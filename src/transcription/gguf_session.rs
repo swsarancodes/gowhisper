@@ -273,9 +273,9 @@ impl OfflineGgufSession {
     /// [`STREAM_PREWARM_SAMPLES`]). Without an extension, or with one the
     /// model's menu rejects, Parakeet buffers with its largest left, chunk,
     /// and right context (Unified English: 5.6 s, 1.04 s, 1.04 s), its most
-    /// accurate and least compute-intensive setting. `HEX_STREAMING=0` keeps
-    /// the model offline and `HEX_STREAMING=1` streams on any device
-    /// (diagnostics and CI); `HEX_STREAM_CHUNK_MS` and `HEX_STREAM_RIGHT_MS`
+    /// accurate and least compute-intensive setting. `GOSPELL_STREAMING=0` keeps
+    /// the model offline and `GOSPELL_STREAMING=1` streams on any device
+    /// (diagnostics and CI); `GOSPELL_STREAM_CHUNK_MS` and `GOSPELL_STREAM_RIGHT_MS`
     /// override the geometry, and Labs › Faster live text picks a shorter
     /// tuple from the model's own menus.
     ///
@@ -283,7 +283,7 @@ impl OfflineGgufSession {
     /// later: a session that fails one never streams at all.
     pub(crate) fn probe_stream(&mut self, options: &transcribe_cpp::RunOptions, model_path: &Path) {
         use transcribe_cpp::DeviceType;
-        let forced = match std::env::var("HEX_STREAMING").as_deref() {
+        let forced = match std::env::var("GOSPELL_STREAMING").as_deref() {
             Ok("0") => return,
             Ok("1") => true,
             _ => false,

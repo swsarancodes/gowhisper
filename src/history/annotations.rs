@@ -109,7 +109,7 @@ struct Destination {
 }
 
 /// The milliseconds a bundle's name starts with: `1792933491953.scrawl`
-/// (Hex) or `scrawl-1792933491953-10739-50.scrawl` (Scrawl).
+/// (GoSpell) or `scrawl-1792933491953-10739-50.scrawl` (Scrawl).
 fn stamp(name: &str) -> Option<u64> {
     let name = name.strip_suffix(".scrawl")?;
     name.split(['-', '.'])
@@ -200,7 +200,7 @@ fn scan(
 
 /// The legacy Captures view's bounded annotation source, read by the mixed
 /// History reader off the window thread. Presence here never authorizes paste.
-#[cfg(all(target_os = "macos", hex_capture))]
+#[cfg(all(target_os = "macos", gospell_capture))]
 pub(crate) fn in_folder(folder: &Path, now: u64) -> Vec<Annotation> {
     scan(folder, now, &mut HashMap::new())
 }
@@ -238,7 +238,7 @@ pub fn refresh() {
         shared.scanning = true;
     }
     let spawned = std::thread::Builder::new()
-        .name("hex-captures-scan".into())
+        .name("gospell-captures-scan".into())
         .spawn(|| {
             let folder = crate::app_settings::capture_settings().captures_dir();
             let mut cache = shared()
@@ -299,7 +299,7 @@ mod tests {
 
     fn folder(name: &str) -> PathBuf {
         let folder = std::env::temp_dir().join(format!(
-            "hex-annotations-{name}-{}",
+            "gospell-annotations-{name}-{}",
             SystemTime::now()
                 .duration_since(SystemTime::UNIX_EPOCH)
                 .unwrap()
@@ -350,7 +350,7 @@ mod tests {
             &folder,
             &format!("scrawl-{}-1-1.scrawl", now - 60_000),
             now - 60_000,
-            r#","video":"recording.mp4","destination":{"session":"ses_1","title":"Hex","via":"chosen"}"#,
+            r#","video":"recording.mp4","destination":{"session":"ses_1","title":"GoSpell","via":"chosen"}"#,
         );
         let newer = write(&folder, &format!("{}.scrawl", now - 1_000), now - 1_000, "");
         fs::write(newer.join("recording.mp4"), b"mp4").unwrap();
@@ -368,7 +368,7 @@ mod tests {
         let older = &listed[1];
         assert_eq!(older.words, "make it blue");
         assert_eq!(older.app.as_deref(), Some("Brave"));
-        assert_eq!(older.sent_to.as_deref(), Some("Hex"));
+        assert_eq!(older.sent_to.as_deref(), Some("GoSpell"));
         assert!(older.expired && older.movie.is_none(), "its movie is gone");
         assert_eq!(
             older.picture,
@@ -378,7 +378,7 @@ mod tests {
             !listed[0].expired,
             "a bundle that never had a movie hasn't lost one"
         );
-        assert!(older.matches(&["blue".into(), "hex".into()]));
+        assert!(older.matches(&["blue".into(), "gospell".into()]));
         assert!(older.matches(&["annotation".into()]));
         assert!(!older.matches(&["red".into()]));
         assert_ne!(listed[0].id, listed[1].id);

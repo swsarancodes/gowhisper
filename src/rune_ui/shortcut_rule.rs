@@ -1,5 +1,5 @@
 //! The OS's rules for a shortcut, the ones Settings applies when recording
-//! one; shared with `hex settings set`. Kept out of `rune_ui.rs` so its
+//! one; shared with `gospell settings set`. Kept out of `rune_ui.rs` so its
 //! source stays under the file cap.
 
 use super::host;
@@ -15,9 +15,9 @@ pub(super) fn slot_of(target: ShortcutTarget) -> HotkeySlot {
         #[cfg(target_os = "linux")]
         ShortcutTarget::TypedText => HotkeySlot::TypedText,
         ShortcutTarget::Cancel => HotkeySlot::Cancel,
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         ShortcutTarget::Capture => HotkeySlot::Capture,
-        #[cfg(all(hex_capture, target_os = "macos"))]
+        #[cfg(all(gospell_capture, target_os = "macos"))]
         ShortcutTarget::CaptureReplay => HotkeySlot::CaptureReplay,
         ShortcutTarget::SecondDictation => HotkeySlot::SecondDictation,
         #[cfg(target_os = "macos")]
@@ -37,11 +37,11 @@ pub(crate) fn shortcut_rule(slot: HotkeySlot, binding: &HotkeyBinding) -> Result
         HotkeySlot::PasteLast => ShortcutTarget::PasteLast,
         HotkeySlot::RawDictation => ShortcutTarget::RawDictation,
         HotkeySlot::Cancel => ShortcutTarget::Cancel,
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         HotkeySlot::Capture => ShortcutTarget::Capture,
-        #[cfg(all(hex_capture, target_os = "macos"))]
+        #[cfg(all(gospell_capture, target_os = "macos"))]
         HotkeySlot::CaptureReplay => ShortcutTarget::CaptureReplay,
-        #[cfg(all(hex_capture, not(target_os = "macos")))]
+        #[cfg(all(gospell_capture, not(target_os = "macos")))]
         HotkeySlot::CaptureReplay => ShortcutTarget::Capture,
         // Labs › Second dictation shortcut: its own shortcut's rules on every
         // OS, so Windows and Linux require a key and macOS keeps accepting a

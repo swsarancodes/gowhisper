@@ -470,7 +470,7 @@ mod tests {
     /// `KEY_V` where the keymap puts it.
     #[test]
     fn the_same_keymap_fd_reads_twice() {
-        let path = std::env::temp_dir().join(format!("hex-keymap-{}", std::process::id()));
+        let path = std::env::temp_dir().join(format!("gospell-keymap-{}", std::process::id()));
         let mut bytes = KEYMAP.as_bytes().to_vec();
         // The desktop ends the keymap with a NUL, as the size it advertises
         // counts it.

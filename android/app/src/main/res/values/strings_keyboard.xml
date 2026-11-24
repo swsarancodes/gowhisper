@@ -1,10 +1,10 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <!-- The keyboard's own strings, apart from the app's so each can change without the other. Translated into
          Simplified Chinese (values-zh-rCN); see strings.xml for the other languages. -->
-    <string name="keyboard_hint_hold">Hold Hex to talk</string>
+    <string name="keyboard_hint_hold">Hold GoSpell to talk</string>
     <string name="keyboard_hint_password">Dictation off in password fields</string>
-    <string name="keyboard_hint_microphone">Allow the microphone in Hex</string>
-    <!-- Dictation's notes, the same sentences MicCapture sends (HexKeyboard.speechNote). -->
+    <string name="keyboard_hint_microphone">Allow the microphone in GoSpell</string>
+    <!-- Dictation's notes, the same sentences MicCapture sends (GoSpellKeyboard.speechNote). -->
     <string name="keyboard_note_microphone">Microphone unavailable. Try again.</string>
     <string name="keyboard_note_transcribe">Couldn’t transcribe. Try again.</string>
     <string name="keyboard_note_no_speech">No speech heard</string>
@@ -12,7 +12,7 @@
     <string name="keyboard_cancel_dictation">Cancel dictation</string>
     <string name="keyboard_finish_dictation">Finish dictation</string>
     <string name="keyboard_undo_dictation">Undo dictation</string>
-    <string name="keyboard_pane">Hex keyboard, %1$s</string>
+    <string name="keyboard_pane">GoSpell keyboard, %1$s</string>
     <string name="keyboard_shift_on">Shift enabled</string>
     <string name="keyboard_caps_lock_on">Caps lock enabled</string>
     <string name="keyboard_more_characters">Show more characters</string>
@@ -23,8 +23,8 @@
     <string name="keyboard_literal" translatable="false">“%1$s”</string>
     <string name="keyboard_keep">Keep %1$s</string>
     <string name="keyboard_suggest">Suggest %1$s</string>
-    <string name="keyboard_menu">Hex menu</string>
-    <string name="keyboard_menu_open">"Hex menu  ›"</string>
+    <string name="keyboard_menu">GoSpell menu</string>
+    <string name="keyboard_menu_open">"GoSpell menu  ›"</string>
     <string name="keyboard_menu_done">Done</string>
     <string name="keyboard_menu_more" translatable="false">⋯</string>
     <string name="keyboard_numbers_label" translatable="false">\?123</string>
@@ -33,7 +33,7 @@
     <string name="keyboard_letters">Letters</string>
     <string name="keyboard_emoji">Emoji</string>
     <string name="keyboard_next">Next keyboard</string>
-    <string name="keyboard_hex">Hex dictation</string>
+    <string name="keyboard_gospell">GoSpell dictation</string>
     <string name="keyboard_space">Space</string>
     <string name="keyboard_space_translate" translatable="false">%1$s → English</string>
     <string name="keyboard_period">Period</string>
@@ -79,7 +79,7 @@
     <string name="keyboard_menu_chosen" translatable="false">✓</string>
     <string name="keyboard_menu_arrow" translatable="false">›</string>
     <string name="keyboard_menu_more_value" translatable="false">"%1$s  ›"</string>
-    <!-- Hex's settings › Keyboard. -->
+    <!-- GoSpell's settings › Keyboard. -->
     <string name="settings_auto_capitalisation">Auto-capitalisation</string>
     <string name="settings_auto_capitalisation_detail">Capitalises the start of sentences</string>
 </resources>

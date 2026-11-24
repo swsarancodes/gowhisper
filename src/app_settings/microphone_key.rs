@@ -1,18 +1,18 @@
-//! Who owns the microphone (dictation) key while Hex runs, and whether a
+//! Who owns the microphone (dictation) key while GoSpell runs, and whether a
 //! press this process took is still waiting for its release.
 //!
 //! macOS sends that key as a normal keyDown/keyUp for virtual key code 176
-//! with SecondaryFn set. Hex reads it at a session tap
+//! with SecondaryFn set. GoSpell reads it at a session tap
 //! (`suppression::dictation_key`), because macOS's own Dictation shortcut is
-//! matched before Hex's annotated-session key tap and the app. That tap asks
+//! matched before GoSpell's annotated-session key tap and the app. That tap asks
 //! this type what each press is, and remembers the one press it took so the
 //! release is taken too while the tap is still there, even when the binding or
 //! the recording changed in between. Turning the lab off removes the tap and
 //! forgets what it took.
 //!
 //! The decision lives here, away from the tap, so it can be tested on every
-//! OS: a press is Hex's only with Labs › Microphone key alone on, while nothing
-//! pauses Hex, and only when a shortcut is being recorded or one of Hex's
+//! OS: a press is GoSpell's only with Labs › Microphone key alone on, while nothing
+//! pauses GoSpell, and only when a shortcut is being recorded or one of GoSpell's
 //! shortcuts matches it. Everything else stays macOS's.
 #![cfg_attr(not(target_os = "macos"), allow(dead_code))]
 
@@ -21,11 +21,11 @@ use super::hotkeys::MICROPHONE_KEY_CODE;
 /// What the microphone key is for at this press.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum MicrophoneKeyTap {
-    /// Not Hex's: macOS's, untouched by the tap.
+    /// Not GoSpell's: macOS's, untouched by the tap.
     Pass,
-    /// Hex's shortcut: fed to the listener, which matches it like any key.
+    /// GoSpell's shortcut: fed to the listener, which matches it like any key.
     Listener { down: bool },
-    /// Hex is recording a shortcut: fed to the recorder in the window.
+    /// GoSpell is recording a shortcut: fed to the recorder in the window.
     Recorder { down: bool },
 }
 
@@ -44,14 +44,14 @@ pub(crate) struct MicrophoneKey {
 impl MicrophoneKey {
     /// What the session tap does with one key event.
     ///
-    /// `bound` says one of Hex's shortcuts matches this press (the tap asks
+    /// `bound` says one of GoSpell's shortcuts matches this press (the tap asks
     /// `RuntimeHotkey::matches_key_press`, so modifiers count and a key that
-    /// only matches with others held is not Hex's alone), `capturing` is
+    /// only matches with others held is not GoSpell's alone), `capturing` is
     /// `hotkey_capture_active`, and `paused` is Labs › Pause from menu bar,
     /// which suspends every shortcut. Recording takes the key before any
     /// binding: the chord being recorded replaces the old one.
     ///
-    /// A release is Hex's only if this key took the press. A press that passes
+    /// A release is GoSpell's only if this key took the press. A press that passes
     /// through forgets anything left behind, so a release that never arrived
     /// cannot claim a later press's release.
     pub(crate) fn take(
@@ -106,9 +106,9 @@ impl MicrophoneKey {
 mod tests {
     use super::*;
 
-    /// The mic key is Hex's only with its lab on and a reason to take it.
+    /// The mic key is GoSpell's only with its lab on and a reason to take it.
     #[test]
-    fn the_microphone_key_is_hexs_only_while_its_lab_wants_it() {
+    fn the_microphone_key_is_gospells_only_while_its_lab_wants_it() {
         let mut key = MicrophoneKey::default();
         let mic = MICROPHONE_KEY_CODE;
         // The lab off leaves the key to macOS, whatever is still saved.
@@ -174,7 +174,7 @@ mod tests {
         );
     }
 
-    /// A press Hex took keeps its release while the tap that took it is still
+    /// A press GoSpell took keeps its release while the tap that took it is still
     /// there, even if the lab turns off between the two.
     #[test]
     fn a_taken_press_is_released_by_the_tap_that_took_it() {

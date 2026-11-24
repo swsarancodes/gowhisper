@@ -1,11 +1,11 @@
 # Simulator vs. physical iPhone
 
-Part of [Hex for iPhone](../README.md).
+Part of [GoSpell for iPhone](../README.md).
 
 What the simulator proves and what only a physical iPhone can.
 
-- **Verified in Simulator (`HEXMobileTests` + `--snap-state` scenes):** Compilation
-  across `HEXMobile`, `HEXKeyboard`, and `HEXWidgets`; App Group command/snapshot
+- **Verified in Simulator (`GoSpellMobileTests` + `--snap-state` scenes):** Compilation
+  across `GoSpellMobile`, `GoSpellKeyboard`, and `GoSpellWidgets`; App Group command/snapshot
   framing; the `DictationController` generation/expiry race and 30s post-close
   transcript delivery; 10s handoff window; interruption handling; meter recovery after injected startup and mid-capture
   recorder unavailability (including keyboard levels and heartbeat); deterministic
@@ -20,10 +20,10 @@ What the simulator proves and what only a physical iPhone can.
   changes have not been reproduced on hardware; the meter recovery tests inject
   that condition through `ActiveAudioCapture`.
 - **Screen recordings with the microphone:** The simulator can't screen-record,
-  so whether one picks up noise while Hex records shows only on an iPhone:
-  record with the microphone on with Hex closed, Hex open and idle, a warm
+  so whether one picks up noise while GoSpell records shows only on an iPhone:
+  record with the microphone on with GoSpell closed, GoSpell open and idle, a warm
   session on, and during in-keyboard dictation (WebKit's `videoChat` session,
-  which Hex can't change), and compare.
+  which GoSpell can't change), and compare.
 - **Live words (In bar and Into field):** `LiveDictationTests` cover how results become the
   words shown, the defaults, the end of a long dictation, and Into field's
   typing, revising, taking back, stopping when the field changes or an app reports no text,
@@ -44,7 +44,7 @@ What the simulator proves and what only a physical iPhone can.
   the probe log's `first audio` and `warm start` lines.
 - **Apple Speech hint:** Custom vocabulary's contextual strings are best effort
   and unverified on a physical iPhone. Apple documents contextual strings only
-  for `DictationTranscriber`; Hex sets them on both modules, and Parakeet's
+  for `DictationTranscriber`; GoSpell sets them on both modules, and Parakeet's
   batch path gets no hint. On macOS 27.2.1 `SpeechTranscriber`'s text didn't
   change with them (0 of 126 clips of names and terms), and
   `DictationTranscriber` wrote the listed spelling in 28 of 132 places against
@@ -55,7 +55,7 @@ What the simulator proves and what only a physical iPhone can.
   following the keyboard's language, and Spanish never reaching Parakeet. The
   simulator can't transcribe: `SpeechTranscriber.isAvailable` is false there
   and `DictationTranscriber` fails with "Model not available", so
-  `AppleSpeechClipTests` (skipped unless `HEX_SPEECH_CLIPS` names a folder of
+  `AppleSpeechClipTests` (skipped unless `GOSPELL_SPEECH_CLIPS` names a folder of
   `<language>.wav` clips) reports that. The same code (`AppleSpeechTranscriber`,
   `AppleSpeechModule`, the picker) built for macOS 26 transcribed `say` clips
   word for word: German and Spanish through `SpeechTranscriber`, Norwegian
@@ -82,7 +82,7 @@ What the simulator proves and what only a physical iPhone can.
   `SFSpeechRecognizer` keeps es-CO and es-419 as themselves and falls to es-US, then
   es-MX, then Spain's for an unlisted region, plain `es` by the iPhone's Region,
   a picked variant survives a swipe away and back, the switch offers one variant per
-  language with Chinese's variants kept apart, and the Hex key menu names the region.
+  language with Chinese's variants kept apart, and the GoSpell key menu names the region.
   No iPhone or simulator ran the Spanish variants for this change, and the Settings
   line and menu labels weren't captured.
   Unverified on a physical iPhone.
@@ -169,7 +169,7 @@ What the simulator proves and what only a physical iPhone can.
   simulator the model loads in about 150 ms, cleans a sentence in about
   3 ms (p95 under 8 ms), and adds about 3 MB to the process footprint,
   because the CPU leaves the int8 weights memory-mapped from the bundle. The
-  simulator's GPU path took 0.8 s to load and added 30 MB, so Hex doesn't use
+  simulator's GPU path took 0.8 s to load and added 30 MB, so GoSpell doesn't use
   the GPU. Neural Engine load time, latency, and the keyboard extension's
   footprint next to Apple Speech are unmeasured on an iPhone;
   `keyboard-capture-probe.log` records the footprint around each in-keyboard
@@ -189,23 +189,23 @@ What the simulator proves and what only a physical iPhone can.
   real hosted field (`--snap-state hosted-keyboard`) and Full Access off: a
   fresh install mounts the full keyboard and offers no in-keyboard dictation;
   keys typed through the engine autocorrect ("thw" became "the", "tk" "to",
-  and with Spatial autocorrect, on by default, "ofthw" "of the"); the Hex key shows the
+  and with Spatial autocorrect, on by default, "ofthw" "of the"); the GoSpell key shows the
   hint. Scenes: `full-keyboard-no-access[-hint][-dark]`; `--keyboard
   full|dictation-bar` picks the keyboard. The simulator's keyboard reads the App
   Group without Full Access; whether an iPhone's does is unverified, which is
   why the keyboard mounts the full keyboard without Full Access whatever was
   chosen. Full Access in a simulator: a `kTCCServiceKeyboardNetwork` row for
-  the containing app (`anomaly.hex.mobile`, auth 2) in the shut-down
+  the containing app (`com.goml.gospell.mobile`, auth 2) in the shut-down
   simulator's `data/Library/TCC/TCC.db`. Unverified on a physical iPhone.
 - **First run:** Reading Full Access from the keyboard on page 3, the
   keyboard-switch signal behind "Full Access looks off"
   (`UITextInputMode.currentInputModeDidChangeNotification`), and Settings
-  opening on Hex's page are unverified on a physical iPhone. Before iOS 26
+  opening on GoSpell's page are unverified on a physical iPhone. Before iOS 26
   without a warm session, dictating on page 3 takes the cold-start path, whose
   handoff screen replaces the page.
 - **Emoji:** `EmojiSuggesterTests` cover the index, ranking, search, the strip and
   the history, and score 100 sentences
-  (`HEXMobileTests/Fixtures/emoji-context-sentences.json`) for a sensible emoji in
+  (`GoSpellMobileTests/Fixtures/emoji-context-sentences.json`) for a sensible emoji in
   the top five: 30 hand-written to tune (30/30, top-1 27), 30 hand-written and held
   out (30/30, top-1 27; written by the same hand as the chat words, so optimistic),
   and 40 written by a separate agent that saw no code or word lists (37/40, top-1 28

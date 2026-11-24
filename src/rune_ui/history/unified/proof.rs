@@ -41,7 +41,7 @@ fn select(rt: &mut Runtime<Ui>, label: &str) {
     settle(rt);
 }
 fn frames() -> impl FnMut(&mut Runtime<Ui>, &str) {
-    let target = std::env::var_os("HEX_UNIFIED_HISTORY_RENDER_DIR").map(|dir| {
+    let target = std::env::var_os("GOSPELL_UNIFIED_HISTORY_RENDER_DIR").map(|dir| {
         fs::create_dir_all(&dir).unwrap();
         let gpu = rune::render::Gpu::try_new(rune::render::Gpu::instance(), None).unwrap();
         let renderer = offscreen::renderer(&gpu.device);
@@ -70,7 +70,7 @@ fn actual_cancel_to_mixed_history() {
 
 fn walkthrough(recover: bool) {
     let mut frame = frames();
-    let root = std::env::temp_dir().join(format!("hex-one-history-{}", std::process::id()));
+    let root = std::env::temp_dir().join(format!("gospell-one-history-{}", std::process::id()));
     fs::create_dir(&root).unwrap();
     let now = crate::history::now_ms();
     let mut store = HistoryStore::open(root.join("history.json"), HistoryRetention::Day, now);
@@ -103,13 +103,14 @@ fn walkthrough(recover: bool) {
     let h = History::new(store);
     if recover {
         use crate::transcription::{Transcriber, WarmTranscriber, engine::TranscriptionEngine};
-        let path = PathBuf::from(std::env::var_os("HEX_PROOF_MODEL").unwrap());
+        let path = PathBuf::from(std::env::var_os("GOSPELL_PROOF_MODEL").unwrap());
         let model = crate::parakeet::Parakeet::load_for_benchmark(&path).unwrap();
         let engine = TranscriptionEngine::start(WarmTranscriber::serving(Transcriber::Gguf(
             Box::new(model),
         )))
         .unwrap();
-        let mut wav = hound::WavReader::open(std::env::var_os("HEX_PROOF_WAV").unwrap()).unwrap();
+        let mut wav =
+            hound::WavReader::open(std::env::var_os("GOSPELL_PROOF_WAV").unwrap()).unwrap();
         assert_eq!((wav.spec().sample_rate, wav.spec().channels), (48000, 1));
         let pcm = wav
             .samples::<i16>()
@@ -145,7 +146,7 @@ fn walkthrough(recover: bool) {
         let at = now - 180_000 - i as u64;
         let b = root.join(format!("{at}.scrawl"));
         fs::create_dir(&b).unwrap();
-        let m = serde_json::json!({"version":1,"id":at.to_string(),"createdAtMs":at,"durationMs":3200,"target":{"mode":"display","displayId":1,"frame":{"x":0,"y":0,"width":64,"height":48,"scale":1}},"transcript":{"source":"hex","text":words,"segments":[],"words":[]},"keyframes":[],"strokes":[],"marks":[],"events":[],"contactSheet":"contact-sheet.png"});
+        let m = serde_json::json!({"version":1,"id":at.to_string(),"createdAtMs":at,"durationMs":3200,"target":{"mode":"display","displayId":1,"frame":{"x":0,"y":0,"width":64,"height":48,"scale":1}},"transcript":{"source":"gospell","text":words,"segments":[],"words":[]},"keyframes":[],"strokes":[],"marks":[],"events":[],"contactSheet":"contact-sheet.png"});
         fs::write(b.join("scrawl.json"), serde_json::to_vec(&m).unwrap()).unwrap();
         if i == 0 {
             crate::capture_host::paste_source::mark_ready(&b, now - 1000).unwrap();

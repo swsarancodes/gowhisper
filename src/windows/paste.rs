@@ -240,7 +240,7 @@ impl WindowsPaster {
     /// Pastes `text`, with Ctrl+Shift+V when `shift` asks for it or the
     /// saved Terminal paste setting is on. Java games still take Ctrl+V.
     /// `return_to` is the window the capture started in: the desktop or a
-    /// taskbar takes no paste, so Hex returns there first and, when it can't,
+    /// taskbar takes no paste, so GoSpell returns there first and, when it can't,
     /// leaves the transcript on the clipboard instead of sending it nowhere.
     /// `standalone` pastes the text without joining the previous dictation
     /// and records no continuation for the next one (Labs › Signature).
@@ -263,7 +263,7 @@ impl WindowsPaster {
         let original_sequence = clipboard_sequence();
         // Read as the paste commits, so the toggle applies at once.
         let keep = crate::labs::keep_on_clipboard();
-        // A clipboard Hex can't snapshot (an app's private format) never
+        // A clipboard GoSpell can't snapshot (an app's private format) never
         // blocks the paste: the transcript still goes in, and that
         // clipboard just isn't restored afterwards. Keeping the paste needs
         // no snapshot at all.
@@ -458,7 +458,7 @@ fn restore_clipboard_generation(clipboard_restore: &Arc<Mutex<ClipboardRestore>>
 }
 
 /// Waits, without a deadline, until Shift, Alt, and Win are up: held, they
-/// would turn the synthesized Ctrl+V (or Ctrl+Shift+V, whose Shift Hex
+/// would turn the synthesized Ctrl+V (or Ctrl+Shift+V, whose Shift GoSpell
 /// presses and releases itself) into a different shortcut. A held Ctrl
 /// is harmless, so the user may keep it down after finishing with a chord.
 fn wait_for_conflicting_modifiers() {
@@ -536,7 +536,7 @@ pub(crate) fn is_shell_window(window: HWND) -> bool {
 
 /// Brings the capture's window back to the front when it is still the same
 /// process's window and another process can paste into it, and says whether
-/// it arrived within [`RETURN_TIMEOUT`]. The shell, Hex's own window, a
+/// it arrived within [`RETURN_TIMEOUT`]. The shell, GoSpell's own window, a
 /// minimized window, and a handle whose process changed are left alone.
 fn bring_to_front(capture: CaptureWindow) -> bool {
     let window = capture.window as HWND;
@@ -609,7 +609,7 @@ fn keyboard_input(key: u16, scan: u16, flags: u32) -> INPUT {
                 wScan: scan,
                 dwFlags: flags,
                 time: 0,
-                dwExtraInfo: crate::windows::input::HEX_INJECTED,
+                dwExtraInfo: crate::windows::input::GOSPELL_INJECTED,
             },
         },
     }

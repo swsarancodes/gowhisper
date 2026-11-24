@@ -1,10 +1,10 @@
-//! The `hex` control client: parses a command, sends it to the running Hex,
+//! The `gospell` control client: parses a command, sends it to the running GoSpell,
 //! and prints the answer for a person or, with `--json`, the versioned reply.
 //!
 //! Exit codes: 0 when the command ran (or there was nothing to change), 1
-//! when Hex refused or failed it, 2 for usage errors (clap), 3 when Hex
-//! isn't running, and 4 when `dictation stop --print` or `hex transcribe`
-//! heard no speech. Nothing here launches Hex except `start` and `restart`.
+//! when GoSpell refused or failed it, 2 for usage errors (clap), 3 when GoSpell
+//! isn't running, and 4 when `dictation stop --print` or `gospell transcribe`
+//! heard no speech. Nothing here launches GoSpell except `start` and `restart`.
 
 use std::io::Write;
 pub(crate) mod annotate_read;
@@ -34,10 +34,10 @@ pub struct Output {
     pub json: bool,
 }
 
-/// The control commands at the top of `hex`.
+/// The control commands at the top of `gospell`.
 #[derive(Subcommand, Debug)]
 pub enum ControlCli {
-    /// Show what the running Hex is doing.
+    /// Show what the running GoSpell is doing.
     ///
     /// Recording, meeting, model, features, permissions, window, version,
     /// pid, and memory footprint.
@@ -45,12 +45,12 @@ pub enum ControlCli {
         #[command(flatten)]
         output: Output,
     },
-    /// Open Hex if it isn't running, and wait until it answers.
+    /// Open GoSpell if it isn't running, and wait until it answers.
     Start {
         #[command(flatten)]
         output: Output,
     },
-    /// Quit Hex.
+    /// Quit GoSpell.
     ///
     /// Refused while a meeting or dictation is in progress unless --force.
     Quit {
@@ -60,7 +60,7 @@ pub enum ControlCli {
         #[command(flatten)]
         output: Output,
     },
-    /// Quit and reopen Hex (or open it if it isn't running).
+    /// Quit and reopen GoSpell (or open it if it isn't running).
     Restart {
         /// Restart even while recording; the recording is lost.
         #[arg(long)]
@@ -105,12 +105,12 @@ pub enum ControlCli {
     /// the text.
     ///
     /// Reads WAV, M4A/MP4/MOV (AAC, ALAC), CAF, AIFF, MP3, FLAC, Ogg and
-    /// WebM (Vorbis, Opus). Works with Hex stopped. Nothing is pasted, saved
+    /// WebM (Vorbis, Opus). Works with GoSpell stopped. Nothing is pasted, saved
     /// to History, or processed.
     Transcribe {
         /// The recording to transcribe.
         file: std::path::PathBuf,
-        /// A model id from `hex model list` (default: the selected model).
+        /// A model id from `gospell model list` (default: the selected model).
         #[arg(long)]
         model: Option<String>,
         /// A language the model supports (default: the saved language).
@@ -139,7 +139,7 @@ pub enum ControlCli {
         #[command(subcommand)]
         command: ModelCommand,
     },
-    /// Open the Hex window at a pane, or close it.
+    /// Open the GoSpell window at a pane, or close it.
     Window {
         #[command(subcommand)]
         command: WindowCommand,
@@ -149,7 +149,7 @@ pub enum ControlCli {
         #[command(subcommand)]
         command: OnboardingCommand,
     },
-    /// Check for a Hex update now; Hex shows what it finds.
+    /// Check for a GoSpell update now; GoSpell shows what it finds.
     CheckForUpdates {
         #[command(flatten)]
         output: Output,
@@ -167,11 +167,11 @@ pub enum ControlCli {
         command: VocabularyCommand,
     },
     /// Read retained dictation history without starting the app, or clear
-    /// it in the running Hex (`hex history clear --yes`).
+    /// it in the running GoSpell (`gospell history clear --yes`).
     #[command(args_conflicts_with_subcommands = true)]
     History(crate::control::transcript_cli::HistoryArgs),
     /// Read and search recorded meetings without starting the app; record
-    /// and stop them in the running Hex.
+    /// and stop them in the running GoSpell.
     Meetings {
         #[command(subcommand)]
         command: crate::control::transcript_cli::MeetingsCommand,
@@ -183,7 +183,7 @@ pub enum ControlCli {
         #[arg(long)]
         meetings_dir: Option<std::path::PathBuf>,
     },
-    /// Manage the ~/.config/hex personal transformations workspace.
+    /// Manage the ~/.config/gospell personal transformations workspace.
     Commands {
         #[command(subcommand)]
         command: CommandsCommand,
@@ -193,28 +193,28 @@ pub enum ControlCli {
         #[command(subcommand)]
         command: Option<crate::labs::LabsCommand>,
     },
-    /// Replaced by `hex labs`.
+    /// Replaced by `gospell labs`.
     #[command(hide = true)]
     Experiments {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
         args: Vec<String>,
     },
     /// Annotate: record your screen with drawing and narration in the
-    /// running Hex, then list and send what you recorded (`hex capture`
+    /// running GoSpell, then list and send what you recorded (`gospell capture`
     /// still works).
     #[command(name = "annotate", alias = "capture")]
     Annotate {
         #[command(subcommand)]
         command: CaptureCommand,
     },
-    /// Print a shell completion script for `hex` (bash, zsh, fish, elvish,
+    /// Print a shell completion script for `gospell` (bash, zsh, fish, elvish,
     /// or PowerShell).
     Completions {
         /// The shell to print a completion script for.
         #[arg(value_enum)]
         shell: clap_complete::Shell,
     },
-    /// Print Hex's recent log lines; works without Hex running.
+    /// Print GoSpell's recent log lines; works without GoSpell running.
     Logs {
         /// Read process.log (Rust and native diagnostics) instead of the
         /// live.ndjson event log.
@@ -231,9 +231,9 @@ pub enum ControlCli {
 
 #[derive(Subcommand, Debug)]
 pub enum CommandsCommand {
-    /// Create ~/.config/hex with a starter config, or refresh its typings.
+    /// Create ~/.config/gospell with a starter config, or refresh its typings.
     Init,
-    /// Load ~/.config/hex's config as Hex would and report what it registers
+    /// Load ~/.config/gospell's config as GoSpell would and report what it registers
     /// or why it fails.
     Check,
 }
@@ -266,7 +266,7 @@ pub enum SettingsCommand {
     ///
     /// Values are JSON (`true`, `0.4`, `"option+space"`, `null` for none);
     /// `transcription.model` and `transcription.language` select a model
-    /// without downloading it. With Hex stopped, writes settings.json
+    /// without downloading it. With GoSpell stopped, writes settings.json
     /// directly.
     Apply {
         /// A JSON file, or `-` for standard input.
@@ -285,7 +285,7 @@ pub enum ModelCommand {
     },
     /// Switch to an installed model. Never downloads.
     Use {
-        /// A model id from `hex model list`.
+        /// A model id from `gospell model list`.
         model: String,
         /// A language the model supports (default: its best match for the
         /// current language).
@@ -295,7 +295,7 @@ pub enum ModelCommand {
         output: Output,
     },
     /// Download a model, then switch to it. Without a model, the selected
-    /// one. On Linux and Windows it downloads here when Hex isn't running.
+    /// one. On Linux and Windows it downloads here when GoSpell isn't running.
     Install {
         model: Option<String>,
         #[arg(long)]
@@ -315,7 +315,7 @@ pub enum ModelCommand {
         #[arg(long)]
         language: Option<String>,
     },
-    /// The transcribe.cpp compute devices Hex can use. Linux and Windows.
+    /// The transcribe.cpp compute devices GoSpell can use. Linux and Windows.
     Devices,
     /// Load and prewarm an installed model here. Linux and Windows.
     Check {
@@ -331,7 +331,7 @@ pub enum ModelCommand {
         #[arg(long)]
         language: Option<String>,
     },
-    /// Copy a GGUF speech model into Hex after checking its header,
+    /// Copy a GGUF speech model into GoSpell after checking its header,
     /// and print its id. The original is left as it is.
     Import {
         path: std::path::PathBuf,
@@ -341,10 +341,10 @@ pub enum ModelCommand {
     },
     /// Rename an imported or found model.
     Rename { model: String, name: String },
-    /// Check Hex's copy of an import (or a found file) again; a copy whose contents
+    /// Check GoSpell's copy of an import (or a found file) again; a copy whose contents
     /// still match is ready again.
     Repair { model: String },
-    /// Remove Hex's copy of an imported model, or forget a found one (its file stays).
+    /// Remove GoSpell's copy of an imported model, or forget a found one (its file stays).
     Remove { model: String },
 }
 
@@ -370,7 +370,7 @@ pub enum WindowCommand {
         #[command(flatten)]
         output: Output,
     },
-    /// Close the window. Hex keeps running in the menu bar.
+    /// Close the window. GoSpell keeps running in the menu bar.
     Hide {
         #[command(flatten)]
         output: Output,
@@ -427,7 +427,7 @@ pub fn finish(code: u8) -> ! {
     std::process::exit(code.into())
 }
 
-/// Runs `command`. `top_level` builds this OS's whole `hex` command tree, and
+/// Runs `command`. `top_level` builds this OS's whole `gospell` command tree, and
 /// only `completions` asks for it, so no other command pays for it.
 pub fn run(command: ControlCli, top_level: impl FnOnce() -> clap::Command) -> u8 {
     match command {
@@ -438,12 +438,12 @@ pub fn run(command: ControlCli, top_level: impl FnOnce() -> clap::Command) -> u8
             if !running() {
                 #[cfg(target_os = "linux")]
                 if crate::linux::service::instance_answers() {
-                    return print(restart_older_hex(), output);
+                    return print(restart_older_gospell(), output);
                 }
                 return launch::start(output);
             }
-            // Hex's instance outlives its local API, so take a handle on the
-            // process to wait for before Hex gets the quit.
+            // GoSpell's instance outlives its local API, so take a handle on the
+            // process to wait for before GoSpell gets the quit.
             #[cfg(not(target_os = "macos"))]
             let restarting = crate::local_api::watch_running();
             #[cfg(target_os = "linux")]
@@ -469,7 +469,7 @@ pub fn run(command: ControlCli, top_level: impl FnOnce() -> clap::Command) -> u8
             output,
         } => {
             if let Err(error) = super::check_flags(action, print, raw) {
-                eprintln!("hex: {}", error.message);
+                eprintln!("gospell: {}", error.message);
                 return 2;
             }
             send(ControlCommand::Dictation { action, print, raw }, output)
@@ -519,7 +519,7 @@ pub fn run(command: ControlCli, top_level: impl FnOnce() -> clap::Command) -> u8
                     == crate::transcription::models::TranscriptionModelId::Custom(id)
                 {
                     color_eyre::eyre::bail!(
-                        "{} is the selected model; choose another with `hex model use` first",
+                        "{} is the selected model; choose another with `gospell model use` first",
                         id.as_str()
                     );
                 }
@@ -601,7 +601,7 @@ pub fn run(command: ControlCli, top_level: impl FnOnce() -> clap::Command) -> u8
     }
 }
 
-/// `hex model install`: the running Hex downloads in the background;
+/// `gospell model install`: the running GoSpell downloads in the background;
 /// without one, Linux and Windows download here and macOS through an
 /// embedded service it starts, then the model is selected.
 fn install_model(model: Option<String>, language: Option<String>, output: Output) -> u8 {
@@ -624,8 +624,8 @@ fn install_model(model: Option<String>, language: Option<String>, output: Output
         ) {
             return fail(&format!("{error:#}"));
         }
-        // macOS runs models only in a Hex process, so an embedded service
-        // downloads it, as `hex transcribe` does with Hex stopped.
+        // macOS runs models only in a GoSpell process, so an embedded service
+        // downloads it, as `gospell transcribe` does with GoSpell stopped.
         #[cfg(target_os = "macos")]
         {
             embedded::exit_on_interrupt();
@@ -642,10 +642,10 @@ fn install_model(model: Option<String>, language: Option<String>, output: Output
     send(ControlCommand::ModelInstall { model, language }, output)
 }
 
-/// `model install` with no Hex running: make the switch the app would have
-/// made. A Hex that started while the model downloaded takes the choice;
+/// `model install` with no GoSpell running: make the switch the app would have
+/// made. A GoSpell that started while the model downloaded takes the choice;
 /// otherwise it is saved under the service lock `settings apply` uses, so a
-/// starting Hex is never written behind. An unchanged selection needs neither.
+/// starting GoSpell is never written behind. An unchanged selection needs neither.
 fn select_installed(
     selection: &crate::transcription::models::TranscriptionSelection,
     output: Output,
@@ -660,7 +660,7 @@ fn select_installed(
         return 0;
     }
     let handoff = hand_off(
-        || select_in_running_hex(selection, output),
+        || select_in_running_gospell(selection, output),
         || match save_selection(selection) {
             Ok(message) => {
                 println!("{message}");
@@ -674,21 +674,21 @@ fn select_installed(
     match handoff {
         Handoff::Done(code) => code,
         #[cfg(target_os = "linux")]
-        Handoff::OlderHex => fail(&format!(
-            "the model is installed, but an older Hex is still running; \
-             run `hex restart`, then `hex model use {}`",
+        Handoff::OlderGoSpell => fail(&format!(
+            "the model is installed, but an older GoSpell is still running; \
+             run `gospell restart`, then `gospell model use {}`",
             selection.model.as_str()
         )),
         Handoff::Deadline => fail(&format!(
-            "the model is installed, but Hex is starting and holds its settings; \
-             run `hex model use {}` once it answers",
+            "the model is installed, but GoSpell is starting and holds its settings; \
+             run `gospell model use {}` once it answers",
             selection.model.as_str()
         )),
     }
 }
 
-/// Hands a downloaded model to a Hex that started while it downloaded.
-fn select_in_running_hex(
+/// Hands a downloaded model to a GoSpell that started while it downloaded.
+fn select_in_running_gospell(
     selection: &crate::transcription::models::TranscriptionSelection,
     output: Output,
 ) -> u8 {
@@ -720,8 +720,8 @@ fn save_selection(
     Ok(format!("Switched to {name} ({})", selection.language))
 }
 
-/// `hex model import`: checks, copies, and records the file here, in this
-/// process; a running Hex lists it at once.
+/// `gospell model import`: checks, copies, and records the file here, in this
+/// process; a running GoSpell lists it at once.
 fn import_model(path: &std::path::Path, name: Option<&str>) -> color_eyre::Result<()> {
     use crate::transcription::custom_models;
     let id = custom_models::import(path, name, &std::sync::atomic::AtomicBool::new(false))?;
@@ -736,7 +736,7 @@ fn imported(model: &str) -> color_eyre::Result<crate::transcription::models::Cus
     crate::transcription::models::CustomModelId::parse(model)
         .filter(|id| custom_models::is_registered(*id))
         .ok_or_else(|| {
-            color_eyre::eyre::eyre!("no imported model is {model}; run `hex model list`")
+            color_eyre::eyre::eyre!("no imported model is {model}; run `gospell model list`")
         })
 }
 
@@ -752,14 +752,14 @@ fn selection(
         .map_err(|error| color_eyre::eyre::eyre!(error.message))
 }
 
-/// `hex model status|devices|check|transcribe`, run in this process.
+/// `gospell model status|devices|check|transcribe`, run in this process.
 #[cfg(not(target_os = "macos"))]
 fn offline_model(command: ModelCommand) -> u8 {
     use crate::transcription::models::{definition, model_path};
     use crate::transcription::readiness::readiness;
     report((|| match command {
         ModelCommand::Status { model, language } => {
-            // Found catalog files count as installed, as `hex model list` says.
+            // Found catalog files count as installed, as `gospell model list` says.
             let _ = crate::transcription::found_models::scan();
             let selection = selection(model, language)?;
             let model = definition(selection.model);
@@ -808,7 +808,7 @@ fn offline_model(command: ModelCommand) -> u8 {
             );
             Ok(())
         }
-        _ => unreachable!("Hex carries out the other model commands"),
+        _ => unreachable!("GoSpell carries out the other model commands"),
     })())
 }
 
@@ -818,13 +818,13 @@ fn offline_model(_: ModelCommand) -> u8 {
     print(
         ControlReply::error(
             "unsupported",
-            "this `hex model` command is for Linux and Windows; use `hex model list`",
+            "this `gospell model` command is for Linux and Windows; use `gospell model list`",
         ),
         Output::default(),
     )
 }
 
-/// The exit code of a command that runs here rather than in Hex.
+/// The exit code of a command that runs here rather than in GoSpell.
 fn report(result: color_eyre::Result<()>) -> u8 {
     match result {
         Ok(()) => 0,
@@ -832,7 +832,7 @@ fn report(result: color_eyre::Result<()>) -> u8 {
     }
 }
 
-/// `hex meetings`: record, stop, and copy in the running Hex; the rest
+/// `gospell meetings`: record, stop, and copy in the running GoSpell; the rest
 /// read the meetings folder here.
 fn meetings(command: crate::control::transcript_cli::MeetingsCommand) -> u8 {
     use crate::control::transcript_cli::MeetingsCommand;
@@ -849,14 +849,14 @@ fn meetings(command: crate::control::transcript_cli::MeetingsCommand) -> u8 {
     }
 }
 
-/// `hex mcp`: logs to stderr only (stdout carries MCP messages) and touches
+/// `gospell mcp`: logs to stderr only (stdout carries MCP messages) and touches
 /// no app state.
 fn mcp(meetings_dir: Option<std::path::PathBuf>) -> color_eyre::Result<()> {
     tracing_subscriber::fmt()
         .with_writer(std::io::stderr)
         .with_ansi(false)
         .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_env("HEX_MCP_LOG")
+            tracing_subscriber::EnvFilter::try_from_env("GOSPELL_MCP_LOG")
                 .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("warn")),
         )
         .init();
@@ -867,7 +867,7 @@ fn mcp(meetings_dir: Option<std::path::PathBuf>) -> color_eyre::Result<()> {
     crate::meeting::mcp::run(root)
 }
 
-/// `hex annotate` (alias `hex capture`).
+/// `gospell annotate` (alias `gospell capture`).
 #[derive(Subcommand, Debug)]
 pub enum CaptureCommand {
     /// Start recording a capture.
@@ -979,16 +979,16 @@ pub enum CaptureCommand {
     Skill,
 }
 
-/// Runs `hex capture`: on macOS through the running Hex; on Linux the
+/// Runs `gospell capture`: on macOS through the running GoSpell; on Linux the
 /// folder reads (`list`, `show`, `route`, `send`) run here, and the
-/// recording commands go to the running Hex's listener; on Windows every
-/// command goes to the running Hex. The agent reads (`inspect`, `zoom`,
+/// recording commands go to the running GoSpell's listener; on Windows every
+/// command goes to the running GoSpell. The agent reads (`inspect`, `zoom`,
 /// `frames`, and `skill`) run here, in the CLI process, on every OS. A build
 /// without the capture engine answers `unsupported`.
 pub fn capture(command: CaptureCommand) -> u8 {
     use crate::control::{ControlCommand as C, ScrawlCaptureAction as A};
     // The reads run here, on every OS: they only touch bundle files and the
-    // video decoder, so Hex needn't be running.
+    // video decoder, so GoSpell needn't be running.
     let (command, output) = match command {
         CaptureCommand::Inspect(args) => return annotate_read::inspect(args),
         CaptureCommand::Zoom(args) => return annotate_read::zoom(args),
@@ -1043,7 +1043,7 @@ pub fn capture(command: CaptureCommand) -> u8 {
             return print(crate::linux::service::capture_draw(), output);
         }
     };
-    #[cfg(not(hex_capture))]
+    #[cfg(not(gospell_capture))]
     {
         let _ = command;
         print(
@@ -1051,14 +1051,14 @@ pub fn capture(command: CaptureCommand) -> u8 {
             output,
         )
     }
-    #[cfg(all(hex_capture, any(target_os = "macos", target_os = "windows")))]
+    #[cfg(all(gospell_capture, any(target_os = "macos", target_os = "windows")))]
     return send(command, output);
-    #[cfg(all(hex_capture, target_os = "linux"))]
+    #[cfg(all(gospell_capture, target_os = "linux"))]
     {
         let reply = match command {
             C::ScrawlCaptureList { limit } => crate::capture_host::list_captures(limit),
             C::ScrawlCaptureShow { capture } => crate::capture_host::show_capture(&capture),
-            // The running Hex's router sends, so its Undo can take it back.
+            // The running GoSpell's router sends, so its Undo can take it back.
             C::ScrawlCaptureSend {
                 capture,
                 to,
@@ -1088,21 +1088,21 @@ pub fn settings(command: SettingsCommand) -> u8 {
     }
 }
 
-/// How handing settings to a running Hex went, or why it couldn't wait.
+/// How handing settings to a running GoSpell went, or why it couldn't wait.
 enum Handoff {
-    /// The running Hex took the work, or the lock was free and the work was
+    /// The running GoSpell took the work, or the lock was free and the work was
     /// written here; holds that command's exit code.
     Done(u8),
-    /// On Linux, a Hex too old for `hex` commands answers on its socket.
+    /// On Linux, a GoSpell too old for `gospell` commands answers on its socket.
     #[cfg(target_os = "linux")]
-    OlderHex,
-    /// A Hex held the settings lock and didn't answer before the deadline.
+    OlderGoSpell,
+    /// A GoSpell held the settings lock and didn't answer before the deadline.
     Deadline,
 }
 
-/// `settings apply`'s wait, shared with `model install`: a Hex that holds the
+/// `settings apply`'s wait, shared with `model install`: a GoSpell that holds the
 /// service lock may have read settings.json already, so hand the work to the
-/// Hex that answers (`send`), or write it here while the lock is held
+/// GoSpell that answers (`send`), or write it here while the lock is held
 /// (`write`). Only a lock that never answers gives up.
 fn hand_off(send: impl FnOnce() -> u8, write: impl FnOnce() -> u8) -> Handoff {
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(35);
@@ -1110,7 +1110,7 @@ fn hand_off(send: impl FnOnce() -> u8, write: impl FnOnce() -> u8) -> Handoff {
         if running() {
             return Handoff::Done(send());
         }
-        // A Hex that holds the service lock may have read settings.json
+        // A GoSpell that holds the service lock may have read settings.json
         // already; wait for it to answer instead of writing behind it.
         #[cfg(target_os = "linux")]
         let lock = crate::desktop::instance::acquire("service");
@@ -1120,15 +1120,15 @@ fn hand_off(send: impl FnOnce() -> u8, write: impl FnOnce() -> u8) -> Handoff {
             Ok(_lock) if !running() => return Handoff::Done(write()),
             Ok(_) => {}
             #[cfg(target_os = "linux")]
-            Err(_) if crate::linux::service::instance_answers() => return Handoff::OlderHex,
+            Err(_) if crate::linux::service::instance_answers() => return Handoff::OlderGoSpell,
             Err(_) if std::time::Instant::now() >= deadline => return Handoff::Deadline,
             Err(_) => std::thread::sleep(std::time::Duration::from_millis(100)),
         }
     }
 }
 
-/// `hex settings apply`: the running Hex saves and adopts the settings, so
-/// it never overwrites them from memory; with no Hex running they are
+/// `gospell settings apply`: the running GoSpell saves and adopts the settings, so
+/// it never overwrites them from memory; with no GoSpell running they are
 /// written to settings.json here.
 fn apply_settings(file: &std::path::Path, output: Output) -> u8 {
     use std::io::Read;
@@ -1160,11 +1160,11 @@ fn apply_settings(file: &std::path::Path, output: Output) -> u8 {
     match handoff {
         Handoff::Done(code) => code,
         #[cfg(target_os = "linux")]
-        Handoff::OlderHex => print(older_hex(), output),
+        Handoff::OlderGoSpell => print(older_gospell(), output),
         Handoff::Deadline => print(
             ControlReply::error(
                 "busy",
-                "Hex is starting but didn't answer; run `hex settings apply` again",
+                "GoSpell is starting but didn't answer; run `gospell settings apply` again",
             ),
             output,
         ),
@@ -1192,7 +1192,7 @@ fn apply_offline(values: &serde_json::Map<String, serde_json::Value>) -> Control
     result.unwrap_or_else(ControlReply::from)
 }
 
-/// `hex history clear`; the confirmation is asked here, before Hex is.
+/// `gospell history clear`; the confirmation is asked here, before GoSpell is.
 pub fn clear_history(confirm: bool, output: Output) -> u8 {
     if !confirm {
         return print(
@@ -1213,15 +1213,15 @@ pub fn send(command: ControlCommand, output: Output) -> u8 {
     }
 }
 
-/// Every OS reaches the running Hex through its local API's owner-only
+/// Every OS reaches the running GoSpell through its local API's owner-only
 /// discovery file and bearer-authenticated `POST /control`.
 fn running() -> bool {
     crate::local_api::running_pid().is_some()
 }
 
-/// `hex settings set key value` in the running Hex, which saves and applies
-/// it; `None` when no Hex runs.
-pub(crate) fn set_in_running_hex(key: &str, value: &str) -> Option<ControlReply> {
+/// `gospell settings set key value` in the running GoSpell, which saves and applies
+/// it; `None` when no GoSpell runs.
+pub(crate) fn set_in_running_gospell(key: &str, value: &str) -> Option<ControlReply> {
     running().then(|| {
         call(ControlRequest::new(ControlCommand::SettingsSet {
             key: key.into(),
@@ -1240,38 +1240,38 @@ fn call(request: ControlRequest) -> Result<ControlResponse, ControlReply> {
 }
 
 pub(crate) fn not_running() -> ControlReply {
-    ControlReply::error("not-running", "Hex is not running; run `hex start`")
+    ControlReply::error("not-running", "GoSpell is not running; run `gospell start`")
 }
 
-/// Why no Hex answered `/control`: on Linux an older Hex an update left
+/// Why no GoSpell answered `/control`: on Linux an older GoSpell an update left
 /// running answers only on its socket (#915).
 fn absent() -> ControlReply {
     #[cfg(target_os = "linux")]
     if crate::linux::service::instance_answers() {
-        return older_hex();
+        return older_gospell();
     }
     not_running()
 }
 
-/// An older Hex that predates `hex` commands over the local API.
+/// An older GoSpell that predates `gospell` commands over the local API.
 #[cfg(target_os = "linux")]
-fn older_hex() -> ControlReply {
+fn older_gospell() -> ControlReply {
     ControlReply::error(
         "outdated",
-        "an older Hex is still running (Hex was updated) and doesn't take `hex` commands; run `hex restart`",
+        "an older GoSpell is still running (GoSpell was updated) and doesn't take `gospell` commands; run `gospell restart`",
     )
 }
 
-/// `hex restart` with an older Hex running: restarts its systemd unit into
-/// the installed build, then waits until the new Hex answers.
+/// `gospell restart` with an older GoSpell running: restarts its systemd unit into
+/// the installed build, then waits until the new GoSpell answers.
 #[cfg(target_os = "linux")]
-fn restart_older_hex() -> ControlReply {
+fn restart_older_gospell() -> ControlReply {
     use std::time::{Duration, Instant};
 
     if !crate::linux::service::supervised() {
         return ControlReply::error(
             "failed",
-            "an older Hex is running outside its systemd unit; quit it from its window or tray, then run `hex start`",
+            "an older GoSpell is running outside its systemd unit; quit it from its window or tray, then run `gospell start`",
         );
     }
     if let Err(error) = crate::linux::service::restart() {
@@ -1280,11 +1280,11 @@ fn restart_older_hex() -> ControlReply {
     let started = Instant::now();
     while started.elapsed() < Duration::from_secs(20) {
         if running() {
-            return ControlReply::done("Restarted Hex");
+            return ControlReply::done("Restarted GoSpell");
         }
         std::thread::sleep(Duration::from_millis(200));
     }
-    ControlReply::done("Restarted Hex; it isn't answering yet (it may be loading its model)")
+    ControlReply::done("Restarted GoSpell; it isn't answering yet (it may be loading its model)")
 }
 
 fn logs(process: bool, lines: usize, follow: bool) -> u8 {
@@ -1370,7 +1370,7 @@ fn logs(process: bool, lines: usize, follow: bool) -> u8 {
 }
 
 fn fail(message: &str) -> u8 {
-    eprintln!("hex: {message}");
+    eprintln!("gospell: {message}");
     EXIT_REFUSED
 }
 
@@ -1400,12 +1400,12 @@ mod tests {
 
     #[cfg(target_os = "linux")]
     #[test]
-    fn an_older_hex_is_not_reported_as_not_running() {
-        let reply = older_hex();
+    fn an_older_gospell_is_not_reported_as_not_running() {
+        let reply = older_gospell();
         assert_eq!(exit_code(&reply), EXIT_REFUSED);
         assert!(matches!(
             &reply,
-            ControlReply::Error { code, message } if code == "outdated" && message.contains("hex restart")
+            ControlReply::Error { code, message } if code == "outdated" && message.contains("gospell restart")
         ));
     }
 
@@ -1464,7 +1464,7 @@ mod tests {
         report.meeting.elapsed_seconds = Some(3723);
         report.features.meetings = true;
         let text = human_status(&report);
-        assert!(text.starts_with("Hex 2.3.1 (pid 42, 412 MB)\n"));
+        assert!(text.starts_with("GoSpell 2.3.1 (pid 42, 412 MB)\n"));
         assert!(text.contains("Meeting      recording “Design sync” for 1:02:03\n"));
         assert!(text.ends_with("Labs         none\n"));
         report.labs = vec!["live-text".into(), "meetings".into()];

@@ -93,7 +93,7 @@ pub fn focused_window_title(pid: i32) -> Option<String> {
 /// field of the same app, even when that field changed without any user
 /// input. The one content read is [`Self::field_text`], for Labs › Learn
 /// from corrections, from exactly the field this identity names.
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 pub(crate) struct PasteFocus {
     application: CfObject,
     window: CfObject,
@@ -103,16 +103,16 @@ pub(crate) struct PasteFocus {
 // SAFETY: these three immutable Core Foundation references are owned by
 // one target token. Moving it transfers ownership to the output worker;
 // no AppKit object or thread-affine UI state is used, and it isn't Sync.
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 unsafe impl Send for PasteFocus {}
 
 /// Longest field text Labs › Learn from corrections reads, in UTF-16 units.
 /// A longer field is a document, not a correction, so it is skipped rather
 /// than truncated.
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 const MAX_FIELD_CHARS: usize = 20_000;
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 impl PasteFocus {
     pub(crate) fn capture(pid: i32) -> Option<Self> {
         let application = foreign_application(pid)?;
@@ -173,7 +173,7 @@ const TEXT_DEADLINE: Duration = Duration::from_millis(150);
 /// contributes only its `AXVisibleCharacterRange`, and is skipped when the app
 /// names none, so a document or a terminal's scrollback never fills the
 /// budget. Secure text fields and their subtrees are skipped, so a password
-/// never leaves the app. `None` for Hex's own window or when the tree has no
+/// never leaves the app. `None` for GoSpell's own window or when the tree has no
 /// text.
 pub fn focused_window_text(pid: i32) -> Option<String> {
     let application = foreign_application(pid)?;
@@ -587,9 +587,9 @@ impl Drop for CfObject {
 }
 
 /// The Accessibility application element for another process, never for
-/// Hex's own: its window serves that tree from the same runtime its main
+/// GoSpell's own: its window serves that tree from the same runtime its main
 /// thread updates, so a read from the foreground-context thread (or Smart
-/// spacing) while an update runs can panic and take Hex down (#1402).
+/// spacing) while an update runs can panic and take GoSpell down (#1402).
 fn foreign_application(pid: i32) -> Option<CfObject> {
     if pid == std::process::id() as i32 {
         return None;
@@ -719,11 +719,11 @@ mod tests {
         assert_eq!(text_around_caret(i32::MAX), None);
     }
 
-    /// Hex's own tree belongs to the main thread that updates it: the
+    /// GoSpell's own tree belongs to the main thread that updates it: the
     /// foreground-context poller and Smart spacing must never ask for it
     /// (#1402).
     #[test]
-    fn hex_never_reads_its_own_accessibility_tree() {
+    fn gospell_never_reads_its_own_accessibility_tree() {
         let own_pid = std::process::id() as i32;
         assert!(foreign_application(own_pid).is_none());
         assert_eq!(focused_window_title(own_pid), None);

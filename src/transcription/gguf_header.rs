@@ -33,7 +33,7 @@ const STREAM_MENUS: [&str; 2] = [
 const MAX_DIMS: u32 = 8;
 const DEFAULT_ALIGNMENT: u64 = 32;
 
-/// The ggml tensor types every Hex build runs on Metal and on Vulkan (the
+/// The ggml tensor types every GoSpell build runs on Metal and on Vulkan (the
 /// Linux and Windows builds embed Vulkan shaders for these alone).
 pub(crate) const SUPPORTED_TENSOR_TYPES: [(u32, &str); 3] = [(0, "F32"), (1, "F16"), (8, "Q8_0")];
 
@@ -53,7 +53,7 @@ pub(crate) struct TensorTypes {
 }
 
 impl TensorTypes {
-    /// F32, F16, and Q8_0: every Hex build on Metal and Vulkan.
+    /// F32, F16, and Q8_0: every GoSpell build on Metal and Vulkan.
     pub(crate) const STANDARD: Self = Self { k_quants: false };
 
     /// Also the K quants, where the GPU backend has their kernels.
@@ -169,7 +169,7 @@ impl<R: Read + Seek> Reader<R> {
         }
         let version = self.u32()?;
         if !(2..=3).contains(&version) {
-            bail!("it is GGUF version {version}; Hex reads versions 2 and 3");
+            bail!("it is GGUF version {version}; GoSpell reads versions 2 and 3");
         }
         let tensors = self.u64()?;
         let keys = self.u64()?;
@@ -339,7 +339,7 @@ impl<R: Read + Seek> Reader<R> {
     }
 }
 
-/// Bytes a tensor of `kind` with `elements` takes, for the types Hex runs.
+/// Bytes a tensor of `kind` with `elements` takes, for the types GoSpell runs.
 fn tensor_bytes(kind: u32, elements: u64) -> Option<u64> {
     match kind {
         0 => elements.checked_mul(4),

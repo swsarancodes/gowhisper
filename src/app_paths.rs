@@ -6,38 +6,38 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use color_eyre::eyre::{Result, eyre};
 use tracing_subscriber::fmt::writer::MakeWriterExt;
 
-/// Whether this is a local build (`HEX_LOCAL_BUILD=1`): made from a checkout
+/// Whether this is a local build (`GOSPELL_LOCAL_BUILD=1`): made from a checkout
 /// for its owner's own machine, so it never checks for or offers updates.
 pub fn is_local_build() -> bool {
-    option_env!("HEX_LOCAL_BUILD") == Some("1")
+    option_env!("GOSPELL_LOCAL_BUILD") == Some("1")
 }
 
-/// Whether this is a macOS `Hex Test.app` build (`HEX_TEST_BUILD=1`), which
-/// keeps its data, settings, and user config apart from the installed Hex.
+/// Whether this is a macOS `GoSpell Test.app` build (`GOSPELL_TEST_BUILD=1`), which
+/// keeps its data, settings, and user config apart from the installed GoSpell.
 pub fn is_macos_test_build() -> bool {
-    cfg!(target_os = "macos") && option_env!("HEX_TEST_BUILD") == Some("1")
+    cfg!(target_os = "macos") && option_env!("GOSPELL_TEST_BUILD") == Some("1")
 }
 
-/// The name menus show, so a test build running beside Hex reads as itself.
+/// The name menus show, so a test build running beside GoSpell reads as itself.
 #[cfg(target_os = "macos")]
 pub fn app_name() -> &'static str {
     if is_macos_test_build() {
-        "Hex Test"
+        "GoSpell Test"
     } else {
-        "Hex"
+        "GoSpell"
     }
 }
 
 pub fn support_dir() -> Result<PathBuf> {
-    if let Some(path) = std::env::var_os("HEX_APPLICATION_SUPPORT_DIR") {
+    if let Some(path) = std::env::var_os("GOSPELL_APPLICATION_SUPPORT_DIR") {
         return Ok(path.into());
     }
     let data =
         dirs::data_dir().ok_or_else(|| eyre!("application data directory is unavailable"))?;
     let folder = if is_macos_test_build() {
-        "hex-test"
+        "gospell-test"
     } else {
-        "hex"
+        "gospell"
     };
     Ok(data.join(folder))
 }
@@ -54,9 +54,9 @@ pub fn models_dir() -> Result<PathBuf> {
 }
 
 /// `name` in the support folder, except on Windows, where logs and models
-/// belong to this computer: `%LOCALAPPDATA%\hex`, not the Roaming
-/// `%APPDATA%\hex`, which managed networks copy to a server at every sign-in.
-/// An older Hex's Roaming copy moves over once. While it can't (a running Hex
+/// belong to this computer: `%LOCALAPPDATA%\gospell`, not the Roaming
+/// `%APPDATA%\gospell`, which managed networks copy to a server at every sign-in.
+/// An older GoSpell's Roaming copy moves over once. While it can't (a running GoSpell
 /// holds its files), the Roaming copy keeps being used, so nothing downloads
 /// again.
 fn machine_local(cell: &std::sync::OnceLock<PathBuf>, name: &str) -> Result<PathBuf> {
@@ -71,15 +71,15 @@ fn machine_local(cell: &std::sync::OnceLock<PathBuf>, name: &str) -> Result<Path
     Ok(cell.get_or_init(|| path).clone())
 }
 
-/// `%LOCALAPPDATA%\hex` on Windows, unless a data folder is chosen for this
-/// run (`HEX_APPLICATION_SUPPORT_DIR`); elsewhere none.
+/// `%LOCALAPPDATA%\gospell` on Windows, unless a data folder is chosen for this
+/// run (`GOSPELL_APPLICATION_SUPPORT_DIR`); elsewhere none.
 fn local_support_dir() -> Option<PathBuf> {
-    if !cfg!(windows) || std::env::var_os("HEX_APPLICATION_SUPPORT_DIR").is_some() {
+    if !cfg!(windows) || std::env::var_os("GOSPELL_APPLICATION_SUPPORT_DIR").is_some() {
         return None;
     }
     std::env::var_os("LOCALAPPDATA")
         .filter(|value| !value.is_empty())
-        .map(|local| PathBuf::from(local).join("hex"))
+        .map(|local| PathBuf::from(local).join("gospell"))
 }
 
 /// `local`, after moving `roaming` there if only `roaming` exists. A move that
@@ -99,7 +99,7 @@ fn move_once(roaming: &Path, local: &Path) -> PathBuf {
 }
 
 /// Creates `directory` readable only by this user, and tightens it if an
-/// older Hex left it open. Tightening is best-effort: a folder Hex can't
+/// older GoSpell left it open. Tightening is best-effort: a folder GoSpell can't
 /// chmod (another owner, a mount that refuses it) is logged, never fatal.
 /// Windows folders already inherit the per-user `%APPDATA%` permissions.
 pub fn create_private_dir(directory: &Path) -> std::io::Result<()> {
@@ -110,7 +110,7 @@ pub fn create_private_dir(directory: &Path) -> std::io::Result<()> {
 }
 
 /// Opens `path` to append, readable only by this user, tightening a file an
-/// older Hex created open (best-effort, as `create_private_dir`).
+/// older GoSpell created open (best-effort, as `create_private_dir`).
 pub fn open_private_append(path: &Path) -> std::io::Result<fs::File> {
     let mut options = OpenOptions::new();
     options.create(true).append(true);
@@ -139,7 +139,7 @@ pub fn init_process_logging(shutdown: &'static AtomicBool) -> Result<PathBuf> {
     create_private_dir(&log_dir)?;
     let process_log = open_private_append(&log_dir.join("process.log"))?;
     let filter = tracing_subscriber::EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("hex=info"));
+        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("gospell=info"));
     tracing_subscriber::fmt()
         .with_env_filter(filter)
         .with_writer(std::io::stderr.and(Mutex::new(process_log)))
@@ -187,16 +187,16 @@ pub fn personal_commands_workspace() -> Result<PathBuf> {
     user_config_dir()
 }
 
-/// The per-user config folder holding `hex.config.ts` on every OS: `~/.config/hex`, or `~/.config/hex-test` for `Hex Test.app`.
+/// The per-user config folder holding `gospell.config.ts` on every OS: `~/.config/gospell`, or `~/.config/gospell-test` for `GoSpell Test.app`.
 fn user_config_dir() -> Result<PathBuf> {
     let home = home_dir().ok_or_else(|| eyre!("home directory is unavailable"))?;
     Ok(user_config_dir_in(&home, is_macos_test_build()))
 }
 
 /// The home folder. On Windows `USERPROFILE` names it, as `HOME` does
-/// elsewhere, so a copy of Hex launched with another profile folder (an
+/// elsewhere, so a copy of GoSpell launched with another profile folder (an
 /// isolated benchmark) reads that folder's config; `dirs::home_dir` asks the
-/// shell for the signed-in user's own folder instead. Every path Hex derives
+/// shell for the signed-in user's own folder instead. Every path GoSpell derives
 /// from the user's folders goes through these, as Annotate's engine does
 /// (`scrawl_router::user_dirs`).
 pub fn home_dir() -> Option<PathBuf> {
@@ -225,7 +225,7 @@ pub fn desktop_dir() -> PathBuf {
 }
 
 /// The Windows profile `USERPROFILE` names, when it is not the signed-in
-/// user's own: a copy of Hex launched with another profile folder (an
+/// user's own: a copy of GoSpell launched with another profile folder (an
 /// isolated benchmark) keeps that profile's folders in use.
 #[cfg(windows)]
 fn redirected_profile() -> Option<PathBuf> {
@@ -273,8 +273,11 @@ pub fn audio_dir() -> Option<PathBuf> {
 }
 
 fn user_config_dir_in(home: &std::path::Path, test_build: bool) -> PathBuf {
-    home.join(".config")
-        .join(if test_build { "hex-test" } else { "hex" })
+    home.join(".config").join(if test_build {
+        "gospell-test"
+    } else {
+        "gospell"
+    })
 }
 
 #[cfg(test)]
@@ -283,9 +286,9 @@ mod tests {
 
     #[test]
     fn an_older_roaming_folder_moves_to_the_local_one_once() {
-        let root = std::env::temp_dir().join(format!("hex-local-move-{}", std::process::id()));
-        let roaming = root.join("Roaming").join("hex").join("models");
-        let local = root.join("Local").join("hex").join("models");
+        let root = std::env::temp_dir().join(format!("gospell-local-move-{}", std::process::id()));
+        let roaming = root.join("Roaming").join("gospell").join("models");
+        let local = root.join("Local").join("gospell").join("models");
         fs::create_dir_all(&roaming).unwrap();
         fs::write(roaming.join("model.gguf"), b"weights").unwrap();
 
@@ -302,7 +305,7 @@ mod tests {
 
     #[test]
     fn a_move_that_fails_keeps_the_roaming_folder_in_use() {
-        let root = std::env::temp_dir().join(format!("hex-local-stay-{}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("gospell-local-stay-{}", std::process::id()));
         let roaming = root.join("Roaming").join("models");
         fs::create_dir_all(&roaming).unwrap();
         // A file where the local parent folder should be makes the move fail.
@@ -320,7 +323,7 @@ mod tests {
     #[test]
     fn the_logs_folder_is_private() {
         use std::os::unix::fs::PermissionsExt;
-        let root = std::env::temp_dir().join(format!("hex-private-dir-{}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("gospell-private-dir-{}", std::process::id()));
         let logs = root.join("logs");
         fs::create_dir_all(&logs).unwrap();
         fs::set_permissions(&logs, fs::Permissions::from_mode(0o755)).unwrap();
@@ -339,11 +342,11 @@ mod tests {
         let home = std::path::Path::new("/Users/alex");
         assert_eq!(
             user_config_dir_in(home, false),
-            home.join(".config").join("hex")
+            home.join(".config").join("gospell")
         );
         assert_eq!(
             user_config_dir_in(home, true),
-            home.join(".config").join("hex-test")
+            home.join(".config").join("gospell-test")
         );
     }
 }

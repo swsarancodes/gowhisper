@@ -575,7 +575,7 @@ impl Thumbnail {
     /// Adds the overlay, hidden, made the first time it shows.
     pub(crate) fn install<S: 'static>(app: &mut rune::App<S>) -> Self {
         let spec = OverlaySpec {
-            name: "Hex screenshot",
+            name: "GoSpell screenshot",
             size: NOMINAL,
             edge: ScreenEdge::Bottom,
             margin: 0.0,
@@ -688,7 +688,7 @@ pub(crate) mod files {
         overlay: Option<OverlayHandle<Cards>>,
         id: u64,
     ) {
-        spawn("hex-card-copy", move || {
+        spawn("gospell-card-copy", move || {
             #[cfg(target_os = "macos")]
             let copied = crate::screenshots::save::copy_saved(&path, recording);
             #[cfg(not(target_os = "macos"))]
@@ -730,7 +730,7 @@ pub(crate) mod files {
     }
 
     pub(crate) fn trash(path: PathBuf) {
-        spawn("hex-card-trash", move || {
+        spawn("gospell-card-trash", move || {
             #[cfg(target_os = "macos")]
             match crate::screenshots::save::trash(&path) {
                 Ok(()) => {

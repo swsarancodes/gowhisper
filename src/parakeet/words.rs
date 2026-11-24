@@ -1,27 +1,27 @@
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 use std::sync::mpsc;
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 use std::thread;
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 use std::time::Instant;
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 use color_eyre::eyre::{Result, eyre};
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 use super::{DictationInference, dictation_busy};
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 use crate::transcription::engine::TranscriptionEngine;
 
 /// The longest audio the capture path hands the engine as one foreground
 /// request, shared with `pieces::PIECE_SAMPLES`. Each request runs through
 /// `Transcriber::transcribe_timed`, which enforces the loaded model's own
 /// `models::max_audio_chunk_samples` cap and Whisper edge trimming.
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 pub(super) const WORD_CHUNK_SAMPLES: usize = crate::transcription::pieces::PIECE_SAMPLES;
 /// How long a capture chunk waits for dictation to go idle before it is
 /// queued anyway; the engine still never runs it inside a live stream.
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 const WORD_DICTATION_WAIT: std::time::Duration = std::time::Duration::from_secs(20);
 
 /// Transcribes a capture's 16 kHz audio with word timestamps on the engine's
@@ -32,7 +32,7 @@ const WORD_DICTATION_WAIT: std::time::Duration = std::time::Duration::from_secs(
 /// first. No second copy of the model is loaded, and only a weak reference
 /// to the engine is kept between chunks. Quitting stops it between chunks.
 /// Every chunk runs on `selection`.
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 pub fn transcribe_with_words(
     engine: &std::sync::Weak<TranscriptionEngine>,
     selection: &crate::transcription::models::TranscriptionSelection,
@@ -71,7 +71,7 @@ pub fn transcribe_with_words(
     })
 }
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 fn wait_for_dictation_idle() -> Result<()> {
     let started = Instant::now();
     while dictation_busy()
@@ -81,14 +81,14 @@ fn wait_for_dictation_idle() -> Result<()> {
         thread::sleep(std::time::Duration::from_millis(50));
     }
     if crate::desktop::process_exit::quitting() {
-        return Err(eyre!("Hex is quitting"));
+        return Err(eyre!("GoSpell is quitting"));
     }
     Ok(())
 }
 
 /// Transcribes `samples` in quiet-cut chunks of at most `chunk_samples`,
 /// offsetting each chunk's segment and word times by where its range starts.
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 pub(super) fn transcribe_in_chunks(
     samples: Vec<f32>,
     chunk_samples: usize,

@@ -1,4 +1,4 @@
-//! The one Linux Hex process: the dictation host (listener, shortcut
+//! The one Linux GoSpell process: the dictation host (listener, shortcut
 //! registration, model preparation, updates, History writes, paste), the
 //! single-instance socket, and the window and HUD, opened on demand and
 //! closed without stopping anything.
@@ -6,7 +6,7 @@
 //! Threads: the main thread runs Rune's event loop; the host thread
 //! refreshes [`LinuxDesktopHost`] (at once when a request changes it, else on
 //! a short idle tick) and publishes its status; the socket's workers answer
-//! `hex` commands from that published status and hand shortcut commands
+//! `gospell` commands from that published status and hand shortcut commands
 //! straight to the listener.
 
 use std::path::PathBuf;
@@ -99,7 +99,7 @@ struct Listener {
     worker: JoinHandle<ListenerResult>,
     startup: ListenerStartup,
     hotkey_status: crate::linux::input::HotkeyStatus,
-    /// `hex` commands for the listener's shortcut state machine.
+    /// `gospell` commands for the listener's shortcut state machine.
     commands: mpsc::SyncSender<ListenerCommand>,
     /// Settings, models, and shortcut suspension the listener applies in place.
     updates: mpsc::Sender<crate::linux::dictation::ListenerUpdate>,
@@ -144,7 +144,7 @@ struct LinuxDesktopHost {
     status: ListenerStatus,
     error: Option<String>,
     dismissed_failure_at: Option<u64>,
-    /// What Hex's GNOME custom shortcuts were last written for (#781).
+    /// What GoSpell's GNOME custom shortcuts were last written for (#781).
     gnome_shortcuts: Option<String>,
     settings_error: Option<String>,
     settings: AppSettings,
@@ -216,7 +216,7 @@ struct Shared {
     /// Whether the window shows, as its app reports it.
     window_visible: Mutex<Option<WindowVisible>>,
     /// Why the window's app stopped, once it panicked (#979): the window
-    /// and overlays are gone until Hex restarts.
+    /// and overlays are gone until GoSpell restarts.
     window_failure: Mutex<Option<String>>,
     shutdown: &'static AtomicBool,
 }
@@ -241,7 +241,7 @@ impl HostHandle {
         }))
     }
 
-    /// The window's "Quit Hex": drains accepted work, then exits.
+    /// The window's "Quit GoSpell": drains accepted work, then exits.
     pub(crate) fn quit(&self) {
         self.0.shutdown.store(true, Ordering::Release);
         self.notify();
@@ -318,7 +318,7 @@ impl HostHandle {
         *self.0.waker.lock().unwrap() = Some(waker);
     }
 
-    /// `hex status` asks `visible` whether the window shows.
+    /// `gospell status` asks `visible` whether the window shows.
     pub(crate) fn set_window_visible(&self, visible: WindowVisible) {
         *self.0.window_visible.lock().unwrap() = Some(visible);
         self.notify();
@@ -427,7 +427,7 @@ impl HostHandle {
 }
 
 /// Becomes the Linux instance: claims the data root, starts the host, and
-/// runs the window's event loop on this (the main) thread until `hex quit`,
+/// runs the window's event loop on this (the main) thread until `gospell quit`,
 /// a signal, or the window's Quit. `activation` opens the window at once.
 pub(crate) fn run(
     event_path: PathBuf,
@@ -435,28 +435,28 @@ pub(crate) fn run(
     activation: Option<Activation>,
 ) -> Result<()> {
     let mut server = linux_service::Server::bind()?;
-    // Installs before #579 named the entries hex.desktop.
+    // Installs before #579 named the entries gospell.desktop.
     if let Err(error) = crate::linux::icons::install() {
-        tracing::warn!(%error, "could not install Hex's icon");
+        tracing::warn!(%error, "could not install GoSpell's icon");
     }
     if let Err(error) = crate::linux::portal::tidy_desktop_entries() {
-        tracing::warn!(%error, "could not move Hex's desktop entry");
+        tracing::warn!(%error, "could not move GoSpell's desktop entry");
     }
     if let Err(error) = crate::linux::portal::forget_legacy_gnome_shortcuts() {
-        tracing::warn!(%error, "could not remove Hex's old GNOME shortcuts");
+        tracing::warn!(%error, "could not remove GoSpell's old GNOME shortcuts");
     }
     if let Err(error) = crate::linux::login_item::tidy() {
-        tracing::warn!(%error, "could not tidy Hex's autostart entry");
+        tracing::warn!(%error, "could not tidy GoSpell's autostart entry");
     }
     // Off the main thread: the portal may take a moment to answer.
     let _ = std::thread::Builder::new()
-        .name("hex-background-portal".into())
+        .name("gospell-background-portal".into())
         .spawn(crate::linux::login_item::announce_background);
     crate::labs::log_launch();
     // Once, at startup: a Wayland session without wl-copy can record but
-    // never copy or paste, and Settings and `hex status` repeat this warning.
+    // never copy or paste, and Settings and `gospell status` repeat this warning.
     crate::linux::paste::missing_wayland_helper().inspect(|warning| tracing::warn!("{warning}"));
-    crate::audio::hex_microphone::host_service();
+    crate::audio::gospell_microphone::host_service();
     let launch = AppSettings::load_for_launch();
     crate::linux::dictation::initialize_feedback(&launch.settings);
     // Before any thread can load a model or the window can create its GPU.
@@ -503,13 +503,13 @@ pub(crate) fn run(
         crate::linux::tray::start(host.clone(), published.clone(), control.clone(), shutdown)
             .map(Arc::new);
     linux_service::notify("READY=1");
-    tracing::info!(pid = std::process::id(), "Hex instance ready");
+    tracing::info!(pid = std::process::id(), "GoSpell instance ready");
 
     let worker = {
         let host = host.clone();
         let tray = tray.clone();
         std::thread::Builder::new()
-            .name("hex-host".into())
+            .name("gospell-host".into())
             .spawn(move || {
                 host::run_host(
                     host,
@@ -547,8 +547,8 @@ fn publish_if_changed<T: PartialEq>(slot: &Mutex<Option<T>>, value: T) -> bool {
 }
 
 /// The one seam between the process and its window, on the main thread
-/// until Hex quits. `first` opens the window at once. A missing display or
-/// GPU fails the window, never Hex.
+/// until GoSpell quits. `first` opens the window at once. A missing display or
+/// GPU fails the window, never GoSpell.
 fn run_window(
     host: &HostHandle,
     requests: Receiver<Control>,
@@ -563,8 +563,8 @@ fn run_window(
         Ok(Err(error)) => error,
         Err(panic) => panic_reason(panic.as_ref()),
     };
-    tracing::error!(%failed, "the Hex window failed; Hex keeps running without it");
-    // `hex window show` and `hex status` say so instead of reporting
+    tracing::error!(%failed, "the GoSpell window failed; GoSpell keeps running without it");
+    // `gospell window show` and `gospell status` say so instead of reporting
     // a window that can no longer open (#979).
     host.window_failed(failed);
     while !shutdown.load(Ordering::Acquire) {
@@ -581,11 +581,11 @@ fn panic_reason(panic: &(dyn std::any::Any + Send)) -> String {
         .unwrap_or_else(|| "no reason given".into())
 }
 
-/// What `hex status` and `hex window show` report once the window failed.
+/// What `gospell status` and `gospell window show` report once the window failed.
 fn window_failure_message(reason: &str) -> String {
     let reason = reason.lines().next().unwrap_or(reason);
     format!(
-        "The Hex window and recording HUD stopped ({reason}). Dictation still works; restart Hex to try again."
+        "The GoSpell window and recording HUD stopped ({reason}). Dictation still works; restart GoSpell to try again."
     )
 }
 
@@ -699,9 +699,9 @@ impl LinuxDesktopHost {
         self.refresh_personal_commands();
     }
 
-    /// Adopts `settings.json` when something other than Hex changed it, so
+    /// Adopts `settings.json` when something other than GoSpell changed it, so
     /// its modes reach the listener and the window's next save keeps the
-    /// edit. Hex's own saves read back equal and change nothing.
+    /// edit. GoSpell's own saves read back equal and change nothing.
     fn reload_changed_settings(&mut self) {
         if cfg!(test) || self.shortcut_edit.is_some() {
             return;
@@ -724,7 +724,7 @@ impl LinuxDesktopHost {
             Ok((settings, None)) => {
                 // Only the adopted snapshot gains permission to save.
                 if settings != self.settings {
-                    tracing::info!("settings.json changed outside Hex; applying it");
+                    tracing::info!("settings.json changed outside GoSpell; applying it");
                 }
                 self.adopt_settings(settings);
             }
@@ -813,8 +813,8 @@ impl LinuxDesktopHost {
         self.status = ListenerStatus::Enabling;
     }
 
-    /// Enable and Disable also decide whether Hex listens at its next launch,
-    /// so a disabled Hex stays disabled after a restart (#575).
+    /// Enable and Disable also decide whether GoSpell listens at its next launch,
+    /// so a disabled GoSpell stays disabled after a restart (#575).
     fn remember_listening(&mut self, enabled: bool) {
         if self.settings.enable_on_launch == enabled {
             return;
@@ -827,8 +827,8 @@ impl LinuxDesktopHost {
         }
     }
 
-    /// Keeps Hex's GNOME custom shortcuts (#781) in step: written while Hex
-    /// listens with them on, for its current shortcuts; removed when Hex is
+    /// Keeps GoSpell's GNOME custom shortcuts (#781) in step: written while GoSpell
+    /// listens with them on, for its current shortcuts; removed when GoSpell is
     /// disabled or they're turned off.
     fn sync_gnome_shortcuts(&mut self) {
         if !self.settings_valid || !crate::linux::portal::gnome() {
@@ -843,19 +843,23 @@ impl LinuxDesktopHost {
         if self.gnome_shortcuts.as_deref() == Some(key.as_str()) {
             return;
         }
-        // Nothing to remove that this Hex wrote or was asked to keep.
+        // Nothing to remove that this GoSpell wrote or was asked to keep.
         if !wanted && self.gnome_shortcuts.is_none() && !self.settings.gnome_keyboard_shortcuts {
             self.gnome_shortcuts = Some(key);
             return;
         }
         let result = if wanted {
-            crate::linux::login_item::launcher()
-                .and_then(|hex| crate::linux::gnome_shortcuts::install(&self.settings, &hex))
+            crate::linux::login_item::launcher().and_then(|gospell| {
+                crate::linux::gnome_shortcuts::install(&self.settings, &gospell)
+            })
         } else {
             crate::linux::gnome_shortcuts::remove()
         };
         match result {
-            Ok(()) => tracing::info!(written = wanted, "updated Hex's GNOME keyboard shortcuts"),
+            Ok(()) => tracing::info!(
+                written = wanted,
+                "updated GoSpell's GNOME keyboard shortcuts"
+            ),
             Err(error) => {
                 self.error = Some(format!(
                     "Could not update GNOME keyboard shortcuts: {error:#}"
@@ -888,14 +892,14 @@ impl LinuxDesktopHost {
 
     fn refresh(&mut self) {
         self.switch_with_keyboard();
-        // Restart to update asks systemd to restart Hex after the updater's
+        // Restart to update asks systemd to restart GoSpell after the updater's
         // final check; only a failure needs showing, and a restart that never
         // happened must not reopen the window on the next launch.
         if let Some(Err(error)) = self.updater.take_restart() {
             if let Some(marker) = reopen_marker() {
                 let _ = std::fs::remove_file(marker);
             }
-            self.error = Some(format!("Could not restart Hex: {error:#}"));
+            self.error = Some(format!("Could not restart GoSpell: {error:#}"));
         }
         // Settings may set up the transformations workspace at any time.
         if self.personal_commands_checked_at.elapsed() >= Duration::from_secs(2) {
@@ -920,7 +924,7 @@ impl LinuxDesktopHost {
                 match result {
                     Ok(prepared) => {
                         let selection = prepared.selection.clone();
-                        // Only a preparation that changes what Hex runs
+                        // Only a preparation that changes what GoSpell runs
                         // replaces the saved choice: a check of that same
                         // model, or of a lost import's fallback, leaves the
                         // saved selection alone.
@@ -1088,7 +1092,7 @@ impl LinuxDesktopHost {
             return;
         }
         // A valid file clears the parse error even when it loads the settings
-        // already running (a fixed file equal to what Hex had in memory).
+        // already running (a fixed file equal to what GoSpell had in memory).
         self.settings_error = None;
         if self.settings_valid && settings == self.settings {
             self.settings.source = settings.source;
@@ -1314,7 +1318,7 @@ impl LinuxDesktopHost {
 /// edits the window saved meanwhile survive.
 /// Annotate's shortcut, while Annotate is on.
 fn capture_shortcut(settings: &AppSettings) -> Option<&crate::app_settings::HotkeyBinding> {
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     if settings.capture.enabled {
         return Some(&settings.capture.hotkey);
     }
@@ -1438,7 +1442,7 @@ impl LinuxDesktopHost {
         }
     }
 
-    /// Where `hex` shortcut commands go: the listener, once it reports its
+    /// Where `gospell` shortcut commands go: the listener, once it reports its
     /// session (a listener still loading its model would replay them late).
     fn shortcut_route(&self) -> Option<ShortcutRoute> {
         self.listener
@@ -1462,7 +1466,7 @@ impl LinuxDesktopHost {
             | DesktopAction::ConfirmUpdateSwitch
             | DesktopAction::WindowFocused => {
                 if let Err(error) = self.updater.act(&action) {
-                    self.error = Some(format!("Could not restart Hex: {error:#}"));
+                    self.error = Some(format!("Could not restart GoSpell: {error:#}"));
                     return Err(error);
                 }
                 // Only an accepted restart relaunches with the window open;
@@ -1595,7 +1599,7 @@ mod tests {
     }
 
     /// The GNOME sync cache key must move when the typed-text lab or its
-    /// binding changes, or stale `hex-typed-text` entries stay behind.
+    /// binding changes, or stale `gospell-typed-text` entries stay behind.
     #[test]
     fn the_gnome_shortcut_key_tracks_typed_text() {
         use crate::app_settings::{HotkeyKey, HotkeyModifiers};
@@ -1645,7 +1649,7 @@ mod tests {
             crate::app_settings::LaunchLoad {
                 settings: host_for_edit(false).settings.clone(),
                 note: Some(crate::app_settings::LaunchNote::Unparseable(
-                    "Hex couldn't read settings.json and started with defaults.".into(),
+                    "GoSpell couldn't read settings.json and started with defaults.".into(),
                 )),
             },
         );

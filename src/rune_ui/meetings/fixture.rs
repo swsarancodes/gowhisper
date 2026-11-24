@@ -17,7 +17,7 @@ impl MeetingsPane {
             turn(
                 false,
                 1,
-                "Basically, I want Anomaly Arcade to be one login where you add friends and jump into any game.",
+                "Basically, I want GoML Arcade to be one login where you add friends and jump into any game.",
             ),
             turn(false, 4, "I need to finish my StarCraft game, too."),
             turn(true, 9, "Oh nice. How far along is it?"),
@@ -51,7 +51,7 @@ impl MeetingsPane {
         ];
         conversation[8].pause_before_ms = Some(55_000);
         fn preview_folder(id: &str) -> std::path::PathBuf {
-            format!("~/Library/Application Support/hex/meetings/{id}").into()
+            format!("~/Library/Application Support/gospell/meetings/{id}").into()
         }
         let meeting =
             |id: &str, title: &str, status, day: &str, clock: &str, minutes: u64| Meeting {
@@ -96,10 +96,10 @@ impl MeetingsPane {
         );
         notes.app = Some("Zoom".into());
         notes.reveal = crate::meeting::RevealTarget::Markdown(
-            "~/Documents/Hex Meetings/Arcade launch plan.md".into(),
+            "~/Documents/GoSpell Meetings/Arcade launch plan.md".into(),
         );
         notes.summary = Some(
-            "One login for every Anomaly Arcade game, aiming for twenty to thirty games over the next couple of months. The build screen needs a proposal before more polish."
+            "One login for every GoML Arcade game, aiming for twenty to thirty games over the next couple of months. The build screen needs a proposal before more polish."
                 .into(),
         );
         notes.transcript = Transcript::Loaded(conversation.clone());

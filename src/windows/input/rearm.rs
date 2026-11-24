@@ -1,12 +1,12 @@
-//! Re-arms Hex's low-level hooks so the dictation shortcut keeps working.
+//! Re-arms GoSpell's low-level hooks so the dictation shortcut keeps working.
 //!
 //! Some apps (Tauri 2 ones among them, #1901) register raw keyboard input and
 //! install their own `WH_KEYBOARD_LL` hook. While such a window holds the
-//! foreground, Windows stops calling low-level keyboard hooks at all — Hex's
+//! foreground, Windows stops calling low-level keyboard hooks at all — GoSpell's
 //! and the app's own — until a hook is installed again, whatever its position
 //! in the chain. Windows also drops a hook whose callback runs past
 //! `LowLevelHooksTimeout`, and the mouse hook can go the same way. One side
-//! effect: a fresh install also puts Hex's hook ahead of hooks other apps
+//! effect: a fresh install also puts GoSpell's hook ahead of hooks other apps
 //! (a key remapper, say) installed after it.
 //!
 //! Out-of-context `EVENT_SYSTEM_FOREGROUND` callbacks arrive on the installing
@@ -30,13 +30,13 @@ use windows_sys::Win32::UI::WindowsAndMessaging::{
     WINEVENT_SKIPOWNPROCESS, WM_TIMER,
 };
 
-/// How long after a swap Hex installs one more hook.
+/// How long after a swap GoSpell installs one more hook.
 const REARM_DELAY_MS: u32 = 1_500;
 
-/// The keyboard hook Hex owns right now; the foreground callback replaces it.
+/// The keyboard hook GoSpell owns right now; the foreground callback replaces it.
 static KEYBOARD_HOOK: AtomicPtr<c_void> = AtomicPtr::new(ptr::null_mut());
 
-/// The mouse hook Hex owns right now, swapped with the keyboard hook.
+/// The mouse hook GoSpell owns right now, swapped with the keyboard hook.
 static MOUSE_HOOK: AtomicPtr<c_void> = AtomicPtr::new(ptr::null_mut());
 
 /// The one-shot re-arm timer pending on the hook thread, if any.
@@ -45,7 +45,7 @@ static REARM_TIMER: AtomicUsize = AtomicUsize::new(0);
 /// A re-arm failure has been logged; the next ones stay quiet.
 static REARM_FAILED: AtomicBool = AtomicBool::new(false);
 
-/// Hex's keyboard and mouse hooks and the foreground watcher that re-arms
+/// GoSpell's keyboard and mouse hooks and the foreground watcher that re-arms
 /// them.
 pub struct KeyboardHooks {
     foreground: HWINEVENTHOOK,
@@ -66,8 +66,8 @@ impl KeyboardHooks {
         let mut foreground = ptr::null_mut();
         if !keyboard.is_null() && !mouse.is_null() {
             super::watchdog::install();
-            // Hex's own process registers raw keyboard input (winit's event
-            // loop), so re-arming while a Hex window is in front would
+            // GoSpell's own process registers raw keyboard input (winit's event
+            // loop), so re-arming while a GoSpell window is in front would
             // recreate the silencing condition.
             foreground = unsafe {
                 SetWinEventHook(
@@ -114,8 +114,8 @@ impl KeyboardHooks {
         unsafe {
             KillTimer(ptr::null_mut(), timer);
         }
-        // The person may have switched to a Hex window meanwhile; re-arming
-        // over it would recreate the silence this watcher skips Hex for.
+        // The person may have switched to a GoSpell window meanwhile; re-arming
+        // over it would recreate the silence this watcher skips GoSpell for.
         if !super::app_is_foreground() {
             swap(false);
         }

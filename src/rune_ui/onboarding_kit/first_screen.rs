@@ -1,4 +1,4 @@
-//! More on `"Setting up Hex"` than a title and a percentage: the details a
+//! More on `"Setting up GoSpell"` than a title and a percentage: the details a
 //! download page owes you, how much is down and that your voice stays on
 //! this computer.
 
@@ -32,7 +32,7 @@ pub(super) fn amount(p: Paint, s: &Onboard, d: Download) -> Option<El> {
 }
 
 /// One quiet line at the foot of the window: why there's a download, and
-/// again when Hex asks for the microphone, where it matters most. From the
+/// again when GoSpell asks for the microphone, where it matters most. From the
 /// practice on, where macOS first shows the mic in use, why it stays on.
 pub(super) fn note(p: Paint, s: &Onboard) -> Option<El> {
     if failed(s) {
@@ -44,14 +44,14 @@ pub(super) fn note(p: Paint, s: &Onboard) -> Option<El> {
             marked(
                 p,
                 &glyphs::LOCK,
-                tr("Hex hears you on this computer. Your voice never leaves it."),
+                tr("GoSpell hears you on this computer. Your voice never leaves it."),
             ),
         )),
         Step::Try | Step::TryHearing | Step::TryHeard | Step::Ready
             if s.live.as_ref().is_some_and(|live| live.mic_stays_open()) =>
         {
             let why = tr(
-                "macOS shows the mic as on because Hex keeps it warm, so dictation starts instantly.",
+                "macOS shows the mic as on because GoSpell keeps it warm, so dictation starts instantly.",
             );
             let only = tr_fill(
                 if s.toggle {

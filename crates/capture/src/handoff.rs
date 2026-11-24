@@ -131,7 +131,7 @@ pub fn newest_bundle(root: &Path) -> Result<PathBuf> {
 }
 
 /// Host clipboard and paste operations. Scrawl's app uses `SystemClipboard`; an embedding host
-/// such as Hex can supply its own implementation.
+/// such as GoSpell can supply its own implementation.
 pub trait Clipboard: Send + Sync {
     fn copy_bundle(&self, bundle_dir: &Path, bundle: &crate::model::ScrawlBundle) -> Result<()>;
     fn copy_text(&self, text: &str) -> Result<()>;
@@ -347,7 +347,7 @@ pub fn copy_png_to_clipboard(_png_bytes: &[u8]) -> Result<()> {
     bail!("Image and text clipboard handoff requires macOS or Windows")
 }
 
-/// Linux hosts copy through their own clipboard path (Hex: `linux_paste`).
+/// Linux hosts copy through their own clipboard path (GoSpell: `linux_paste`).
 #[cfg(not(any(target_os = "macos", target_os = "windows")))]
 fn copy_loaded_bundle_to_clipboard(
     _directory: &Path,
@@ -400,18 +400,18 @@ pub struct EngineConfig {
     /// site's OpenCode session (`routing`).
     #[serde(default)]
     pub auto_send: Option<bool>,
-    /// `"apple"` (default), `"hex"` or `"command"`: which engine transcribes recordings
+    /// `"apple"` (default), `"gospell"` or `"command"`: which engine transcribes recordings
     /// (`transcribe`). The command's own keys are read by `transcribe_command`, not here, so a
     /// malformed one can't reset this struct.
     #[serde(default)]
     pub transcriber: Option<String>,
-    /// The Hex model to use when `transcriber` is `"hex"` (default: the first ready one of
-    /// `hex::PREFERRED_MODELS`).
+    /// The GoSpell model to use when `transcriber` is `"gospell"` (default: the first ready one of
+    /// `gospell::PREFERRED_MODELS`).
     #[serde(default)]
-    pub hex_model: Option<String>,
-    /// Hex language code (`"en"` by default, `"auto"` for model language detection).
+    pub gospell_model: Option<String>,
+    /// GoSpell language code (`"en"` by default, `"auto"` for model language detection).
     #[serde(default)]
-    pub hex_language: Option<String>,
+    pub gospell_language: Option<String>,
     /// Apple Speech locale (BCP-47, e.g. "zh-TW"); missing means the Mac's own language.
     #[serde(default)]
     pub apple_locale: Option<String>,
@@ -456,8 +456,8 @@ impl EngineConfig {
         self.auto_send.unwrap_or(true)
     }
 
-    pub fn hex_model(&self) -> Option<String> {
-        self.hex_model
+    pub fn gospell_model(&self) -> Option<String> {
+        self.gospell_model
             .as_deref()
             .map(str::trim)
             .filter(|m| !m.is_empty())
@@ -568,7 +568,7 @@ static SCRAWL_HOST_DEFAULTS: std::sync::atomic::AtomicBool =
 
 /// Enables Scrawl's own `~/.config/scrawl/config.json` and `~/Library/Logs/Scrawl/scrawl.log`
 /// defaults. Called only by the Scrawl CLI/app binary (`src/main.rs`). Library consumers (such as
-/// Hex) never call this, so library code never implicitly reads `~/.config/scrawl/config.json` or
+/// GoSpell) never call this, so library code never implicitly reads `~/.config/scrawl/config.json` or
 /// writes under `~/Library/Application Support/scrawl`.
 pub fn enable_scrawl_host_defaults() {
     SCRAWL_HOST_DEFAULTS.store(true, std::sync::atomic::Ordering::Release);
@@ -620,7 +620,7 @@ pub fn parse_config_from<T: for<'de> Deserialize<'de> + Default>(path: &Path) ->
 }
 
 /// Pure parser for a raw `~/.config/scrawl/config.json` string into [`EngineConfig`].
-/// Never touches the filesystem; used by hosts (such as Hex) for one-time migration of Scrawl
+/// Never touches the filesystem; used by hosts (such as GoSpell) for one-time migration of Scrawl
 /// capture settings into their own config store (`scrawl_router::parse_scrawl_config` parses
 /// the routing half).
 pub fn parse_scrawl_config(raw: &str) -> EngineConfig {
@@ -711,7 +711,7 @@ fn random_bytes_32() -> Result<[u8; 32]> {
     Ok(bytes)
 }
 
-fn random_hex_token_32() -> Result<String> {
+fn random_gospell_token_32() -> Result<String> {
     use std::fmt::Write as _;
     let bytes = random_bytes_32()?;
     let mut token = String::with_capacity(64);
@@ -745,7 +745,7 @@ pub fn ensure_ingest_token_in(path: &Path) -> Result<String> {
         return Ok(existing.to_owned());
     }
 
-    let token = random_hex_token_32()?;
+    let token = random_gospell_token_32()?;
     map.insert(
         "ingestToken".to_owned(),
         serde_json::Value::String(token.clone()),
@@ -815,7 +815,7 @@ pub fn import_or_ensure_ingest_token_file(
     });
     let token = match imported {
         Some(token) => token,
-        None => random_hex_token_32()?,
+        None => random_gospell_token_32()?,
     };
 
     if let Some(parent) = token_file.parent()
@@ -945,19 +945,19 @@ pub fn transcriber() -> Option<String> {
     config().transcriber
 }
 
-/// The configured Hex model id (`hexModel`), if any.
-pub fn hex_model() -> Option<String> {
-    config().hex_model()
+/// The configured GoSpell model id (`gospellModel`), if any.
+pub fn gospell_model() -> Option<String> {
+    config().gospell_model()
 }
 
-/// The configured Hex language, defaulting to the previous English behavior.
-pub fn hex_language() -> String {
-    hex_language_from(&config())
+/// The configured GoSpell language, defaulting to the previous English behavior.
+pub fn gospell_language() -> String {
+    gospell_language_from(&config())
 }
 
-pub fn hex_language_from(config: &EngineConfig) -> String {
+pub fn gospell_language_from(config: &EngineConfig) -> String {
     config
-        .hex_language
+        .gospell_language
         .as_deref()
         .and_then(crate::transcribe::language_code)
         .unwrap_or_else(|| crate::transcribe::DEFAULT_LANGUAGE.into())
@@ -1461,15 +1461,15 @@ mod tests {
         let path = fixture.0.join("config.json");
         fs::write(&path, br#"{"ingestToken":"abc","autoSend":false}"#).unwrap();
         let config = load_config_from(&path);
-        assert_eq!((&config.transcriber, &config.hex_model), (&None, &None));
-        assert_eq!(hex_language_from(&config), "en");
-        set_config_value_in(&path, "transcriber", "hex".into()).unwrap();
-        set_config_value_in(&path, "hexModel", "parakeet_v3".into()).unwrap();
-        set_config_value_in(&path, "hexLanguage", "nl".into()).unwrap();
+        assert_eq!((&config.transcriber, &config.gospell_model), (&None, &None));
+        assert_eq!(gospell_language_from(&config), "en");
+        set_config_value_in(&path, "transcriber", "gospell".into()).unwrap();
+        set_config_value_in(&path, "gospellModel", "parakeet_v3".into()).unwrap();
+        set_config_value_in(&path, "gospellLanguage", "nl".into()).unwrap();
         let config = load_config_from(&path);
-        assert_eq!(config.transcriber.as_deref(), Some("hex"));
-        assert_eq!(config.hex_model.as_deref(), Some("parakeet_v3"));
-        assert_eq!(hex_language_from(&config), "nl");
+        assert_eq!(config.transcriber.as_deref(), Some("gospell"));
+        assert_eq!(config.gospell_model.as_deref(), Some("parakeet_v3"));
+        assert_eq!(gospell_language_from(&config), "nl");
         assert_eq!(config.ingest_token.as_deref(), Some("abc"));
         assert_eq!(config.auto_send, Some(false));
         #[cfg(unix)]
@@ -1570,11 +1570,11 @@ mod tests {
         let path = fixture.0.join("config.json");
         fs::write(
             &path,
-            r#"{"agentHost": "studio", "autoSend": "maybe", "usbApps": "not-a-list", "transcriber": "hex", "unknown": {"x": 1}}"#,
+            r#"{"agentHost": "studio", "autoSend": "maybe", "usbApps": "not-a-list", "transcriber": "gospell", "unknown": {"x": 1}}"#,
         )
         .unwrap();
         let cfg = load_config_from(&path);
-        assert_eq!(cfg.transcriber.as_deref(), Some("hex"));
+        assert_eq!(cfg.transcriber.as_deref(), Some("gospell"));
         assert_eq!(cfg.auto_send, None);
         assert!(cfg.usb_apps.is_empty());
         // Both spellings of one field: one is kept rather than neither.
@@ -1625,14 +1625,17 @@ mod tests {
     #[test]
     fn parse_scrawl_config_parses_engine_settings_purely() {
         let raw = r#"{
-            "transcriber": "hex",
-            "hexModel": "parakeet-tdt-0.6b-v3",
+            "transcriber": "gospell",
+            "gospellModel": "parakeet-tdt-0.6b-v3",
             "capturesDir": "~/Captures",
             "experiments": {"agentContext": true}
         }"#;
         let engine = parse_scrawl_config(raw);
-        assert_eq!(engine.transcriber.as_deref(), Some("hex"));
-        assert_eq!(engine.hex_model().as_deref(), Some("parakeet-tdt-0.6b-v3"));
+        assert_eq!(engine.transcriber.as_deref(), Some("gospell"));
+        assert_eq!(
+            engine.gospell_model().as_deref(),
+            Some("parakeet-tdt-0.6b-v3")
+        );
         assert!(engine.experiment(AGENT_CONTEXT));
     }
 }

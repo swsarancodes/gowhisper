@@ -1,4 +1,4 @@
-# Hex Feature Map
+# GoSpell Feature Map
 
 What can the user do, how do they reach it, and what would prove it works?
 This maps existing behavior. [ROADMAP.md](../../ROADMAP.md) owns future work;
@@ -13,7 +13,7 @@ locators unless an executed result is explicitly recorded, as in the
 ## Product Map
 
 ```ts
-Hex                                      // macOS release
+GoSpell                                      // macOS release
 ├── Get ready                            // install, permissions, local model
 ├── Dictate                              // hold OR double-tap lock
 ├── Use the result                       // paste, paste-last, History
@@ -59,7 +59,7 @@ OpenCode; the mode's transformations still run afterwards and may use the
 network if you wrote them that way, and Voice Action still uses OpenCode. A
 number, negation, or protected number run, link, path, code, or quote that
 does not survive verbatim keeps the corrected transcript.
-General › Advanced › Interface language offers Português (Brasil), and Hex
+General › Advanced › Interface language offers Português (Brasil), and GoSpell
 uses it for any Portuguese system language (#867); it also offers Français,
 used for any French system language (#892), and Русский, used for any
 Russian system language (#1317). None of these has had a native speaker's
@@ -78,51 +78,51 @@ models another app already downloaded; its Labs › Smaller model files toggle
 [Annotate](capture.md) (macOS, Linux,
 and Windows) records the screen while you draw and talk and sends it to an agent;
 its Labs › Agent tools for captures toggle (off by default, every OS) adds
-`hex annotate inspect`, `zoom`, `frames`, and `skill`, which read a bundle in
+`gospell annotate inspect`, `zoom`, `frames`, and `skill`, which read a bundle in
 the CLI process so a coding agent can see its summary, marks, a dense frame
 sheet, or a range of frames itself. Its Labs › Install agent skill from
 Annotate toggle (off by default, every OS) adds an Agents section that writes
-the `hex-annotate` skill into Claude Code, Codex, OpenCode, or Pi, and on macOS
-links `hex` onto PATH.
+the `gospell-annotate` skill into Claude Code, Codex, OpenCode, or Pi, and on macOS
+links `gospell` onto PATH.
 [Screenshots](labs.md) (Labs, macOS) takes CleanShot-style ⌘⇧4 area and
 window screenshots, and with Annotate on records from a ⌘⇧5 toolbar.
 The other capabilities stay here until they need their own verification recipe.
 
 ## Get Ready
 
-Install the signed macOS app with `brew install --cask anomalyco/tap/hex` or the
+Install the signed macOS app with `brew install --cask goml/tap/gospell` or the
 [manual DMG](../../README.md#downloads). The cask uses a versioned, checksum-pinned
-DMG, requires Apple silicon/macOS 15+, and leaves updates to Hex's own updater. It does
+DMG, requires Apple silicon/macOS 15+, and leaves updates to GoSpell's own updater. It does
 not require OpenCode, launch the app automatically, migrate the legacy
 Swift app's data, or forcibly replace an existing app destination. Homebrew uninstall
 leaves runtime settings, models, and retained data intact.
 
 ```ts
-Download Hex                              // setup.download-recovery
-├── anoma.ly/hex names the visitor's platform  // setup.download-button
+Download GoSpell                              // setup.download-recovery
+├── gospell.goml.io names the visitor's platform  // setup.download-button
 │   ├── Mac -> DMG | Intel Mac -> disabled, "needs Apple silicon"
-│   ├── Windows x64 / ARM64 (UA-CH) -> hex-setup-<version>-windows-<arch>.exe + SmartScreen note
+│   ├── Windows x64 / ARM64 (UA-CH) -> gospell-setup-<version>-windows-<arch>.exe + SmartScreen note
 │   ├── Linux -> copyable `curl … install-linux.sh | sh` + Arch/glibc requirement
 │   ├── Phone -> Send yourself the link
 │   └── Other platforms -> every build, Homebrew, the GitHub release
-├── Website, README, installers, apps, feeds, appcast -> anoma.ly/hex/files (Worker hex-production-site):
+├── Website, README, installers, apps, feeds, appcast -> gospell.goml.io/files (Worker gospell-production-site):
 │   installers and appcast from the site build, dev notes from the dev-notes branch, frozen feeds and artifacts from R2
-├── Releases up to 2.3.1 -> downloads.hex.kitlangton.dev (Kit's frozen bucket) -> the same bytes
+├── Releases up to 2.3.1 -> downloads.gospell.goml.io (Kit's frozen bucket) -> the same bytes
 ├── GitHub v<version> (app-v through 2.3.1) -> identical DMG, Setup.exe, and Linux bytes
 └── Older app cannot reach its update feed -> manually install the DMG
 
 Install on Windows                        // setup.windows-installer
-├── Setup.exe, per user, no admin -> managed versions\<version>\hex.exe
+├── Setup.exe, per user, no admin -> managed versions\<version>\gospell.exe
 │   ├── x64 without a Vulkan 1.2 driver -> installs; speech on the CPU + Settings note (#1240)
 │   ├── another version installed (e.g. self-updated) -> install this one over it
 │   ├── the setup engine is signed -> Smart App Control runs the copy extracted to %TEMP%
 │   │   (unsigned, it blocks setup: "Unable to execute file in the temporary directory", error 4551)
-│   └── finish -> Open Hex -> the first run downloads a model
+│   └── finish -> Open GoSpell -> the first run downloads a model
 └── Settings › Apps -> uninstall every version, shortcut, Launch at login; keep data
     └── the installed uninstaller is that same signed engine
 
 Install on Linux                          // setup.linux-installer
-└── curl … | sh -> signed feed -> verified artifact -> launcher + hex.service
+└── curl … | sh -> signed feed -> verified artifact -> launcher + gospell.service
     ├── cannot start -> name the glibc floor or the missing Arch packages
     └── finish without wl-copy -> print apt/dnf/pacman commands for wl-clipboard and wtype
 
@@ -134,7 +134,7 @@ Prepare local models                      // separate network dependency
 The website shows the pinned macOS version and platform requirements beside its
 download links. App mirrors use explicit `v…` release tags (`app-v…` through 2.3.1) rather than GitHub's
 repository-wide latest release, which may refer to the SDK. Builds on the release
-service update from `https://anoma.ly/release` (docs/releasing.md); the 2.3.1
+service update from `https://goml.io/release` (docs/releasing.md); the 2.3.1
 feeds, appcast, and the legacy `r2.dev` endpoint stay frozen for installed
 clients. Hosting does not guarantee access through every corporate policy.
 
@@ -157,7 +157,7 @@ Control decision, SmartScreen prompt, or first launch on a real PC has been
 observed. The Linux library diagnosis has no automated check. The site's
 platform states were captured once in headless Chromium with `?platform=`.
 
-Sources: [website](../../site/src/Download.tsx), [installer](../../packaging/windows/hex.iss),
+Sources: [website](../../site/src/Download.tsx), [installer](../../packaging/windows/gospell.iss),
 [release publisher](../../.github/release/release-service.sh),
 [mirror publisher](../../scripts/publish-app-mirror.sh),
 [macOS release publisher](../../scripts/release-app.sh),
@@ -172,18 +172,18 @@ Executed hosting checks and deployment details are recorded in
 with 2.1.17; the initial 2.1.16 mirror preserves that release's original bytes.
 
 ```ts
-Launch Hex, setup incomplete              // setup.tour; every build and OS, full window
+Launch GoSpell, setup incomplete              // setup.tour; every build and OS, full window
 ├── One onboarding: the first-run story (rune_ui/onboarding_kit/live.rs) over
 │   the tour state machine (desktop::onboarding::Flow); no flag, no other tour
 ├── Skip (quiet, top-right, only on the demo and the practice)    // setup.skip
 │   ├── Passes over that part to the next step setup still needs: permissions,
-│   │   then Almost ready while the model downloads, else Hex is ready
+│   │   then Almost ready while the model downloads, else GoSpell is ready
 │   ├── Never closes onboarding or records it done
 │   └── No Skip on permissions, the model step or download, or the paste
 │       permission. Check: `onboarding_skip` (scripts/check-onboarding.sh)
 ├── GNOME/KDE Wayland (pastes through the RemoteDesktop portal, no wtype)
-│   and no saved grant -> before Your turn, "Let Hex paste for you"     // setup.paste-access
-│   ├── Says why: Hex only sends the paste keystroke, never sees the screen;
+│   and no saved grant -> before Your turn, "Let GoSpell paste for you"     // setup.paste-access
+│   ├── Says why: GoSpell only sends the paste keystroke, never sees the screen;
 │   │   the desktop asks once and may call it remote desktop (#932)
 │   ├── Allow -> opens the desktop's dialog; the grant's restore token is saved,
 │   │   so the first paste needs no dialog
@@ -192,7 +192,7 @@ Launch Hex, setup incomplete              // setup.tour; every build and OS, ful
 │   └── Skipped or refused -> Settings › General shows it under "Permissions
 │       needed" until allowed. Check: golden `onboarding-paste`; the real
 │       portal dialog is not exercised
-├── 2.3.1 or Swift Hex -> Sparkle offers the new Hex -> Install Update   // setup.legacy-update; macOS
+├── 2.3.1 or Swift GoSpell -> Sparkle offers the new GoSpell -> Install Update   // setup.legacy-update; macOS
 │   ├── Replaces the old app in place (its file name kept) and opens the new one
 │   ├── Accepted only because app/Info.plist keeps the old SUPublicEDKey;
 │   │   scripts/validate-app.sh requires it. Feed items: docs/plans/swift-app-handoff.md
@@ -201,27 +201,27 @@ Launch Hex, setup incomplete              // setup.tour; every build and OS, ful
 │   ├── It lands in <data>/voice-control/versions/<version>; its first app or
 │   │   `service` launch from there moves it into the managed layout, then
 │   │   relaunches from it (Linux: exec, so the old unit keeps its process)
-│   ├── Linux -> 2.3.1's marked unit, ~/.local/bin/hex link, and hex.desktop
+│   ├── Linux -> 2.3.1's marked unit, ~/.local/bin/gospell link, and gospell.desktop
 │   │   entries move aside -> the built-in .github/release/install-linux.sh
 │   │   installs this executable -> session.env copied; failure puts them back
-│   ├── Windows -> %APPDATA%\hex\versions, receipt, Hex.lnk recreated,
+│   ├── Windows -> %APPDATA%\gospell\versions, receipt, GoSpell.lnk recreated,
 │   │   Launch at login repointed, 2.3.1's Apps & Features entry removed
 │   ├── Failure -> logged, runs in place; the next launch tries again
 │   ├── Settings, history, and models in voice-control are not carried over
 │   └── Check: `a_legacy_linux_install_moves_into_the_installers_layout`,
 │       `a_failed_move_puts_the_legacy_files_back`; Windows and a real 2.3.1
 │       feed update are unverified
-├── Upgrading from 2.3.1 or earlier (same `hex` folder)     // setup.upgrade; macOS
-│   ├── `anomaly.hex` is a new identity: macOS kept none of the old grants
-│   ├── Settings without `anomaly-hex-identity` in `migrations` -> checked once at launch
+├── Upgrading from 2.3.1 or earlier (same `gospell` folder)     // setup.upgrade; macOS
+│   ├── `com.goml.gospell` is a new identity: macOS kept none of the old grants
+│   ├── Settings without `goml-gospell-identity` in `migrations` -> checked once at launch
 │   │   ├── Permissions or the selected model not ready -> the old completion
 │   │   │   no longer counts -> onboarding opens from the start
 │   │   └── Everything ready -> no onboarding; nothing but the ID changes
 │   ├── Saved settings are kept; the ID is recorded either way
-│   └── Setup ready, listener starting -> a running 2.3.1 or Swift Hex   // setup.quit-legacy
+│   └── Setup ready, listener starting -> a running 2.3.1 or Swift GoSpell   // setup.quit-legacy
 │       (retired bundle IDs) is asked to quit, so both never answer Option;
-│       it stays installed. No check; `macos_rune::quit_legacy_hex`
-├── Setting up Hex -> speech model download starts at once  // setup.background-download
+│       it stays installed. No check; `macos_rune::quit_legacy_gospell`
+├── Setting up GoSpell -> speech model download starts at once  // setup.background-download
 │   ├── Model -> the selection recommended for the system's first preferred
 │   │            language (English -> Parakeet Unified English; e.g. French ->
 │   │            Parakeet v3, Japanese -> Whisper large-v3-turbo); when that
@@ -249,18 +249,18 @@ Launch Hex, setup incomplete              // setup.tour; every build and OS, ful
 │   │       error), + Download + Add model file…. Check: golden
 │   │       `onboarding-no-model`, `onboarding_continue_without_model`
 │   └── Change or delete the model later in Settings      // setup.delete-model
-├── The demo, while the model downloads: a second on Setting up Hex, then the
+├── The demo, while the model downloads: a second on Setting up GoSpell, then the
 │   Launch Room's conversation is there, Jay's messages landing in it ->
-│   "Without Hex" (typed, with typos) -> "With Hex" (the same reply, spoken,
+│   "Without GoSpell" (typed, with typos) -> "With GoSpell" (the same reply, spoken,
 │   fireworks lighting the page), then moves on by itself; Skip → (or
 │   Escape) cuts to the end
 │   └── Jay's face rides the newest message: it fades out on the older line as
 │       it fades in on the new one, never popping off in one frame
 ├── Quit part-way -> next launch resumes at the saved step  // setup.resume
 │   ├── The saved step is the one record of an unfinished tour; only Start
-│   │   using Hex (with setup ready) or Continue without a model records it
+│   │   using GoSpell (with setup ready) or Continue without a model records it
 │   │   finished, and that replaces the step. Setup becoming ready does not:
-│   │   a run quit on the practice resumes at the practice, one quit on Hex
+│   │   a run quit on the practice resumes at the practice, one quit on GoSpell
 │   │   is ready resumes there. Check:
 │   │   `a_tour_quit_part_way_stays_unfinished_until_it_finishes`
 │   ├── Resumed at setup -> the first permission still missing; with none
@@ -269,7 +269,7 @@ Launch Hex, setup incomplete              // setup.tour; every build and OS, ful
 │   └── Permissions are read again at launch: a setup they now finish (macOS's
 │       Quit & Reopen after a grant) is passed; past setup, it waits until they do
 ├── Permissions, one page each           // setup.checklist; skipped when granted
-│   ├── macOS: "Let Hex hear you" (Microphone), then "Make it work everywhere"
+│   ├── macOS: "Let GoSpell hear you" (Microphone), then "Make it work everywhere"
 │   │   (Accessibility), both before Your turn: the shortcut needs Accessibility;
 │   │   each card floats off once allowed
 │   │   ├── No Input Monitoring row: Accessibility also lets the shortcut taps listen
@@ -282,56 +282,56 @@ Launch Hex, setup incomplete              // setup.tour; every build and OS, ful
 │   │   │       answer. Check: `a_microphone_answer_avfoundation_has_not_seen_reads_from_tcc`
 │   │   ├── Accessibility -> Privacy pane + drag guide
 │   │   │   ├── Granted while System Settings is still in front (within 3 s) ->
-│   │   │   │   Hex comes back in front; another app in front keeps it (also
+│   │   │   │   GoSpell comes back in front; another app in front keeps it (also
 │   │   │   │   System Audio and Screen Recording). Check:
-│   │   │   │   `hex_returns_after_a_grant_only_while_system_settings_is_in_front`
-│   │   │   ├── Retired Hex bundle IDs (`com.kitlangton.hex2`, `com.kitlangton.Hex`,
-│   │   │   │   `com.kitlangton.Hex.debug`) cleared once in the background (`tccutil reset`,
+│   │   │   │   `gospell_returns_after_a_grant_only_while_system_settings_is_in_front`
+│   │   │   ├── Retired GoSpell bundle IDs (`com.goml.gospell`, `com.goml.gospell`,
+│   │   │   │   `com.goml.gospell.debug`) cleared once in the background (`tccutil reset`,
 │   │   │   │   ignoring `OSStatus -10814` when no bundle is on disk)
 │   │   │   ├── Returned from System Settings still untrusted (2 s, or 6 s side-by-side) ->
-│   │   │   │   "An older Hex entry can keep this off" + "Still grey? Fix it"
+│   │   │   │   "An older GoSpell entry can keep this off" + "Still grey? Fix it"
 │   │   │   │   -> resets the running bundle ID + retired IDs, prompts, and reopens the guide
 │   │   │   └── macOS 27 names the list "Device Control and Data Access"; the row follows
 │   │   ├── On in System Settings, unusable until relaunch -> "Needs a restart"
-│   │   │   └── Every permission on -> "Restart Hex" -> relaunch at setup  // setup.restart
+│   │   │   └── Every permission on -> "Restart GoSpell" -> relaunch at setup  // setup.restart
 │   │   └── Each grant -> a beat with its check -> the card floats off -> on
-│   ├── Windows: only while the microphone privacy switch is off: "Let Hex hear
+│   ├── Windows: only while the microphone privacy switch is off: "Let GoSpell hear
 │   │   you", one Microphone row -> Open Settings (ms-settings:privacy-microphone)
 │   └── Linux: no page
 ├── Almost ready: the model still downloads -> waits, then Your turn
 ├── Your turn: the practice game          // setup.practice; every OS
 │   ├── "Clear your messages": hold the saved shortcut and answer the lit card;
-│   │   Hex's own dictation (macOS listener, Linux and Windows event log) holds
+│   │   GoSpell's own dictation (macOS listener, Linux and Windows event log) holds
 │   │   the keys, flies the live words, and lightning burns the answered card
 │   ├── A short, silent, or failed try -> a hint under the field
 │   ├── Listener running but still loading its model, microphone, or shortcuts
-│   │   -> "Getting Hex ready to listen…" in place of the hold prompt until its
+│   │   -> "Getting GoSpell ready to listen…" in place of the hold prompt until its
 │   │   first session starts (desktop/host.rs `warming`)
 │   │   // setup.warming; Check: `the_practice_page_waits_for_the_listener`
 │   ├── macOS, mic kept open (General's "Turn off the mic when not dictating"
-│   │   off, read on every poll, so `hex settings set` updates it) -> a note at
-│   │   the window's foot, here and on Hex is ready, says why macOS shows the
+│   │   off, read on every poll, so `gospell settings set` updates it) -> a note at
+│   │   the window's foot, here and on GoSpell is ready, says why macOS shows the
 │   │   mic in use  // setup.mic-note
-│   └── Done at any time -> Hex is ready  // practice is never required
+│   └── Done at any time -> GoSpell is ready  // practice is never required
 ├── Listener cannot start after setup     // setup.relaunch; event tap refused
-│   ├── First time -> Hex records a marker, reopens itself, resumes at the practice
-│   └── Within 2 min of that relaunch -> "Hex's shortcut didn't start." + Reopen Hex
+│   ├── First time -> GoSpell records a marker, reopens itself, resumes at the practice
+│   └── Within 2 min of that relaunch -> "GoSpell's shortcut didn't start." + Reopen GoSpell
 │       in place of the practice's hold prompt, idle pill, and hint (never a
-│       second Reopen Hex in the top banner); Hex is ready keeps the banner.
+│       second Reopen GoSpell in the top banner); GoSpell is ready keeps the banner.
 │       Check: `a_shortcut_that_did_not_start_shows_only_reopen`
-└── Hex is ready -> where Hex lives (menu bar, system tray, or app launcher)
-    ├── macOS: "Open Hex when your Mac starts?" + Launch at login, napping in your menu bar
-    ├── Windows: "Open Hex when your computer starts?" + Launch at login, napping in your system tray
-    ├── Linux: "Open Hex when your computer starts?" + Launch at login, napping in the background
+└── GoSpell is ready -> where GoSpell lives (menu bar, system tray, or app launcher)
+    ├── macOS: "Open GoSpell when your Mac starts?" + Launch at login, napping in your menu bar
+    ├── Windows: "Open GoSpell when your computer starts?" + Launch at login, napping in your system tray
+    ├── Linux: "Open GoSpell when your computer starts?" + Launch at login, napping in the background
     │   Check: `the_login_ask_speaks_each_platforms_wording` (all three)
     ├── Try again -> back to the practice game
-    └── Start using Hex -> records completion once setup is ready; closes onboarding
-Run setup again (Labs) or `hex onboarding reset` -> the same story from the start,
+    └── Start using GoSpell -> records completion once setup is ready; closes onboarding
+Run setup again (Labs) or `gospell onboarding reset` -> the same story from the start,
 on every build; settings, models, and permissions stay, so their pages pass
 ```
 
 General > Speech model, selected model not downloaded     // settings.model-missing (#676)
-├── Muted "Hex can't listen until the speech model has downloaded"
+├── Muted "GoSpell can't listen until the speech model has downloaded"
 ├── Downloading -> progress bar beside the model
 └── No download running -> Download (the same ChooseModel); a failure shows its error
 
@@ -343,14 +343,14 @@ General > Speech model or Language
 Permissions revoked later
   -> General > Permissions needed: Allow rows like onboarding's
      ├── Returned from System Settings still untrusted -> "Still grey? Fix it"
-     └── On, waiting for a relaunch -> "Restart Hex"
+     └── On, waiting for a relaunch -> "Restart GoSpell"
 ```
 
 Observed on macOS 26.6.2 and macOS 27.0 VMs (2026-10-31, SIP enabled): unprivileged
-`/usr/bin/tccutil reset` from inside `anomaly.hex` clears `Accessibility`,
-`ScreenCapture`, and `AudioCapture` entries for retired Hex bundles on disk with
+`/usr/bin/tccutil reset` from inside `com.goml.gospell` clears `Accessibility`,
+`ScreenCapture`, and `AudioCapture` entries for retired GoSpell bundles on disk with
 no password prompt (`rc=64` / `OSStatus -10814` when absent from disk), and
-resetting `anomaly.hex` followed by `AXIsProcessTrustedWithOptions` /
+resetting `com.goml.gospell` followed by `AXIsProcessTrustedWithOptions` /
 `CGRequestScreenCaptureAccess` replaces a stale `CDHash` entry that stayed grey
 or untrusted in System Settings. Checks:
 `tccutil_exit_codes_distinguish_cleared_absent_and_failed_bundles`,
@@ -420,10 +420,10 @@ Choose a supported language              // setup.language-conditioning; macOS +
 ├── Russian -> GigaAM v3 (Russian only, no language input); Parakeet v3 and
 │   Whisper turbo also offer it
 ├── Norwegian -> NB-Whisper Medium, always with the `no` hint (Bokmål is all
-│   Hex measured); stock Whisper turbo also offers it (#1150)
+│   GoSpell measured); stock Whisper turbo also offers it (#1150)
 ├── Swedish -> KB-Whisper Medium, always with the `sv` hint; its 6.6% WER on
 │   FLEURS Swedish is the model card's figure for its default checkpoint, not
-│   Hex's run; Parakeet v3 is Fastest there, and stock Whisper turbo also
+│   GoSpell's run; Parakeet v3 is Fastest there, and stock Whisper turbo also
 │   offers it (#1991)
 ├── Bangla -> Whisper only, with the `bn` hint; Auto lets Whisper guess per clip
 ├── Khmer -> Whisper only, with the `km` hint; Auto lets Whisper guess per clip
@@ -433,7 +433,7 @@ Choose a supported language              // setup.language-conditioning; macOS +
 
 Whisper and Qwen3-ASR (including QwenCleo) read the shared
 [Vocabulary](vocabulary.md) as their context prompt; recognition hints, a
-separate per-model box, merged into it ([#129](https://github.com/anomalyco/hex/issues/129)).
+separate per-model box, merged into it ([#129](https://github.com/goml/gospell/issues/129)).
 Observed on apollo (Vulkan, 2026-10-31, LibriSpeech test-clean), when they were
 still hints: with Qwen3-ASR 0.6B, "Kaffar, Rodolfo, Bragelonne, …" fixed Caffer,
 Rudolpho, Redolfo, Rudolph, and Bragolon in 10 clips without changing the others
@@ -500,15 +500,15 @@ Settings picker > Every model row          // fixed height; scrolls
 │   speed qualified; "Most accurate" only between comparable records (labs.md)
 ├── Labs > Parakeet Ultra (off) -> its row with a Labs tag and Details: languages,  // setup.parakeet-ultra
 │   measured memory, the CC BY 4.0 credit, notice, Source/License links, folded
-│   published benchmarks "not measured in Hex" (labs.md)
+│   published benchmarks "not measured in GoSpell" (labs.md)
 ├── Orukeet -> ordinary row with Details: languages, the CC BY-SA 4.0 credit  // setup.orukeet
 │   and notice, Source/License links, folded published FLEURS benchmarks
-│   "not measured in Hex"; never recommended or badged. Checks:
+│   "not measured in GoSpell"; never recommended or badged. Checks:
 │   `orukeet_is_offered_for_exactly_parakeet_v3s_languages_and_never_badged`,
 │   `orukeets_details_credit_its_base_and_cover_its_languages_once`
 ├── Fluid Speech Pro -> ordinary row with Details: languages, the CC BY 4.0  // setup.fluid-speech-pro
 │   credit and notice, Source/License links, folded published benchmarks "not
-│   measured in Hex": the card's FLEURS figures for 24 of its 25 languages
+│   measured in GoSpell": the card's FLEURS figures for 24 of its 25 languages
 │   (greedy decoding, the reference NeMo model; no English figure); never
 │   recommended or badged. Checks:
 │   `fluid_speech_pro_is_offered_for_exactly_parakeet_v3s_languages_and_never_badged`,
@@ -518,7 +518,7 @@ Settings picker > Every model row          // fixed height; scrolls
 │   prefix; Rename, Remove (not the active
 │   model); missing or changed -> warning line and no Use (own-models.md)
 └── Found on this computer -> a scan of the Hugging Face cache when the picker  // setup.found-models
-    opens: other compatible files at the top (Not tested by Hex, Use); a catalog
+    opens: other compatible files at the top (Not tested by GoSpell, Use); a catalog
     model already downloaded there says so and offers Use; a found file's
     Delete is Forget (own-models.md)
 ```
@@ -528,19 +528,19 @@ are the models marked `streams`
 (`only_the_streaming_parakeet_artifacts_are_marked_streaming`). The mark describes
 the artifact; dictation still streams only after the load probe succeeds on a GPU
 device ([Streaming Finish](dictation.md#streaming-finish)). The menu bar lists
-names only and shows no tags. Scenes: `hex app -- --snap OUT --scene picker`
+names only and shows no tags. Scenes: `gospell app -- --snap OUT --scene picker`
 (also `picker-downloading`, `picker-japanese`, `picker-japanese-all`,
 `picker-custom-models`, `picker-found`).
 
 Nemotron 3.5 ASR (#834; NVIDIA's `nemotron-3.5-asr-streaming-0.6b`, OpenMDW-1.1)
-streams in 27 of Hex's languages and detects the language with Auto: Hex sends
+streams in 27 of GoSpell's languages and detects the language with Auto: GoSpell sends
 its language as the locale its prompt takes (`de` -> `de-DE`,
 `runtime_language`), and Auto sends none. It is not anyone's recommendation:
-Hex's own runs of transcribe.cpp's WER harness on apollo (Vulkan, 7045d1c) put
+GoSpell's own runs of transcribe.cpp's WER harness on apollo (Vulkan, 7045d1c) put
 it behind Parakeet v3 on every set measured: LibriSpeech test-clean 3.05%
 against 1.95%, FLEURS English 7.91% against 4.88%, and FLEURS German 10.39%
 against 5.17% (8.77% and 10.46% with Auto). It is there to stream with the
-language set, or across English and German in one model. Hex converted the
+language set, or across English and German in one model. GoSpell converted the
 pinned `.nemo` itself; the shipped file is handy-computer's, whose 653 tensors
 match that conversion byte for byte (`NEMOTRON_3_5_ASR_ARTIFACT`). Checks:
 `nemotron_takes_its_languages_as_locales_and_detects_with_auto`. Not observed:
@@ -567,7 +567,7 @@ The regression was observed failing with the old metadata and passing after the
 correction. The picker's layout is checked by Rune goldens (`rune-picker-*`), not on a
 Mac screen.
 
-**Unreproduced recognition report:** [#68](https://github.com/anomalyco/hex/issues/68)
+**Unreproduced recognition report:** [#68](https://github.com/goml/gospell/issues/68)
 reports Portuguese speech misrecognized as English. Source and pinned-model
 metadata inspection establish the prompting limitation, not the cause or repair
 of those transcripts. No v3 audio reproduction or transcription-quality fix has
@@ -643,13 +643,13 @@ the saved step (`the_tour_step_is_saved_for_the_next_launch`), and the upgrade
 check (`a_fresh_install_onboards_without_the_identity_check`,
 `an_upgrader_without_permissions_gets_the_tour_once`,
 `an_upgrader_whose_setup_is_ready_skips_the_tour`; a real 2.3.1 to
-`anomaly.hex` upgrade on a Mac is not yet observed). Rune tests drive the
+`com.goml.gospell` upgrade on a Mac is not yet observed). Rune tests drive the
 first run (`a_new_install_opens_the_first_run`,
 `the_mac_first_run_asks_each_permission_then_practices`,
-`the_practice_game_follows_hex_s_own_dictation_on_every_os`,
+`the_practice_game_follows_gospell_s_own_dictation_on_every_os`,
 `a_listener_that_will_not_start_relaunches_once_then_asks_to_reopen`,
 `a_refused_microphone_points_to_system_settings`,
-`a_grant_waiting_for_a_restart_makes_setup_restart_hex`,
+`a_grant_waiting_for_a_restart_makes_setup_restart_gospell`,
 `onboarding_downloads_the_model_through_the_service`,
 `a_found_model_moves_on_without_a_download_and_back_returns_to_it`), and every
 page is a scene whose goldens `scripts/check-onboarding.sh` checks (its
@@ -659,7 +659,7 @@ The default model comes from `desktop::i18n::preferred_language` (macOS:
 `NSLocale.preferredLanguages`) through `recommended_selection`; existing
 settings keep their saved model.
 Observed on Linux (apollo, 2026-11-01): a clean first run in a nested
-session, from Setting up Hex through the real download to Hex is ready. Not
+session, from Setting up GoSpell through the real download to GoSpell is ready. Not
 yet observed: a clean-account Mac run with real grants, a real practice
 answer on macOS or Windows, or a real self-relaunch after an event-tap
 refusal. The story's demo cards and the game's messages stay in English in
@@ -746,12 +746,12 @@ keyboard layout handles, X11 XKB layouts such as `de(neo)`), not inferred speech
 physical keyboard keys, and store a model with a language it supports. Only
 downloaded models from the picker are offered (Apple Speech is never mapped);
 downloads stay in the picker. A mapped model that is no longer downloaded is
-labeled Not installed and can be cleared; a mapping to a model or language Hex no
+labeled Not installed and can be cleared; a mapping to a model or language GoSpell no
 longer offers is dropped when settings load. Removing a source hides its row
 without erasing its saved mapping.
 
-Hex reads input sources only while the setting is on: the Windows runtime's poll
-of the keyboard-focused window's layout, which ignores Hex's own windows, and
+GoSpell reads input sources only while the setting is on: the Windows runtime's poll
+of the keyboard-focused window's layout, which ignores GoSpell's own windows, and
 the Linux host's XKB connection (polled every 250 ms) exist only then, and the
 macOS main-thread TIS distributed-notification observer, which always runs to
 rebuild the keyboard layout snapshot
@@ -775,7 +775,7 @@ runtimes ([macOS](../../src/macos_rune.rs),
 [Windows](../../src/windows/app.rs), [Linux](../../src/linux/app.rs)), and
 [settings UI](../../src/rune_ui/settings.rs).
 Checks: the switch policy and settings/CLI validation tests, the window-source
-decision tests (Hex's own windows and a missing layout name no source), the
+decision tests (GoSpell's own windows and a missing layout name no source), the
 runtime scheduling tests in [macos_rune/tests.rs](../../src/macos_rune/tests.rs)
 (macOS), the settings interaction tests in
 [keyboard_model_tests.rs](../../src/rune_ui/keyboard_model_tests.rs), and the
@@ -784,7 +784,7 @@ observer. No check delivers native input-source notifications or switches
 sources through the Input menu or a shortcut.
 
 **Observed October 30, 2026, X11 observer:** on a headless Xvnc with
-`setxkbmap -layout us,ru,de -variant ,,neo`, Hex listed English (US), Russian,
+`setxkbmap -layout us,ru,de -variant ,,neo`, GoSpell listed English (US), Russian,
 and German (Neo 2) as `us`, `ru`, `de(neo)` with languages en, ru, de, and
 reported `us`, then `ru` after an XKB group lock. The Windows observer and both
 new runtime paths compile (x64 clippy) but were not run on Windows or a live X11
@@ -800,7 +800,7 @@ Settings picker > Every model > Downloaded row   // setup.delete-model; macOS
 ├── Selected dictation model (any language) -> No Delete
 ├── Preparing or Apple Speech model -> No Delete
 ├── Model choice or closing the picker -> Confirmation cleared
-└── Labs > Downloaded models only (off) -> "Downloaded models take <size>" (Hex's own   // labs.picker-downloaded
+└── Labs > Downloaded models only (off) -> "Downloaded models take <size>" (GoSpell's own   // labs.picker-downloaded
     files) + "Only downloaded models", which leaves just the downloaded rows, each
     with its Delete; reset when the picker opens (labs.md, #1018)
 ```
@@ -868,7 +868,7 @@ Labs > Caps Lock dictation (macOS, off)   // labs.md
   -> needs both the HID Caps Lock key and its AlphaShift edge; remapped to
      Control or Escape changes no AlphaShift, so it never toggles dictation
   -> Caps Lock stays off so typing is unchanged; its light is solid while any
-     capture records (normal-shortcut and Annotate too), blinks while Hex
+     capture records (normal-shortcut and Annotate too), blinks while GoSpell
      transcribes or processes, off when done
   -> Escape cancels in any mode; in Toggle mode only Escape cancels a Caps
      Lock capture; the normal shortcut stands down while one runs; off or
@@ -881,7 +881,7 @@ Labs > Free memory when idle (off; 5/15/30/60 min, default 15)   // labs.md; tra
 
 The [detailed map](dictation.md) covers timing, successive captures, output
 commitment, named checks, and native-proof gaps.
-The macOS CLI entry is `hex listen`, with an optional authoritative `--device`.
+The macOS CLI entry is `gospell listen`, with an optional authoritative `--device`.
 Do not start it beside an existing listener.
 
 ## Use The Result
@@ -925,7 +925,7 @@ Completed output                         // output
     ├── Labs > Copy dictation audio (off) -> copies a kept WAV as a file   // labs.copy-dictation-audio
     │   -> the card's Copy audio beside Play, and the menu bar or tray's Copy last dictation audio
     │   -> needs Keep recordings; it stores no audio itself (labs.md)
-    ├── Labs > Dictation stats (off) -> History's Stats dialog and hex history stats   // labs.history-stats
+    ├── Labs > Dictation stats (off) -> History's Stats dialog and gospell history stats   // labs.history-stats
     │   -> headline tiles, time saved with a typing-speed slider, the busiest hour, a 30-day chart, top apps
     │   -> a 53-week heatmap and all-time totals, from a daily rollup in usage.json with no text or app names
     │   -> Clear all history deletes the rollup too (labs.md)
@@ -947,7 +947,7 @@ said: `live.ndjson` records each dictation's phase and timing with its text
 left out (`events::VoiceEvent::without_words`,
 `the_log_never_keeps_what_was_said`), so History is the only place dictated
 words are kept. They are readable
-only by their owner on macOS and Linux: Hex creates and tightens the logs folder
+only by their owner on macOS and Linux: GoSpell creates and tightens the logs folder
 to 0700 and `live.ndjson` and `process.log` to 0600 (`app_paths::create_private_dir`,
 `open_private_append`; `the_logs_folder_is_private`, `the_log_is_private`;
 tightening is best-effort, never fatal), so other
@@ -976,7 +976,7 @@ latency measurement.
 ## Find a setting or lab
 
 ```ts
-Focused Hex window → ⌘K (Ctrl+K off macOS; ⌘F / Ctrl+F also works on General)
+Focused GoSpell window → ⌘K (Ctrl+K off macOS; ⌘F / Ctrl+F also works on General)
 ├── Type a title, description or breadcrumb → one list of settings and Labs cards
 ├── ↑ / ↓, then Return, or click → reveal and focus the control; no value changes
 │   ├── General › Advanced → unfold in this window only
@@ -1000,7 +1000,7 @@ Sidebar                                  // settings.nav
 ├── General, Output, Modes (Labs › Modes editor, while on), History, then each
 │   feature that is on: Captures (Labs › Screenshots, macOS), Meetings and
 │   Voice Filter (Labs toggles), Annotate, Playground (Labs, an item)
-├── Labs -> a store of unfinished features, each off by default: search, categories, cards with their own settings inline; hex://labs/<feature> opens its group and scrolls to its card (labs.md)
+├── Labs -> a store of unfinished features, each off by default: search, categories, cards with their own settings inline; gospell://labs/<feature> opens its group and scrolls to its card (labs.md)
 └── What’s new -> recent features and their controls; Down from Labs selects it
     // Version, update actions, and Quit (Linux and Windows) are outside the navigation list
     // Command-1…9 follow the main panes' order (labs::order)
@@ -1013,7 +1013,7 @@ General                                  // settings
 │       -> Folds under a clip as the rows below slide over it; no fade in place
 ├── Microphone -> Value names the input in use, with live level bars // settings.microphone
 │   ├── "System default · Kit Pods", or a saved device
-│   ├── Level bars -> peak of the audio Hex receives, ~30 fps while General shows them above rest // input_level
+│   ├── Level bars -> peak of the audio GoSpell receives, ~30 fps while General shows them above rest // input_level
 │   │   ├── Peak measured around each chunk's mean, so a microphone's DC offset never lights them
 │   │   ├── Read from one atomic the audio owner stores per chunk; never opens or blocks the mic
 │   │   ├── Quiet room (bars at rest) -> no 30 fps frames; the window's 250 ms tick notices a rise.
@@ -1025,17 +1025,17 @@ General                                  // settings
 │   ├── Re-listed on a device or default change while General shows (Windows: also every 3 s)
 │   ├── System default -> The OS default input, followed live
 │   │   ├── Default changes -> Switch once capture is idle; new stream opens before the old drops
-│   │   ├── Default is Hex Microphone -> Built-in mic, else first real input; row says so
+│   │   ├── Default is GoSpell Microphone -> Built-in mic, else first real input; row says so
 │   │   ├── Stand-ins never include virtual or aggregate inputs (macOS: e.g. Microsoft Teams Audio)
 │   │   │   ├── Nothing real left -> "lid is closed" / "no microphone" error, not silence
 │   │   │   └── A virtual default, saved device, or `--device` is still used as named
 │   │   └── Default is Bluetooth (Advanced switch on) -> Built-in mic, else first wired/USB input
-│   │       ├── Row says "KIT PODS is Bluetooth, so Hex listens to MacBook Pro Microphone"
+│   │       ├── Row says "KIT PODS is Bluetooth, so GoSpell listens to MacBook Pro Microphone"
 │   │       ├── Windows: WASAPI `BTHENUM`, or a headset/handset endpoint of unknown bus (`BTHHFENUM`)
-│   │       ├── Linux: a `bluez5` default source; Hex opens ALSA's default, then moves its own
+│   │       ├── Linux: a `bluez5` default source; GoSpell opens ALSA's default, then moves its own
 │   │       │   stream to the PCI input, else the first other hardware source (pactl, PipeWire);
 │   │       │   the stream is marked so WirePlumber never remembers the move. A Bluetooth
-│   │       │   default chosen while Hex's stream is open is followed until the next open
+│   │       │   default chosen while GoSpell's stream is open is followed until the next open
 │   │       ├── No other usable input (or lid closed, Bluetooth only) -> the Bluetooth default
 │   │       ├── A saved Bluetooth mic or `--device` is always used as named
 │   │       └── Dictation only: meeting recording keeps the Bluetooth default, which
@@ -1045,7 +1045,7 @@ General                                  // settings
 │   │   ├── Row says "SHURE MV7 isn't connected; using your Mac's input"
 │   │   ├── Menu keeps "SHURE MV7" checked with a faint "not connected"
 │   │   └── Device returns -> Switch back once idle; the setting never changes
-│   ├── Menu lists real inputs only                                // never Hex Microphone
+│   ├── Menu lists real inputs only                                // never GoSpell Microphone
 │   └── Open menu covers the controls beneath it; click elsewhere dismisses
 ├── Advanced ▸ -> one fold per pane, closed by default, even while a setting in it is in use
 │   ├── Collapse -> drops a pending release confirmation
@@ -1119,9 +1119,9 @@ Pause media + Also pause the browser     // browser_media
 │   └── Any window at or below -60 dBFS, or no level -> leave it alone
 ├── Send the system pause command (MediaRemote 1; never the toggle)
 ├── Poll 5 windows of 100 ms
-│   ├── 2 windows in a row below -90 dBFS -> Hex paused it
+│   ├── 2 windows in a row below -90 dBFS -> GoSpell paused it
 │   └── Otherwise (another tab, a sound that ended later, or the pause went elsewhere) -> no play later
-└── Dictation ends and Hex paused it -> first, before the players: listen 300 ms to every browser process
+└── Dictation ends and GoSpell paused it -> first, before the players: listen 300 ms to every browser process
     ├── Above -60 dBFS (you started it again) -> no play
     ├── No level, a browser runs and every one has closed its output -> still paused: play
     │   (a pause longer than about 10 s closes the output; a tap on it delivers nothing)
@@ -1138,7 +1138,7 @@ Intentional recording                    // recording.environment, idle_sleep
 ├── Prevent idle sleep
 │   ├── macOS -> IOKit no-idle-sleep assertion
 │   ├── Linux -> logind `idle:sleep` inhibitor; `idle` only where polkit refuses a
-│   │   process outside the seat session (Hex's user service) to block sleep
+│   │   process outside the seat session (GoSpell's user service) to block sleep
 │   ├── Windows -> system-required power request (from the press, as its While dictating does)
 │   └── Failure -> Warn and continue recording
 └── Finish/cancel -> Release it
@@ -1150,7 +1150,7 @@ seconds on macOS, where an open output is a live CoreAudio client coreaudiod
 services and holds a sleep assertion for, and five idle minutes on Windows.
 On Linux, where an open output stays listed in the desktop's sound controls,
 it closes about a second after the last tone ends
-([#720](https://github.com/anomalyco/hex/issues/720)); the existing
+([#720](https://github.com/goml/gospell/issues/720)); the existing
 `output_opens_for_a_tone_and_releases_after_the_idle_grace` check covers the
 grace logic, not a real PipeWire stream list. A fatal stream error (the output
 became unavailable or invalid) sets a per-sink flag from the stream error
@@ -1166,8 +1166,8 @@ opens the new default. On macOS the CoreAudio listeners on the default output,
 the device list, and an audio service restart advance an output route
 generation; the next tone drops an output opened under an older one and opens
 the current default at once, so unplugging a USB or Bluetooth output no longer
-silences tones until Hex restarts
-([#428](https://github.com/anomalyco/hex/issues/428)). Check:
+silences tones until GoSpell restarts
+([#428](https://github.com/goml/gospell/issues/428)). Check:
 `a_route_change_reopens_the_output_on_the_current_default` in
 [feedback.rs](../../src/feedback.rs), with injected opens; a real unplug has not
 been observed by a test.
@@ -1186,12 +1186,12 @@ sends lowering to the virtual main volume so the balance stays intact; an
 output with no controllable volume at all is left unchanged and logs a
 warning. Meetings do
 not acquire this dictation environment. Linux lowers the default sink's
-channels through `pactl` (one volume through `wpctl` without it), so Hex's own
+channels through `pactl` (one volume through `wpctl` without it), so GoSpell's own
 tones are lowered too and the stop tone waits, as on macOS. Windows lowers
-every other app's audio session instead, leaving Hex's tones at full volume;
+every other app's audio session instead, leaving GoSpell's tones at full volume;
 sessions that start while recording are left alone.
 
-HEX snapshots the volumes and applies a smooth ramp in
+GOSPELL snapshots the volumes and applies a smooth ramp in
 [audio/output_ducking.rs](../../src/audio/output_ducking.rs) over the CoreAudio adapter in
 [ducking.rs](../../src/audio/recording_environment/ducking.rs), the sink adapter in
 [linux/audio_control.rs](../../src/linux/audio_control.rs), and the session
@@ -1238,12 +1238,12 @@ not run on a device).
 On 2026-10-25, the macOS logic/settings checks and strict Clippy passed.
 The seven reference images were regenerated on Ubuntu 24.04 ARM64 with Mesa
 lavapipe, using the unmodified Linux-only Rune test module and
-`HEX_UPDATE_GOLDENS=1 scripts/check ducking`. A subsequent
+`GOSPELL_UPDATE_GOLDENS=1 scripts/check ducking`. A subsequent
 `scripts/check rune_ui --nocapture` without the update flag passed all 113 tests,
 including the unchanged control goldens; no golden skipped for lack of a GPU
 adapter. The five existing images differ from the base branch above the existing
 12-level channel tolerance only within the While dictating control; the sidebar,
-Quit Hex, and shortcut layouts remain unchanged. Dark and light ducking previews
+Quit GoSpell, and shortcut layouts remain unchanged. Dark and light ducking previews
 were visually inspected. The earlier macOS-generated references were replaced
 because these fixtures retain build-OS-dependent layout and defaults. This
 verifies headless Linux rendering, not audible playback, physical devices,
@@ -1284,8 +1284,8 @@ or VLC through Automation.
 The browser pause runs after the AppleScript players and only when System Audio
 Recording is reported granted (an unknown answer skips it, because the tap would
 open the macOS dialog mid-dictation). macOS 15.4 and later no longer tell other apps
-what is playing, so Hex hears the browsers through a private process tap
-(aggregate `anomaly.hex.browser-tap.<pid>`, apart from the meeting tap) and sends
+what is playing, so GoSpell hears the browsers through a private process tap
+(aggregate `com.goml.gospell.browser-tap.<pid>`, apart from the meeting tap) and sends
 play only after it saw the browser go silent right after its own pause. The
 browsers are the ones [microphone_activity.rs](../../src/microphone_activity.rs)
 knows: Chrome, Brave, Safari, Firefox, Edge, Arc, Vivaldi, Helium, Ardia,
@@ -1304,9 +1304,9 @@ assertion smoke exercises IOKit without starting microphone capture.
 **Changed after 2.3.1:** Automatic was a compiled preference list (Universal
 Audio Thunderbolt, Studio Display Microphone), then the macOS default with a
 Bluetooth default swapped for the built-in microphone (the 2.1.22 fix for
-[#106](https://github.com/anomalyco/hex/issues/106) and
-[#88](https://github.com/anomalyco/hex/issues/88)). That skipped a user's
-AirPods default, and Hex Microphone then passed the wrong microphone on to
+[#106](https://github.com/goml/gospell/issues/106) and
+[#88](https://github.com/goml/gospell/issues/88)). That skipped a user's
+AirPods default, and GoSpell Microphone then passed the wrong microphone on to
 calls. Automatic is now System default: the OS default input, followed live.
 A Bluetooth default (CoreAudio transport Bluetooth or Bluetooth LE) is passed
 over for the built-in microphone, else the first other real input, so AirPods
@@ -1314,13 +1314,13 @@ keep their music out of call quality while you dictate; it is kept when nothing
 else is usable. Only System default is affected: a saved Bluetooth microphone
 and `--device` are honoured, and General › Advanced › "Use the Mac's microphone
 instead of Bluetooth" (`avoid_bluetooth_microphone`, default on) turns it off.
-Hex Microphone carries whichever input Hex records from. Linux and Windows
+GoSpell Microphone carries whichever input GoSpell records from. Linux and Windows
 don't detect Bluetooth inputs yet and follow the default. Checks in
 [audio.rs](../../src/audio.rs):
 `system_default_passes_over_a_bluetooth_default`,
 `a_bluetooth_default_is_kept_when_nothing_else_is_usable`,
 `a_virtual_input_never_stands_in` (CoreAudio transport Virtual, Aggregate, or
-AutoAggregate; [#429](https://github.com/anomalyco/hex/issues/429)),
+AutoAggregate; [#429](https://github.com/goml/gospell/issues/429)),
 `inputs_resolve_to_the_selection_then_the_system_default`,
 `device_override_wins_and_never_falls_back`,
 `a_default_change_switches_only_while_capture_is_idle`, and
@@ -1331,7 +1331,7 @@ read against real AirPods, or Windows' default-change report on a real PC.
 
 **Fixed after 2.1.20:** through 2.1.20 the microphone menu was painted without
 occluding the panel, so hovering or clicking a device also reached the setting
-under the pointer ([#94](https://github.com/anomalyco/hex/issues/94)), and it
+under the pointer ([#94](https://github.com/goml/gospell/issues/94)), and it
 only closed by choosing or reopening. The menu is now anchored to its button,
 occludes the controls beneath it, and closes on any outside mouse-down. In the
 Rune window the menu is a rune-kit `Menu` in the overlay layer (scene `menus`);
@@ -1355,7 +1355,7 @@ A pane, detail card or dropdown longer than its space    // ui.scroll-bar (#1209
 ```
 
 The bar is Rune's `rune_kit::scroll_bar`, used by `scroll_body`, `faded_body`
-and every kit `Menu`, `Select` and `Combobox`. Hex's pane and card bodies call
+and every kit `Menu`, `Select` and `Combobox`. GoSpell's pane and card bodies call
 `scroll_bar_styled` instead, with an 8 pt `text_faint` thumb that turns
 `text_muted` and widens to 10 pt under the pointer; dropdowns keep the kit's
 thin thumb. Checks:
@@ -1374,15 +1374,15 @@ Gaps: the bar and touch are not verified on a real Windows PC or touchscreen.
 ```ts
 Output (main sidebar, replaces the Modes editor) // rune_ui/output.rs; scenes output*
 ├── Trust prompt -> Allow a config that uses fetch or programs (only when one asks)
-├── Edit with agent -> Copy a prompt naming the steps' keys (the AI rewrite too), `hex settings`,
-│   `hex vocabulary` for names, and the transforms docs
+├── Edit with agent -> Copy a prompt naming the steps' keys (the AI rewrite too), `gospell settings`,
+│   `gospell vocabulary` for names, and the transforms docs
 ├── Open file -> settings.json in the default editor
 ├── Every dictation -> Global's steps, numbered, read-only
 ├── Try -> Global's corrections and built-ins on a typed sentence
 │   ├── Scripts and rewriting run only when dictating
 │   └── Labs > Fix results in Output (off, #989) -> Vocabulary (the shared sheet) and,
 │       with a sentence typed, Fix this: copies Edit with agent's prompt ending
-│       `When I say "<sentence>", Hex pastes "<result>". It should paste: ` (labs.md)
+│       `When I say "<sentence>", GoSpell pastes "<result>". It should paste: ` (labs.md)
 ├── Labs > Transform typed text (Linux, off) -> a Typed text section with typed_text_hotkey,
 │   unbound by default: copies the focused field, runs its Output steps, re-checks the
 │   selection, and replaces it (labs.md, dictation.md)
@@ -1397,7 +1397,7 @@ Output (main sidebar, replaces the Modes editor) // rune_ui/output.rs; scenes ou
 Context retained when dictation stops -> Select processing
 ├── Matching website                     // macOS: scriptable browsers, then AXWebArea; Windows: UIA; Linux: AT-SPI
 ├── Otherwise matching application
-├── Hex itself in front                  // application only: Hex never reads its own AX tree (#1402)
+├── GoSpell itself in front                  // application only: GoSpell never reads its own AX tree (#1402)
 └── Otherwise Global
 
 Selected mode                            // replaces Global's rewrite and transformations
@@ -1407,7 +1407,7 @@ Selected mode                            // replaces Global's rewrite and transf
   -> Labs > Neutral voice, in a mode that opts in  // macOS; replaces the rewrite and cleanup; transformations still run
   -> Labs > Rewrite by voice's phrase          // Labs off, or no phrase, processes as before
      -> one spoken instruction replaces the rewrite, with the mode's model and deadline (labs.md)
-  -> OpenCode transformation             // optional provider-backed rewrite; an unset model is Hex's ranked pick, shown Automatic
+  -> OpenCode transformation             // optional provider-backed rewrite; an unset model is GoSpell's ranked pick, shown Automatic
   -> Dictation style                     // Labs › Dictation style on: Polished, Casual, Notes, or Verbatim, after the rewrite and before transformations (labs.md)
   -> Transformations                     // ordered text chain
   -> Paste or Send
@@ -1432,7 +1432,7 @@ Check: `numbers_only_transcripts_skip_the_rewrite` in
 were not run against a live model.
 
 Built-in text transformations run natively. Custom transformations come from
-`~/.config/hex/hex.config.ts` and run in Hex's embedded script engine, each
+`~/.config/gospell/gospell.config.ts` and run in GoSpell's embedded script engine, each
 under its own `timeout` (1 s by default, 30 s when the config uses host APIs,
 60 s cap). OpenCode rewriting sends documented context to the configured
 provider; speech transcription stays local. With Labs › Rewrite reads nearby
@@ -1442,7 +1442,7 @@ are skipped, and off leaves the prompt unchanged.
 
 ```ts
 Discover custom transformations           // personal_commands::host_needed; every OS
-├── A config exists (Set up, hex commands init, or a manual file) -> start the host
+├── A config exists (Set up, gospell commands init, or a manual file) -> start the host
 ├── A custom transformation is selected -> start, even if its config is missing
 ├── Only built-ins selected, no config -> native transforms only, no script host
 └── DisableTransforms policy -> no host, regardless of config or selection
@@ -1470,7 +1470,7 @@ Timeout or settle -> requests abandoned, process group / job object killed
 ```
 
 The API is documented for agents at
-[anoma.ly/hex/docs/transforms](../../site/public/docs/transforms.md), linked
+[gospell.goml.io/docs/transforms](../../site/public/docs/transforms.md), linked
 from `llms.txt`, the managed `AGENTS.md`, and Edit with agent's prompt. Checks:
 [tests/host_apis.rs](../../src/personal_commands/tests/host_apis.rs) runs
 `fetch` against a local server (approval, re-ask on edit, abort, network
@@ -1542,7 +1542,7 @@ poll reads it once when a scriptable browser becomes the frontmost process
 switching away and back reads the page again. A capture asks for one more
 read only once it is real, never on every press: the shortcut held past its
 hold threshold, a finish that lands before that, or a control start
-(`hex dictation start`). A press a chord discards before that hold threshold
+(`gospell dictation start`). A press a chord discards before that hold threshold
 reads nothing; holding the shortcut past the threshold first still reads the
 page once.
 A finish waits at most 1 s for the refreshed page and otherwise hands its
@@ -1560,17 +1560,17 @@ to an AT-SPI window by title and process and reads its showing web
 document's `DocURL` (Firefox) or `URI` (Chromium, only with
 `--force-renderer-accessibility`). `linux_context_reads_the_focused_window`
 (ignored, manual) printed `google-chrome-stable` with `https://example.com/path`
-under headless Sway and `chrome` with the page under its XWayland, and `hex`
+under headless Sway and `chrome` with the page under its XWayland, and `gospell`
 on niri (Oct 30); the macOS adapters are compiled on CI only and not run.
-With Hex's own window frontmost, its application name still matches but no
+With GoSpell's own window frontmost, its application name still matches but no
 Accessibility tree of its own process is read, so its main thread owns that
-tree alone (#1402); `hex_never_reads_its_own_accessibility_tree` in
+tree alone (#1402); `gospell_never_reads_its_own_accessibility_tree` in
 [accessibility.rs](../../src/accessibility.rs) covers the skip (macOS only),
 though the race it prevents is not reproduced in a test.
 
 OpenCode transformation talks only to an already running OpenCode service,
 found through its registration file ([desktop/opencode_service.rs](../../src/desktop/opencode_service.rs));
-Hex runs no OpenCode executable and starts nothing. On Windows, Labs › OpenCode
+GoSpell runs no OpenCode executable and starts nothing. On Windows, Labs › OpenCode
 in WSL adds the default WSL distribution's registration and a Linux
 `x-opencode-directory` workspace; with the lab on, a WSL service that answers
 is used ahead of a Windows one, and the Windows service is the fallback when
@@ -1618,7 +1618,7 @@ the per-app model opt-in never switched to its mode's model.
 **Fixed in 2.1.14:** through 2.1.13, a mode saved with that Finder
 preference enabled never activates and every dictation falls back to Global.
 Update to repair saved selections automatically. For older builds, the workaround
-is to quit Hex, remove the `.app` suffix from
+is to quit GoSpell, remove the `.app` suffix from
 `dictation_processing.modes[].applications` in `settings.json`, then relaunch.
 
 ## Record Meetings
@@ -1628,11 +1628,11 @@ Meetings › Settings), call detection and the
 focus-free offer, menu-bar recording state, rolling transcription, echo
 suppression, and the Markdown copy in the user's transcript folder.
 
-## Experimental: Hex Microphone And Voice Filter
+## Experimental: GoSpell Microphone And Voice Filter
 
 ```ts
-Labs › Voice Filter (experimental.hex_microphone = true), HEX_EXPERIMENTAL_MIC=1,
-or the driver installed; off, the pane is hidden  // fun.hex-microphone; macOS, Linux
+Labs › Voice Filter (experimental.gospell_microphone = true), GOSPELL_EXPERIMENTAL_MIC=1,
+or the driver installed; off, the pane is hidden  // fun.gospell-microphone; macOS, Linux
 ├── Sidebar > Voice Filter  // the only home of these controls
 ├── What callers hear: the effect applies only while dictating; normal speech otherwise
 │   ├── Select a name → apply it live: Muffled (default), Muted, Quiet, Normal, Chipmunk, Robot, Walkie, Underwater, Far
@@ -1640,34 +1640,34 @@ or the driver installed; off, the pane is hidden  // fun.hex-microphone; macOS, 
 │   │   ├── Example clip or an explicit 5 s recording (in memory only); Play original to compare
 │   │   └── Two waveforms highlight the dictation span. Switching previews stops the previous one
 │   └── Adjust effect → per-mode sliders, effect strength, Reset, and comfort noise for Muted
-├── Hex Microphone setup
-│   ├── Linux -> no driver: a PipeWire virtual source (Audio/Source "Hex Microphone",
-│   │   node hex_microphone) that Hex plays into through `pw-cat` while the Voice Filter is on
-│   │   ├── Status -> Starting… / Available ("Choose Hex Microphone as your input…") / Unavailable + reason
+├── GoSpell Microphone setup
+│   ├── Linux -> no driver: a PipeWire virtual source (Audio/Source "GoSpell Microphone",
+│   │   node gospell_microphone) that GoSpell plays into through `pw-cat` while the Voice Filter is on
+│   │   ├── Status -> Starting… / Available ("Choose GoSpell Microphone as your input…") / Unavailable + reason
 │   │   ├── pw-cat missing or exits -> Unavailable with its last error line; retries every 2 s
 │   │   ├── --raw -> only where pw-cat's help lists it (PipeWire 1.3.81+);
 │   │   │   1.2 and older reject it and already play raw on -
-│   │   ├── Off or Hex quits -> the source disappears (pw-cat ends with its input); no root, nothing installed
-│   │   └── Session priority 1 -> WirePlumber never picks it as the default input Hex records
-│   ├── macOS -> select Hex Microphone as the input in the call app / In use (by name only when observed on that input) + Uninstall
+│   │   ├── Off or GoSpell quits -> the source disappears (pw-cat ends with its input); no root, nothing installed
+│   │   └── Session priority 1 -> WirePlumber never picks it as the default input GoSpell records
+│   ├── macOS -> select GoSpell Microphone as the input in the call app / In use (by name only when observed on that input) + Uninstall
 │   │   ├── Version mismatch -> Update + Uninstall
-│   │   ├── Pre-Anomaly com.kitlangton driver at the same path -> Update replaces it in place
-│   │   ├── Not installed -> Install -> macOS admin prompt -> copies bundled HexMicrophone.driver + restarts coreaudiod
+│   │   ├── Pre-GoML com.kitlangton driver at the same path -> Update replaces it in place
+│   │   ├── Not installed -> Install -> macOS admin prompt -> copies bundled GoSpellMicrophone.driver + restarts coreaudiod
 │   │   └── Inline state -> Installing… / Uninstalling… / Cancelled / Failed with reason
-├── Live microphone capture -> Raw audio to Hex transcription (unmodified)
-│   ├── Source -> Hex's dictation microphone (System default follows the OS default, never Hex Microphone itself), never a meeting's second stream
+├── Live microphone capture -> Raw audio to GoSpell transcription (unmodified)
+│   ├── Source -> GoSpell's dictation microphone (System default follows the OS default, never GoSpell Microphone itself), never a meeting's second stream
 │   │   └── macOS: with Release when idle off, locking the screen or sleeping the
-│   │       display releases that microphone, so Hex Microphone pauses until wake or unlock
+│   │       display releases that microphone, so GoSpell Microphone pauses until wake or unlock
 │   │       (dictate.warm-away)
 │   ├── Lock-free ring -> 48 kHz virtual sink (macOS IOProc; Linux 11 ms blocks into a one-page pipe) -> Raised-cosine fade on intentional hold
 │   │   └── Not dictating -> bit-exact pass-through; non-48 kHz inputs resample continuously
 │   └── Ring underflows/overflows -> process.log each minute while an app reads it, and on sink stop
-└── Offline CLI -> hex dev voice-filter render <in.wav> --mode <m> --dictation <start>-<end> -o <out.wav>
+└── Offline CLI -> gospell dev voice-filter render <in.wav> --mode <m> --dictation <start>-<end> -o <out.wav>
 ```
 
 Sources: [audio/voice_filter.rs](../../src/audio/voice_filter.rs),
-[audio/hex_microphone.rs](../../src/audio/hex_microphone.rs),
-[HexMicrophoneDriver.c](../../macos/HexMicrophoneDriver/HexMicrophoneDriver.c),
+[audio/gospell_microphone.rs](../../src/audio/gospell_microphone.rs),
+[GoSpellMicrophoneDriver.c](../../macos/GoSpellMicrophoneDriver/GoSpellMicrophoneDriver.c),
 [build-app.sh](../../scripts/build-app.sh),
 and [rune_ui/fun.rs](../../src/rune_ui/fun.rs). Checks:
 `default_mode_is_muffled`,
@@ -1677,7 +1677,7 @@ and [rune_ui/fun.rs](../../src/rune_ui/fun.rs). Checks:
 `a_meeting_stream_on_the_same_microphone_does_not_double_the_feed`,
 `a_callback_larger_than_the_latency_cap_passes_through_whole`,
 `resampling_is_continuous_across_callbacks`,
-`only_the_listeners_current_input_feeds_hex_microphone`,
+`only_the_listeners_current_input_feeds_gospell_microphone`,
 `driver_plugin_loopback_streams_at_48khz_under_20ms_latency`,
 `driver_plist_version_and_status_mismatch_are_detected`,
 `osascript_failure_classifies_user_cancel_and_errors`,
@@ -1687,12 +1687,12 @@ and [rune_ui/fun.rs](../../src/rune_ui/fun.rs). Checks:
 `preview_each_effect_before_install_without_applying_it`,
 `voice_filter_setup_distinguishes_an_available_input_from_a_call`,
 `rapid_auditions_replace_pending_audio_and_invalidate_work_in_flight`, and
-`voice_filter_needs_labs_or_hex_microphone`.
+`voice_filter_needs_labs_or_gospell_microphone`.
 Scenes: `mac-voice-filter`, `mac-voice-filter-muted`,
 `mac-voice-filter-driver-missing`, `voice-filter`, `voice-filter-unavailable`
 (Linux).
 Linux observed (apollo, PipeWire 1.6): the source lists in `pactl list sources`
-and `pw-record --target hex_microphone` records the fed audio at 48 kHz; no
+and `pw-record --target gospell_microphone` records the fed audio at 48 kHz; no
 automated check covers it, and no call app was tried.
 Proof limit: in-process `dlopen` loopback proves the compiled driver's 48 kHz
 `WriteMix`/`ReadInput` path at 5.33 ms (256 frames), not an interactive macOS
@@ -1721,17 +1721,17 @@ Menu bar and Settings                    // maintenance
 │   │   informational (labs.md, meetings.md)
 │   ├── Meetings on or a meeting under way: Recording · <title> · 12:34 (opens
 │   │   the Meetings pane), Stop & Transcribe, Copy Section ▸; idle: Record Meeting
-│   ├── Pause Hex (Labs › Pause from menu bar, off, #82) -> every capture
+│   ├── Pause GoSpell (Labs › Pause from menu bar, off, #82) -> every capture
 │   │   shortcut and the secure-input hotkeys go inert, the tap passes keys
-│   │   through, and the row reads Resume Hex (labs.md); Resume waits for a
+│   │   through, and the row reads Resume GoSpell (labs.md); Resume waits for a
 │   │   neutral keyboard, and a restart starts unpaused
 │   ├── Paste Last Dictation ⌥⇧V (saved binding), Copy Recent Dictation ▸ (Labs),
 │   │   Copy Last Meeting Transcript (Meetings on), Restore Last Capture (Labs ›
 │   │   Screenshots on; dimmed until a capture card was closed), Speech Model ▸
-│   ├── Settings… ⌘, · Check for Updates… · Quit Hex ⌘Q
+│   ├── Settings… ⌘, · Check for Updates… · Quit GoSpell ⌘Q
 │   │   └── Labs > ⌘Q closes Settings (off, #1473) -> ⌘Q closes the Settings
 │   │       window instead; dictation keeps running, the menu bar icon quits (labs.md)
-│   ├── No Meetings… (Settings… opens the same window) and no Show Hex in
+│   ├── No Meetings… (Settings… opens the same window) and no Show GoSpell in
 │   │   Screen Recordings (Annotate's pane has it)
 │   ├── In the interface language: macOS title case in English, else the
 │   │   window's translated labels; fixed rows retitle as the menu opens, state
@@ -1741,20 +1741,20 @@ Menu bar and Settings                    // maintenance
 │       paste_last_shows_the_saved_binding_or_nothing,
 │       the_pause_row_reads_pause_or_resume (status_item.rs; the
 │       row order and key equivalents only, no native menu is drawn)
-├── Icon -> 18 pt monochrome Hex mark template (recording variant + elapsed time)
+├── Icon -> 18 pt monochrome GoSpell mark template (recording variant + elapsed time)
 │   └── Labs > Hide menu bar icon (off, #1064) -> hidden unless a meeting is under
 │       way; shortcuts keep working; Finder or Spotlight reopen -> Settings (labs.md)
 ├── Settings / Paste Last -> Reachable with Dock icon hidden
 ├── Launch at Login -> macOS owns registration state
 ├── Check for Updates -> The updater (maintain.updates); opens the window, whose
-│   footer then says "Checking for updates…", "Hex is up to date", or
+│   footer then says "Checking for updates…", "GoSpell is up to date", or
 │   "Couldn't check for updates" (#1120)
 └── Quit -> Orderly shutdown (⌘Q closes Settings instead while its Lab is on)
 ```
 
 ```ts
-Launch Hex                               // maintain.startup
-├── `hex app --hidden` + usable menu-bar item -> No startup window, even before setup
+Launch GoSpell                               // maintain.startup
+├── `gospell app --hidden` + usable menu-bar item -> No startup window, even before setup
 │   └── check: login_item_launch_starts_without_the_window (the decision only); not run on a Mac
 ├── Setup incomplete / permissions or model missing -> Open setup or Settings
 ├── Show Dock icon on -> Open Settings
@@ -1770,14 +1770,14 @@ Launch Hex                               // maintain.startup
 Menu-bar installation fails -> Show Dock icon and open the window // recovery access
 
 Show Dock icon off                       // maintain.dock-policy
-├── Settings window open -> Dock icon stays // hiding it would deactivate Hex
+├── Settings window open -> Dock icon stays // hiding it would deactivate GoSpell
 └── Settings window closes -> Menu-bar only
 
-⌘Tab to Hex while it's in the Dock and its window is closed   // maintain.app-switcher (#1298)
+⌘Tab to GoSpell while it's in the Dock and its window is closed   // maintain.app-switcher (#1298)
 └── Opens the window in front, on the pane it last showed, as the Dock icon does
-    ├── No reopen Apple event comes with ⌘Tab; Hex watches its own activation
+    ├── No reopen Apple event comes with ⌘Tab; GoSpell watches its own activation
     └── Menu-bar only, an overlay that took the keyboard, or the window already open -> nothing
-    // check: switching_to_hex_opens_its_closed_window (the decision only); not run on a Mac
+    // check: switching_to_gospell_opens_its_closed_window (the decision only); not run on a Mac
 ```
 
 ```ts
@@ -1829,9 +1829,9 @@ not an input-to-frame latency measurement or a signed-release smoke test.
 
 Closing Settings left the app process alive with zero `login-item` threads;
 reopening produced one new worker. An earlier apparent surviving worker came
-from computer-use observation reopening the window. Cmd+Q and Quit Hex each
-terminated the process. Local profiles are `/tmp/hex-login-worker-current.sample.txt`
-and `/tmp/hex-login-cycle-{before,closed-no-observe,reobserved}.sample.txt`.
+from computer-use observation reopening the window. Cmd+Q and Quit GoSpell each
+terminated the process. Local profiles are `/tmp/gospell-login-worker-current.sample.txt`
+and `/tmp/gospell-login-cycle-{before,closed-no-observe,reobserved}.sample.txt`.
 The tested temporary executable's SHA-256 is
 `d1a3be1e219e7371726273937eeef6c7e16434637e4297ae183f9bdaf4d28b04`.
 No Developer ID signing identity was available for a new distribution build.
@@ -1841,7 +1841,7 @@ additional launch-window setting. This applies to normal and login launches,
 does not change login registration, and does not hide an already open window
 when the preference changes. Any open Settings window keeps the Dock icon: macOS
 deactivates an app asynchronously when it becomes menu-bar only, which dropped
-the window behind other applications ([#103](https://github.com/anomalyco/hex/issues/103)).
+the window behind other applications ([#103](https://github.com/goml/gospell/issues/103)).
 Turning the preference off therefore takes effect when Settings closes.
 
 Closing the window only orders it out, and AppKit keeps an ordered-out window
@@ -1857,7 +1857,7 @@ Checks in [meeting/watcher.rs](../../src/meeting/watcher.rs):
 Dock/Finder reopen Apple event and the status item's `OpenSettings` bypass it.
 These checks do not establish signed-app login behavior or native Finder/Spotlight
 reopening; those still need an installed-app smoke test. This addresses the
-menu-bar-only case in [#64](https://github.com/anomalyco/hex/issues/64), not an
+menu-bar-only case in [#64](https://github.com/goml/gospell/issues/64), not an
 independent window preference for users keeping the Dock icon visible.
 
 **Executed September 3, 2026:** 441 Rust tests passed (nine opt-in tests ignored),
@@ -1866,13 +1866,13 @@ The release Settings preview built and launched, but window screenshot capture
 failed; no visual or installed-app startup verification is claimed.
 
 ```ts
-Hex checks the release service            // maintain.updates
-├── 10 s after launch, hourly (Dev channel: every 10 min and on window focus), and Check for updates -> anoma.ly/release/hex/desktop/<channel>.json
-│   ├── User-Agent: hex/<build channel>/<version> (hex/dev/0.0.0-dev-171, hex/stable/2.3.1); nothing else about the install
+GoSpell checks the release service            // maintain.updates
+├── 10 s after launch, hourly (Dev channel: every 10 min and on window focus), and Check for updates -> goml.io/release/gospell/desktop/<channel>.json
+│   ├── User-Agent: gospell/<build channel>/<version> (gospell/dev/0.0.0-dev-171, gospell/stable/2.3.1); nothing else about the install
 │   ├── Failed check -> backs off, never past hourly
 │   └── <channel> -> updates.channel (General › Application › Update channel: Stable | Dev,
-│       or `hex settings set updates.channel`), else the channel the build was published on
-│       (HEX_BUILD_CHANNEL; older builds: dev for a dev version, else the receipt's);
+│       or `gospell settings set updates.channel`), else the channel the build was published on
+│       (GOSPELL_BUILD_CHANNEL; older builds: dev for a dev version, else the receipt's);
 │       package managers always stable
 │       └── Choosing a channel -> checks now; a staged update stays staged
 ├── Versions never compared: channel's current release != running build -> take it
@@ -1882,38 +1882,38 @@ Hex checks the release service            // maintain.updates
 │   ├── required -> install without waiting for the rollout
 │   └── Rollout -> device-local bucket in <support>/update-bucket, never sent
 ├── Direct install -> download (resumable) -> size + SHA-256 -> code signature -> stage
-│   ├── macOS -> unpack beside Hex.app -> Developer ID 5NZ4Q7NXJ4, anomaly.hex, notarized
+│   ├── macOS -> unpack beside GoSpell.app -> Developer ID 5NZ4Q7NXJ4, com.goml.gospell, notarized
 │   ├── Windows -> Authenticode valid, signer AUTHENTICODE_SIGNER -> new version directory
 │   │   └── .lnk files in Start Menu, Desktop, and taskbar pins -> retargeted in one PowerShell run
-│   │       // target is versions\<version>\hex.exe; arguments and name stay, an old-version icon is repointed
-│   │       // a Start Menu Hex.lnk that reads as empty (zero-filled) is recreated, but never when it is gone
+│   │       // target is versions\<version>\gospell.exe; arguments and name stay, an old-version icon is repointed
+│   │       // a Start Menu GoSpell.lnk that reads as empty (zero-filled) is recreated, but never when it is gone
 │   │       // saves flush updates\shortcut.tmp.lnk; a failed replace saves the retarget in place, the repair copies
 │   ├── Linux -> SHA-256 only -> new version directory, `current` switched
 │   ├── Staged -> checks continue; Restart to update stays offered meanwhile
 │   │   ├── Another release this install takes (update, required) -> download -> replaces the staged one
-│   │   │   └── macOS -> its unpacked .Hex-update-<version> folder goes with it
+│   │   │   └── macOS -> its unpacked .GoSpell-update-<version> folder goes with it
 │   │   └── Same release, rollout deferred, unconfirmed switch, rollback, failure -> keep the staged one
 │   └── Sidebar Update, menu bar / tray: Restart to update; a dev build lists its
-│       first changes and What's new (https://anoma.ly/hex/dev) under it (updater/notes.rs)
+│       first changes and What's new (https://gospell.goml.io/dev) under it (updater/notes.rs)
 │       ├── A meeting is recording -> refused with that reason; the update stays
 │       │   staged and Ready, so the next click after it ends restarts. The macOS
 │       │   status item dims Restart to update while it would be refused
 │       ├── One more check first (manifest within 15 s) -> Checking / Downloading -> newest staged
 │       │   └── A release published after the relaunch -> the next launch's check
 │       ├── macOS -> renamex_np swap (also at quit) -> relaunch -> old bundle removed at launch
-│       │   // one .Hex-update-<version> folder at a time: staging a newer build removes the one it replaces
+│       │   // one .GoSpell-update-<version> folder at a time: staging a newer build removes the one it replaces
 │       └── Labs › Release notes link -> a release build's footer carries this build's notes:
-│           anoma.ly/hex/dev#<version> for a dev build, github.com/anomalyco/hex/releases/tag/v<version> for a stable one;
+│           gospell.goml.io/dev#<version> for a dev build, github.com/goml/gospell/releases/tag/v<version> for a stable one;
 │           local and test builds show no link (by build kind, not version string)
 ├── macOS location not replaceable (read-only, translocated, root-owned) -> Download update (DMG)
 ├── Package manager (pacman, Nix) -> its command, once it serves another version
 ├── Source build, test build -> never checks
-├── `HEX_X86_BASELINE=ivybridge` source build (2012 floor) -> source build: never checks; official artifacts target x86-64-v3
+├── `GOSPELL_X86_BASELINE=ivybridge` source build (2012 floor) -> source build: never checks; official artifacts target x86-64-v3
 └── Failure -> keep the running version, back off, Check for updates retries
 
 Check for updates pressed (footer, menu bar, app menu)   // maintain.update-feedback (#1120)
 ├── The menu bar's and app menu's open the window at General
-└── Footer -> "Checking for updates…" -> "Hex is up to date" | "Couldn't check for updates"
+└── Footer -> "Checking for updates…" -> "GoSpell is up to date" | "Couldn't check for updates"
     // the hourly check alone keeps "Check for updates"; check:
     // an_asked_update_check_says_how_it_went (fixture; not run on a Mac)
 
@@ -1923,18 +1923,18 @@ DisableUpdates at launch                 // maintain.managed-updates
 └── macOS menu bar -> Disabled "Updates Managed by Your Organization"
 ```
 
-Administrators set `DisableUpdates` on macOS as a Boolean in the `anomaly.hex`
+Administrators set `DisableUpdates` on macOS as a Boolean in the `com.goml.gospell`
 defaults domain, normally through a configuration profile
-([#100](https://github.com/anomalyco/hex/issues/100)), and on Windows as a
-non-zero DWORD under `SOFTWARE\Policies\Anomaly\Hex` in HKLM or HKCU. Hex
+([#100](https://github.com/goml/gospell/issues/100)), and on Windows as a
+non-zero DWORD under `SOFTWARE\Policies\GoML\GoSpell` in HKLM or HKCU. GoSpell
 reads it once at launch, so a forced value wins and a change applies after
 relaunch. Speech-model downloads are unaffected. Releases through 2.3.1 read
-`com.kitlangton.hex2`; there is no fallback to it, so profiles must name
-`anomaly.hex`.
+`com.goml.gospell`; there is no fallback to it, so profiles must name
+`com.goml.gospell`.
 
-Every quit Hex starts ends through its own drain: Rune is told the app has work
+Every quit GoSpell starts ends through its own drain: Rune is told the app has work
 after its loop (`rune::orderly_exit`, called by `macos_rune::run`,
-`windows::rune::open`, and `rune_ui::run_app`), so Quit Hex, `hex quit`, and
+`windows::rune::open`, and `rune_ui::run_app`), so Quit GoSpell, `gospell quit`, and
 Restart to update stop and join the meeting controller. The staged bundle is
 installed before that join (the swap is atomic and touches no meeting files),
 and a quit that begins during Restart to update's final check never swaps a
@@ -1983,9 +1983,9 @@ Manifests are unsigned; on Linux a compromised HTTPS origin could serve any
 executable with a matching manifest, which Linux code signing cannot catch.
 
 **Fixed after 0.0.0-dev-1046 (Dev channel):** through that build, every staged
-release unpacked its own `.Hex-update-<version>` folder beside `Hex.app`
+release unpacked its own `.GoSpell-update-<version>` folder beside `GoSpell.app`
 (`stage` in [macos.rs](../../src/updater/macos.rs)) and the only removal was
-`finish_on_launch`, so a Hex that ran for days while the Dev channel (a check
+`finish_on_launch`, so a GoSpell that ran for days while the Dev channel (a check
 every ten minutes) published builds left one ~80 MB copy of the app per build in
 `/Applications`. Staging a newer release now removes the folder of the one it
 replaces once the replacement is the staged update, and a release whose download
@@ -1996,8 +1996,8 @@ Ready, so the quit still installs it. The launch sweep still takes whatever a
 swap or an interrupted stage left behind. Observed on macOS 26
 with the published 0.0.0-dev-1046 build: the launch sweep removed a folder
 holding an older signed build and one holding a swapped-in peer beside
-`/Applications/Hex.app`, and a folder owned by another user stayed with
-`could not remove an earlier Hex update … Permission denied (os error 13)`,
+`/Applications/GoSpell.app`, and a folder owned by another user stayed with
+`could not remove an earlier GoSpell update … Permission denied (os error 13)`,
 which this does not repair. No test drives a live quit through the race: the
 guard is a decision test plus a restart-state test. Neither the staging sweep nor
 the swap was exercised against a real release service on a real install.
@@ -2027,17 +2027,17 @@ update from an older supported build.
 ### Managed feature locks (macOS)
 
 ```ts
-Configuration profile forces a key in anomaly.hex     // maintain.managed-locks
+Configuration profile forces a key in com.goml.gospell     // maintain.managed-locks
 ├── DisableMeetings -> no detection, recording, transcription, or notes;
-│   hex meetings and hex mcp still read existing meetings
+│   gospell meetings and gospell mcp still read existing meetings
 ├── DisableAnnotate -> Annotate off
 ├── DisableOpenCodeProcessing -> no mode rewrites, meeting notes, or capture sends
-├── DisableTransforms -> no transforms; the hex.config.ts host never starts
+├── DisableTransforms -> no transforms; the gospell.config.ts host never starts
 ├── RestrictTransformsToLoopback -> transforms on; fetch reaches loopback only
 │   (resolved addresses, every redirect, no proxy); exec/execFile refused
 ├── DisableLabs -> every Labs feature off
 └── Window: setting off, disabled, "Managed by your organization";
-    hex settings set / hex labs on / local API refuse with code "managed"
+    gospell settings set / gospell labs on / local API refuse with code "managed"
 ```
 
 Only values a profile forces count (`CFPreferencesAppValueIsForced`), read once
@@ -2050,7 +2050,7 @@ starts: `Profile::configured` (rewrites, transformations), OpenCode generation
 in `dictation/processor.rs`, `capture_host/routing.rs` sends,
 `PersonalCommands::start`, and `personal_commands/script.rs` with
 `net::loopback_agent`. Admin docs: `site/public/docs/admin.md`
-(https://anoma.ly/hex/docs/admin).
+(https://gospell.goml.io/docs/admin).
 
 Checks: `policy::tests`, `a_managed_lock_reads_off_and_never_rewrites_the_saved_switch`,
 `a_managed_setting_is_refused`, `managed_locks_drop_the_rewrite_and_transformations`,
@@ -2064,11 +2064,11 @@ or the managed rows in the window.
 
 ```ts
 Linux beta                               // not macOS feature parity
-├── hex start -> One per-user Hex -> Alt-Space capture -> Stream (Vulkan GPU) -> Paste
+├── gospell start -> One per-user GoSpell -> Alt-Space capture -> Stream (Vulkan GPU) -> Paste
 ├── Labs › Live typing (labs.live_typing, off, wlroots-family Wayland) -> zwp_input_method_v2 preedit in the focused field
 │   ├── Final text committed through the input method; no active input, another input method, multi-line, or no answer -> Paste  // labs.live-typing
 │   ├── CPU engine or non-streaming model -> No words while speaking; the final text still commits there
-│   └── Hex's first-run practice field on Linux takes the preedit and commit too while on
+│   └── GoSpell's first-run practice field on Linux takes the preedit and commit too while on
 ├── Speech engine (General › Advanced › Dictation; transcription_device) -> Auto | GPU | CPU (#856)
 │   ├── Auto -> best GPU unless gpu-failures.json lists it under its current driver
 │   │   (kernel + Vulkan driver libraries), then another GPU, then the CPU;
@@ -2078,18 +2078,18 @@ Linux beta                               // not macOS feature parity
 │   │   GPU is recorded
 │   ├── A run that fails out of memory (status 7) -> reloads on the CPU and is
 │   │   not recorded (another copy can fill the GPU, #1165); the dictation
-│   │   model says so in the row until a GPU load works or Hex restarts (#1984)
+│   │   model says so in the row until a GPU load works or GoSpell restarts (#1984)
 │   ├── An integrated GPU whose warm 1.5 s run takes over 300 ms -> Auto times
 │   │   the CPU too and keeps the faster; a slower GPU is recorded (slow), so
 │   │   later loads go straight to the CPU (#484: UHD 620, Iris Plus 655)
 │   ├── GPU -> tries the GPU anyway; working, it clears that GPU's record
-│   └── CPU -> CPU only; launched on CPU, Hex loads no GPU driver for speech
-│       and switching to Auto or GPU says it turns on when Hex restarts (#1253)
+│   └── CPU -> CPU only; launched on CPU, GoSpell loads no GPU driver for speech
+│       and switching to Auto or GPU says it turns on when GoSpell restarts (#1253)
 │   // checked on apollo with a planted record (RADV); a real i915 hang not reproduced
 │   └── CPU or a model that cannot stream -> Transcribe the whole clip after release
-├── hex / hex app -> Window in the same process; closing it leaves Hex running
-│   └── Ctrl+Q in the window or Quit Hex in the sidebar -> quits Hex (#808)
-│       // check: ctrl_q_quits_hex (fixture; not run on a GNOME session)
+├── gospell / gospell app -> Window in the same process; closing it leaves GoSpell running
+│   └── Ctrl+Q in the window or Quit GoSpell in the sidebar -> quits GoSpell (#808)
+│       // check: ctrl_q_quits_gospell (fixture; not run on a GNOME session)
 ├── Recording sounds -> Shortcut press / capture stop
 ├── Shortcuts -> One state machine, three sources        // linux.shortcuts
 │   ├── X11 -> Root-window key grabs; General records the chord
@@ -2105,7 +2105,7 @@ Linux beta                               // not macOS feature parity
 │   │   │   an empty trigger (KDE's for one it keeps unbound) counts as refused
 │   │   │   └── Hyprland (XDG_CURRENT_DESKTOP) -> its portal names no trigger, since
 │   │   │       its config binds them: muted "Your desktop assigns this key itself,
-│   │   │       so Hex can't confirm it", no refusal note, info log (#635)
+│   │   │       so GoSpell can't confirm it", no refusal note, info log (#635)
 │   │   │       // check: a_missing_trigger_is_unconfirmed_where_the_desktop_assigns_keys
 │   │   │       // (the row's data only); not run on a Hyprland session
 │   │   ├── Portal version 2 -> Desktop shortcuts > Open -> ConfigureShortcuts,
@@ -2131,37 +2131,37 @@ Linux beta                               // not macOS feature parity
 │   │       (Enable, a settings change) tries once more
 │   │       // check: only_backend_failures_count_as_a_missing_portal (the
 │   │       // classification only); not run on niri
-│   ├── Wayland without the portal -> Bind `hex` commands in the desktop
-│   │   ├── The commands reach only the service listener (`hex start`/`hex service`);
-│   │   │   a foreground `hex dictate` receives none and says so at startup (#1506)
+│   ├── Wayland without the portal -> Bind `gospell` commands in the desktop
+│   │   ├── The commands reach only the service listener (`gospell start`/`gospell service`);
+│   │   │   a foreground `gospell dictate` receives none and says so at startup (#1506)
 │   │   ├── General hides shortcut rows and lists the commands
 │   │   └── GNOME: Add GNOME keyboard shortcuts -> custom shortcuts running
-│   │       `hex dictation toggle` (#781); written only while the listener has no
+│   │       `gospell dictation toggle` (#781); written only while the listener has no
 │   │       portal, and removed once the portal (or X11) binds the shortcuts, so a
 │   │       press never both starts a portal hold and toggles it off (#931)
 │   │       // check: entries_exist_only_without_the_portal (the rule only)
-│   └── Listener starting or stopped -> `hex status` reports Unregistered,
+│   └── Listener starting or stopped -> `gospell status` reports Unregistered,
 │       never the X11 mode
-├── hex dictation start|stop|toggle, hex paste-last
+├── gospell dictation start|stop|toggle, gospell paste-last
 │   -> Same events as a shortcut                     // linux.commands
 │   ├── start|toggle --raw -> Dictate without processing's events
 │   ├── Idempotent: start while recording / stop while idle -> Nothing
-│   └── Hex missing or not listening -> One-line error, non-zero exit
-│       // as for hex quit|restart|status
-├── hex dictation cancel -> Discards whatever records, any mode
+│   └── GoSpell missing or not listening -> One-line error, non-zero exit
+│       // as for gospell quit|restart|status
+├── gospell dictation cancel -> Discards whatever records, any mode
 ├── Toggle's cancel shortcut (Escape by default), only while recording
 │   ├── X11 -> Grabbed only for the recording, and Escape while Annotate draws
-│   └── Portal -> Never bound: bind `hex dictation cancel` in the desktop
-│       └── KDE startup -> before the bind, the pre-#579 `hex` set (with the
-│           pre-#492 `cancel` on Escape), and every action under `anomaly.hex`
+│   └── Portal -> Never bound: bind `gospell dictation cancel` in the desktop
+│       └── KDE startup -> before the bind, the pre-#579 `gospell` set (with the
+│           pre-#492 `cancel` on Escape), and every action under `com.goml.gospell`
 │           this bind doesn't ask for (`cancel`, `cancel-dictation`, and the ids
 │           of shortcuts changed since, which kept their keys so the new id could
 │           never take them, #898) are removed from kglobalaccel (`unregister`);
 │           other apps untouched
 │           // check: only_requested_shortcuts_are_shown (a stale grant stays
-│           // out), kde_actions_hex_no_longer_binds_are_removed (the list only);
+│           // out), kde_actions_gospell_no_longer_binds_are_removed (the list only);
 │           // the KDE removal is not run on a Plasma session
-│       └── KDE's approval dialog -> Hex waits for it up to 30 min, not 60 s:
+│       └── KDE's approval dialog -> GoSpell waits for it up to 30 min, not 60 s:
 │           giving up closed the session, and KDE then kept every shortcut
 │           with no key and never asked again (#898). A bind left unapproved
 │           (dismissed, canceled, abandoned) is noted in
@@ -2169,11 +2169,11 @@ Linux beta                               // not macOS feature parity
 │           they still have no key, so the dialog asks again; a key set in
 │           System Settings since stays
 │           // checked in a headless KWin 6.8 session (xdg-desktop-portal-kde
-│           // 6.8.2): the dialog stays up with Hex "Enabling…"; with the note,
+│           // 6.8.2): the dialog stays up with GoSpell "Enabling…"; with the note,
 │           // keyless ids are removed and the dialog returns; without it they
-│           // stay; Hex is listed under Applications in System Settings ›
+│           // stay; GoSpell is listed under Applications in System Settings ›
 │           // Shortcuts. Approving with OK was not exercised (no input there)
-├── Recording HUD -> Dot scope, as on macOS, on the
+├── Recording HUD -> Embers on Dot scope's plate, as on macOS, on the
 │   │   top or bottom edge, recording with the voice's level, then transcribing
 │   │   until accepted output finishes; Hidden position -> none   // linux.hud
 │   ├── Display -> picked at each capture start (#486)
@@ -2182,13 +2182,13 @@ Linux beta                               // not macOS feature parity
 │   │   ├── Layer-shell (niri, Sway, Hyprland) -> no output pinned: the
 │   │   │   compositor's focused output
 │   │   └── GNOME, KDE (XDG_CURRENT_DESKTOP) -> the primary display
-│   └── Rune overlay in Hex's process (rune_hud, rune_hud.wgsl on the GPU)
+│   └── Rune overlay in GoSpell's process (rune_hud, rune_hud.wgsl on the GPU)
 │       ├── Wayland -> layer-shell overlay layer, no keyboard, empty input region
 │       ├── X11 -> override-redirect window, empty input shape
 │       ├── Wayland without layer-shell (zwlr_layer_shell_v1; GNOME) and XWayland
 │       │   (`DISPLAY`) -> only the HUD opens on XWayland: override-redirect ARGB
 │       │   window, notification type, empty input shape, primary monitor's edge,
-│       │   scale from Xft.dpi; the rest of Hex (window, portal shortcuts) stays
+│       │   scale from Xft.dpi; the rest of GoSpell (window, portal shortcuts) stays
 │       │   on Wayland (#465)
 │       │   // seen in headless mutter 51 + Xwayland on apollo: HUD at the top
 │       │   // centre, animating, focus unchanged, the pointer over it hits the
@@ -2208,14 +2208,14 @@ Linux beta                               // not macOS feature parity
 │       │       keep running; the next show tries again
 │       │       // checked with a noop-backend Rune test; not on NVIDIA hardware
 │       ├── Window's Rune app panics anyway, or Rune returns a startup error
-│       │   -> `hex window show` errors and `hex status` reports the window
+│       │   -> `gospell window show` errors and `gospell status` reports the window
 │       │   and HUD stopped, with the reason (#979)
 │       ├── Neither (Rune refused it, or no layer-shell and no XWayland)
-│       │   -> process.log warns once; `hex status` reports `hud_limitation`
+│       │   -> process.log warns once; `gospell status` reports `hud_limitation`
 │       │   and the listener's notice or warning (a missing wl-copy outranks it)
-│       └── No window loop (no GPU or display, `hex dictate`) -> no HUD
+│       └── No window loop (no GPU or display, `gospell dictate`) -> no HUD
 ├── Tray host (StatusNotifierWatcher) -> Tray icon: click opens the window; menu as Windows' (tray_menu, linux/tray, linux/icons, desktop/tray_icon, rune::Tray)
-│   ├── Symbolic theme icon -> `anomaly.hex-symbolic.svg` written to hicolor/scalable/apps at startup, its name served beside the pixmap
+│   ├── Symbolic theme icon -> `com.goml.gospell-symbolic.svg` written to hicolor/scalable/apps at startup, its name served beside the pixmap
 │   │   ├── Plasma 6, GNOME's AppIndicator extension, Waybar -> draw the mark in the panel's text color
 │   │   │   // check: the_tray_icon_is_a_recolorable_symbolic_svg,
 │   │   │   // the_tray_icon_lands_in_the_users_scalable_hicolor_theme,
@@ -2223,7 +2223,7 @@ Linux beta                               // not macOS feature parity
 │   │   │   // not checked against a real KDE or GNOME panel
 │   │   ├── Plasma 6 -> recolors only with icon themes that follow the color scheme (Breeze, Papirus); else the SVG's default color
 │   │   ├── Plasma 5 -> also prefers IconName but has no panel palette, so the SVG's color there is untested
-│   │   ├── A running Plasma session -> told to reload icons after Hex writes the file, since KIconLoader lists hicolor folders at startup
+│   │   ├── A running Plasma session -> told to reload icons after GoSpell writes the file, since KIconLoader lists hicolor folders at startup
 │   │   ├── A user's own file at that name -> kept and named; a dangling link or failed write -> the name is unset
 │   │   └── Default color -> the same light/dark guess as the pixmap
 │   ├── Mark (pixmap) -> white; black when the desktop's color scheme prefers light (portal Settings color-scheme)
@@ -2234,14 +2234,14 @@ Linux beta                               // not macOS feature parity
 │   └── No tray host -> No icon; status and sounds remain available
 ├── Microphone -> System default or a saved device; `--device` overrides
 │   └── System default -> ALSA's default, resolved at each stream open // no live follow
-├── General > Launch at login -> writes or removes ~/.config/autostart/anomaly.hex.desktop (X-Hex-Managed; linux/login_item)
-│   ├── Background portal (GNOME, KDE; xdg-desktop-portal 1.20+) -> the portal writes it (X-XDP-Autostart=anomaly.hex; linux/background)
-│   ├── Installed by mise or asdf -> starts the version manager's shim, if it runs Hex from home
-│   ├── An entry without the mark -> error beside the row; Hex never replaces it
-│   └── A user target wants hex.service (~/.config/systemd/user/*.wants/hex.service:
-│       Home Manager's programs.hex.autostart, `systemctl --user enable`) -> on;
+├── General > Launch at login -> writes or removes ~/.config/autostart/com.goml.gospell.desktop (X-GoSpell-Managed; linux/login_item)
+│   ├── Background portal (GNOME, KDE; xdg-desktop-portal 1.20+) -> the portal writes it (X-XDP-Autostart=com.goml.gospell; linux/background)
+│   ├── Installed by mise or asdf -> starts the version manager's shim, if it runs GoSpell from home
+│   ├── An entry without the mark -> error beside the row; GoSpell never replaces it
+│   └── A user target wants gospell.service (~/.config/systemd/user/*.wants/gospell.service:
+│       Home Manager's programs.gospell.autostart, `systemctl --user enable`) -> on;
 │       turning it off errors, naming where to disable it; no entry is written (#1164)
-│       // check: an_enabled_systemd_unit_starts_hex_at_login (the link scan only)
+│       // check: an_enabled_systemd_unit_starts_gospell_at_login (the link scan only)
 ├── Microphone failure -> Same recovery as macOS, except an interrupted dictation is never kept (RecoveringAudioInput)
 │   ├── Stream fails -> Cancel an unfinished capture (macOS transcribes and copies a held one), "reopening" failure, retry with backoff
 │   ├── Startup open fails -> Retry with backoff; the listener keeps running
@@ -2271,11 +2271,11 @@ Linux beta                               // not macOS feature parity
 │           // not run on GNOME
 │   └── Wayland: wl-copy, then the shortcut, chosen at the first paste  // linux.wayland-paste
 │       ├── wl-copy not on PATH (direct installs add no packages) -> Settings and
-│       │   `hex status` warn while the listener runs; capture and transcription
+│       │   `gospell status` warn while the listener runs; capture and transcription
 │       │   still run, and the paste fails naming wl-clipboard before a helper
 │       │   is spawned
 │       ├── Asked by a modifier shortcut -> wait for its portal release + 250 ms
-│       │   (2 s cap without a release); after a hex command -> 250 ms
+│       │   (2 s cap without a release); after a gospell command -> 250 ms
 │       │   // Hyprland merges held physical modifiers into virtual-keyboard keys (#353)
 │       ├── Shortcut fails partway -> releases the keys it still holds
 │       │   // portal path unit-tested; X11 untested
@@ -2302,22 +2302,22 @@ Linux beta                               // not macOS feature parity
 │       │       // fixed delay, no acknowledgement; not observed on a real GNOME session
 │       └── Neither works -> Failed: "Copied to the clipboard; press Ctrl+V…" naming
 │           the RemoteDesktop portal; the clipboard keeps the transcript
-└── Portal identity -> Register as `anomaly.hex` (reverse-DNS: GNOME 49/50's
-    shortcuts provider refused the bare `hex`, so binding failed, #579)
-    ├── Installs ship anomaly.hex.desktop (StartupWMClass=anomaly.hex); windows
-    │   report app_id / WM_CLASS anomaly.hex -> one launcher entry
-    ├── Icon=anomaly.hex -> packages install hicolor 16–512 px PNGs (deb/rpm refresh
-    │   the icon cache); otherwise Hex writes them to ~/.local/share/icons/hicolor
+└── Portal identity -> Register as `com.goml.gospell` (reverse-DNS: GNOME 49/50's
+    shortcuts provider refused the bare `gospell`, so binding failed, #579)
+    ├── Installs ship com.goml.gospell.desktop (StartupWMClass=com.goml.gospell); windows
+    │   report app_id / WM_CLASS com.goml.gospell -> one launcher entry
+    ├── Icon=com.goml.gospell -> packages install hicolor 16–512 px PNGs (deb/rpm refresh
+    │   the icon cache); otherwise GoSpell writes them to ~/.local/share/icons/hicolor
     │   at startup and fixes Icon= in managed entries it wrote (#652)
-    ├── Startup -> Hex's own managed hex.desktop (launcher, autostart) renamed
-    │   to anomaly.hex.desktop; the installer does the same; unmanaged ones kept
-    └── No anomaly.hex.desktop in XDG data dirs -> Hex writes
-        ~/.local/share/applications/anomaly.hex.desktop (X-Hex-Managed),
-        NoDisplay when an older package's hex.desktop already shows Hex,
-        removed once a package ships anomaly.hex.desktop; never rewritten while
-        its program is there; pointed at this Hex (or a version manager's
+    ├── Startup -> GoSpell's own managed gospell.desktop (launcher, autostart) renamed
+    │   to com.goml.gospell.desktop; the installer does the same; unmanaged ones kept
+    └── No com.goml.gospell.desktop in XDG data dirs -> GoSpell writes
+        ~/.local/share/applications/com.goml.gospell.desktop (X-GoSpell-Managed),
+        NoDisplay when an older package's gospell.desktop already shows GoSpell,
+        removed once a package ships com.goml.gospell.desktop; never rewritten while
+        its program is there; pointed at this GoSpell (or a version manager's
         shim) once its program is gone or superseded by that shim (#810)
-        // KDE bindings and RemoteDesktop grants stored under `hex` are asked again once
+        // KDE bindings and RemoteDesktop grants stored under `gospell` are asked again once
         // checked by unit tests only, not on a GNOME 49 session
 GNOME portal shortcuts (#723)            // linux.gnome-shortcuts
 ├── New GNOME or KDE Plasma setup -> dictation default Ctrl+Alt+Space (GNOME's
@@ -2325,16 +2325,16 @@ GNOME portal shortcuts (#723)            // linux.gnome-shortcuts
 │   // checked in a headless KWin 6.8 session: the portal's dialog flags Alt+Space
 ├── Granted key GNOME keeps (Alt+Space, Super+Space, Alt+Tab, Print, …) -> red note under the row
 ├── Keys changed in GNOME Settings -> ShortcutsChanged -> pressing them dictates at once;
-│   the row note, the Status hint and `hex status --json` listener.shortcuts show them
+│   the row note, the Status hint and `gospell status --json` listener.shortcuts show them
 └── Annotate's shortcut -> its own row under dictation's in General
     // observed on apollo: gnome-control-center 51.1 provider, portal-gnome 50, stand-in Shell
 Enable / Disable (General, tray)         // linux.listener-persist
-├── Saves enable_on_launch -> a disabled Hex stays disabled after a restart (#575)
+├── Saves enable_on_launch -> a disabled GoSpell stays disabled after a restart (#575)
 └── GNOME (XDG_CURRENT_DESKTOP) Disable -> after the listener's session closes, a
     fresh session binds no shortcuts: GNOME Settings stores that empty set, so
-    Hex's entries leave its list; Enable shows GNOME's approval dialog again
+    GoSpell's entries leave its list; Enable shows GNOME's approval dialog again
     // never on KDE: an empty bind drops the user's keys (#482)
-GNOME startup -> pre-#579 `hex` set listed in GNOME Settings -> removed through
+GNOME startup -> pre-#579 `gospell` set listed in GNOME Settings -> removed through
     gsettings (reset its shortcuts, drop it from `applications`); other apps untouched
     // observed on apollo with gnome-control-center 51.1's provider, portal-gnome 50,
     // a stand-in org.gnome.Shell, not a full GNOME session
@@ -2374,15 +2374,15 @@ it is not yet observed on Hyprland, and a modifier held past the wait still
 changes the paste. wtype numbers its keymap from evdev code 1 in order of first
 use, and Hyprland matches binds through its configured layout, so a bare
 `-k v` read as Escape and a Ctrl+Shift+Escape bind swallowed Terminal paste
-([#444](https://github.com/anomalyco/hex/issues/444)). Hex now releases 46
+([#444](https://github.com/goml/gospell/issues/444)). GoSpell now releases 46
 never-pressed placeholder keysyms first so V lands on `KEY_V`;
 `wtype_sends_v_on_the_v_key` checks the numbering against wtype's rule, not a
 real Hyprland session.
 
 ```ts
 Windows beta                             // x64 (Vulkan GPU) and ARM64 (CPU)
-├── Install -> Setup.exe or install-windows.ps1 -> hex.exe + install.json receipt
-├── Launch -> DLLs load from System32 and Hex's folder only, never PATH (#587)
+├── Install -> Setup.exe or install-windows.ps1 -> gospell.exe + install.json receipt
+├── Launch -> DLLs load from System32 and GoSpell's folder only, never PATH (#587)
 │   └── DX12 compiles shaders with FXC (System32), never a dxcompiler.dll on PATH
 ├── GPU -> Rune draws with DX12 only (Vulkan only without a DX12 adapter) on
 │   the lowest-power adapter that drives a display (an unused integrated GPU
@@ -2413,7 +2413,7 @@ Windows beta                             // x64 (Vulkan GPU) and ARM64 (CPU)
 │       an orderly session end - Rune's quit hook runs on WM_QUERYENDSESSION
 │       and WM_ENDSESSION before the process may end, also for a windowless
 │       launch; a tray launch that never draws writes none) -> high-performance
-│       GPU (WGPU_POWER_PREF=high), warned in process.log, until Hex updates
+│       GPU (WGPU_POWER_PREF=high), warned in process.log, until GoSpell updates
 │       or the file is deleted
 ├── Present cadence -> after any change the window presents every refresh for
 │   1 s, then rests: windowed G-SYNC/FreeSync sees one rate change per
@@ -2422,16 +2422,16 @@ Windows beta                             // x64 (Vulkan GPU) and ARM64 (CPU)
 │   a failed GPU load retries on the CPU; the GPU record and Settings ›
 │   Speech engine work as on Linux (#856)
 │   ├── A run that fails out of memory -> CPU for this process, said in
-│   │   Speech engine until Hex restarts (#1984; not run on Windows)
+│   │   Speech engine until GoSpell restarts (#1984; not run on Windows)
 │   ├── A launch that crashed starting the GPU (gpu-start.pending, a version
 │   │   and crashed attempts) -> the next launch retries once; a second crash
 │   │   keeps the CPU, warned in process.log, and Settings › Speech engine
 │   │   says "Choose Auto or GPU", which clears the marker and turns the GPU
 │   │   on at restart; an update deletes a marker from another build
 │   │   (#662; not run on Windows)
-│   └── hex status -> Speech names the loaded device ("Vulkan — …"), or "CPU
+│   └── gospell status -> Speech names the loaded device ("Vulkan — …"), or "CPU
 │       (GPU start crashed twice)" after the marker forced the CPU
-├── Hex app -> General, tray, HUD; Enabled = shortcut works in every app
+├── GoSpell app -> General, tray, HUD; Enabled = shortcut works in every app
 ├── HUD display -> the monitor under the pointer (GetCursorPos) at each capture
 │   start, inside that monitor's work area, at its own DPI (#486); while
 │   shown, checked every 250 ms; moves once two checks agree (#807)
@@ -2451,13 +2451,13 @@ Windows beta                             // x64 (Vulkan GPU) and ARM64 (CPU)
 │   shown while the HUD backs off. Logged once per reason; Settings'
 │   listener warning (dictation.md, rune_hud::FirstFrame)
 ├── Launch again -> Running app shows its window; hidden (login) launch -> no-op
-├── Tray icon -> White Hex mark; light taskbar (SystemUsesLightTheme) -> black mark
+├── Tray icon -> White GoSpell mark; light taskbar (SystemUsesLightTheme) -> black mark
 │   └── Theme read when the tray is created; a later switch applies at the next launch
 ├── Tray menu (tray_menu, shared with Linux)    // maintain.tray
 │   ├── Recording / Transcribing… status line and tooltip while the listener works
-│   ├── Show Hex · Paste last dictation (refocuses the app the menu covered)
+│   ├── Show GoSpell · Paste last dictation (refocuses the app the menu covered)
 │   ├── Speech model: downloaded models, ✓ on the selected one; none while one prepares
-│   └── Update item · Enable / Disable Hex · Quit Hex
+│   └── Update item · Enable / Disable GoSpell · Quit GoSpell
 ├── Single-modifier shortcut -> Left / Either / Right side picker, as macOS
 ├── Recordable keys -> letters, digits, F1–F24, named keys, mouse buttons (#794)
 │   ├── Punctuation -> saved by virtual key (`oem 1`…`oem 102`), so a layout
@@ -2480,12 +2480,12 @@ Windows beta                             // x64 (Vulkan GPU) and ARM64 (CPU)
 │   ├── Another key joining the hold -> Its chord; the press cancels at once
 │   │   (Labs › Hold through other keys keeps a hold a second or more old)
 │   └── Another modifier the chord doesn't name -> Its chord too: cancels, and
-│       Toggle's press locks nothing; Alt's release goes unmasked, unless Hex
+│       Toggle's press locks nothing; Alt's release goes unmasked, unless GoSpell
 │       swallowed a key of that chord (Paste Last's V re-arms the mask)
 ├── Microphone switched off in Settings › Privacy -> Onboarding Microphone row -> Allow opens it
 ├── Microphone -> System default or a saved device
 │   ├── Windows default input changes -> Switch once capture is idle // cpal's default-device report
-│   └── Windows default input reports no default format -> Hex's own WASAPI paths
+│   └── Windows default input reports no default format -> GoSpell's own WASAPI paths
 │       (the endpoint by id, as when picked by name), then other formats it lists;
 │       the read error keeps its cause (#1845, unverified on real Windows)
 ├── Paste -> Waits for Shift, Alt, and Win; a held Ctrl is kept and harmless
@@ -2504,14 +2504,14 @@ Windows updates follow `maintain.updates` ([updater.rs](../../src/updater.rs),
 ([windows/rune.rs](../../src/windows/rune.rs)) follow the published update
 state. They pass the cross-compiled Clippy check, but no one has clicked them
 on a real Windows PC. The white tray mark vanished on a light taskbar
-([#460](https://github.com/anomalyco/hex/issues/460)); a light taskbar now gets
+([#460](https://github.com/goml/gospell/issues/460)); a light taskbar now gets
 the same mark in black (`a_light_tray_gets_a_dark_mark_with_the_same_shape`
 checks the pixels, not a real taskbar). Releases are Authenticode-signed once Azure Artifact
 Signing is configured ([windows-signing.md](../windows-signing.md)).
 
-**Known defect, outside Hex:** Discord's game detection matches the running
-`hex.exe` to *HEX: Shards of Fate*
-([#445](https://github.com/anomalyco/hex/issues/445)). The executable name stays
+**Known defect, outside GoSpell:** Discord's game detection matches the running
+`gospell.exe` to *GOSPELL: Shards of Fate*
+([#445](https://github.com/goml/gospell/issues/445)). The executable name stays
 as it is because the managed install layout, updater, shortcut, and login entry
 use it. The workaround is to hide the entry in Discord's Registered Games
 ([Windows guide](../windows.md#known-issues)). No check covers it.
@@ -2526,8 +2526,8 @@ smoke tests on Windows 10 and on ARM64 hardware have not been run.
 Linux updates                            // maintain.linux-updates
 ├── Direct install (versions/ + install.json receipt) -> release service -> staged -> sidebar footer: Restart to update
 ├── Source install (source-build marker) -> Sidebar footer: Updated from your source checkout
-├── Local build (HEX_LOCAL_BUILD=1) -> Sidebar footer: Local build · updates off; Version 2.3.1 (local <commit>); no checks, no channel row
-├── pacman (AUR hex-bin: /usr/bin, root-owned) or Nix store -> Sidebar footer: Updated by your package manager
+├── Local build (GOSPELL_LOCAL_BUILD=1) -> Sidebar footer: Local build · updates off; Version 2.3.1 (local <commit>); no checks, no channel row
+├── pacman (AUR gospell-bin: /usr/bin, root-owned) or Nix store -> Sidebar footer: Updated by your package manager
 └── Anything else (a downloaded executable) -> Sidebar footer: Download update
 ```
 
@@ -2536,10 +2536,10 @@ observation (a staged update and the sidebar button) predates the release
 service and is not evidence for it.
 
 No Linux meetings. Wayland shortcuts need either the desktop's GlobalShortcuts portal
-or the user's own keybindings for the `hex` commands; Hex reads no input
+or the user's own keybindings for the `gospell` commands; GoSpell reads no input
 devices. Click-through and a physical portal or keybinding press still need
 native evidence. Its [smoke](../../scripts/test-wayland-paste.sh) explicitly
-isolates `HEX_APPLICATION_SUPPORT_DIR`, pastes while another keyboard holds
+isolates `GOSPELL_APPLICATION_SUPPORT_DIR`, pastes while another keyboard holds
 Ctrl and Alt, opens the window through a second launch, and checks that
 closing it leaves the same process answering.
 
@@ -2551,7 +2551,7 @@ plus X11 auto-repeat filtering and a portal release that never arrives
 [dictation.md](dictation.md)). The X11 grab tests run on an isolated display in
 CI; `commands_and_grabs_share_the_x11_listener` drives grabs and commands
 through one listener. [scripts/test-linux-service.py](../../scripts/test-linux-service.py)
-checks that commands fail without a listening Hex.
+checks that commands fail without a listening GoSpell.
 On 2026-10-22 the portal path was observed on niri with xdg-desktop-portal-gnome
 using synthetic uinput keys against an isolated service: granted triggers,
 hold and Escape while held (Escape no longer cancels since #786), double-tap lock, Paste Last, and commands. A
@@ -2561,16 +2561,16 @@ physical keyboard press has not been recorded.
 listener's generation slot (an old listener cannot hide a restarted HUD) and
 turns its reports into [rune_hud.rs](../../src/rune_hud.rs)'s events;
 reports before the window's app exists are dropped. The shaders render
-offscreen with `cargo test --bin hex rune_hud_frames -- --ignored`
+offscreen with `cargo test --bin gospell rune_hud_frames -- --ignored`
 (2026-10-28 on apollo: Dot scope frames match the Metal look; 2026-10-29 on
 apollo: recording, processing, and done after Dot scope became the default).
 The GTK HUD it replaced is deleted. The text pill was observed on
 2026-10-22 in a headless sway on apollo (isolated data root, real microphone,
-`hex service`): `hex dictation start` showed the pill at the top edge and it
-was gone after `hex dictation stop` and transcription. The Rune overlay itself
+`gospell service`): `gospell dictation start` showed the pill at the top edge and it
+was gone after `gospell dictation stop` and transcription. The Rune overlay itself
 was also observed passing a virtual-pointer click through to the window below
 and leaving keyboard focus where it was (Rune `examples/background`). Not
-observed: X11 with Hex, niri, KWin, Mutter.
+observed: X11 with GoSpell, niri, KWin, Mutter.
 
 See the [Linux guide](../linux.md), [linux/app.rs](../../src/linux/app.rs),
 [linux/portal.rs](../../src/linux/portal.rs), and
@@ -2578,31 +2578,31 @@ See the [Linux guide](../linux.md), [linux/app.rs](../../src/linux/app.rs),
 The [direct installer/updater](../../src/updater/linux.rs) and
 [installer tests](../../scripts/test-install-linux-release.sh) do not establish
 a published, supported-host-validated signed release. [Nix](../nix.md) owns its
-package updates; Hex updates only managed direct installs. Its Home Manager
-module merges `programs.hex.settings` into Hex on every activation through
-`hex settings apply` ([control-cli.md](control-cli.md)); `nix/checks.nix`
+package updates; GoSpell updates only managed direct installs. Its Home Manager
+module merges `programs.gospell.settings` into GoSpell on every activation through
+`gospell settings apply` ([control-cli.md](control-cli.md)); `nix/checks.nix`
 evaluates the module, not a live activation.
 
 ```ts
 Linux process                            // maintain.linux-service
-├── hex / hex app -> Hex running? -> Activate{activation token} over the socket -> exit 0
-│   ├── No Hex, hex.service loaded -> session.env -> systemctl start (Type=notify) -> Activate
-│   ├── No Hex, no unit or custom data dir -> This process becomes Hex
+├── gospell / gospell app -> GoSpell running? -> Activate{activation token} over the socket -> exit 0
+│   ├── No GoSpell, gospell.service loaded -> session.env -> systemctl start (Type=notify) -> Activate
+│   ├── No GoSpell, no unit or custom data dir -> This process becomes GoSpell
 │   │   └── Custom data dir -> Keep the supplied desktop environment; no user-manager query
-│   │       or Wayland socket discovery (unless HEX_SYSTEMD_UNIT explicitly opts in)
-│   └── Two racing launches -> One Hex; the other forwards and exits 0
-├── hex start / desktop autostart / hex service -> Same, without the window
+│   │       or Wayland socket discovery (unless GOSPELL_SYSTEMD_UNIT explicitly opts in)
+│   └── Two racing launches -> One GoSpell; the other forwards and exits 0
+├── gospell start / desktop autostart / gospell service -> Same, without the window
 │   └── No WAYLAND_DISPLAY (none at all, or only Xwayland's DISPLAY)
 │       -> Adopt the manager's live WAYLAND_DISPLAY, else the newest answering socket
 │       (#756); behind DISPLAY only for an explicit wayland session type, or an unset
 │       one whose manager names a live display. An explicit x11 or tty login keeps its
 │       X display. Launchers adopt first, so session.env agrees. The shortcut backend
-│       follows the adopted Wayland session: the portal, or the `hex` commands where
+│       follows the adopted Wayland session: the portal, or the `gospell` commands where
 │       it has none
-├── hex dictation|paste-last -> Socket worker -> Listener queue (never the UI thread)
-├── hex dictate -> Foreground listener; adopts the session's Wayland display like hex service;
-│   `hex` commands reach only the service listener, never it (#1506)
-├── hex status -> Published status; hex quit / Quit Hex / launcher action -> Drain, exit 0
+├── gospell dictation|paste-last -> Socket worker -> Listener queue (never the UI thread)
+├── gospell dictate -> Foreground listener; adopts the session's Wayland display like gospell service;
+│   `gospell` commands reach only the service listener, never it (#1506)
+├── gospell status -> Published status; gospell quit / Quit GoSpell / launcher action -> Drain, exit 0
 ├── Any instance stop still draining after 20 s -> _exit before the unit's 30 s TimeoutStopSec
 │   └── A transcription or paste cut by the deadline is lost; checked by unit tests only,
 │       no observed systemd stop
@@ -2610,12 +2610,12 @@ Linux process                            // maintain.linux-service
 ├── Open the window -> Maps at 980×760 (min = max), tiling WMs float it -> Resizable from 860×560
 ├── Close the window -> Keep microphone, accepted jobs, model preparation, and HUD
 │   └── Uncommitted shortcut capture -> Cancel and restore the prior listening state
-├── Crash -> systemd Restart=on-failure -> Hex without a window
-├── Update -> Restart the unit -> Hex reopens the window
-├── hex restart without a display (SSH) -> Keep the saved session.env
+├── Crash -> systemd Restart=on-failure -> GoSpell without a window
+├── Update -> Restart the unit -> GoSpell reopens the window
+├── gospell restart without a display (SSH) -> Keep the saved session.env
 ├── Saved XAUTHORITY file gone (a reboot: Xwayland's cookie is new each login)
 │   -> Take the user manager's current XAUTHORITY, else drop it (#465)
-├── Window fails (no display, no GPU) -> Logged; Hex keeps running
+├── Window fails (no display, no GPU) -> Logged; GoSpell keeps running
 └── Startup -> transcribe.cpp's Vulkan instance first, on the main thread
     └── then the model load and the window's wgpu instance never create one at once
 ```
@@ -2624,10 +2624,10 @@ Sources: the process, host, and window seam in [linux/app.rs](../../src/linux/ap
 the single-instance socket and systemd lifecycle in
 [linux/service.rs](../../src/linux/service.rs), the CLI in
 [linux.rs](../../src/linux.rs), and the managed installer/Nix user units.
-`hex status` queries the running Hex; `--lines` explicitly reads historical
-observations. `hex app --hidden` and `hex start` start Hex without the window;
-`hex stop` equals `hex quit`. Closing the window does not mean Disable; the
-General's listener card Enable/Disable controls the listener, Quit Hex the process. No
+`gospell status` queries the running GoSpell; `--lines` explicitly reads historical
+observations. `gospell app --hidden` and `gospell start` start GoSpell without the window;
+`gospell stop` equals `gospell quit`. Closing the window does not mean Disable; the
+General's listener card Enable/Disable controls the listener, Quit GoSpell the process. No
 root daemon or new input grants. The window runs on Rune's app lifetime: it
 opens or focuses with the forwarded activation token and keeps its state
 across close and reopen. Observed in a headless sway on apollo on 2026-10-22
@@ -2637,16 +2637,16 @@ reopen, quit); not rerun since GPUI was removed. On niri
 (apollo, 2026-10-22, isolated data directory, listener off) launches spawned
 through `niri msg action spawn` opened the window in the instance's process,
 `close-window` left the same process answering, a relaunch opened a new
-window in it, and `hex quit` exited; the window never took focus although niri
+window in it, and `gospell quit` exited; the window never took focus although niri
 passed `XDG_ACTIVATION_TOKEN` (an IPC spawn's token, without user input, so
 this does not show whether a launcher's token focuses it). Not yet on KWin,
 Mutter, or i3.
 
 Listener starts consume the host's settings snapshot; the foreground
-`hex dictate` command loads its own snapshot once. A settings file that isn't
-valid JSON, or isn't a JSON object, starts Hex with defaults and shows the parse
+`gospell dictate` command loads its own snapshot once. A settings file that isn't
+valid JSON, or isn't a JSON object, starts GoSpell with defaults and shows the parse
 error, but no longer blocks dictation; saving over it is refused, even after it
-is fixed, until Hex restarts. Its two-second poll keeps the running settings
+is fixed, until GoSpell restarts. Its two-second poll keeps the running settings
 when the file isn't a JSON object, and adopting a fixed or removed file also
 clears that refusal, so the window's next save works without a restart. A load
 that fails outright still blocks capture until a successful save or a restart.
@@ -2666,9 +2666,9 @@ runtime workers. The virtual-microphone and Wayland scripts open the window
 through a second launch; the Wayland script passed on apollo (headless sway,
 `WLR_RENDERER=gles2`, before GPUI was removed), the X11 virtual-microphone script
 has not run since the single-process change. A throwaway `Type=notify` user unit
-on apollo (`HEX_SYSTEMD_UNIT`) started ready through `hex start`, restarted
+on apollo (`GOSPELL_SYSTEMD_UNIT`) started ready through `gospell start`, restarted
 after SIGABRT and SIGKILL without a window, stopped cleanly on
-`systemctl stop` and `hex quit`, and an older `Type=simple` unit still started.
+`systemctl stop` and `gospell quit`, and an older `Type=simple` unit still started.
 Before the Vulkan ordering fix, a launch with an installed model and
 `enable_on_launch` SIGSEGVed in the Vulkan loader 3/3 in a headless sway on
 apollo (the model load raced the window's wgpu instance); with it, 6/6 ran.
@@ -2700,7 +2700,7 @@ Linux General > Sounds > Sound volume     // dictate.feedback.linux; X11 + Wayla
 Linux General > Sounds > a set            // dictate.sound-theme
 └── Press it -> Save and apply live; play its dictation
 
-Capture                                  // hex app and hex dictate
+Capture                                  // gospell app and gospell dictate
 ├── Shortcut starts capture -> Queue start sound immediately, before audio arrives
 ├── Hold passes 300 ms -> While dictating mute/pause/lower begins, never at the press
 ├── Finish retained recording -> Stop sound at the release, while the 200 ms
@@ -2711,7 +2711,7 @@ Capture                                  // hex app and hex dictate
 └── Dictation pasted -> Done sound; failures play the error sound
 ```
 
-The shared [feedback player](../../src/feedback.rs) uses Hex's bundled sounds
+The shared [feedback player](../../src/feedback.rs) uses GoSpell's bundled sounds
 ([Feedback](dictation.md#feedback)) on every platform; only macOS wake/sleep
 use `afplay`.
 Decoding happens before the Linux capture loop; the output device opens for
@@ -2749,7 +2749,7 @@ layout evidence.
 ```ts
 TypeScript SDK + local service             // macOS, Linux, Windows
 ├── Caller records audio -> Explicit helper -> Raw transcription
-│   └── Linux, Windows -> No packaged helper; command: hex service --embedded
+│   └── Linux, Windows -> No packaged helper; command: gospell service --embedded
 ├── Caller streams audio -> Running app's /streams -> Partials, segments, final
 │   └── Dictation first; uses the loaded model only (docs/streams.md)
 ├── Running app's /transcriptions -> Listener's engine when it holds the model
@@ -2766,14 +2766,14 @@ TypeScript SDK + local service             // macOS, Linux, Windows
 │   │       skips a window with no speech, and drops hint echoes
 │   ├── Linux, Windows -> The listener records it (dictation::service owner)
 │   │   ├── With the microphone chosen in Settings, as the shortcut does
-│   │   ├── Shortcut or `hex dictation` records -> 409 dictation-busy
+│   │   ├── Shortcut or `gospell dictation` records -> 409 dictation-busy
 │   │   ├── Client's dictation records -> shortcut starts and ends nothing
 │   │   ├── Lapsed lease or owner's cancel -> only that dictation is dropped
 │   │   ├── Microphone lost -> finish answers microphone-lost (no kept clip)
 │   │   └── Start with "partials": true -> GET /dictations/{id}/partials
 │   │       └── SSE {stable, tentative} while the model streams (GPU)
 │   ├── macOS -> No partials: dictationPartials false; the SSE ends at once
-│   └── hex service -> serviceCapture false, 404 service-capture-unavailable
+│   └── gospell service -> serviceCapture false, 404 service-capture-unavailable
 └── Distribution
     ├── SDK 0.3.0 -> Published
     └── Turnkey signed helper -> Unfinished
@@ -2781,7 +2781,7 @@ TypeScript SDK + local service             // macOS, Linux, Windows
 
 Linux and Windows serve the same local API from the running app
 ([linux/app.rs](../../src/linux/app.rs), [windows/rune.rs](../../src/windows/rune.rs))
-and from `hex service [--embedded]`; a failed start only logs, and Hex runs on
+and from `gospell service [--embedded]`; a failed start only logs, and GoSpell runs on
 without it. On Linux, the embedded service answered `/health`,
 `/capabilities`, `/models`, and transcribed a WAV with Parakeet Unified
 English on the Vulkan iGPU (October 30). The running app's shared-engine path,
@@ -2798,7 +2798,7 @@ SDK is unverified.
 
 Windows `/dictations` uses the same owner in the listener
 ([windows/dictation.rs](../../src/windows/dictation.rs)), so a client gets
-Hex's microphone choice, pre-roll, and While dictating behavior, and the HUD
+GoSpell's microphone choice, pre-roll, and While dictating behavior, and the HUD
 shows the recording. Live text is opt-in per dictation: `POST /dictations
 {"source": "…", "partials": true}` holds a live-text demand for the
 recording's stream, and `GET /dictations/{id}/partials` (owner token, once)
@@ -2859,11 +2859,11 @@ microphone behavior.
 ```ts
 macOS debug runtime                      // not release navigation
 ├── Meetings -> Always available; release builds need the Meetings opt-in (its pane's card or Meetings › Settings)
-├── Activity / HUD Lab / hex dev -> Observation and developer controls
+├── Activity / HUD Lab / gospell dev -> Observation and developer controls
 └── HUD Lab in release -> Only in the playground (Labs › Playground)
 
-`hex app -- --snap OUT --scene NAME` -> Rendered fixtures    // not proof capture/download/update happened
-Linux `hex` -> the Linux window on Rune, in the Hex process // dev.rune-ui
+`gospell app -- --snap OUT --scene NAME` -> Rendered fixtures    // not proof capture/download/update happened
+Linux `gospell` -> the Linux window on Rune, in the GoSpell process // dev.rune-ui
 ├── Calls the host directly: saves settings through it; woken on host changes
 ├── Wayland frame: where winit draws the client-side frame (GNOME), a floating
 │   decorated window's bottom corners round with the frame's headerbar, and are
@@ -2882,13 +2882,13 @@ Linux `hex` -> the Linux window on Rune, in the Hex process // dev.rune-ui
     Meetings (Recordings | Settings, opt-in card), Voice Filter,
     HUD Lab, Activity, permission rows, Launch at login, Dock icon, shortcut
     sides, the permissions page
-macOS `hex app` -> one menu-bar process, Rune window // dev.rune-ui-macos
+macOS `gospell app` -> one menu-bar process, Rune window // dev.rune-ui-macos
 ├── rune::App on the main thread: accessory, windowless unless setup/onboarding/Dock icon open it
-├── Same AppKit loop: status item, updater, Hex/File/Window menu, Dock reopen event, the HUD pump (16 ms timer; the HUD itself is a Rune overlay)
+├── Same AppKit loop: status item, updater, GoSpell/File/Window menu, Dock reopen event, the HUD pump (16 ms timer; the HUD itself is a Rune overlay)
 ├── Runtime thread: model preparation (menu bar: installed only), starts the listener once setup is ready
 ├── Listener, meeting controller, local API: their own threads
 ├── macos_host: AppKit event monitor records chords (Option, Fn); NativeHost does permissions,
-│   login item, Hex Microphone, meeting start/stop/rename/trash/reveal, relaunch
+│   login item, GoSpell Microphone, meeting start/stop/rename/trash/reveal, relaunch
 ├── Meetings pane lists the store through meeting::query (1 s rescan, sent only when changed);
 │   a controller failure shows in the pane; rune::FileDialogs (file_dialog) chooses the
 │   meetings folder and Modes' "Choose a file…" .app
@@ -2900,12 +2900,12 @@ macOS `hex app` -> one menu-bar process, Rune window // dev.rune-ui-macos
 │   with Copy agent prompt / Copy all of the in-call transcript; compact until hovered,
 │   dragged to any corner)
 └── Modes app icons: Finder's icon (NSWorkspace) in the picker, chips, and mode rows
-Windows `hex app` -> one tray process, Rune window // dev.rune-ui-windows
+Windows `gospell app` -> one tray process, Rune window // dev.rune-ui-windows
 ├── Runtime thread owns WindowsDesktopHost (listener, model preparation, OpenCode, transformations, updater)
 ├── Named event: a second launch shows the window; tray Show / Enable-Disable / Quit
 ├── rune::App: --hidden starts windowless and makes no Direct3D device (on x64
 │   the speech model still loads on the GPU through Vulkan); closing releases
-│   the window and its swapchain too (release_gpu_when_closed), so a tray Hex
+│   the window and its swapchain too (release_gpu_when_closed), so a tray GoSpell
 │   holds neither and capture tools such as NVIDIA's Instant Replay don't take
 │   it for the game (#1308); the next open makes them again where the window
 │   was and at its size; Quit or no tray ends it
@@ -2914,14 +2914,14 @@ Windows `hex app` -> one tray process, Rune window // dev.rune-ui-windows
 ├── Modes: "Choose a file…" opens rune::FileDialogs (file_dialog) on its own thread
 ├── Modes app icons: the executable's first icon (PrivateExtractIconsW)
 └── Not yet: custom caption
-iOS prototype (`HEXMobile`) -> Record/transcribe/copy and keyboard handoff
+iOS prototype (`GoSpellMobile`) -> Record/transcribe/copy and keyboard handoff
 ├── Speech model preparation: launch dictates with Apple Speech on iOS 26 (an OS
 │   asset, no app download) or Parakeet V2; a preparation that says nothing for 30 s, or
 │   nothing new for 120 s, ends as "The speech model isn't ready. Try again." (time iOS
-│   has Hex suspended doesn't count), so "Checking the speech model" cannot stay at 0%
+│   has GoSpell suspended doesn't count), so "Checking the speech model" cannot stay at 0%
 │   forever. Apple's reservation and asset status are watched at 60 s the same way, a
 │   reservation or release that never answers is forgotten, and a keyboard check that
-│   hangs counts no strike toward Hex's handoff. The keyboard's own check has its own 30 s
+│   hangs counts no strike toward GoSpell's handoff. The keyboard's own check has its own 30 s
 │   limit, retries after a real background trip, and a late answer can't reopen it. Unit
 │   tests only (`DictationControllerTests`, `SpeechModelInstallTests`,
 │   `AppleSpeechAssetReservationsTests`); no physical iPhone run checks either deadline.
@@ -2969,8 +2969,8 @@ iOS prototype (`HEXMobile`) -> Record/transcribe/copy and keyboard handoff
 │   checks it
 ├── German spatial autocorrect (off by default, `experiments.germanSpatialAutocorrect`):
 │   with Spatial autocorrect on too, the Deutsch layout reads taps with the German
-│   model Android ships (`ios/HEXKeyboard/TypingModel/de.hextm`, the same v3 file
-│   and hash as `android/app/src/main/assets/typing/de.hextm`) and the capitalisation
+│   model Android ships (`ios/GoSpellKeyboard/TypingModel/de.gospelltm`, the same v3 file
+│   and hash as `android/app/src/main/assets/typing/de.gospelltm`) and the capitalisation
 │   sidecar beside it (`de.capitals`, built by `ios/scripts/build-german-capitals.py`,
 │   each word's share written with a capital): a noun takes its capital anywhere from
 │   a 95% share and after an article or determiner from 50% ("das haus" -> "das Haus",
@@ -3003,8 +3003,8 @@ iOS prototype (`HEXMobile`) -> Record/transcribe/copy and keyboard handoff
 │   dictation there; when its words are about to insert and the field still shows the range
 │   unchanged (same document and surrounding text), they replace it, otherwise they insert
 │   at the cursor as any dictation would and the range stays. Cancelling or hearing nothing
-│   leaves the range untouched. Where dictation would open Hex instead (no Full Access, or
-│   the keyboard can't dictate here), tapping Dictate dismisses the actions and opens Hex or
+│   leaves the range untouched. Where dictation would open GoSpell instead (no Full Access, or
+│   the keyboard can't dictate here), tapping Dictate dismisses the actions and opens GoSpell or
 │   shows the Full Access hint, leaving the text. An empty range ends like a
 │   normal trackpad lift. Delete and Cut call the host's delete once per Character, so a
 │   host that removes one code point per call (some Devanagari and Thai clusters) can leave
@@ -3034,7 +3034,7 @@ iOS prototype (`HEXMobile`) -> Record/transcribe/copy and keyboard handoff
 │   Off, delete takes the whole word back as before.
 │   Unit tests only: no CI compiles the iOS targets, and no physical iPhone run checks it
 ├── Hide word suggestions (off by default, `experiments.hideWordSuggestions`): the full
-│   keyboard's strip keeps its height, the Hex key, Undo, status, notices and the Paste chip,
+│   keyboard's strip keeps its height, the GoSpell key, Undo, status, notices and the Paste chip,
 │   but stops suggesting words: no typing or next-word suggestions, swipe readings, finished
 │   word emoji, or the chip that keeps what you typed while a correction is still ahead.
 │   Autocorrect still corrects on space, and after Delete the chip that puts back what it
@@ -3069,7 +3069,7 @@ iOS prototype (`HEXMobile`) -> Record/transcribe/copy and keyboard handoff
 │   Duo's split keyboard the comma takes from the left half's bar and the period from the right
 │   half's, each bar keeping its inner edge. Neither is added unless the bar still holds a
 │   letter-wide space after them (on an upright iPhone showing both the globe and emoji keys
-│   with the Hex key beside space there isn't room, so they're skipped). They type `,` and
+│   with the GoSpell key beside space there isn't room, so they're skipped). They type `,` and
 │   `.` with shift on too. The 123 and #+= pages, a URL or email field (which keeps its own
 │   `.`), an iPad, and English's Dvorak letters while Dvorak punctuation already puts both on
 │   row 1 are unchanged; off, every layout is key for key the one it was.
@@ -3115,7 +3115,7 @@ iOS prototype (`HEXMobile`) -> Record/transcribe/copy and keyboard handoff
 │   en-GB); learned words are one list per keyboard language
 │   (`keyboard.learnedWords.<code>`, seeded from the shared `keyboard.learnedWords`
 │   list), with bilingual autocorrect's partner keeping its own list and fixes; Delete
-│   what Hex learned erases the shared list and every language's; off, everything is the
+│   what GoSpell learned erases the shared list and every language's; off, everything is the
 │   one shared list and learning it was before. Unit tests only: no CI compiles the iOS
 │   targets, and no physical iPhone run checks it
 ├── Two-language dictation (off by default, `experiments.twoLanguageDictation`, iOS 26+):
@@ -3166,7 +3166,7 @@ best-effort deletion is not guaranteed deletion.
 
 `dev.rune-ui` lives in [rune_ui.rs](../../src/rune_ui.rs) and its pane modules;
 its tests drive the Rune runtime headlessly (navigation; General rows per
-shortcut source, fitting the default window with Advanced collapsed, Shortcut mode's modal, saves through the host, Quit Hex, microphone-release
+shortcut source, fitting the default window with Advanced collapsed, Shortcut mode's modal, saves through the host, Quit GoSpell, microphone-release
 confirmation, shortcut recording and Escape, conflicts; History select, two-step
 delete and clear, copy; Modes add/delete, corrections, transformations (drag reorder saves once
 on release), application conflicts, a chosen file joining the mode, arrow
@@ -3191,9 +3191,9 @@ service saved a new mode and a correction. See
 [rune_ui/macos_host.rs](../../src/rune_ui/macos_host.rs). On hailmary
 (macOS 26.2, Command Line Tools only) it compiles, passes clippy
 `-D warnings` and the macOS unit tests (including `macos_host`'s chord
-capture), and a debug `hex app` with an isolated data root started, showed
+capture), and a debug `gospell app` with an isolated data root started, showed
 its 980×760 window (CGWindowList; `lsappinfo`: Foreground while open),
-answered `hex dev status/show/hud`, and quit cleanly on Ctrl-C, also with
+answered `gospell dev status/show/hud`, and quit cleanly on Ctrl-C, also with
 the meeting fixtures copied into its data root and the Meetings pane shown.
 `macos_host`'s tests cover the meeting feed over `tests/fixtures/meetings`
 (order, recovery to Interrupted, turns and pauses, no resend when unchanged)

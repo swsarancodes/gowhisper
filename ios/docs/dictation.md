@@ -1,6 +1,6 @@
 # Dictation
 
-Part of [Hex for iPhone](../README.md).
+Part of [GoSpell for iPhone](../README.md).
 
 The dictation pipeline: engines and speech models, styles and cleanup,
 dictation language and translation, warm sessions and live dictation,
@@ -9,28 +9,28 @@ capture, audio and the Action Button. The keyboard's own keys are in
 
 ## App status and engines
 
-**Status:** Internal TestFlight app (`HEXMobile`), custom keyboard extension
-(`HEXKeyboard`), and Live Activity + Control Center widget extension
-(`HEXWidgets`). The containing app records a generation-scoped temporary WAV,
+**Status:** Internal TestFlight app (`GoSpellMobile`), custom keyboard extension
+(`GoSpellKeyboard`), and Live Activity + Control Center widget extension
+(`GoSpellWidgets`). The containing app records a generation-scoped temporary WAV,
 transcribes on-device with Apple Speech on iOS 26+ (`SpeechTranscriber`, or
 `DictationTranscriber` for the languages it lacks, such as Norwegian, Danish,
 Swedish and Hebrew) or FluidAudio Parakeet V2 (iOS 18+, English). Before iOS 26,
 every other language, and English on 3 GB iPhones (iPhone XR, SE 2nd generation)
 or after Parakeet couldn't load, goes to Apple's `SFSpeechRecognizer` on device
-only (`OnDeviceSpeechTranscriber`, chosen by `SpeechEngineChoice`). Hex removes
+only (`OnDeviceSpeechTranscriber`, chosen by `SpeechEngineChoice`). GoSpell removes
 each capture's file after inference, cancellation, or failure. During a warm session the keyboard
 extension sends commands and inserts completed text over the shared App Group
-(`group.anomaly.hex.mobile`). Otherwise it dictates by itself (in-keyboard
+(`group.com.goml.gospell.mobile`). Otherwise it dictates by itself (in-keyboard
 dictation, iOS 26+): iOS refuses to record from a keyboard extension
 directly, so it captures through `getUserMedia` in a hidden `WKWebView`
-under Hex's microphone permission, writes a temporary WAV, and transcribes
+under GoSpell's microphone permission, writes a temporary WAV, and transcribes
 it on-device with Apple Speech, downloading the speech assets on first use
-(`HEXKeyboard/KeyboardLocalDictation.swift`), or, with Settings › Dictation › Speech model in
+(`GoSpellKeyboard/KeyboardLocalDictation.swift`), or, with Settings › Dictation › Speech model in
 keyboard on, with Parakeet on the Neural Engine in the keyboard's own process
-(`HEXKeyboard/KeyboardParakeet.swift`, below). With Full Access, the web view
+(`GoSpellKeyboard/KeyboardParakeet.swift`, below). With Full Access, the web view
 and its page load as the keyboard shows (unless memory is already short), without
 the microphone, so no orange dot shows until you dictate; the full keyboard's
-Hex key then starts capture as the finger lands, before the touch is a tap or
+GoSpell key then starts capture as the finger lands, before the touch is a tap or
 a hold, and a slide to the style menu or a cancelled touch drops it with
 nothing transcribed (its orange dot shows for that moment). Until the first
 real PCM audio buffer arrives, the keyboard shows a calm starting state
@@ -38,12 +38,12 @@ real PCM audio buffer arrives, the keyboard shows a calm starting state
 switches to active recording only once audio is flowing. iOS ends a keyboard that passes
 its memory limit (about 60–90 MB depending on the model), so while less is left
 than starting needs (`os_proc_available_memory`: 32 MB for the first
-dictation, 24 MB once the capture web view is loaded) Dictate and the Hex key
-open Hex instead, as before iOS 26. Audio never leaves the iPhone. From iOS 26 Hex
+dictation, 24 MB once the capture web view is loaded) Dictate and the GoSpell key
+open GoSpell instead, as before iOS 26. Audio never leaves the iPhone. From iOS 26 GoSpell
 never asks for Speech Recognition access: that permission covers `SFSpeechRecognizer`,
-which Hex uses only before iOS 26, and `SpeechAnalyzer` runs without it in the app and
+which GoSpell uses only before iOS 26, and `SpeechAnalyzer` runs without it in the app and
 the keyboard alike (a TestFlight tester who turned it off dictated, iOS 27.0.1, build 51).
-Before iOS 26 Hex asks for it as it gets `SFSpeechRecognizer` ready (setup, or Set up),
+Before iOS 26 GoSpell asks for it as it gets `SFSpeechRecognizer` ready (setup, or Set up),
 never at a launch by itself.
 
 ## Warm session (`Off`, `5m`, `15m`, `1h`)
@@ -53,19 +53,19 @@ mic warm** starts an `AVAudioEngine` input session immediately so
 subsequent taps on **Dictate** record directly inside the keyboard with zero
 app switches; picking `Off` or tapping the header timer ends it. Unless
 chosen, it is `Off`, with the row hidden, where the keyboard dictates by
-itself (`KeyboardSelfDictation`: iOS 26, and the keyboard hasn't opened Hex
+itself (`KeyboardSelfDictation`: iOS 26, and the keyboard hasn't opened GoSpell
 for a dictation in the last 7 days, for any reason: the keyboard records its
-own (memory, a missing speech model, the Multilingual model) and Hex records
+own (memory, a missing speech model, the Multilingual model) and GoSpell records
 every keyboard launch, since TestFlight build 129 showed keyboards that opened
-Hex for reasons they left no record of; a dictation the keyboard finishes by
+GoSpell for reasons they left no record of; a dictation the keyboard finishes by
 itself clears it), and `15m` elsewhere; worked out on each read, never
 stored. The row shows whenever a duration is in effect, and stays on the
 page once picked. Once on iOS 26, a stored `15m` (which tapping the old
 default to warm the mic also stored) was taken for not chosen where the
-keyboard dictates by itself. A Dictate that opens Hex there brings the `15m`
+keyboard dictates by itself. A Dictate that opens GoSpell there brings the `15m`
 default back from that launch, so it warms as before 129.
 
-## Styles (`TranscriptFormatter`, run by `DictationPipeline` wherever Hex dictates: the app, the keyboard's warm session and cold start, the Action Button, Control Center and in-keyboard dictation)
+## Styles (`TranscriptFormatter`, run by `DictationPipeline` wherever GoSpell dictates: the app, the keyboard's warm session and cold start, the Action Button, Control Center and in-keyboard dictation)
 
 `Polished` (full
 sentences: fillers trimmed, each sentence capitalized, "I" too, and ended,
@@ -200,7 +200,7 @@ the tagger, so the tagger never removes a number in digits outside a self-correc
 Parakeet V2 now and then writes a whole sentence in words ("The ratio is five point
 five.", "november twenty second"), mostly in a real voice: 53 of 80 test sentences in
 Ryan's cloned voice against 11 of 80 in macOS voices (macOS 27.2.1,
-`experiments/2026-11-22-hex-numbers`). It writes decimals ("5.5", "3.1.4", "1.2
+`experiments/2026-11-22-gospell-numbers`). It writes decimals ("5.5", "3.1.4", "1.2
 million"), percentages ("20%"), numbers from ten up and compounds ("25", "312",
 "15,000"; commas from 10,000, as Apple writes "8000"), years ("1999", "2026"), money
 with "dollars" ("$5", "$15.40"), two to nine before a plural noun or unit ("2 dogs", "6
@@ -299,7 +299,7 @@ what I say on; where it can't type a dictation for one of these, the words show 
 instead, as In bar does, so Into field never shows nothing (`LiveDictationSettings.liveWords`;
 what is stored doesn't change). Both keys on (1.0.4's two switches together, until another
 choice is picked) types into the field and shows the words over the keys. Neither runs
-before iOS 26, for dictations recorded through Hex (Keep mic warm), when less than 32 MB
+before iOS 26, for dictations recorded through GoSpell (Keep mic warm), when less than 32 MB
 is left once the capture runs (`KeyboardLiveDictation`: the recogniser's share in the
 keyboard with margin, and the speech model's transcription after it), on an error, or
 when the recogniser isn't running 4–6 s into the audio; under 24 MB, or on a memory warning, the recogniser goes
@@ -333,14 +333,14 @@ the toggle is disabled with a reason when Apple Intelligence is unusable.
 ## Multilingual model (Settings › Experiments › Multilingual model (Parakeet), iOS 18+)
 
 Off by default, and disabled on iPhones under 6 GB
-(`MultilingualParakeetSettings`, in the App Group). While on, Hex dictates
+(`MultilingualParakeetSettings`, in the App Group). While on, GoSpell dictates
 Parakeet Ultra's 25 languages (Moondream's post-training of NVIDIA Parakeet TDT
 0.6B v3) with it, which hears them mixed within a sentence (Dutch with English
-words, a TestFlight request); any other dictation language keeps the engine Hex
+words, a TestFlight request); any other dictation language keeps the engine GoSpell
 picks without it. The language Ultra takes is the one set, else the one Automatic
 follows on the keyboard, else the iPhone's first. The experiment never takes
-dictation away: until Ultra is ready, Hex and the keyboard dictate as they would
-with it off, and Hex switches to Ultra once it has loaded (a dictation in flight
+dictation away: until Ultra is ready, GoSpell and the keyboard dictate as they would
+with it off, and GoSpell switches to Ultra once it has loaded (a dictation in flight
 isn't interrupted). Turning it on downloads
 FluidInference's Core ML build (632 MB, pinned to revision `95eaa59`, each file
 checked against its SHA-256 and resumed from its `.partial`) into Application
@@ -348,7 +348,7 @@ Support, out of backups, beside that engine (`ParakeetUltraDownload`): home and 
 switch say "Downloading the multilingual model: 123.4 MB of 632.2 MB" with a bar. A
 dropped connection, or bytes that stop for 20 s, tries again by itself after 2, 4, 8,
 16, then 30 s, starting over whenever it got further; in the background it waits for
-Hex to come back to the front, which picks it up at once (and starts a fresh
+GoSpell to come back to the front, which picks it up at once (and starts a fresh
 connection after 25 s away). After six tries in a row that got nothing further, or a
 refused request or a full iPhone, it says what happened in plain words with Try again
 and Turn off. Once downloaded, Ultra's first load (Core ML's compile, a minute or
@@ -360,14 +360,14 @@ App Group can't be read (a launch before the first unlock). FluidAudio 0.15.5 ha
 `.ultra`, so `ParakeetUltraModel` loads the four models itself and hands
 FluidAudio v3 `AsrModels` (its own loader would replace a folder it can't load
 with v3's download). It is chosen only with 1.5 GB left to load it
-(`os_proc_available_memory`), and never again after a load that ended Hex
+(`os_proc_available_memory`), and never again after a load that ended GoSpell
 (`ParakeetLoadGuard`, its own keys) until Try again beside the status, or the switch
 turned off and on. Unless Settings › Dictation › Speech model in keyboard has it loaded in the
-keyboard (below), the keyboard doesn't use it, so once Hex has it ready
+keyboard (below), the keyboard doesn't use it, so once GoSpell has it ready
 (`MultilingualParakeetSettings.isModelReady`, set after a load, cleared while it's
-missing, set aside or off) and it takes the dictation language, Dictate and the Hex
-key open Hex, as before iOS 26 (a warm session still dictates without leaving the
-app); until then the keyboard dictates itself. Measured on a Mac (`~/dev/experiments/2026-11-21-hex-multilingual-parakeet`):
+missing, set aside or off) and it takes the dictation language, Dictate and the GoSpell
+key open GoSpell, as before iOS 26 (a warm session still dictates without leaving the
+app); until then the keyboard dictates itself. Measured on a Mac (`~/dev/experiments/2026-11-21-gospell-multilingual-parakeet`):
 mixed Dutch-English test sentences 7.5% WER against Apple Speech nl-NL's 26.9%,
 pure Dutch 0.9% (0.4%), pure English 0% (0%). Load memory, compile time and speed
 on an iPhone are unmeasured.
@@ -377,31 +377,31 @@ on an iPhone are unmeasured.
 On unless the person turns it off, and disabled (shown off) on iPhones under
 6 GB (`KeyboardParakeetSettings`, in the App Group; a value stored by hand wins, so a
 switch turned off stays off). Off, nothing of it loads and the keyboard dictates exactly
-as before. On, Hex downloads Parakeet V2 (464 MB, about 700 MB with the keyboard's
+as before. On, GoSpell downloads Parakeet V2 (464 MB, about 700 MB with the keyboard's
 compiled copy) into the App Group (`KeyboardParakeetDownload`; turning it off stops and
-deletes it unless Hex itself dictates with V2). By itself it downloads only where the
+deletes it unless GoSpell itself dictates with V2). By itself it downloads only where the
 keyboard would use it (`KeyboardParakeetDownload.hold`): English dictation without
 Two-language dictation or the Multilingual model, the keyboard's own memory limit
 measured on this iPhone (the keyboard writes footprint plus `os_proc_available_memory`
-to the App Group at each launch and tells Hex with a Darwin notification) and at least
+to the App Group at each launch and tells GoSpell with a Darwin notification) and at least
 `KeyboardParakeetBudget.requiredLimit`, a connection that isn't expensive, constrained or
 cellular (`NWPathMonitor`, `KeyboardParakeetDownload.isUnmetered`: not cellular, even 5G that
 iOS calls not expensive under "Allow More Data on 5G", a personal hotspot or Low Data Mode),
 and 2 GB free.
-It checks at launch, whenever Hex comes to the front, when such a connection returns and
+It checks at launch, whenever GoSpell comes to the front, when such a connection returns and
 when the keyboard reports its limit. Turned on by hand (a stored true, including from
 the builds where it was off by default) it downloads at once on any connection. Until
-then the row says what it waits for: "Downloads after you first use the Hex keyboard",
+then the row says what it waits for: "Downloads after you first use the GoSpell keyboard",
 "Downloads on Wi-Fi", "Downloads once the iPhone has 2 GB free", "Only for English
-dictation". Home shows the same status under "New: Hex's own speech model" wherever the
+dictation". Home shows the same status under "New: GoSpell's own speech model" wherever the
 keyboard would use it (`SpeechModelHomeCard`: the switch on, an iPhone that fits, English
 and no other engine); once it's ready in the keyboard the card can be dismissed, for good. The keyboard's own dictation transcribes with Parakeet in
-the keyboard's process (`HEXKeyboard/KeyboardParakeet.swift`), with the app closed:
+the keyboard's process (`GoSpellKeyboard/KeyboardParakeet.swift`), with the app closed:
 V2 for English, and Parakeet Ultra for a language Experiments › Multilingual model
-dictates once its files are there, in which case Dictate and the Hex key stop opening
-Hex for it. Parakeet's files moved from the app's Application Support into the App
+dictates once its files are there, in which case Dictate and the GoSpell key stop opening
+GoSpell for it. Parakeet's files moved from the app's Application Support into the App
 Group (`SpeechModelStore`), renamed in place at launch (`moveLegacyDownloads`) rather
-than downloaded again; each folder is marked complete (`.hex-complete`) once every file
+than downloaded again; each folder is marked complete (`.gospell-complete`) once every file
 is there, and the keyboard loads only a marked one. The keyboard loads it after its
 first frame and launch work, off the main thread (the preprocessor on the CPU, the rest
 on the CPU and Neural Engine, one chunk at a time, never the GPU, which iOS gives a
@@ -413,7 +413,7 @@ the model isn't loaded, isn't on the Neural Engine (the keyboard's Neural Engine
 else Core ML's compute plan before iOS 27), another transcription runs, the keyboard's
 memory limit (footprint plus `os_proc_available_memory`) is under 131 MB (V2 and Ultra
 alike: with the model loaded the keyboard records at up to 91 MB, and Ultra's
-transcription rose 9 MB in Hex's keyboard, V2's 16 MB), too little is
+transcription rose 9 MB in GoSpell's keyboard, V2's 16 MB), too little is
 left, the recording is longer than 90 s or there isn't room for it (FluidAudio holds the
 whole recording in memory, about 0.42 MB a second measured, counted at 0.5 MB on top of
 the 24 MB transcription headroom; Apple's speech recognition streams the file, so a long
@@ -426,14 +426,14 @@ gets ready beside the engine that dictates. The Settings › Dictation row says 
 downloaded, getting ready in the keyboard, ready, or that the keyboard can't use it now
 (`KeyboardParakeetSettings.keyboardState`, written by the keyboard). Each dictation logs
 its engine, the keyboard's limit, footprint before and at peak, load and transcription
-time to `keyboard-capture-probe.log`. Measured in Hex's keyboard on an iPhone 17 Pro
+time to `keyboard-capture-probe.log`. Measured in GoSpell's keyboard on an iPhone 17 Pro
 (iOS 27.2, keyboard limit 177 MB) with the app force-quit: V2's first load 15.4 s, the
 keyboard recording at 56 MB and peaking at 72 MB while V2 transcribed 9.4 s of audio in
 0.28 s (Apple's speech recognition, same clip: 0.34 s), with 468 MB on the Neural Engine
 outside the footprint. Twenty dictations in one keyboard process stayed on V2 with a
 peak of 96 MB, ten hide-and-show cycles and a five-minute hide kept the process and the
 model, a new process reloaded it in 0.3 s, and Ultra peaked at 66 MB (607 MB on the
-Neural Engine). A probe keyboard (`~/dev/experiments/2026-11-22-hex-keyboard-asr/native`)
+Neural Engine). A probe keyboard (`~/dev/experiments/2026-11-22-gospell-keyboard-asr/native`)
 put 60 s of audio at 0.25–0.5 s; on the CPU, four chunks at once passed the limit
 there, so the keyboard never runs that. Linking FluidAudio into the keyboard grows its binary from
 5.9 to 12.6 MB and, with the switch off, its footprint at launch by about 0.2 MB
@@ -442,7 +442,7 @@ there, so the keyboard never runs that. Linking FluidAudio into the keyboard gro
 ## Clean up what I say (Settings › Dictation › Clean up what I say)
 
 Off by
-default. For every style but `Verbatim`, Hex's dictation cleanup tagger
+default. For every style but `Verbatim`, GoSpell's dictation cleanup tagger
 labels each spoken word KEEP or DELETE on the iPhone and drops ums,
 repeats, and the words a spoken correction replaces ("3pm, actually 4pm"
 becomes "4pm"); a word goes only above P(DELETE) 0.98.
@@ -465,7 +465,7 @@ cleanup, translation, and formatting, in in-keyboard dictation and in the
 app. The tagger is a BERT L-4/H-512 token classifier fine-tuned from
 Google's Apache-2.0 `bert_uncased_L-4_H-512_A-8` on generated examples,
 shipped as an int8 Core ML model (28.5 MB) with its WordPiece vocabulary
-once, in `HEXKeyboard.appex` (`HEXKeyboard/CleanupTagger/`). The app loads
+once, in `GoSpellKeyboard.appex` (`GoSpellKeyboard/CleanupTagger/`). The app loads
 it from there. `CleanupTokenizer` matches Hugging Face's `BertTokenizer`,
 including its Unicode 8.0 character classes. The model loads on the Neural
 Engine or CPU when a dictation starts recording with the experiment on,
@@ -488,7 +488,7 @@ offers **Add to vocabulary** there (`FullKeyboardView+Vocabulary`; a capital onl
 sentence's start gave the word is left out); without Full Access
 the keyboard can't write the App Group, so the word is kept for that session only.
 Before this the keys knew only iOS's text replacements and Contacts names
-(`requestSupplementaryLexicon`), never Hex's list. After
+(`requestSupplementaryLexicon`), never GoSpell's list. After
 transcription, matching words are rewritten to the listed spelling across
 case, spaces, tabs, a single hyphen, and possessive apostrophes, before
 cleanup and again after formatting, so a style cannot undo a spelling. In
@@ -546,7 +546,7 @@ resolved (`settings.dictationLanguage.resolved`). Picking a language prepares
 (and if needed downloads) its model at once, or after the dictation in flight.
 An iPhone without `SpeechTranscriber` (A13: iPhone 11, SE 2nd generation, all
 3–4 GB) dictates English with `DictationTranscriber` on iOS 26+: loading
-Parakeet there sat at 50% (Core ML's compile) until iOS ended Hex, at every
+Parakeet there sat at 50% (Core ML's compile) until iOS ended GoSpell, at every
 launch. Parakeet stays where it fits (6 GB) and before iOS 26, for English only, on
 an iPhone without `SpeechTranscriber`: an iPhone that has it keeps English on Apple
 Speech, on `DictationTranscriber` too while `SpeechTranscriber`'s English is set
@@ -555,9 +555,9 @@ in a row (TestFlight build 126: one failed install sent an iPhone 15 Pro Max to 
 Parakeet download that stalled, until a reinstall). When Apple Speech doesn't answer,
 English stays on it there too, and any other language stays on Apple Speech, which
 says it can't dictate it, rather than going to Parakeet as English
-(`DictationController.appleSpeechLanguage`). After Hex ended twice in a row while
+(`DictationController.appleSpeechLanguage`). After GoSpell ended twice in a row while
 loading Parakeet, the next launches wait for Set up instead of loading it again, for
-a day and on that build only (`ParakeetLoadGuard`: iOS ending Hex in the background
+a day and on that build only (`ParakeetLoadGuard`: iOS ending GoSpell in the background
 or a swipe away mid-load once is no evidence), and a Parakeet download that sits at
 one fraction for 90 s ends with a message. A preparation that says nothing for 30 s
 ("Checking the speech model": Speech or its asset store not answering), or nothing
@@ -566,18 +566,18 @@ new for 120 s after, ends with "The speech model isn't ready. Try again."
 whose row then offers **Try again**. Apple's reservation and asset status are watched
 at 60 s the same way (`SpeechModelDeadline`), a reservation or release that never
 answers is forgotten so the next attempt asks again, and a keyboard check that hangs
-counts no strike toward Hex's handoff (`SpeechModelNeedsHex.keyboardError`).
+counts no strike toward GoSpell's handoff (`SpeechModelNeedsGoSpell.keyboardError`).
 **When a model won't install**
 (`SpeechModelInstall`, shared by the app and in-keyboard dictation): Apple lists
 some languages whose `SpeechTranscriber` asset never arrives ("transcription.ru
-asset not found after attempted download"), so Hex then installs the same
+asset not found after attempted download"), so GoSpell then installs the same
 language on `DictationTranscriber`, and after the second such failure in a row goes
 straight to it for three days. A download whose progress doesn't move for 60 s is
 given up on. When neither module installs while the iPhone is online, twice in a row,
 Automatic sets the language aside for three days and dictates the next one ("Russian
 isn't available on this iPhone yet. Using English."); a language picked by hand says
 so and offers that one ("Try English", with **Use English** in the app). A model that
-installs clears the failures so far. Only Hex's own failures set anything aside:
+installs clears the failures so far. Only GoSpell's own failures set anything aside:
 in-keyboard dictation's are often its own (each process holds its own reservation, one
 released, removed or over Apple's limit reads as not installed there, "Too many asset
 locales allocated"). With nothing else to move
@@ -585,22 +585,22 @@ to (an English-only iPhone), Automatic tries the set-aside language again
 rather than none, so "Apple's speech recognition can't dictate this language" means neither
 module lists any of the iPhone's languages. Offline or stalled, it
 says the download failed and tries again next time. In the keyboard, a model it
-can't get itself says "Hex couldn't transcribe that. Try again." the first time, and the
-second time in a row (within 6 h, no model in place since) "Open Hex to download
-English.": Dictate and the Hex key then open Hex, which downloads it, until a model
-installs (in either process; Hex checks again each time it comes to the front), a
-language is chosen, or a day passes (`SpeechModelNeedsHex`,
-`settings.dictationLanguage.keyboardNeedsHex`). Only a language Hex itself set aside keeps
+can't get itself says "GoSpell couldn't transcribe that. Try again." the first time, and the
+second time in a row (within 6 h, no model in place since) "Open GoSpell to download
+English.": Dictate and the GoSpell key then open GoSpell, which downloads it, until a model
+installs (in either process; GoSpell checks again each time it comes to the front), a
+language is chosen, or a day passes (`SpeechModelNeedsGoSpell`,
+`settings.dictationLanguage.keyboardNeedsGoSpell`). Only a language GoSpell itself set aside keeps
 its sentence in the keyboard ("Russian isn't available on this iPhone yet. Try English."): the
 keyboard sets nothing aside, and through TestFlight build 147 its own failed install of a
 language picked by hand on an English iPhone (Hebrew, Norwegian, German) said it wasn't
-available at every dictation and never went to Hex, which could download it. Every other
-failure is Hex's to download, Hebrew included (`SpeechModelNeedsHex.keyboardError`).
-Coming back to Hex after it was in the background starts over a check that failed or
+available at every dictation and never went to GoSpell, which could download it. Every other
+failure is GoSpell's to download, Hebrew included (`SpeechModelNeedsGoSpell.keyboardError`).
+Coming back to GoSpell after it was in the background starts over a check that failed or
 never answered, and a check that gives up bumps its generation so a
 late answer can't reopen the row (`KeyboardSpeechPreparation`). Reservations make room
 under `AssetInventory.maximumReservedLocales` by releasing others first. Only
-Hex's own error text reaches the app or keyboard (`HexDescribedError`); Apple's
+GoSpell's own error text reaches the app or keyboard (`GoSpellDescribedError`); Apple's
 and other packages' descriptions go to logs, however readable.
 The setup sheet's Speech model row names the language ("Norwegian Bokmål ·
 Apple"). Steps that only know English follow the language: Clean up what I
@@ -618,12 +618,12 @@ language rather than a guess. Custom vocabulary works in any language.
 Off by default
 (`experiments.voiceIsolation`, App Group). While on, the app records in
 `AVAudioSession`'s `.voiceChat` mode instead of `.measurement`, so Control
-Center's Mic Mode can offer Voice Isolation while Hex records, and
+Center's Mic Mode can offer Voice Isolation while GoSpell records, and
 in-keyboard dictation asks `getUserMedia` for echo cancellation and noise
 suppression (automatic gain stays off). Other audio may be lowered while
 recording, and Bluetooth headphones may switch to their hands-free call
 profile. With it off, both record exactly as before. Not verified on a
-device: that Control Center actually offers Voice Isolation for Hex, and how
+device: that Control Center actually offers Voice Isolation for GoSpell, and how
 the mode changes a recording's level.
 
 ## Two-language dictation (Settings › Experiments › Two-language dictation, iOS 26+)
@@ -665,7 +665,7 @@ iPhone, and the simulator can't transcribe.
 ## Switching the dictation language in the keyboard (iOS 26+, Full Access)
 
 The dictation bar shows the language beside the style ("Norsk ⌄") and opens a
-tray of chips; the full keyboard's Hex key menu has a Language row with its
+tray of chips; the full keyboard's GoSpell key menu has a Language row with its
 own page, and the space bar names the language faintly ("English", "Norsk"),
 unless the keyboard switches between two or more languages: then it names the keyboard's.
 Both offer Automatic plus up to five languages: the one set, the ones picked
@@ -684,18 +684,18 @@ more than one of that language ("Español (US)" or "Español (ES)", "English
 say which variant dictation actually uses. Under Automatic, Settings ›
 Dictation language says the same itself while the keyboard follows: "Follows
 keyboard: English (US) · Spanish (US)" names each keyboard language's
-dictation language, and is refreshed when Hex comes back to the foreground,
+dictation language, and is refreshed when GoSpell comes back to the foreground,
 not only when the row
-appears. A long press on a language (a chip, or a row on the Hex key menu's Language
+appears. A long press on a language (a chip, or a row on the GoSpell key menu's Language
 page) shows **Remove**, which takes it off (`settings.dictationLanguage.removed`, so one
 of the iPhone's own languages stays off too) and puts the one set back on Automatic;
 Settings › Dictation language's **Remove from keyboard** does the same (TestFlight build
-56: a language couldn't be removed, and one could only be added in Hex). **More
+56: a language couldn't be removed, and one could only be added in GoSpell). **More
 languages…** lists every other language Apple Speech has, the iPhone's own first, and
 picking one there adds it (in the dictation bar the list takes the keys' place). Removing
 or adding one never changes Automatic, which still follows the keyboard's language.
-A pick writes the same App Group setting as Hex's menu, so
-in-keyboard dictation uses it at once; a warm Hex session follows it within
+A pick writes the same App Group setting as GoSpell's menu, so
+in-keyboard dictation uses it at once; a warm GoSpell session follows it within
 100 ms and prepares the language between dictations, and a handoff or the
 Action Button picks it up before recording.
 
@@ -708,16 +708,16 @@ can't (no pack, a pair Apple can't translate, or a translation that fails
 twice, each in a new `TranslationSession`, never one kept), the
 transcript goes in as spoken and the keyboard says so for 8 s:
 "Couldn't translate, pasted as spoken" over the fix ("Download Chinese in
-Settings"), whose Open Hex (the dictation bar: a tap) opens Settings ›
-Dictation (`hex-dictation://keyboard/translation`). Settings keeps the
+Settings"), whose Open GoSpell (the dictation bar: a tap) opens Settings ›
+Dictation (`gospell-dictation://keyboard/translation`). Settings keeps the
 last failure (`experiments.translateDictation.lastFailure`, with Apple's
 error code, never the text) beside the download until a dictation
 translates. With Hinglish on, Hindi going into another language is
 translated from its Devanagari, and romanized only if it goes in as
 spoken; Greeklish does the same for Greek, translated from Greek letters.
 Where you dictate, a "Translate to
-English" switch turns it on or off without opening Hex (testers asked for
-a button, not a setting): a row in the full keyboard's Hex key menu, lit
+English" switch turns it on or off without opening GoSpell (testers asked for
+a button, not a setting): a row in the full keyboard's GoSpell key menu, lit
 with a checkmark while on, and a chip in the dictation bar's language tray.
 It writes Settings' own switch (`experiments.translateDictation`), the
 only switch: nothing else turns translation off (build 56's "Paste in
@@ -727,18 +727,18 @@ it), and Settings re-reads it when it shows. Below it, Translation language list
 up to six targets (the current one, English, the dictation and preferred
 languages, then common ones, only those Apple translates into); picking one
 sets `experiments.translateDictation.target` and turns translation on.
-Settings keeps the full language list and the pack download under Insert in. While dictations paste translated, the Hex
+Settings keeps the full language list and the pack download under Insert in. While dictations paste translated, the GoSpell
 key wears the target's code ("EN") in its corner, the dictation bar shows
-"→ EN" beside the Hex mark, and the space bar reads "Español → English".
+"→ EN" beside the GoSpell mark, and the space bar reads "Español → English".
 The App Group carries the switch, so in-keyboard dictation, a warm
 session, and the Action Button all follow it. The keyboard shares the
-app's String Catalog, so the Hex key menu is in Chinese on a Chinese iPhone.
+app's String Catalog, so the GoSpell key menu is in Chinese on a Chinese iPhone.
 
-## Screen stays on while dictating in Hex
+## Screen stays on while dictating in GoSpell
 
 Recording and transcribing set
 `isIdleTimerDisabled`, and every way out (done, cancel, failure) hands the
-screen back to Auto-Lock. iOS honors it only while Hex is in front: the
+screen back to Auto-Lock. iOS honors it only while GoSpell is in front: the
 handoff screen and in-app recording, not a warm session or in-keyboard
 dictation, where another app is in front and a keyboard extension has no
 public way to keep the screen on.
@@ -750,21 +750,21 @@ public way to keep the screen on.
   already-accepted transcription (deliverable for 30s), while a stale
   winding-down inference can never overwrite a newer capture or delete its
   audio file.
-- A keyboard's dictation never leaves the keyboard stuck. Hex reads the
+- A keyboard's dictation never leaves the keyboard stuck. GoSpell reads the
   keyboard's Done and Cancel and heartbeats the job's snapshot until its
   text is in, in a warm session and in One shot alike (One shot used to
   ignore them, so a handed-off recording ran to its 60 s limit), and asks
   iOS for background time to finish the text. The keyboard takes a
   recording or transcription whose heartbeat is more than 6 s old as over
-  (`KeyboardSnapshot.isOrphanedJob`): a Hex that ended, crashed or was
+  (`KeyboardSnapshot.isOrphanedJob`): a GoSpell that ended, crashed or was
   suspended mid-job used to hold every keyboard in recording for good. A
   result that missed its 30 s to go in by itself stays offered as **Paste
   dictation** for 10 minutes, in the full keyboard's strip and in the dictation
   bar's top row (on an iPad it once offered nothing). A failure or note
-  from Hex ("Another app is using the microphone. Try again.") shows for 8 s
-  after Hex wrote it (`KeyboardSnapshot.messageAt`), not for as long as it
+  from GoSpell ("Another app is using the microphone. Try again.") shows for 8 s
+  after GoSpell wrote it (`KeyboardSnapshot.messageAt`), not for as long as it
   stays in the App Group; meanwhile both keyboards dictate in the keyboard, and
-  after it a warm session's next start is Hex's Try again.
+  after it a warm session's next start is GoSpell's Try again.
 - An in-keyboard dictation the keyboard is dismissed from (or another app
   comes forward) stops its capture at once, keeps what was said, and
   finishes without the keyboard; its text is held in the App Group
@@ -795,14 +795,14 @@ public way to keep the screen on.
   notification on a phone, with the ringer on and on silent, is unverified.
 - Phone/FaceTime/Siri audio interruptions finalize captures `>= 300 ms` so
   spoken words are not lost, cancel shorter taps cleanly out of `Listening`,
-  and resume warm keepalive when iOS signals `.shouldResume`. Hex's own
+  and resume warm keepalive when iOS signals `.shouldResume`. GoSpell's own
   recording (the app, a warm session's keepalive and captures) is
   `playAndRecord` with `mixWithOthers` and A2DP output, never `duckOthers`,
   so it doesn't interrupt another app's video or music, and ending a session
   deactivates with `notifyOthersOnDeactivation`. It sets no preferred sample
   rate: `playAndRecord` runs the microphone and the output at one rate, and
   the 16 kHz it used to ask for moved everything the iPhone played and
-  recorded (a screen recording's audio too) to 16 kHz while Hex held the
+  recorded (a screen recording's audio too) to 16 kHz while GoSpell held the
   session (48 kHz to 16 kHz in the simulator). The recorder writes 16 kHz
   itself, and the keepalive is input only (an `AVAudioEngine` input tap, no
   output node: its output element is off). A keepalive that keeps stopping by
@@ -834,13 +834,13 @@ public way to keep the screen on.
 
 ## Action Button, Control Center, Back Tap & Live Activity
 
-- `DictateWithHexIntent` (`AudioRecordingIntent` + `LiveActivityIntent`) and
-  `HexDictationControl` (`ControlWidget`) start recording on first press with
+- `DictateWithGoSpellIntent` (`AudioRecordingIntent` + `LiveActivityIntent`) and
+  `GoSpellDictationControl` (`ControlWidget`) start recording on first press with
   a Dynamic Island / Lock Screen Live Activity (`Stop` and `Cancel` buttons)
   and transcribe + copy to the clipboard on second press.
 - Only these dictations get a Live Activity; the keyboard and the app show
   their own recording UI. It shows Copied for 2 s, and a cancel, failure, or
   empty capture ends it at once, under a background task so a suspending app
   can't leave it behind (`LiveActivityCoordinator`). Every end also ends any
-  other Hex activity, and launch, returning to Hex, and ending the warm
+  other GoSpell activity, and launch, returning to GoSpell, and ending the warm
   session (Keep mic warm › Off) end any no dictation owns.

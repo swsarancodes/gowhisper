@@ -220,7 +220,7 @@ mod tests {
     #[test]
     fn newest_copyable_requires_keep_recordings_and_copy_dictation_audio() {
         let directory = std::env::temp_dir().join(format!(
-            "hex-copy-newest-{}-{}",
+            "gospell-copy-newest-{}-{}",
             std::process::id(),
             crate::history::now_ms()
         ));
@@ -285,7 +285,7 @@ mod tests {
     #[test]
     fn transcribe_again_returns_once_the_run_ends() {
         let directory = std::env::temp_dir().join(format!(
-            "hex-retranscribe-{}-{}",
+            "gospell-retranscribe-{}-{}",
             std::process::id(),
             crate::history::now_ms()
         ));

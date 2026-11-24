@@ -1,5 +1,5 @@
 //! Linux dictation shortcuts: the one state machine every input feeds, the
-//! X11 key grabs, the Wayland shortcuts portal, and the `hex` commands a
+//! X11 key grabs, the Wayland shortcuts portal, and the `gospell` commands a
 //! desktop keybinding runs. Dictation sees only [`HotkeyEvent`]s.
 
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -135,7 +135,7 @@ pub(crate) fn mouse_name(button: u8) -> Option<String> {
 
 impl LinuxHotkey {
     /// Whether X11 and the portal can bind this shortcut's key. Settings
-    /// and `hex settings set` both check it before saving.
+    /// and `gospell settings set` both check it before saving.
     pub(crate) fn validate(&self) -> Result<()> {
         if self.key.trim().is_empty() {
             return Err(eyre!("Linux hotkeys require a non-modifier key"));
@@ -159,7 +159,7 @@ impl LinuxHotkey {
     pub(crate) fn portal_trigger(&self) -> Result<String> {
         if mouse_button(&self.key).is_some() {
             return Err(eyre!(
-                "Wayland's shortcuts portal cannot request mouse buttons; bind the hex commands in the desktop settings"
+                "Wayland's shortcuts portal cannot request mouse buttons; bind the gospell commands in the desktop settings"
             ));
         }
         // A portal shortcut holds its key from every app, so the portal
@@ -229,10 +229,10 @@ const KEY_REPEAT_GAP: Duration = Duration::from_secs(1);
 /// or a release is settling.
 const POLL_INTERVAL: Duration = Duration::from_millis(5);
 /// How long a listening portal waits for the desktop's next signal: a press
-/// wakes it at once, and this only bounds how long a queued `hex` command
+/// wakes it at once, and this only bounds how long a queued `gospell` command
 /// waits behind it.
 const PORTAL_WAIT: Duration = Duration::from_millis(50);
-/// How long a monitor without a portal sleeps: a `hex` command wakes it, and
+/// How long a monitor without a portal sleeps: a `gospell` command wakes it, and
 /// its next portal check is due much later than this.
 const COMMAND_WAIT: Duration = Duration::from_millis(250);
 /// Binding through the portal can wait for the user to approve a dialog.
@@ -245,12 +245,12 @@ pub(crate) enum HotkeyEvent {
     /// dictation.
     Start {
         flavour: DictationFlavour,
-        /// A `hex` command started it, not a shortcut press (Labs › Send
+        /// A `gospell` command started it, not a shortcut press (Labs › Send
         /// long dictations never sends a command's capture).
         command: bool,
     },
     Finish,
-    /// `hex dictation stop --print` finished the dictation: its transcript
+    /// `gospell dictation stop --print` finished the dictation: its transcript
     /// goes to the reply instead of being pasted.
     FinishPrinting(crate::control::PrintReply),
     /// Labs › Stop phrase heard its words: the hands-free capture ends as the
@@ -268,24 +268,24 @@ pub(crate) enum HotkeyEvent {
     CaptureUp,
 }
 
-/// What a `hex` command asks of the running listener. Each one is
+/// What a `gospell` command asks of the running listener. Each one is
 /// idempotent: starting while recording or stopping while idle does nothing.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub(crate) enum ShortcutCommand {
     DictationStart,
     DictationStop,
     DictationToggle,
-    /// `hex dictation cancel`: discards whatever records, in any mode.
+    /// `gospell dictation cancel`: discards whatever records, in any mode.
     DictationCancel,
     PasteLast,
-    /// `hex typed-text`: the typed-text shortcut's one job.
+    /// `gospell typed-text`: the typed-text shortcut's one job.
     TypedText,
-    /// `hex dictation start --raw` and `toggle --raw`.
+    /// `gospell dictation start --raw` and `toggle --raw`.
     DictationStartRaw,
     DictationToggleRaw,
 }
 
-/// What the listener's command queue carries: a `hex` command, or a
+/// What the listener's command queue carries: a `gospell` command, or a
 /// printing stop with the reply only its own connection waits on.
 #[derive(Debug, Eq, PartialEq)]
 pub(crate) enum ListenerCommand {
@@ -327,16 +327,16 @@ pub(crate) struct HotkeyOptions {
     /// Annotate's one key, while Annotate is on: tap to start and stop,
     /// hold to draw.
     pub(crate) capture: Option<LinuxHotkey>,
-    /// Toggle mode's cancel shortcut, which Hex takes only while a
+    /// Toggle mode's cancel shortcut, which GoSpell takes only while a
     /// recording runs; `None` in Hold mode, which has no cancel.
     pub(crate) cancel: Option<LinuxHotkey>,
 }
 
-/// Whether Annotate draws now, so Escape is Hex's (it stops drawing).
+/// Whether Annotate draws now, so Escape is GoSpell's (it stops drawing).
 fn annotate_drawing() -> bool {
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     return crate::capture_host::drawing();
-    #[cfg(not(hex_capture))]
+    #[cfg(not(gospell_capture))]
     false
 }
 
@@ -348,7 +348,7 @@ pub(crate) struct HotkeyStatus {
     configurable: Arc<AtomicBool>,
     /// Settings asked for that dialog.
     configure: Arc<AtomicBool>,
-    /// The person disabled Hex: clear its shortcuts from the desktop's list
+    /// The person disabled GoSpell: clear its shortcuts from the desktop's list
     /// when the listener stops.
     forget: Arc<AtomicBool>,
     keys: ShortcutKeys,
@@ -371,12 +371,12 @@ impl HotkeyStatus {
         self.configurable.load(Ordering::Acquire)
     }
 
-    /// Opens the desktop's dialog for Hex's shortcuts, when it has one.
+    /// Opens the desktop's dialog for GoSpell's shortcuts, when it has one.
     pub(crate) fn configure(&self) {
         self.configure.store(true, Ordering::Release);
     }
 
-    /// Clears Hex's shortcuts from the desktop's list once the listener
+    /// Clears GoSpell's shortcuts from the desktop's list once the listener
     /// stops, as Disable does; a restart for a settings change keeps them.
     pub(crate) fn forget_on_stop(&self) {
         self.forget.store(true, Ordering::Release);
@@ -391,18 +391,18 @@ impl HotkeyStatus {
 }
 
 /// How long after a Wayland shortcut's last event its modifiers may still be
-/// down. Hex cannot see them there, so this is the bounded estimate.
+/// down. GoSpell cannot see them there, so this is the bounded estimate.
 const MODIFIER_GRACE: Duration = Duration::from_millis(250);
 /// The longest a press without its release holds a paste back, for desktops
 /// that drop the release.
 const HELD_LIMIT: Duration = Duration::from_secs(2);
 
-/// When the keys of a Hex shortcut may still be down. Some Wayland
+/// When the keys of a GoSpell shortcut may still be down. Some Wayland
 /// compositors (Hyprland) add every held physical modifier to virtual
-/// keyboard input, turning a paste's Ctrl+V into Ctrl+Alt+V. Hex reads no
+/// keyboard input, turning a paste's Ctrl+V into Ctrl+Alt+V. GoSpell reads no
 /// input devices, so the paste waits on the shortcut's own events: until a
 /// modifier shortcut's release (portal Deactivated) plus [`MODIFIER_GRACE`],
-/// and [`MODIFIER_GRACE`] after a `hex` command, whose keybinding is unknown.
+/// and [`MODIFIER_GRACE`] after a `gospell` command, whose keybinding is unknown.
 #[derive(Clone, Debug, Default)]
 pub(crate) struct ShortcutKeys(Arc<Mutex<HeldKeys>>);
 
@@ -453,7 +453,7 @@ impl ShortcutKeys {
             .held = 0;
     }
 
-    /// Whether a Hex shortcut is down now (pressed without its release), so
+    /// Whether a GoSpell shortcut is down now (pressed without its release), so
     /// a newer capture owns the modifiers a paste sees held.
     pub(crate) fn any_held(&self) -> bool {
         self.0
@@ -485,7 +485,7 @@ impl ShortcutKeys {
 }
 
 /// Whether a portal trigger holds modifiers: the one the desktop granted,
-/// else the one Hex asked for.
+/// else the one GoSpell asked for.
 fn trigger_has_modifiers(granted: Option<&str>, requested: &LinuxHotkey) -> bool {
     match granted.map(str::trim).filter(|trigger| !trigger.is_empty()) {
         Some(trigger) => crate::linux::portal::readable_trigger(trigger).contains('+'),
@@ -495,14 +495,14 @@ fn trigger_has_modifiers(granted: Option<&str>, requested: &LinuxHotkey) -> bool
 
 /// The portal id of a shortcut asking for `trigger`. A desktop keeps the
 /// trigger it stored for an id and ignores a later `preferred_trigger`
-/// (GNOME, KDE), so a shortcut changed in Hex gets a new id, which the
+/// (GNOME, KDE), so a shortcut changed in GoSpell gets a new id, which the
 /// desktop binds to the new trigger (#575). An unchanged shortcut keeps its
 /// id, and with it any trigger the user assigned in the desktop.
 ///
 /// With `desktop_assigns` (Hyprland), the desktop ignores the trigger and
 /// the user binds the id by name in its config, so the id is the bare
-/// `base`: recording another key in Hex must not leave that bind pointing
-/// at a name Hex no longer listens to (#1376).
+/// `base`: recording another key in GoSpell must not leave that bind pointing
+/// at a name GoSpell no longer listens to (#1376).
 fn portal_shortcut_id(base: &str, trigger: &str, desktop_assigns: bool) -> String {
     if desktop_assigns {
         return base.to_string();
@@ -510,9 +510,9 @@ fn portal_shortcut_id(base: &str, trigger: &str, desktop_assigns: bool) -> Strin
     format!("{base}-{}", trigger.replace('+', "-"))
 }
 
-/// The name Hex 3.3 and earlier gave `shortcut` on Hyprland, the trigger in
+/// The name GoSpell 3.3 and earlier gave `shortcut` on Hyprland, the trigger in
 /// the id (`dictation-ALT-space`), which configs written then still bind.
-/// Hex binds it beside the bare id so those binds keep working while the
+/// GoSpell binds it beside the bare id so those binds keep working while the
 /// recorded key is the one they were written for. Only the shortcuts 3.3
 /// had get one.
 fn hyprland_legacy_id(shortcut: Shortcut, trigger: &str) -> Option<String> {
@@ -523,7 +523,7 @@ fn hyprland_legacy_id(shortcut: Shortcut, trigger: &str) -> Option<String> {
     .then(|| portal_shortcut_id(shortcut.portal_id().0, trigger, false))
 }
 
-/// The trigger the desktop granted a shortcut, by the id Hex bound it under.
+/// The trigger the desktop granted a shortcut, by the id GoSpell bound it under.
 fn granted_trigger<'a>(
     granted: &'a std::collections::HashMap<String, Option<String>>,
     ids: &[Option<String>; Shortcut::ALL.len()],
@@ -535,7 +535,7 @@ fn granted_trigger<'a>(
         .and_then(Option::as_deref)
 }
 
-/// What the desktop granted, as Settings shows it: each shortcut Hex asked
+/// What the desktop granted, as Settings shows it: each shortcut GoSpell asked
 /// for. With `desktop_assigns` (Hyprland), a shortcut without a trigger is
 /// unconfirmed rather than refused.
 fn project_grants(
@@ -633,7 +633,7 @@ enum Input {
     Released(Shortcut),
     /// Escape, which only stops Annotate's drawing (#786).
     Escape,
-    /// The cancel shortcut, pressed while Hex held it.
+    /// The cancel shortcut, pressed while GoSpell held it.
     Cancel,
     /// The backend can no longer tell which keys are down.
     Lost,
@@ -706,7 +706,7 @@ impl ShortcutState {
         !matches!(self.key_hold, KeyHold::Up)
     }
 
-    /// Whether the cancel shortcut is Hex's now: only in Toggle mode, and
+    /// Whether the cancel shortcut is GoSpell's now: only in Toggle mode, and
     /// only while something records, so the key stays with every app
     /// otherwise.
     fn wants_cancel(&self) -> bool {
@@ -801,7 +801,7 @@ impl ShortcutState {
             // Escape while Annotate draws stops drawing, never the recording,
             // and it ends no dictation (#786).
             Input::Escape => {
-                #[cfg(hex_capture)]
+                #[cfg(gospell_capture)]
                 crate::capture_host::exit_drawing();
                 None
             }
@@ -922,7 +922,7 @@ impl ShortcutState {
             }
             Input::Released(Shortcut::PasteLast) => None,
             // The typed-text job owns no capture state: pressing its shortcut
-            // or sending `hex typed-text` while idle asks for one job, and
+            // or sending `gospell typed-text` while idle asks for one job, and
             // while recording it does nothing at all.
             Input::Pressed(Shortcut::TypedText) | Input::Command(ShortcutCommand::TypedText) => {
                 self.idle().then_some(HotkeyEvent::TypedText)
@@ -949,7 +949,7 @@ impl ShortcutState {
     }
 }
 
-/// `hex` commands for whichever monitor runs now. The listener keeps one
+/// `gospell` commands for whichever monitor runs now. The listener keeps one
 /// queue while it registers its shortcuts again after a settings change.
 #[derive(Clone)]
 pub(crate) struct CommandQueue {
@@ -958,8 +958,8 @@ pub(crate) struct CommandQueue {
     /// phrase finishing a hands-free capture); nothing outside sends these.
     self_sender: mpsc::Sender<ListenerCommand>,
     self_commands: Arc<Mutex<Receiver<ListenerCommand>>>,
-    /// Whether `hex` commands reach this listener: they go to the service,
-    /// never to a foreground `hex dictate` process.
+    /// Whether `gospell` commands reach this listener: they go to the service,
+    /// never to a foreground `gospell dictate` process.
     connected: bool,
 }
 
@@ -976,7 +976,7 @@ impl From<Receiver<ListenerCommand>> for CommandQueue {
 }
 
 impl CommandQueue {
-    /// A queue nothing sends to: the foreground `hex dictate` listener.
+    /// A queue nothing sends to: the foreground `gospell dictate` listener.
     pub(crate) fn disconnected() -> Self {
         let (self_sender, self_commands) = mpsc::channel();
         Self {
@@ -987,7 +987,7 @@ impl CommandQueue {
         }
     }
 
-    /// Whether this listener's `hex` commands arrive through this queue.
+    /// Whether this listener's `gospell` commands arrive through this queue.
     pub(crate) fn connected(&self) -> bool {
         self.connected
     }
@@ -1048,9 +1048,9 @@ impl Dispatcher {
         self.pending.extend(event);
     }
 
-    /// Feeds every queued `hex` command, and the listener's own requests.
+    /// Feeds every queued `gospell` command, and the listener's own requests.
     fn commands(&mut self) {
-        // `hex dictate` has no queue anything sends to: only its own requests
+        // `gospell dictate` has no queue anything sends to: only its own requests
         // and shortcuts remain.
         if self.commands.connected() {
             let commands = self
@@ -1076,7 +1076,7 @@ impl Dispatcher {
         }
     }
 
-    /// Waits up to `timeout` for a `hex` command, so a monitor with no
+    /// Waits up to `timeout` for a `gospell` command, so a monitor with no
     /// shortcuts to watch sleeps until one arrives, then feeds it and any
     /// others already queued.
     fn wait_for_commands(&mut self, timeout: Duration) {
@@ -1251,7 +1251,7 @@ impl Backend {
         self.run_portal(portal, dispatcher, binding, options)
     }
 
-    /// Serves `hex` commands, and with `probe` looks for the shortcuts
+    /// Serves `gospell` commands, and with `probe` looks for the shortcuts
     /// portal again from time to time: a portal started before the desktop's
     /// session environment exposes none until it is restarted (#875).
     /// Returns the portal once it appears, or `None` when the listener stops.
@@ -1263,7 +1263,7 @@ impl Backend {
         self.mark_ready(DesktopShortcuts::Commands);
         let mut probe = probe.then(|| crate::linux::portal::PortalProbe::new(self.stop.clone()));
         while !self.stopping() {
-            // No portal: `hex` commands are the only input, so wait on their
+            // No portal: `gospell` commands are the only input, so wait on their
             // queue; the probe is due far less often than this.
             dispatcher.wait_for_commands(COMMAND_WAIT);
             if !dispatcher.flush()? {
@@ -1348,10 +1348,10 @@ impl Backend {
         if let Err(error) = portal.forget_legacy_kde_shortcuts(&keep) {
             tracing::warn!(
                 error = format!("{error:#}"),
-                "could not remove Hex's old shortcuts from KDE"
+                "could not remove GoSpell's old shortcuts from KDE"
             );
         }
-        // GNOME asks for approval whenever Hex binds shortcuts it hasn't
+        // GNOME asks for approval whenever GoSpell binds shortcuts it hasn't
         // approved, as after a shortcut change; dismissing that dialog fails
         // the bind (#723), and Enable binds again, so the dialog returns.
         let granted = match portal.bind(&shortcuts, &self.stop) {
@@ -1366,7 +1366,7 @@ impl Backend {
                 tracing::warn!(
                     error = format!("{error:#}"),
                     desktop = std::env::var("XDG_CURRENT_DESKTOP").unwrap_or_default(),
-                    "the shortcuts portal's backend could not bind Hex's shortcuts; dictation follows the hex commands, which reach the service listener (`hex start`) but not a foreground `hex dictate`"
+                    "the shortcuts portal's backend could not bind GoSpell's shortcuts; dictation follows the gospell commands, which reach the service listener (`gospell start`) but not a foreground `gospell dictate`"
                 );
                 drop(portal);
                 self.wait_for_portal(&mut dispatcher, false)?;
@@ -1374,7 +1374,7 @@ impl Backend {
             }
             Err(error) => {
                 return Err(error.wrap_err(
-                    "the desktop did not approve Hex's shortcuts; choose Enable to ask again",
+                    "the desktop did not approve GoSpell's shortcuts; choose Enable to ask again",
                 ));
             }
         };
@@ -1396,13 +1396,13 @@ impl Backend {
                 None if shortcut.unconfirmed => {
                     tracing::info!(
                         name = %shortcut.name,
-                        "the desktop assigns this Hex shortcut's key itself; Hex cannot confirm it"
+                        "the desktop assigns this GoSpell shortcut's key itself; GoSpell cannot confirm it"
                     );
                 }
                 None => {
                     tracing::warn!(
                         name = %shortcut.name,
-                        "the desktop did not grant a Hex shortcut"
+                        "the desktop did not grant a GoSpell shortcut"
                     );
                 }
                 Some(_) => {}
@@ -1421,7 +1421,7 @@ impl Backend {
         };
         while !self.stopping() {
             // Wakes on the desktop's signals; the timeout only lets queued
-            // `hex` commands through while nothing is pressed.
+            // `gospell` commands through while nothing is pressed.
             for event in portal.wait_events(PORTAL_WAIT) {
                 let input = match event {
                     crate::linux::portal::Event::Pressed(id) => match shortcut_for(&id) {
@@ -1452,7 +1452,9 @@ impl Backend {
                         dispatcher.keys.released_all();
                         dispatcher.input(Input::Lost);
                         let _ = dispatcher.flush();
-                        return Err(eyre!("the desktop closed Hex's shortcuts portal session"));
+                        return Err(eyre!(
+                            "the desktop closed GoSpell's shortcuts portal session"
+                        ));
                     }
                 };
                 dispatcher.input(input);
@@ -1481,7 +1483,7 @@ impl Backend {
         {
             tracing::warn!(
                 error = format!("{error:#}"),
-                "could not clear Hex's shortcuts from the desktop"
+                "could not clear GoSpell's shortcuts from the desktop"
             );
         }
         Ok(())
@@ -1504,7 +1506,7 @@ mod tests {
         flavour: DictationFlavour::Normal,
         command: false,
     };
-    /// A `hex dictation start` or `toggle` command's start.
+    /// A `gospell dictation start` or `toggle` command's start.
     const COMMAND_START: HotkeyEvent = HotkeyEvent::Start {
         flavour: DictationFlavour::Normal,
         command: true,
@@ -1705,7 +1707,7 @@ mod tests {
         assert_eq!(test.events, [SECOND, Finish, START, Finish, SECOND, Finish]);
     }
 
-    /// #786: only the shortcuts Hex asked for show; a key the desktop still
+    /// #786: only the shortcuts GoSpell asked for show; a key the desktop still
     /// keeps for the removed Cancel dictation stays out.
     #[test]
     fn only_requested_shortcuts_are_shown() {
@@ -1927,7 +1929,7 @@ mod tests {
         }
     }
 
-    /// 04.1: X11 grabs every key the window records and `hex settings`
+    /// 04.1: X11 grabs every key the window records and `gospell settings`
     /// accepts, navigation keys included; an unknown key fails validation
     /// before it is saved.
     #[test]
@@ -2118,8 +2120,8 @@ mod tests {
         assert_eq!(granted_trigger(&granted, &ids, Shortcut::PasteLast), None);
     }
 
-    /// #1376: Hyprland binds Hex's shortcuts by name in its config and
-    /// ignores the trigger, so a key recorded in Hex keeps the same name.
+    /// #1376: Hyprland binds GoSpell's shortcuts by name in its config and
+    /// ignores the trigger, so a key recorded in GoSpell keeps the same name.
     #[test]
     fn a_desktop_that_assigns_keys_keeps_one_shortcut_id() {
         let id = |shortcut: Shortcut, trigger: &str| {
@@ -2136,8 +2138,8 @@ mod tests {
         );
     }
 
-    /// A config written for 3.3 binds `anomaly.hex:dictation-ALT-space`;
-    /// Hex binds that name too, for the key it was written for.
+    /// A config written for 3.3 binds `com.goml.gospell:dictation-ALT-space`;
+    /// GoSpell binds that name too, for the key it was written for.
     #[test]
     fn hyprland_keeps_the_names_3_3_bound() {
         assert_eq!(
@@ -2568,7 +2570,7 @@ mod tests {
         assert_eq!(test.events, [START, Cancel, START, Cancel, START, Finish]);
     }
 
-    /// Cancelling mid-hold (for example `hex dictation cancel` while a desktop
+    /// Cancelling mid-hold (for example `gospell dictation cancel` while a desktop
     /// is repeating the shortcut) clears held/repeating state so `expire()`
     /// emits nothing and a fresh press right after starts a new dictation.
     #[test]
@@ -2601,7 +2603,7 @@ mod tests {
         assert_eq!(test.events, [START, Cancel, START, Cancel]);
     }
 
-    /// Hold mode has no cancel: the key is never Hex's, even while a
+    /// Hold mode has no cancel: the key is never GoSpell's, even while a
     /// recording runs, and a press of it ends nothing.
     #[test]
     fn cancel_is_ignored_in_hold_mode() {
@@ -2623,7 +2625,7 @@ mod tests {
         assert!(test.events.iter().all(|event| *event != Cancel));
     }
 
-    /// While nothing records, Hex doesn't take the cancel key, so it stays
+    /// While nothing records, GoSpell doesn't take the cancel key, so it stays
     /// with the app in front.
     #[test]
     fn cancel_is_not_taken_while_idle() {
@@ -2688,7 +2690,7 @@ mod tests {
             [HotkeyEvent::TypedText, HotkeyEvent::TypedText]
         );
         assert_eq!(test.state.capture, Capture::Idle);
-        // Recording owns the shortcut and `hex typed-text`: no job and no
+        // Recording owns the shortcut and `gospell typed-text`: no job and no
         // state change.
         test.press(Shortcut::Dictation);
         test.events.clear();
@@ -3132,7 +3134,7 @@ mod tests {
     }
 
     #[test]
-    fn an_idle_monitor_wakes_at_once_for_a_hex_command() {
+    fn an_idle_monitor_wakes_at_once_for_a_gospell_command() {
         let (sender, events) = mpsc::sync_channel(4);
         let (commands, receiver) = mpsc::sync_channel(4);
         let mut dispatcher = Dispatcher::new(

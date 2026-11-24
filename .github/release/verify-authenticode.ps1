@@ -1,5 +1,5 @@
 # Checks the Authenticode signatures CI applied through Azure Artifact
-# Signing to every executable (.exe and hex.com) and installer in the given
+# Signing to every executable (.exe and gospell.com) and installer in the given
 # folders. Run after both the executables and the installers are signed.
 # -Extensions names which files to check: the setup engine (.e32) is signed in
 # its own job, before an installer embeds it.

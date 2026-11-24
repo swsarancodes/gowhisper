@@ -1,23 +1,23 @@
 # Annotate (macOS, Linux, and Windows)
 
-Annotate is Scrawl's capture engine hosted inside Hex (code and settings keep
+Annotate is Scrawl's capture engine hosted inside GoSpell (code and settings keep
 the name `capture`), steps 3 to 5 of
-[the plan](../plans/capture-in-hex.md). It runs the real
+[the plan](../plans/capture-in-gospell.md). It runs the real
 `scrawl-capture` crate, imported into `crates/capture`: it records the active
 display with ScreenCaptureKit, on Linux the screen-cast portal and
 PipeWire (`capture.linux`), on Windows Windows.Graphics.Capture
 (`capture.windows`), (or a cabled iPhone through `scrawl-helper`'s
-mirror) and narration from Hex's microphone, takes ink and clicks (Shift on
+mirror) and narration from GoSpell's microphone, takes ink and clicks (Shift on
 macOS and Windows, or the Annotate key held or the pen), transcribes the
-narration with word timestamps on Hex's loaded model (a model that gives
+narration with word timestamps on GoSpell's loaded model (a model that gives
 none, GigaAM v3 say, has its text spread over the recording as estimated
 times), writes a Scrawl bundle into Scrawl's captures folder, copies it to
 the clipboard, and sends it to an OpenCode session with Scrawl's router
-(`crates/router`), run in Hex's process. Settings › Annotate (under Labs in
+(`crates/router`), run in GoSpell's process. Settings › Annotate (under Labs in
 the sidebar) holds its settings. Scrawl's capsule (switch chips, the
 on-screen picker, route chips) and its ink and laser overlay are Rune
 overlays. A capture's `summary.md` and the text pasted into an agent start
-with `[hex-annotate <clock> · <target> · <folder>]`; older captures say
+with `[gospell-annotate <clock> · <target> · <folder>]`; older captures say
 `[scrawl …]`.
 
 ```ts
@@ -25,7 +25,7 @@ Turn it on                               // capture.gate
 ├── On by default in every macOS, Linux, and Windows build, stable included
 │   (capture.enabled); the `annotate-on-by-default` migration turns it on
 │   once for older settings
-│   └── macOS bundles sign scrawl-helper beside `hex`; validate-app.sh requires it
+│   └── macOS bundles sign scrawl-helper beside `gospell`; validate-app.sh requires it
 ├── Nothing is asked at launch: Screen Recording (macOS) at the first capture,
 │   the portal's dialog (Linux) at the first Screen capture; Windows asks
 │   nothing
@@ -33,7 +33,7 @@ Turn it on                               // capture.gate
 │   iPhone, then Microphone, then Accessibility; capture_host::permissions)
 │   -> refused with code `permission`, no error tone, and the capsule's
 │   permission helper opens (capture.permission)
-└── Off -> no capture host, engine, sink, thread, or folder; `hex annotate` -> feature-off
+└── Off -> no capture host, engine, sink, thread, or folder; `gospell annotate` -> feature-off
 
 Draw                                     // capture.draw (capture_host::drawing)
 ├── One key: tap (under DRAW_HOLD, 250 ms) to start and again to stop; held
@@ -62,7 +62,7 @@ Draw                                     // capture.draw (capture_host::drawing)
 │   clicks never reach the app; the capsule stays clickable above it (macOS:
 │   its level; Linux: the overlay leaves a hole over the capsule's pill).
 │   Every move draws ink; there are no pins and no undo
-├── `hex annotate draw` (Linux) -> the pen on or off, for desktops without
+├── `gospell annotate draw` (Linux) -> the pen on or off, for desktops without
 │   the portal (it starts a recording drawing)
 ├── Default key: ⌥⇧S on macOS; F9 on Linux and Windows, a single key one hand holds
 │   while the other moves the mouse (F10 is GTK's menu key, F11 full screen,
@@ -110,13 +110,13 @@ On Linux                                 // capture.linux
 │   ffmpeg. No
 │   portal and no dialog, so i3 and other desktops without a ScreenCast
 │   backend record (#690, @nefthy). Screen is the RandR monitor under the
-│   pointer; Area is `hex annotate start --area X,Y,W,H` (pixels), clipped to
-│   the screen. Hex's own overlays show in it. A Window still goes through
+│   pointer; Area is `gospell annotate start --area X,Y,W,H` (pixels), clipped to
+│   the screen. GoSpell's own overlays show in it. A Window still goes through
 │   the portal's picker and, without one, fails saying to record the screen
 │   or an area. Can't open the display, an unusual pixel depth, or no
 │   ffmpeg/x264 -> the capture fails at once with why in the capsule, never
 │   a capture without a picture. Check: x11 areas_are_clipped…,
-│   cursor_blends_premultiplied_argb_in_place; on hex-linux-nvidia (T4, Ubuntu
+│   cursor_blends_premultiplied_argb_in_place; on gospell-linux-nvidia (T4, Ubuntu
 │   24.04) native Xorg + i3 recorded 1920x1080 at 60/1 fps (598 frames in
 │   9.97 s, 597 grabs) and a 1280x720 Area (298 frames in 4.97 s, 297 grabs),
 │   and rootful Xwayland at 3840x2160 recorded 2560x1440 at 60/1 fps (598
@@ -159,7 +159,7 @@ On Linux                                 // capture.linux
 │   to a 2560 px long edge (1920 for a window, exact even sides padded to 16 px
 │   macroblocks and cropped in SPS) and converted on the video engine, H.264
 │   High at a constant QP and computed level (4.2 at 1080p60, 5.1 at 1440p60,
-│   5.2 at 4K60) with Hex-written headers, 60 fps; `ffmpeg -c copy` muxes
+│   5.2 at 4K60) with GoSpell-written headers, 60 fps; `ffmpeg -c copy` muxes
 │   recording.mp4. Every /dev/dri render node is
 │   tried in order, so a hybrid laptop whose first node is a GPU the VA
 │   driver can't use encodes on the next (#853). No VA-API -> frames copied
@@ -173,14 +173,14 @@ On Linux                                 // capture.linux
 │   buffer as rows. A first frame neither path can read (a DMA-BUF the CPU
 │   can't map, or tiled) fails the capture with why, never a capture without
 │   a picture or a crash. Buffers PipeWire removes mid-stream (a
-│   renegotiation) are never queued again, and Hex maps buffers itself and
+│   renegotiation) are never queued again, and GoSpell maps buffers itself and
 │   unmaps a removed one only after the recorder's copy, so a renegotiation
-│   can't crash Hex. Check: vaapi render_nodes_in_order,
+│   can't crash GoSpell. Check: vaapi render_nodes_in_order,
 │   level_and_sps_crop_match_resolution_and_60fps, pipewire
 │   offered_formats_parse_back, a_negotiated_tiled_modifier_is_read,
 │   capture::platform output_sizes_stay_exact_even_dimensions… and
 │   cpu_x264_uses_superfast…; PipeWire 1920x1080 SHM -> x264 recorded 60/1 fps
-│   (598 frames in 9.97 s, 594 delivered) on hex-linux-nvidia; VA-API 60 fps
+│   (598 frames in 9.97 s, 594 delivered) on gospell-linux-nvidia; VA-API 60 fps
 │   encoding not observed on Intel/AMD hardware (T4 has no VA-API encoder), nor
 │   on a hybrid laptop or an Intel Arc laptop
 ├── Candidates -> a small copy from the video engine on demand every
@@ -197,11 +197,11 @@ On Linux                                 // capture.linux
 │   stream anchored to the monotonic clock); released-while-idle microphones
 │   open for the capture
 ├── Words -> one foreground job on the listener's engine (its loaded model)
-├── Copy -> the summary text through Hex's Linux clipboard (wl-copy or the
+├── Copy -> the summary text through GoSpell's Linux clipboard (wl-copy or the
 │   X11 clipboard), as the Mac copies it; Labs › Copy a capture as one file puts
 │   `<stem>.scrawl.slim.zip` there instead, as a `text/uri-list` file
 ├── Paste -> as the Mac: the contact sheet (image/png), then the summary,
-│   each with Hex's own Ctrl+V (linux/paste). An app that takes no image (a
+│   each with GoSpell's own Ctrl+V (linux/paste). An app that takes no image (a
 │   terminal) gets only the summary, which names the contact sheet; the Mac
 │   pastes a terminal the sheet's path instead
 ├── Finished capsule -> "Annotation" with Paste and, if there are destinations, Send to…;
@@ -210,13 +210,13 @@ On Linux                                 // capture.linux
 ├── Shortcuts -> F9 (tap to start and stop, hold to draw) through the
 │   GlobalShortcuts portal ("Annotate") or X11 grabs. Without the portal,
 │   General's commands list and this pane's Shortcut row give
-│   `hex annotate toggle` to bind in the desktop instead. There is no
+│   `gospell annotate toggle` to bind in the desktop instead. There is no
 │   separate draw shortcut and no send-to list shortcut on any OS
 ├── GNOME Wayland -> no layer-shell, so Rune can't show the capsule or ink
 │   until Labs › Annotate on GNOME (`labs.gnome_annotate`, off by default)
 │   opens them on XWayland (`OverlayOptions::xwayland_input`): override-redirect
 │   windows that take the pointer in their input shape and never keyboard
-│   focus, only while this user's Xwayland already runs (never started by Hex;
+│   focus, only while this user's Xwayland already runs (never started by GoSpell;
 │   the meeting capsules' decision in linux/meeting_capsules.rs). The ink is
 │   made with pointer regions and `KeyPolicy::None`, since Rune refuses an
 │   OnDemand overlay on XWayland, and keeps regions with no hit area while not
@@ -240,9 +240,9 @@ On Linux                                 // capture.linux
 │   with no service the send says "OpenCode isn't running". The capsule's
 │   rows are clicked (no keyboard).
 │   See capture.send: everything goes inline, so a remote server works
-└── Gaps: no Area on Wayland (it gives Hex no pointer to aim it; X11 takes
+└── Gaps: no Area on Wayland (it gives GoSpell no pointer to aim it; X11 takes
     `--area`), no area picker on screen, no iPhone, no
-    laser or click log outside draw mode, no window log, `hex capture status`
+    laser or click log outside draw mode, no window log, `gospell capture status`
     unsupported, choosing another folder only through settings.json
 
 On Windows                               // capture.windows
@@ -289,23 +289,23 @@ On Windows                               // capture.windows
 │   Apps, a function key) goes on to the app even in the search, as does a key
 │   the app already had down with its repeats and release, wherever the capsule
 │   stood when it went down. Ctrl, Alt and the Windows key make a chord and stay
-│   the app's, so AltGr types its character in the app, not the search; Hex's
+│   the app's, so AltGr types its character in the app, not the search; GoSpell's
 │   own shortcuts do too, and Escape over the suggestions is the app's. While
 │   a dictation records, Escape cancels that first, as it does everywhere on
 │   Windows, so it never reaches the search. Check:
 │   `windows::input::capsule`'s mapping tests; not observed on a Windows PC
-└── Gaps: no `hex annotate` (Windows has no control transport yet), no
+└── Gaps: no `gospell annotate` (Windows has no control transport yet), no
     iPhone, keys pressed in the app are not logged. Checked only by
     cross-compiling (`cargo xwin clippy`, x86_64 and aarch64); never run on
     a Windows machine
 
 Settings › Annotate                      // capture.pane
-├── Capture with Hex (capture.enabled, default on) -> off: no host, shortcut,
+├── Capture with GoSpell (capture.enabled, default on) -> off: no host, shortcut,
 │   input, retention, or folder
 │   └── On while the shortcut collides -> refused, the shortcut row says why
 ├── Shortcut (capture.hotkey, default ⌥⇧S, F9 on Linux and Windows) -> same keycap and recorder as dictation;
 │   a key is required; refused when it overlaps dictation or paste. On a Linux desktop with no
-│   GlobalShortcuts portal (the `commands` fallback) the row is the `hex annotate toggle` command
+│   GlobalShortcuts portal (the `commands` fallback) the row is the `gospell annotate toggle` command
 │   to bind in the desktop instead, as General's commands list has it
 ├── How it works (on) -> start (tap), draw (hold, no click; Shift too on
 │   macOS), the capsule's pen with Esc, stop (tap again), and send, each
@@ -318,12 +318,12 @@ Settings › Annotate                      // capture.pane
 │   its row or the capsule's permission helper is on screen, plus a one-frame
 │   probe once that says granted
 │   ├── granted -> Allowed, no button
-│   ├── granted in System Settings but unusable until Hex relaunches ->
-│   │   "Turns on when Hex restarts" and Restart Hex, never Allow over a switch
+│   ├── granted in System Settings but unusable until GoSpell relaunches ->
+│   │   "Turns on when GoSpell restarts" and Restart GoSpell, never Allow over a switch
 │   │   already on
 │   ├── Returned from System Settings still untrusted -> "Still grey? Fix it"
 │   │   (`ScreenCapture` reset on running bundle + retired IDs, re-prompt + guide)
-│   └── Allow -> clears retired Hex IDs, rechecks, then opens the permission
+│   └── Allow -> clears retired GoSpell IDs, rechecks, then opens the permission
 │       guide over System Settings' list (PermissionKind::ScreenRecording); flips
 │       on the next read. The guide's own preflight caches the launch answer,
 │       so it reads the grant from TCC and the host closes it as soon as the
@@ -336,56 +336,56 @@ Settings › Annotate                      // capture.pane
 ├── Transcriber (capture.transcriber) -> Parakeet (default) | Apple
 ├── Captures folder (capture.folder, default Scrawl's) -> Reveal | choose another
 ├── Keep (capture.media_days / bundle_days) -> Scrawl's presets, or imported days
-├── Scrawl.app running -> "Scrawl is running" card + Use Hex for captures
-│   └── Click -> asks Scrawl to quit (nothing else quits it); Hex takes the
+├── Scrawl.app running -> "Scrawl is running" card + Use GoSpell for captures
+│   └── Click -> asks Scrawl to quit (nothing else quits it); GoSpell takes the
 │       shortcut within 2 s of Scrawl leaving
-└── No iPhone pairing row: ScrawlKit pairing needs the ingest server, which Hex
+└── No iPhone pairing row: ScrawlKit pairing needs the ingest server, which GoSpell
     doesn't run. A cabled iPhone needs no row (capture.phone)
 
 Agents (on; Labs › Install agent skill from Annotate)   // capture.agents; labs.annotate_agent_install
 ├── Off -> the pane is exactly as before, and nothing reads a coding agent's folder
-├── One row per coding agent: whether its folder exists, and whether it already has this Hex's skill
-│   ├── Claude Code -> $CLAUDE_CONFIG_DIR or ~/.claude, then skills/hex-annotate/SKILL.md
+├── One row per coding agent: whether its folder exists, and whether it already has this GoSpell's skill
+│   ├── Claude Code -> $CLAUDE_CONFIG_DIR or ~/.claude, then skills/gospell-annotate/SKILL.md
 │   │   (found with that folder)
-│   ├── Codex -> ~/.agents/skills/hex-annotate/SKILL.md (found with ~/.codex or
+│   ├── Codex -> ~/.agents/skills/gospell-annotate/SKILL.md (found with ~/.codex or
 │   │   $CODEX_HOME); $CODEX_HOME/skills is only the legacy place
-│   ├── OpenCode -> $XDG_CONFIG_HOME or ~/.config, then opencode/skills/hex-annotate/SKILL.md
+│   ├── OpenCode -> $XDG_CONFIG_HOME or ~/.config, then opencode/skills/gospell-annotate/SKILL.md
 │   │   (found with the opencode folder)
-│   └── Pi -> ~/.pi/agent/skills/hex-annotate/SKILL.md ($PI_CODING_AGENT_DIR or ~/.pi;
+│   └── Pi -> ~/.pi/agent/skills/gospell-annotate/SKILL.md ($PI_CODING_AGENT_DIR or ~/.pi;
 │       found with that folder), or the shared ~/.agents copy when one exists
 ├── npx skills writes Codex and Pi skills to ~/.agents/skills, so that copy counts for
 │   both: read by content, never checked for a second copy, and an outdated shared copy
 │   is the one installing updates
 ├── A found agent without the skill reads Not installed and starts checked; the file
-│   differing from this Hex's reads Update available, and installing replaces it
+│   differing from this GoSpell's reads Update available, and installing replaces it
 ├── Install -> agent_install::install writes the same embedded
-│   skills/hex-annotate/SKILL.md that hex annotate skill prints into each checked agent's
+│   skills/gospell-annotate/SKILL.md that gospell annotate skill prints into each checked agent's
 │   folder: directories created, a staging file renamed into place in the same folder,
 │   and no other file touched
-├── A symlinked SKILL.md, or a symlinked hex-annotate folder, is managed elsewhere: the
+├── A symlinked SKILL.md, or a symlinked gospell-annotate folder, is managed elsewhere: the
 │   row says Managed elsewhere, it has no switch, and nothing is written through the link
 ├── An agent this computer doesn't have reads Not found, has no switch, is never checked,
 │   and gets no folder created for it; Install is disabled while nothing is checked
-├── Install with the skills CLI -> npx skills add anomalyco/hex --skill hex-annotate,
+├── Install with the skills CLI -> npx skills add goml/gospell --skill gospell-annotate,
 │   beside Copy for people who manage skills themselves
-├── Command-line tool (macOS) -> a hex symlink to this app's executable (current_exe) in
+├── Command-line tool (macOS) -> a gospell symlink to this app's executable (current_exe) in
 │   the first of /opt/homebrew/bin and /usr/local/bin that exists and is writable, else
 │   ~/.local/bin (created)
-│   ├── An existing hex that is a symlink to this Hex or any
-│   │   Hex.app/Contents/MacOS/hex is kept and reads Installed at <path>; a link whose
-│   │   target is gone counts only when it names a Hex app, and is then replaced
+│   ├── An existing gospell that is a symlink to this GoSpell or any
+│   │   GoSpell.app/Contents/MacOS/gospell is kept and reads Installed at <path>; a link whose
+│   │   target is gone counts only when it names a GoSpell app, and is then replaced
 │   ├── A regular file, or a link to anything else (a dangling one included), is never
 │   │   replaced: the row reads Owned by another program
-│   ├── A hex running from App Translocation refuses to link and says to move Hex to
+│   ├── A gospell running from App Translocation refuses to link and says to move GoSpell to
 │   │   Applications first
 │   └── A ~/.local/bin link that $PATH doesn't name adds "<folder> isn't on your PATH"
 ├── While Labs › Agent tools for captures is off, a note says the skill's zoom, inspect,
 │   and frames commands need it
 └── Checks: agent_install (finding each agent, installing, updating an outdated file,
     leaving other files alone, the shared ~/.agents copy for Codex and Pi, a symlinked
-    skill or folder, choosing the link folder, never replacing a foreign hex (a live
+    skill or folder, choosing the link folder, never replacing a foreign gospell (a live
     foreign link or a regular file is never removed even by link() itself), a dangling
-    Hex-app link, App Translocation), and rune_ui::scrawl's
+    GoSpell-app link, App Translocation), and rune_ui::scrawl's
     the_agents_section_needs_its_lab, installing_writes_each_checked_agents_skill,
     an_agents_row_checks_only_that_agent, a_linked_skill_has_no_switch.
     Proof limits: the macOS symlink path runs the same POSIX rules its unit tests
@@ -404,12 +404,12 @@ First launch with Annotate on            // capture.import
 ⌥⇧S (capture.shortcut; captures on, Scrawl not running)
 ├── Press, held as long as you like -> armed; nothing records while ⌥⇧ is down
 │   └── One of its modifiers comes up -> start on the display under the pointer,
-│       as `hex capture start`                // a fresh press only, no repeats
+│       as `gospell capture start`                // a fresh press only, no repeats
 ├── Esc before the modifiers come up -> nothing records
-├── Press while recording -> stop, as `hex capture stop` // ignored within 400 ms
+├── Press while recording -> stop, as `gospell capture stop` // ignored within 400 ms
 ├── Press while the capsule's picker is open -> the picker records what it is on
 ├── Esc while a capture records -> nothing: it reaches the app being recorded,
-│   and Hex's tap lets it through; a dictation under it goes on too (#786)
+│   and GoSpell's tap lets it through; a dictation under it goes on too (#786)
 ├── The binding is swallowed, never chord evidence for dictation
 ├── Hold the dictation shortcut mid-capture -> dictation pastes as usual
 │   (only with Labs › Dictate while annotating on; without it, nothing starts)
@@ -434,24 +434,24 @@ While a capture records                  // capture.quiet
 └── Dictation that began before the capture -> each effect is held from the first session that
     wants it to the last, so neither unmutes or resumes what the other still
     holds; a While dictating change mid-capture composes too (the capture keeps
-    media paused, the dictation mutes). Only what Hex
+    media paused, the dictation mutes). Only what GoSpell
     changed is restored. The dictation stop tone plays at once while the capture
     keeps output muted. Check: recording_environment tests (overlap both ways),
-    capture_host a_capture_stays_quiet_until_it_stops_is_cancelled_or_hex_quits
+    capture_host a_capture_stays_quiet_until_it_stops_is_cancelled_or_gospell_quits
 
 Switching target                         // capture.switch; the capsule's chips
 ├── The recording capsule shows no target chips: a recording is the screen.
 │   Switching (below) remains for the CLI, the picker, and the playground
 ├── CaptureCommand::Switch(target) -> discard and start in one step: no snapshot
 │   shows nothing recording in between (Scrawl's switch_recording)
-│   ├── No room to start (two writing, Hex stopping) -> refused `busy` before
+│   ├── No room to start (two writing, GoSpell stopping) -> refused `busy` before
 │   │   the discard; the recording goes on
 │   └── The start fails after the discard -> the discarded capture settles
 │       `Failed` with the start's error
 ├── Window or Area -> CaptureCommand::Discard: bundle removed, no outcome, gone
 │   from the snapshot at once (and from MAX_FINISHING), so the capsule becomes
 │   the picker
-├── Picker open (take_keys: Picker) -> Hex's tap hands it ⌥⇧S and Esc; it never
+├── Picker open (take_keys: Picker) -> GoSpell's tap hands it ⌥⇧S and Esc; it never
 │   takes focus
 ├── A pick -> CaptureCommand::Start(Window | Area | Display); nothing while one
 │   records
@@ -467,11 +467,11 @@ A cabled iPhone                          // capture.phone
 ├── Start(Phone) -> scrawl-helper's mirror window shows the phone and records
 │   its native video into recording.mov; `--no-microphone`: the mirror never
 │   asks for or opens a microphone
-│   ├── Camera access -> macOS asks on Hex's behalf (every bundle carries
+│   ├── Camera access -> macOS asks on GoSpell's behalf (every bundle carries
 │   │   NSCameraUsageDescription; validate-app.sh requires it)
 │   └── Pointer and pen input -> normalized to the mirror's picture
-├── Narration -> Hex's timeline, as for the screen, moved onto the movie's clock
-│   (its first frame, measured from the capture's start) and transcribed by Hex's
+├── Narration -> GoSpell's timeline, as for the screen, moved onto the movie's clock
+│   (its first frame, measured from the capture's start) and transcribed by GoSpell's
 │   transcriber (capture.transcriber), not Scrawl's
 ├── Stop -> as any capture; keyframes decoded from the phone's own video
 └── The mirror ends on its own (unplugged, no phone in 12 s, camera denied) ->
@@ -502,24 +502,24 @@ The capsule                              // capture.capsule (rune_ui/capture_cap
 │   instead; a start that fails before any snapshot showed it
 │   recording still shows, but never over a newer recording, and a capture
 │   already under way that fails in the background never takes it over
-├── Permission helper (capture.permission) -> "Hex needs Screen Recording ·
+├── Permission helper (capture.permission) -> "GoSpell needs Screen Recording ·
 │   to see your screen · Allow ✕" (Microphone, Accessibility alike)
 │   ├── Allow -> macOS's microphone prompt, else System Settings with the
 │   │   floating guide beside it (permission_guide), never at launch
 │   ├── Followed once a second (feed::watch_grant, screen_access_watched) ->
-│   │   "… is on · Restart Hex" when macOS needs one, then "… is on ·
+│   │   "… is on · Restart GoSpell" when macOS needs one, then "… is on ·
 │   │   Capture ⌥⇧S"; Capture or the shortcut records the pointer's display
 │   ├── ✕ closes it; unanswered it folds after 2 min; the shortcut brings it
 │   │   back as it stood
 │   ├── A capture written with no frames -> sent with only the voice and
 │   │   marks, its summary naming the actual reason the picture is missing
-│   │   (Screen Recording is off for Hex, or the screen source failed or sent
+│   │   (Screen Recording is off for GoSpell, or the screen source failed or sent
 │   │   no frames), no contact sheet; a permission miss opens the helper once
 │   │   its capsule folds
-│   └── Story: hex://story/prototypes/capture-capsule/permission; goldens
+│   └── Story: gospell://story/prototypes/capture-capsule/permission; goldens
 │       capture-capsule-permission{,-restart,-ready}
 ├── A shown recording that leaves with no outcome (a discard, from a chip or
-│   `hex capture discard`) -> the capsule leaves; the picker a chip opened
+│   `gospell capture discard`) -> the capsule leaves; the picker a chip opened
 │   stays. A switch that can't start settles the recording it discarded as
 │   failed, which the capsule shows as "Couldn't start"
 ├── Recording -> `● 0:07 │ ✎ │ ■ ✕`: the timer, the toolbar (the pen, its
@@ -538,9 +538,9 @@ The capsule                              // capture.capsule (rune_ui/capture_cap
 │   └── Window or Area -> Discard; the capsule becomes the picker, and
 │       FindPhone looks for a phone cabled since the recording began
 ├── Picker: ⌥⇧S records what the on-screen picker shows; Esc closes it
-├── ✓ -> `hex capture stop`
+├── ✓ -> `gospell capture stop`
 ├── ✕ while recording -> asks first: a destructive "Discard" and "Keep
-│   recording", the recording running on; Discard -> `hex capture cancel`.
+│   recording", the recording running on; Discard -> `gospell capture cancel`.
 │   Unanswered, it goes back to recording after 4 s (never while hovered, and
 │   1.5 s after the pointer leaves). Esc never discards
 ├── Routing (Scrawl's routing.md) -> `last.route` once its answer arrives; the
@@ -580,7 +580,7 @@ The capsule                              // capture.capsule (rune_ui/capture_cap
 │   │   ├── OpenCode's home screen (`OpenCode`) or a plain shell -> the
 │   │   │   folder and the title's words are clues, as before
 │   │   ├── ⇧ (a folder that isn't home or `/`) -> the rule is
-│   │   │   `routing.terminals` keyed on the folder's project root ("hex
+│   │   │   `routing.terminals` keyed on the folder's project root ("gospell
 │   │   │   terminal" in the header and the footer's app badge), naming the
 │   │   │   session picked; it covers that folder and everything under it (the
 │   │   │   longest key wins) and sends like a site rule. Ghostty itself stays
@@ -638,7 +638,7 @@ The capsule                              // capture.capsule (rune_ui/capture_cap
 │   │   │   "No sessions match" and the footer drops Send and Remember. Esc or a click away goes
 │   │   │   back to the suggestions; ⌥⇧S in the search records a new capture
 │   │   ├── Once the capsule has gone, ⌥⇧S records as usual
-│   │   ├── Esc -> not Hex's here: it goes to the app in front
+│   │   ├── Esc -> not GoSpell's here: it goes to the app in front
 │   │   └── Unpicked -> they leave with the capsule after the done hold
 │   ├── Taken back (a rule's send or a pick) -> never
 │   │   ends the capture: the list opens again with the same sessions, the one
@@ -687,7 +687,7 @@ The capsule                              // capture.capsule (rune_ui/capture_cap
 │   │   │   to the app. Shift's presses and releases (flagsChanged) reach the
 │   │   │   capsule too (`CapsuleKey::Shift`) and still go on to the app
 │   │   └── List open -> the session tap takes every key press without ⌘ or ⌃
-│   │       that isn't a Hex shortcut: text in the active layout, ⌫, ↑↓, ⏎,
+│   │       that isn't a GoSpell shortcut: text in the active layout, ⌫, ↑↓, ⏎,
 │   │       ⇧⏎ (always), Esc; their releases too. Digits are typed (session
 │   │       names have them), and ⌥⇧S goes on to the listener, which records. A send, Esc, or a
 │   │       press off the capsule (the tap reports mouse-downs while the list
@@ -698,7 +698,7 @@ The capsule                              // capture.capsule (rune_ui/capture_cap
 │   │       foreground window's layout and never with the layout's state
 │   │       changed (a dead key types nothing in the search, and AltGr's
 │   │       Ctrl+Alt stays the app's), a press kept only while no shortcut of
-│   │       Hex's claims it, and a key the app already holds left to it;
+│   │       GoSpell's claims it, and a key the app already holds left to it;
 │   │       never observed on a Windows PC
 │   ├── `offer` (a rule offer) -> not drawn; Scrawl's capsule doesn't draw it
 │   ├── The ready capsule shows a labeled Paste button, both folded and above
@@ -730,7 +730,7 @@ The capsule                              // capture.capsule (rune_ui/capture_cap
 │   │   │   into the focused field, from the bundle shown, not the newest output.
 │   │   │   No Return, send, Undo or rule change
 │   │   └── Click the finished preview, when Inspect is available, or the
-│   │       Inspect button on other outcomes -> opens the contact sheet (Hex
+│   │       Inspect button on other outcomes -> opens the contact sheet (GoSpell
 │   │       has no review window, and opening the bundle could launch
 │   │       Scrawl.app)
 │   ├── Undo is a click only, with no shortcut: Escape meant for another app
@@ -763,7 +763,7 @@ The capsule                              // capture.capsule (rune_ui/capture_cap
     r22-flows). Only the guesses' look changes; rules, Undo, ✕ and the
     keys the capsule takes stay the same. Each capsule story's variants
     pick one, so a link opens a state in a flow:
-    `hex://story/prototypes/capture-capsule/suggestions?variant=toast`
+    `gospell://story/prototypes/capture-capsule/suggestions?variant=toast`
     ├── list (default) -> today's list under the capsule, as above
     ├── toast -> one line "Send to X ⏎" with "Next ⇥" for more than one
     │   guess; ⇥/⇧⇥ cycle (CapsuleKeys::Suggest { cycle }), ⏎ or a click on
@@ -780,13 +780,13 @@ The capsule                              // capture.capsule (rune_ui/capture_cap
         there reads; left and right edges snapped to the backing pixels, the
         panel moved under its middle and pinned to the display it was
         measured on, so the panel and the notch can't disagree. Pinned, Rune
-        doesn't follow the pointer for it; while the picker is open, Hex
+        doesn't follow the pointer for it; while the picker is open, GoSpell
         re-reads the pointer's screen at the picker's display-check cadence
         (`picker::DISPLAY_EVERY`, 100 ms) and re-places display and inset
         together, so the capsule crosses with the picker within that
         cadence. Only the fallback that couldn't read the screen keeps
         `UnderPointer`, where Rune can show one frame at the previous inset
-        before Hex re-places it; 185 pt
+        before GoSpell re-places it; 185 pt
         on a flat display, a pretend one the menu bar's height, so its panel
         lands within a point of the display's middle rather than exactly on
         it) into the pill and the same card, its content under the notch,
@@ -810,7 +810,7 @@ The on-screen picker                     // capture.picker (capture_capsule/pick
 │   left out of recordings (`OwnWindow::Picker`); it takes the pointer only while
 │   picking and never takes focus; it follows the pointer to another display
 ├── Made at launch, hidden; away from macOS its window holds no GPU surface
-│   while hidden (`release_gpu_when_hidden`), so a Hex that never annotates
+│   while hidden (`release_gpu_when_hidden`), so a GoSpell that never annotates
 │   holds no GPU memory for it (`perf/idle.bench.ts#window-closed-memory`,
 │   `gpu.vram`)
 ├── Everything but the target dims; the dim moves with the target as one piece
@@ -826,16 +826,16 @@ The on-screen picker                     // capture.picker (capture_capsule/pick
 └── Windows load off the UI thread (`list_selectable_windows`); nothing picks
     until they arrive
 
-Hex's own windows                        // capture.own-windows
-├── Chrome (the capsule, ink, picker, HUDs, meeting capsules: Hex's named
+GoSpell's own windows                        // capture.own-windows
+├── Chrome (the capsule, ink, picker, HUDs, meeting capsules: GoSpell's named
 │   windows and any of its windows above the normal level) -> never recorded,
 │   never in the window log, never the target, clicks on it not logged
 │   ├── While the pen is on, the ink overlay holds the keys, so the window
-│   │   log's system-wide focused-application read names Hex itself; AppKit
+│   │   log's system-wide focused-application read names GoSpell itself; AppKit
 │   │   answers that read on the asking `scrawl-window-log` thread, and the
 │   │   vendored AccessKit macOS adapter now answers such off-main reads as a
 │   │   plain view instead of borrowing its main-thread state. That borrow
-│   │   aborted Hex mid-capture (#1859, Rune #1040); a test would need AppKit
+│   │   aborted GoSpell mid-capture (#1859, Rune #1040); a test would need AppKit
 │   │   and a key window, so none covers it
 │   ├── Other recorders -> the capsule, picker, and ink are left out
 │   │   (sharingType none) while shown; the dictation HUD and meeting
@@ -844,18 +844,18 @@ Hex's own windows                        // capture.own-windows
 │   │       before sharingType returns to readOnly; prewarming keeps the
 │   │       surface ready but leaves no invisible panel ordered in. This
 │   │       avoids relying on macOS restoring sharing after exclusion
-│   ├── Show in screen recordings on -> every recorder, Hex's captures
+│   ├── Show in screen recordings on -> every recorder, GoSpell's captures
 │   │   included, shows all of it (sharingType readOnly, no SCK exclusions);
 │   │   still never in the window log or the target. Rune's
 │   │   OverlayHandle::set_exclude_from_capture flips open windows, and the
 │   │   sampler rebuilds its filter mid-recording (OwnWindows::recorded) and
 │   │   the recording's (capture-core's Recording::set_exclusions). macOS's
-│   │   pump and Windows' runtime thread follow the setting while Hex runs
+│   │   pump and Windows' runtime thread follow the setting while GoSpell runs
 │   │   (CaptureOverlays::follow_recordings), so it applies live on both, not
 │   │   only to windows made after it changed
 │   └── Rune's presence tests check ordering and sharing together, including
 │       stale fade completions and setting changes. Its native `spaces_probe`
-│       checks this process's WindowServer ordering. A native Hex smoke on
+│       checks this process's WindowServer ordering. A native GoSpell smoke on
 │       2026-11-02 failed before the pin bump and passed after it: capsule,
 │       Screen/Area picker, ink, dictation HUD and meeting capsule show and
 │       leave no onscreen window after hiding. This used isolated test state,
@@ -863,11 +863,11 @@ Hex's own windows                        // capture.own-windows
 │       third-party recording exclusion remain unverified
 │   └── Click-through chrome (the full-screen ink overlay, the capsule's
 │       640×424 panel outside its pill) -> clicks there count for the app
-│       beneath; only the pill's (capture_host::set_capsule_pill) are Hex's
+│       beneath; only the pill's (capture_host::set_capsule_pill) are GoSpell's
 └── Normal windows (Settings) -> like any app's: recorded, logged, pickable,
-    and Hex is the front app when its window is the topmost normal one, so a
-    capture of Settings routes by Hex's name. A capsule Paste still goes to
-    the last other app, never into Hex
+    and GoSpell is the front app when its window is the topmost normal one, so a
+    capture of Settings routes by GoSpell's name. A capsule Paste still goes to
+    the last other app, never into GoSpell
 
 Ink and laser                            // capture.ink
 ├── A click-through overlay over the recorded display, excluded from the
@@ -880,21 +880,21 @@ Ink and laser                            // capture.ink
 While a capture records                  // capture.input
 ├── The existing session tap adds mouse down/up/drag/scroll and Shift (no second tap)
 ├── -> Capture::input() through a bounded queue; full -> events dropped and counted
-├── Keys pressed in the app -> logged; keys Hex consumes (its shortcuts, Esc) and
+├── Keys pressed in the app -> logged; keys GoSpell consumes (its shortcuts, Esc) and
 │   anything while a shortcut is being recorded -> not logged
 ├── Scrawl's rules in the engine (hosted_input): Shift drag inks, a
 │   Shift-click is part of the drawing (no pins, no ⌘Z undo), clicks on
-│   Hex's capture chrome ignored; while drawing, capture_host::as_pen makes
+│   GoSpell's capture chrome ignored; while drawing, capture_host::as_pen makes
 │   every pointer event Shift ink
 └── Shift still held from ⌥⇧S -> must come up once before it can ink; Shift up
     at the start -> the first Shift drag inks
 
-hex capture start                        // capture.start; needs a listening Hex
+gospell capture start                        // capture.start; needs a listening GoSpell
 ├── Creates <captures folder>/<unix ms>.scrawl (owner-only) -> reply: recording + bundle path
 ├── Two stopped captures still writing -> refused `busy`
 ├── Copies the dictation timeline from now into a bounded sink (no second stream)
 ├── In the background: Scrawl's engine starts on the active display
-│   ├── Needs Screen Recording for Hex (or the terminal running it)
+│   ├── Needs Screen Recording for GoSpell (or the terminal running it)
 │   └── Fails to start -> sink closed, bundle removed, last outcome `failed`;
 │       Esc and the next ⌥⇧S see nothing recording
 ├── Release microphone while idle -> the capture keeps the microphone open
@@ -906,17 +906,17 @@ While it records                         // capture.audio
 ├── Sink full (collector stalled) -> capture audio dropped as a gap, dictation untouched
 └── Microphone gap or recovery -> the gap is recorded, positions stay on the clock
 
-Never on Hex's path                      // capture.isolation
+Never on GoSpell's path                      // capture.isolation
 ├── No microphone, event tap, global shortcut, or model of its own
 ├── No ingest server (47777) or recovery workers; delivery retries only while
 │   neither Scrawl.app runs nor anything serves the ingest port (capture.route)
 ├── No ingest token used; Scrawl's two config files read once by the import, never
-│   written; nothing else of Scrawl's touched (its log goes to Hex's tracing)
-└── Settings from Hex (capture.*), not Scrawl's config: auto-crop on (display
+│   written; nothing else of Scrawl's touched (its log goes to GoSpell's tracing)
+└── Settings from GoSpell (capture.*), not Scrawl's config: auto-crop on (display
     captures), the agentContext summary format off
 
 Retention                                // capture.retention
-├── Hex's own thread: Scrawl's retention pass with capture.*'s policy, 90 s after
+├── GoSpell's own thread: Scrawl's retention pass with capture.*'s policy, 90 s after
 │   captures turn on, then hourly; skipped while a capture records or writes,
 │   or while Scrawl.app runs (it cleans the shared folder then)
 ├── Linux sends media to the desktop Trash itself (the freedesktop.org Trash
@@ -929,7 +929,7 @@ Retention                                // capture.retention
 └── Old media goes to the Trash and the prompt stays; after bundleDays the
     whole bundle goes
 
-hex capture stop                         // capture.stop
+gospell capture stop                         // capture.stop
 ├── Closes the sink (≤ 100 ms wait) -> reply: idle + the bundle path, at once
 ├── The screen recording, window log, and input stop at once (Capture::stop)
 ├── recording.mp4 finishes after that on capture-core's own thread: detached
@@ -970,8 +970,8 @@ hex capture stop                         // capture.stop
     │   rebuilds)
     ├── recording.mp4, capture.json, audio.wav, frames/, scrawl.json,
     │   summary.md; then every file 0600 and folder 0700
-    ├── Keyframes decoded from recording.mp4 by scrawl-helper (beside `hex`: in
-    │   Hex.app's Contents/MacOS or target/<profile>; or $SCRAWL_HELPER); helper
+    ├── Keyframes decoded from recording.mp4 by scrawl-helper (beside `gospell`: in
+    │   GoSpell.app's Contents/MacOS or target/<profile>; or $SCRAWL_HELPER); helper
     │   missing -> the 480 px sampled frames
     ├── Spoken cues (look, now, here, this…) pick the keyframe the screen
     │   changes to; they also count in Spanish (mira, ahora, aquí, esto…),
@@ -987,7 +987,7 @@ Copying a written capture                 // capture.copy; Labs › Copy a captu
 ├── Off (default) -> the bundle's summary text on the clipboard, as before:
 │   macOS and Windows through Scrawl's handoff (Windows may also put the
 │   contact sheet PNG when the clipboardImage experiment is on), Linux the
-│   summary text through Hex's paster
+│   summary text through GoSpell's paster
 ├── On -> crates/capture/src/slim_zip.rs writes <stem>.scrawl.slim.zip inside
 │   the bundle (a temp name, then rename) and puts only that file on the
 │   clipboard: macOS a file URL through handoff::copy_file_to_clipboard (the
@@ -1055,8 +1055,8 @@ What a send carries                      // capture.send (router opencode::send_
 
 Where it goes                            // capture.route; capture.routing's autoSend on
 ├── Once recording starts -> a capture-look thread reads the tab,
-│   terminal, and sessions in front (Scrawl's router, in Hex's process, with
-│   Scrawl's own router folders, so `scrawl router undo` and its evals see Hex's
+│   terminal, and sessions in front (Scrawl's router, in GoSpell's process, with
+│   Scrawl's own router folders, so `scrawl router undo` and its evals see GoSpell's
 │   sends as Scrawl's). The whole look has 15 s: steps not begun by then are
 │   skipped, and routing waits 1 s more for the one under way, then goes on
 │   without it. The newest-session list starts beside local sensing; exact
@@ -1092,7 +1092,7 @@ Where it goes                            // capture.route; capture.routing's aut
 │   │   Jev couldn't tell, a dev server's port, a page's opencode-session tag,
 │   │   `.opencode-session` file, data-session or
 │   │   publisher, a name that was said, the captured app's checkout (the one
-│   │   open session folder named like the app, such as `…/hex` for Hex's own
+│   │   open session folder named like the app, such as `…/gospell` for GoSpell's own
 │   │   Settings; smartRouting only), the port ladder) is suggestion #1, its
 │   │   reason as the row's word ("dev server", "same page", "mentioned"; none
 │   │   for Jev's pick or fallback), then
@@ -1104,7 +1104,7 @@ Where it goes                            // capture.route; capture.routing's aut
 │   │   or `send --always`) would save, after which that site's captures are Rules;
 │   │   ⇧⏎ in a Rule's list saves the rule for the session picked instead
 │   ├── Each Rule or Guess -> routing.json's `shown`: `as` rule or guess, and
-│   │   `why`, the router's leading reason; `hex capture route` prints it
+│   │   `why`, the router's leading reason; `gospell capture route` prints it
 │   ├── Nothing / NoAnswer -> recent sessions only
 │   └── Unreachable -> the look read no sessions (OpenCode slow past the look's
 │       deadline, down, or refusing); a warning in process.log with the error, and
@@ -1112,9 +1112,9 @@ Where it goes                            // capture.route; capture.routing's aut
 │       answer"), or "OpenCode isn't running" alone, keeping Paste. A reason is
 │       shown only in plain words: one with a path, URL, OS error or code goes
 │       to process.log and the capsule shows none
-│       └── OpenCode refusing Hex's password (HTTP 401/403) -> "OpenCode needs a
-│           password Hex doesn't have", for the look and for a send, and
-│           process.log says where Hex reads it (service.json under this user's
+│       └── OpenCode refusing GoSpell's password (HTTP 401/403) -> "OpenCode needs a
+│           password GoSpell doesn't have", for the look and for a send, and
+│           process.log says where GoSpell reads it (service.json under this user's
 │           ~/.local/state/opencode, or OPENCODE_PASSWORD), never the password.
 │           The capture stays saved and copied. Check: capture_host::routing
 │           a_look_that_read_no_sessions_answers_unreachable,
@@ -1122,7 +1122,7 @@ Where it goes                            // capture.route; capture.routing's aut
 │           OpenCode in WSL on, the capture router reaches the WSL service
 │           too (capture.send)
 ├── An answer for a capsule already closed (dismissed, or past its hold)
-│   leaves it closed; `hex capture list` and `send` still offer the capture
+│   leaves it closed; `gospell capture list` and `send` still offer the capture
 ├── Starting another capture preserves an older rule's accepted pending send;
 │   its eventual answer does not replace the newest capsule
 ├── The capsule's commands act only on `last`, the newest routed capture:
@@ -1141,13 +1141,13 @@ Where it goes                            // capture.route; capture.routing's aut
 │   does too
 └── autoSend off -> no look, no route; the capture is only copied
 
-hex capture list|show|send|route         // capture.cli; docs/cli.md
+gospell capture list|show|send|route         // capture.cli; docs/cli.md
 ├── list [--limit N] -> the newest bundles in the captures folder: mode, words,
 │   where it went; words count a model's own word times, else the words in the
 │   transcript's text
 ├── show <capture> -> one capture's words, files, and send; a capture whose
 │   audio stopped early (the 8 h disk guard, or a failed write) says where
-├── send <capture> [--to <session>] [--always] -> needs a listening Hex
+├── send <capture> [--to <session>] [--always] -> needs a listening GoSpell
 │   ├── The last routed capture -> as the capsule's pick (no --to: the Rule's
 │   │   session, a Guess's first suggestion, or the recorded destination), so
 │   │   the capsule's Undo follows it; --always also saves the site or app rule
@@ -1157,12 +1157,12 @@ hex capture list|show|send|route         // capture.cli; docs/cli.md
 ├── route <capture> [--ask-jev] -> what the router sees and decides; sends nothing
 └── <capture> = bundle name, path, or `latest`; unknown -> `not-found`
 
-hex annotate inspect|zoom|frames|skill   // capture.agents; labs.annotate_agent_tools
-├── Off by default (`Audience::Everyone`, every OS); a CLI read in the `hex`
-│   process, never over the control socket: Hex needn't run, and nothing
+gospell annotate inspect|zoom|frames|skill   // capture.agents; labs.annotate_agent_tools
+├── Off by default (`Audience::Everyone`, every OS); a CLI read in the `gospell`
+│   process, never over the control socket: GoSpell needn't run, and nothing
 │   records, sends, or writes a setting. `frames` extracts with `ffmpeg` from
 │   PATH when one is installed (the engine's own choice), else the engine's
-│   decoder. Off -> refused naming `hex labs on annotate-agent-tools`
+│   decoder. Off -> refused naming `gospell labs on annotate-agent-tools`
 ├── inspect [<capture>=latest] -> `summary.md` (sketch::summary_markdown)
 │   ├── --marks -> one `agent_context::MarkEntry::line()` per mark, time order,
 │   │   or `No marks`; --marks --json -> the entries as a JSON array
@@ -1180,9 +1180,9 @@ hex annotate inspect|zoom|frames|skill   // capture.agents; labs.annotate_agent_
 │   `(to − from) * fps / 1000 + 1` and the engine decoder's inclusive
 │   `(to − from) / max(1000 / fps, 1) + 1`; without a video, or over an empty
 │   range, it prints the keyframes in `frames/` that fall in the range instead
-├── skill -> `include_str!` of `skills/hex-annotate/SKILL.md`, the guide an
-│   agent installs with `npx skills add anomalyco/hex --skill hex-annotate`
-├── Every command resolves `<capture>` as `hex capture list` does (bundle name,
+├── skill -> `include_str!` of `skills/gospell-annotate/SKILL.md`, the guide an
+│   agent installs with `npx skills add goml/gospell --skill gospell-annotate`
+├── Every command resolves `<capture>` as `gospell capture list` does (bundle name,
 │   path, or `latest`, in `capture.folder`); an unknown bundle -> `not-found`.
 │   `zoom` and `frames` write only into `<bundle>/zoom/`; nothing else in the
 │   bundle changes
@@ -1191,11 +1191,11 @@ hex annotate inspect|zoom|frames|skill   // capture.agents; labs.annotate_agent_
     frames is the engine's own `zoom`/`movie_frames_at` path, unverified on a
     real bundle here, and no capture was recorded for this change
 
-hex capture cancel -> engine cancelled, sink closed, bundle removed
-hex capture status -> recording (bundle, elapsed), bundles still writing, last outcome
+gospell capture cancel -> engine cancelled, sink closed, bundle removed
+gospell capture status -> recording (bundle, elapsed), bundles still writing, last outcome
                       (words, audio gaps, or why it has no transcript, and where
                       its audio stopped if it did)
-Hex quits mid-capture -> cancelled, bundle removed; captures still writing stop
+GoSpell quits mid-capture -> cancelled, bundle removed; captures still writing stop
 transcribing between chunks and keep their audio (shutdown waits ≤ 2 s)
 
 15 s replay buffer (Labs, macOS 27+)     // capture.replay; labs.annotate_replay
@@ -1207,22 +1207,22 @@ transcribing between chunks and keep their audio (shutdown waits ≤ 2 s)
 ├── On (with Annotate on and Scrawl.app not running) -> one worker thread waits
 │   until Screen Recording is already granted (never prompts in the background),
 │   then runs one 15 fps `SCStream` with `SCClipBufferingOutput` on the pointer's
-│   display (≤ 2560 px long edge, cursor hidden, audio off, Hex's `OWN_WINDOWS`
+│   display (≤ 2560 px long edge, cursor hidden, audio off, GoSpell's `OWN_WINDOWS`
 │   and non-layer-0 overlays excluded unless Show in screen recordings is on)
 │   ├── `replayd` encodes the rolling 15 s H.264 ring out-of-process; macOS keeps
 │   │   the menu-bar screen-recording indicator lit while the stream is active
 │   └── Display plug/unplug (`CGDisplayRegisterReconfigurationCallback`) or a
 │       stopped stream -> reopens on the active display with bounded backoff
-├── `hex capture replay` (`hex annotate replay`) -> exports up to 15 s (`> 15 s`
+├── `gospell capture replay` (`gospell annotate replay`) -> exports up to 15 s (`> 15 s`
 │   is rejected by ScreenCaptureKit `-3812`) into `<captures>/<unix ms>.scrawl`
 │   without stopping the buffer, probes and decodes keyframes with `scrawl-helper`,
 │   writes `capture.json` and `scrawl.json` (`missing: "no_audio"`), copies to
 │   the clipboard, and feeds `capture.route`
 └── `capture.replay_hotkey` (unbound by default; recordable in
-    Settings › Annotate while the lab is on, or `hex settings set capture.replay_hotkey`)
+    Settings › Annotate while the lab is on, or `gospell settings set capture.replay_hotkey`)
     ├── Tap (< 300 ms) -> exports the silent 15 s clip at once, no mic opened
     └── Hold (≥ 300 ms) -> exports the frozen 15 s clip at the press and records
-        Hex's microphone timeline with "While dictating" until release + tail;
+        GoSpell's microphone timeline with "While dictating" until release + tail;
         narration is shifted onto the bundle clock after the clip (`video_ms..`),
         transcribed with word timestamps, and anchored onto the final keyframe
 ```
@@ -1233,7 +1233,7 @@ boot-time clock audio and shortcuts share), and `audio.wav` starts at that
 start too, padded with silence when the microphone began late or dropped
 audio.
 
-`hex dev capture-replay <wav>…` (debug, with the feature) runs the same
+`gospell dev capture-replay <wav>…` (debug, with the feature) runs the same
 capture host on a fresh transcription engine with the selected model, feeding
 WAV files instead of the microphone, and prints the bundle path. It needs
 Annotate on too, and records the screen meanwhile.
@@ -1287,7 +1287,7 @@ Checks:
   `captures_finish_one_at_a_time_and_starts_wait_for_room`,
   `a_capture_queued_behind_a_slow_finish_has_already_stopped`,
   `a_failed_start_raced_by_stop_never_wedges_later_starts`,
-  `the_engine_config_comes_from_hex`, and
+  `the_engine_config_comes_from_gospell`, and
   `shutdown_cancels_the_recording_capture_and_waits_for_its_cleanup`.
   In capture_host/wav_file.rs: `a_finished_file_reads_back_and_can_be_trimmed`,
   `a_keep_past_the_written_samples_keeps_them_all`, and
@@ -1316,20 +1316,20 @@ Checks:
   `the_hosts_normal_windows_count_and_its_chrome_does_not` in
   [window_log.rs](../../crates/capture/src/window_log.rs) and
   `helper_windows_are_scrawl_s_except_the_capture_source` in
-  [capture.rs](../../crates/capture/src/capture.rs) for Hex's own windows;
+  [capture.rs](../../crates/capture/src/capture.rs) for GoSpell's own windows;
   the ink and click rules in hosted_input.rs, including
   `a_capture_started_by_its_shortcut_waits_for_shift_to_come_up`,
   `a_capture_started_without_shift_held_inks_from_the_first_stroke`, and
   `a_click_with_the_chords_shift_still_held_is_no_pin`, and in
   capture.rs `a_shift_click_is_part_of_the_drawing`.
-- iPhone: `an_iphone_capture_narrates_with_hex_audio_and_finishes_when_its_mirror_ends`
+- iPhone: `an_iphone_capture_narrates_with_gospell_audio_and_finishes_when_its_mirror_ends`
   and `a_mirror_ending_never_stops_a_screen_capture` in capture_host.rs;
   `since_moves_audio_and_gaps_onto_a_later_clock`,
   `audio_streamed_to_disk_counts_its_samples_and_can_be_read_back` (reading a
   streamed recording consumes its partial), and
   `a_streamed_recording_whose_file_is_gone_has_no_samples` in
   [audio.rs](../../crates/capture/src/audio.rs). The mirror, its
-  `--no-microphone`, and the camera prompt have not run in Hex.
+  `--no-microphone`, and the camera prompt have not run in GoSpell.
 - Streaming and recovery, in [recover.rs](../../crates/capture/src/recover.rs):
   `a_capture_that_has_not_been_journaled_is_never_owed_a_rebuild` (and the
   live case
@@ -1418,7 +1418,7 @@ Checks:
   `tests/golden/capture-capsule-*.png`, and
   `the_capsule_moves_inside_its_panel_and_comes_to_rest`, which traces every
   scripted state change per frame, Calm and Reduce Motion, for no pops,
-  jumps, or jiggle. `HEX_CAPSULE_MOTION` also writes rune-motion traces for
+  jumps, or jiggle. `GOSPELL_CAPSULE_MOTION` also writes rune-motion traces for
   motion-lint. `cues_mark_start_stop_sent_and_taking_back`,
   `nothing_heard_says_so`, and `a_capture_with_no_words_says_nothing_was_heard`
   cover the tones and the empty transcript. Observed (Oct 27, worker, r19 motion): all 28
@@ -1445,12 +1445,12 @@ Checks:
   `only_an_open_picker_over_a_pinned_capsule_looks_again`. The native
   read, the re-place, and the 100 ms wake itself have no test: they need two
   real displays.
-- Playground: `hex capsule-playground` (feature builds; hidden), or
+- Playground: `gospell capsule-playground` (feature builds; hidden), or
   `scripts/build-capsule-playground.sh` for an ad-hoc signed
-  `Hex Playground.app`, runs the real capsule in a window of its own against a
+  `GoSpell Playground.app`, runs the real capsule in a window of its own against a
   fake host, with state buttons, the whole flow, slow motion, Reduce Motion,
   the tones, and live tuning ([tuning.rs](../../src/rune_ui/capture_capsule/tuning.rs);
-  "Copy values" copies its `DEFAULT`). It reads and writes no Hex data and
+  "Copy values" copies its `DEFAULT`). It reads and writes no GoSpell data and
   records or sends nothing. The whole flow picks the first suggestion;
   its "Saved rule" toggle plays a rule's send, sent at once, instead.
   `--snap --scene suggestions|shift|sent-rule|search|typed|picked|rule|recording`
@@ -1468,7 +1468,7 @@ Checks:
   `retention_names_presets_and_imported_days` in rune_ui/scrawl.rs; scenes
   `mac-scrawl-off`, `mac-scrawl`, `mac-scrawl-running`, `mac-scrawl-permission`
   (feature builds only, so no goldens: those run on Linux).
-- Settings: every `capture.*` key in `hex settings`
+- Settings: every `capture.*` key in `gospell settings`
   (`every_persisted_setting_has_a_cli_key`).
 - Replay, in [capture_host/replay.rs](../../src/capture_host/replay.rs) and
   [capture_host/replay/sck.rs](../../src/capture_host/replay/sck.rs):
@@ -1479,23 +1479,23 @@ Checks:
   and `error_completion_block_carries_xpc_signature`.
 
 Observed 2026-10-25 on pro (M2 Max), before the real engine, with the
-stand-in: `HEX_EXPERIMENTS=capture hex dev capture-replay` over three
+stand-in: `GOSPELL_EXPERIMENTS=capture gospell dev capture-replay` over three
 vocabulary fixtures (6.5 s) loaded Parakeet unified English on Metal and
-wrote 18 words with plausible times. The non-replay `hex capture` engine has
+wrote 18 words with plausible times. The non-replay `gospell capture` engine has
 not run end to end in automated tests (unit tests use a fake engine over
 Scrawl's real bundle writer). Observed 2026-11-04 in a macOS 27.0
-(`26A428`) guest VM on Apple Silicon with Developer ID-signed `Hex Test.app`:
+(`26A428`) guest VM on Apple Silicon with Developer ID-signed `GoSpell Test.app`:
 `labs.annotate_replay` opened a 15 fps `1920×1080` `SCClipBufferingOutput`
 stream, exported 15,000 ms silent and 19,581 ms narrated bundles (13 Parakeet
-words anchored on the final keyframe, cursor hidden, Hex chrome excluded,
-clipboard handoff populated) via `hex capture replay`, an `⌥⇧R` tap, and a
+words anchored on the final keyframe, cursor hidden, GoSpell chrome excluded,
+clipboard handoff populated) via `gospell capture replay`, an `⌥⇧R` tap, and a
 3.5 s `⌥⇧R` hold, recovered across `CGVirtualDisplay` plug/unplug and
 display sleep/wake, and rejected a 16 s request with
 `SCStreamErrorDomain -3812`. The menu-bar screen-recording indicator stays lit
 for the entire lifetime of the rolling buffer.
 # Paste Last provenance on macOS
 
-A successful Annotate finish marks its own bundle with `.hex-annotate-v1`
+A successful Annotate finish marks its own bundle with `.gospell-annotate-v1`
 (owner-only identity and ready time, no words or images). Failed, cancelled,
 and Screenshots recordings do not publish this mark. Existing ambiguous
 bundles, including captures made by standalone Scrawl, are not backfilled

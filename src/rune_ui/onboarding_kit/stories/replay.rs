@@ -1,5 +1,5 @@
 //! The real first run's replay strip, in test and debug builds only
-//! (`hex_dev_onboarding`): restart it, go back one beat, play another joke,
+//! (`gospell_dev_onboarding`): restart it, go back one beat, play another joke,
 //! and fake a slower download. Every build logs how long the download
 //! showed for.
 
@@ -9,12 +9,12 @@ use super::super::live;
 use super::*;
 
 /// Whether this build has the strip, and the jokes that swear.
-const ON: bool = cfg!(hex_dev_onboarding);
+const ON: bool = cfg!(gospell_dev_onboarding);
 
 /// How fast the download shows, at most.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub(crate) enum Speed {
-    /// As fast as Hex downloads it.
+    /// As fast as GoSpell downloads it.
     #[default]
     Real,
     Mbps100,
@@ -58,7 +58,7 @@ pub(crate) struct Replay {
 }
 
 impl Replay {
-    /// Holds Hex's real `download` to the chosen speed, and logs how long
+    /// Holds GoSpell's real `download` to the chosen speed, and logs how long
     /// it showed for once it finishes. A model already in place shows
     /// nothing.
     pub(crate) fn show(&mut self, download: &mut Download, now: f64) {
@@ -108,7 +108,7 @@ impl Onboard {
             | Step::Waiting
             | Step::Try
             | Step::TryHearing
-            | Step::TryHeard => self.with_hex(),
+            | Step::TryHeard => self.with_gospell(),
             Step::Ready => self.jump_to_try(),
             Step::Pick | Step::Started | Step::Parked | Step::Done => self.opener(),
         }
@@ -126,15 +126,15 @@ impl Onboard {
         self.replay.speed = self.replay.speed.next();
     }
 
-    /// `"Without Hex"` from the top: the conversation opens as it would
-    /// after `"Setting up Hex"`.
+    /// `"Without GoSpell"` from the top: the conversation opens as it would
+    /// after `"Setting up GoSpell"`.
     fn opener(&mut self) {
         self.jump_to_demo();
         self.auto_due_at = Some(self.now);
     }
 
-    /// `"With Hex"` from the top, `"Without Hex"` just behind it.
-    fn with_hex(&mut self) {
+    /// `"With GoSpell"` from the top, `"Without GoSpell"` just behind it.
+    fn with_gospell(&mut self) {
         self.jump_to_demo();
         let now = self.now;
         let typing_from = now - self.scene.duration() - COMEDY_HOLD;
@@ -238,10 +238,10 @@ mod tests {
     }
 
     #[test]
-    fn back_from_with_hex_opens_without_hex_from_the_top() {
+    fn back_from_with_gospell_opens_without_gospell_from_the_top() {
         let mut s = Onboard::new(Flow::FirstRun);
         s.now = 5.0;
-        s.with_hex();
+        s.with_gospell();
         assert_eq!(s.step(), Step::YourTurn);
         s.back_one_beat();
         assert_eq!(s.step(), Step::Parked);

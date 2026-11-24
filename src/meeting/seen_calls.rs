@@ -1,8 +1,8 @@
-//! The apps and websites Hex has seen a call in, newest first, for
+//! The apps and websites GoSpell has seen a call in, newest first, for
 //! Meetings › Settings › Calls. The meeting watcher notes each call it
 //! detects; the window only reads. Kept in the data folder as
 //! `seen-calls.json`, owner-only and bounded, beside settings rather than in
-//! them, so it has no `hex settings` key.
+//! them, so it has no `gospell settings` key.
 
 use std::path::{Path, PathBuf};
 
@@ -32,7 +32,7 @@ pub struct SeenCall {
 }
 
 impl SeenCall {
-    /// The call's provider, or None when Hex can't name it.
+    /// The call's provider, or None when GoSpell can't name it.
     pub fn from_candidate(candidate: &MeetingCandidate, now_ms: i64) -> Option<Self> {
         let provider = candidate.provider()?;
         Some(Self {
@@ -180,7 +180,8 @@ mod tests {
 
     #[test]
     fn the_file_is_owner_only_and_reads_back_newest_first() {
-        let folder = std::env::temp_dir().join(format!("hex-seen-calls-{}", std::process::id()));
+        let folder =
+            std::env::temp_dir().join(format!("gospell-seen-calls-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&folder);
         std::fs::create_dir_all(&folder).unwrap();
         let path = folder.join(FILE);

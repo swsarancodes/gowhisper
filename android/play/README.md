@@ -1,6 +1,6 @@
-# Hex keyboard on Google Play
+# GoSpell keyboard on Google Play
 
-**Before submission:** the [public privacy policy](https://dev.anoma.ly/hex/privacy) currently returns HTTP 200 but explicitly covers only iPhone. Add the [Android policy text](policy/privacy-policy.txt) at that URL alongside the iPhone policy. The signed app already shows the Android text offline in Privacy → Privacy policy.
+**Before submission:** the [public privacy policy](https://dev.gospell.goml.io/privacy) currently returns HTTP 200 but explicitly covers only iPhone. Add the [Android policy text](policy/privacy-policy.txt) at that URL alongside the iPhone policy. The signed app already shows the Android text offline in Privacy → Privacy policy.
 
 ## Listing files
 
@@ -16,14 +16,14 @@ Default language: English (United States). Store category: **Tools**. No account
 
 **Phone screenshots** — 1080 × 1920, portrait 9:16, RGB PNG. Captured from the final signed build, with synthetic input:
 
-1. [Typing](screenshots/01-keyboard.png) — Hex suggests “library” while a sentence is being typed.
+1. [Typing](screenshots/01-keyboard.png) — GoSpell suggests “library” while a sentence is being typed.
 2. [Dictation](screenshots/02-dictation.png) — the listening strip shows activity, finish and cancel.
 3. [Settings](screenshots/03-settings.png) — the ready state, Dictate and four settings pages.
 4. [Welcome](screenshots/04-welcome.png) — how dictation works and why there is a model download.
 
 ## Release candidate
 
-`ly.anoma.hex` · 0.2.0 (version code 3) · Android 12+ · arm64-v8a. The first open-testing release, built from `dev` at `bbebfa75` plus the version bump (#2286). 0.1.1 (version code 2) is on internal testing.
+`com.goml.gospell` · 0.2.0 (version code 3) · Android 12+ · arm64-v8a. The first open-testing release, built from `dev` at `bbebfa75` plus the version bump (#2286). 0.1.1 (version code 2) is on internal testing.
 
 | Size | 0.2.0 bytes | 0.1.0 bytes |
 | --- | ---: | ---: |
@@ -37,12 +37,12 @@ Bundletool reported the same minimum and maximum for an API 36 arm64-v8a, en-US,
 
 - Targets API 36, the [new phone-app requirement](https://developer.android.com/google/play/requirements/target-sdk) effective August 31, 2026. R8 and the resource shrinker ran, and the bundle is signed with the upload key. The release DEX has no reference to `android.util.Log`; typing and dictating a sentence on both emulators left none of its words in logcat.
 - The merged manifest requests only `RECORD_AUDIO` (user-started dictation) and `INTERNET` (the one model download). `BIND_INPUT_METHOD` protects the bound IME; it is not a requested permission.
-- The external editor’s input connection received **zero context reads** while typing, deleting and pressing the Hex key in text, visible, web and numeric password fields on API 36 and API 31. Only literal writes reached each field, the strip said “Dictation off in password fields” and the microphone stayed off. The same trace counted twelve context reads, and the microphone started, in an ordinary field.
-- All seven ELF load segments in `libhexspeech.so` and `libandroidx.graphics.path.so` are 16 KB aligned. BundleConfig requests 16 KB page alignment, and the arm64 and master splits passed `zipalign -c -P 16 4`. The release ran dictation on a guest with 16,384-byte pages.
+- The external editor’s input connection received **zero context reads** while typing, deleting and pressing the GoSpell key in text, visible, web and numeric password fields on API 36 and API 31. Only literal writes reached each field, the strip said “Dictation off in password fields” and the microphone stayed off. The same trace counted twelve context reads, and the microphone started, in an ordinary field.
+- All seven ELF load segments in `libgospellspeech.so` and `libandroidx.graphics.path.so` are 16 KB aligned. BundleConfig requests 16 KB page alignment, and the arm64 and master splits passed `zipalign -c -P 16 4`. The release ran dictation on a guest with 16,384-byte pages.
 
 **Emulator checks of this bundle** (installed from the AAB with bundletool, no phone): on API 36 and API 31 the first run downloaded and verified the model, then in airplane mode “teh” became “the” in another app, an emoji came from the emoji panel, the number pad typed, the phone pad opened, French turned “jai” into “J’ai”, all six typing models offered suggestions, words and shortcuts from Android’s personal dictionary were used, TalkBack’s explore-by-touch typed letters (API 31’s image has no TalkBack, so it was copied from the API 36 image), the licences and privacy pages opened, and one sentence was dictated through the emulator microphone. No crash or ANR. On API 36, installing 0.2.0 over a signed 0.1.1 kept the speech model, the style, the dictation language, the keyboard settings and the selected keyboard.
 
-**Known issue:** on Android 16 (API 36) the model download stops 5 to 6 seconds after Hex goes to the background, for example while you turn on the keyboard in Settings, and the partial file is deleted; a trip of 1 to 3 seconds survives. Setup then offers Retry. It does not happen on API 31.
+**Known issue:** on Android 16 (API 36) the model download stops 5 to 6 seconds after GoSpell goes to the background, for example while you turn on the keyboard in Settings, and the partial file is deleted; a trip of 1 to 3 seconds survives. Setup then offers Retry. It does not happen on API 31.
 
 ## Device matrix
 
@@ -59,7 +59,7 @@ Both Studio emulators started with no installed model. Each downloaded the pinne
 
 ## Real-device checklist
 
-The [upload-key-signed APK set](../build/phase5-proof/Hex-0.1.0-device.apks) can be installed on a connected arm64 Android 12+ handset with `bundletool install-apks --apks=<file>` without using Play.
+The [upload-key-signed APK set](../build/phase5-proof/GoSpell-0.1.0-device.apks) can be installed on a connected arm64 Android 12+ handset with `bundletool install-apks --apks=<file>` without using Play.
 
 1. **Microphones and audio routes:** dictate with the handset mic and with Bluetooth earbuds while music is playing. Check input quality, playback continuity and that cancel or loss of focus releases the mic.
 2. **Low-memory hardware:** on a 2–3 GB phone, time a cold dictation and several long ones. Check insertion latency, heat, battery use and whether Android evicts the IME or the app you’re typing in.

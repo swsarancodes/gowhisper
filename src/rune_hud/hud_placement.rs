@@ -11,7 +11,7 @@ use crate::rune_hud::dot_scope::Placement;
 /// reads as its own thing.
 pub const TOP_OFFSET: f64 = 6.0;
 /// The plate's gap above the Dock or the screen's bottom edge while Labs ›
-/// HUD height is off: the fixed gap Hex always had.
+/// HUD height is off: the fixed gap GoSpell always had.
 pub const BOTTOM_OFFSET: f64 = crate::app_settings::HUD_BOTTOM_GAP_DEFAULT as f64;
 /// The space the in-bar plate leaves above and below itself.
 pub const BAR_INSET: f64 = 3.0;

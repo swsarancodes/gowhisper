@@ -2,7 +2,7 @@
 //! what to record (an area, a window, or a whole display), which display,
 //! the sound a recording keeps, its settings, and Record. It rests at the
 //! bottom of the display under the pointer, never takes focus, and is left
-//! out of every capture; Hex's session tap gives it Escape and Return. What
+//! out of every capture; GoSpell's session tap gives it Escape and Return. What
 //! a choice does is the controller's ([`crate::screenshots`]).
 
 use super::*;
@@ -97,7 +97,7 @@ impl Toolbar {
 /// Adds the toolbar, hidden.
 pub(crate) fn install<S: 'static>(app: &mut rune::App<S>) -> OverlayHandle<Toolbar> {
     let spec = rune::OverlaySpec {
-        name: "Hex recording toolbar",
+        name: "GoSpell recording toolbar",
         size: SIZE,
         edge: rune::ScreenEdge::Bottom,
         margin: MARGIN,
@@ -141,7 +141,7 @@ pub(crate) fn remember(
     let saver = SAVER.get_or_init(|| {
         let (wake, woken) = std::sync::mpsc::sync_channel(1);
         std::thread::Builder::new()
-            .name("hex-record-choice".into())
+            .name("gospell-record-choice".into())
             .spawn(move || {
                 for () in woken {
                     save_choices();
@@ -609,12 +609,12 @@ mod tests {
         assert_eq!(toolbar.microphone_label(), "Studio Display Microphone");
     }
 
-    /// `HEX_TOOLBAR_RENDERS=<folder>` draws the toolbar offscreen, light and
+    /// `GOSPELL_TOOLBAR_RENDERS=<folder>` draws the toolbar offscreen, light and
     /// dark, with one display and with two. No golden checks it.
     #[test]
     #[ignore = "writes stills only when asked"]
     fn renders_the_toolbar() {
-        let Some(folder) = std::env::var_os("HEX_TOOLBAR_RENDERS") else {
+        let Some(folder) = std::env::var_os("GOSPELL_TOOLBAR_RENDERS") else {
             return;
         };
         let folder = std::path::PathBuf::from(folder);

@@ -1,5 +1,5 @@
 """Synthetic German, Bokmål, French and Italian typing sets for the Android replay, made the way
-2026-11-20-hex-typing-logs/bench_make.py made the English and Spanish ones: held-out Tatoeba
+2026-11-20-gospell-typing-logs/bench_make.py made the English and Spanish ones: held-out Tatoeba
 sentences (CC BY 2.0 FR), each tap sampled from the measured per-key offset and per-row spread
 in that benchmark's input.json meta (no log rows), with 2% of spaces missed and space taps that
 land on a letter typed as that letter. A letter AZERTY moves takes its row's average offset. Keys, with the English rows' heights and space bar on a 402 pt layout:

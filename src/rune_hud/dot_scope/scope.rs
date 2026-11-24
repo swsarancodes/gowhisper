@@ -4,10 +4,11 @@
 
 use std::f32::consts::{PI, TAU};
 
-use super::{AutoLevel, Processing, Tuning, fixed_level};
+use super::embers::{Embers, Finale};
+use super::{AutoLevel, Look, Processing, Tuning, fixed_level};
 use crate::rune_hud::spring::{REDUCED_FADE, Spec, Spring};
 
-const STEP: f32 = 1.0 / 240.0;
+pub(super) const STEP: f32 = 1.0 / 240.0;
 const HISTORY: usize = 512;
 const SAMPLES_PER_COLUMN: usize = 3;
 const SPEEDS: [f32; 4] = [0.8, 1.25, 1.85, 2.6];
@@ -42,7 +43,8 @@ pub fn demo_level(time: f32) -> f32 {
     if t > SPOKEN {
         return 0.04;
     }
-    let shape = (PI * t / SPOKEN).sin().powf(0.4);
+    // `max`: at the phrase's very end `sin` dips a hair below 0.
+    let shape = (PI * t / SPOKEN).sin().max(0.0).powf(0.4);
     let rate = TAU * (4.3 + 0.6 * (phrase * 1.7).sin());
     let syllable = 0.5 + 0.5 * (rate * t + phrase).sin();
     let stress = 0.75 + 0.25 * (TAU * 1.1 * t + 2.0 * phrase).sin();
@@ -100,6 +102,8 @@ pub struct Pose {
     /// only while a field held by one end is between whole columns
     /// ([`Scope::span`]).
     pub shift: f32,
+    /// Embers' done: the flash, ripple and mark ([`Look::Embers`] only).
+    pub finale: Finale,
 }
 
 /// The end of the field that stays where it is as its width changes.
@@ -118,7 +122,7 @@ struct Voice {
     energy: f32,
     kick: f32,
     kick_velocity: f32,
-    /// The prototype's 16 bands, all the level: Hex meters no spectrum.
+    /// The prototype's 16 bands, all the level: GoSpell meters no spectrum.
     band: f32,
 }
 
@@ -423,6 +427,8 @@ pub struct Scope {
     softness: Spring,
     cool: Spring,
     fail: Spring,
+    /// The Embers look's simulation, stepped alongside the traces.
+    embers: Embers,
 }
 
 impl Scope {
@@ -464,6 +470,7 @@ impl Scope {
             softness: Spring::at(HIDDEN_SOFTNESS),
             cool: Spring::at(0.0),
             fail: Spring::at(0.0),
+            embers: Embers::new(),
         };
         scope.resize();
         scope
@@ -612,7 +619,22 @@ impl Scope {
             },
             done: if self.stage == Stage::Done { 1.0 } else { 0.0 },
             shift: self.shift,
+            finale: if self.tuning.look == Look::Embers {
+                self.embers.finale()
+            } else {
+                Finale {
+                    ripple: -1.0,
+                    ..Finale::default()
+                }
+            },
         }
+    }
+
+    /// The embers on the plate as it stands, packed for the shader
+    /// ([`Embers::words`]).
+    pub fn ember_words(&self) -> Vec<[u16; 2]> {
+        let pose = self.pose();
+        self.embers.words(pose.width, pose.height)
     }
 
     /// Whether the scope has faded out after being hidden.
@@ -719,7 +741,15 @@ impl Scope {
         self.elapsed += h;
         self.time += h;
         self.steps += 1;
-        if self.steps.is_multiple_of(2) {
+        if tuning.look == Look::Embers {
+            let voice = if recording {
+                self.voices[0].level.clamp(0.0, 1.0)
+            } else {
+                0.0
+            };
+            self.embers
+                .step(h, self.stage, self.elapsed, voice, frame.reduce_motion);
+        } else if self.steps.is_multiple_of(2) {
             self.beam(2.0 * h);
         }
     }
@@ -1049,6 +1079,19 @@ pub fn palette(dark: bool, pose: &Pose, saturation: f32) -> Palette {
     }
 }
 
+/// Embers' colours, always on the HUD's dark plate: deep GoML orange to
+/// white-hot while recording and working, coral on failure.
+pub fn ember_palette(pose: &Pose, saturation: f32) -> Palette {
+    let (ember, ember_core) = ([1.0, 0.40, 0.04], [1.0, 0.94, 0.84]);
+    let (coral, coral_core) = ([1.0, 0.38, 0.31], [1.0, 0.66, 0.6]);
+    let dark = palette(true, pose, saturation);
+    Palette {
+        base: saturate(mix3(ember, coral, pose.fail), saturation),
+        core: saturate(mix3(ember_core, coral_core, pose.fail), saturation),
+        ..dark
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1070,11 +1113,13 @@ mod tests {
         }
     }
 
-    /// The prototype's response: the fixed window and round 1's sweep.
+    /// The prototype's response: the fixed window and round 1's sweep, on
+    /// the classic dot field.
     fn fixed() -> Tuning {
         Tuning {
             auto_level: false,
             processing: Processing::Sweep,
+            look: Look::Dots,
             ..Tuning::default()
         }
     }
@@ -1327,7 +1372,10 @@ mod tests {
             loudness: demo_loudness(time),
             ..recording(0.0)
         };
-        let mut auto = Scope::new(Tuning::default());
+        let mut auto = Scope::new(Tuning {
+            look: Look::Dots,
+            ..Tuning::default()
+        });
         let mut fixed_window = Scope::new(fixed());
         let (mut a, mut f) = (0.0, 0.0);
         for i in 0..240 {
@@ -1384,10 +1432,18 @@ mod tests {
         scope.tune(Tuning {
             columns: 64.0,
             rows: 15.0,
-            ..Tuning::default()
+            ..fixed()
         });
         run(&mut scope, 0.2, recording(0.3));
         assert_eq!(scope.dots().len(), 64 * 15);
+    }
+
+    /// A phrase's very end used to take a power of a hair below zero.
+    #[test]
+    fn the_demo_voice_stays_finite_at_a_phrase_end() {
+        for time in [1.7, 2.4 + 1.7, 1.699_999_9, 1.700_000_1] {
+            assert!(demo_level(time).is_finite(), "{time}");
+        }
     }
 
     #[test]

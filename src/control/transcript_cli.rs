@@ -47,7 +47,7 @@ pub struct HistoryArgs {
     pub action: Option<HistoryAction>,
 }
 
-/// History changes, carried out by the running Hex (`crate::control`).
+/// History changes, carried out by the running GoSpell (`crate::control`).
 #[derive(Subcommand, Debug)]
 pub enum HistoryAction {
     /// Delete every retained dictation.
@@ -121,7 +121,7 @@ pub enum MeetingsCommand {
         /// Only entries starting before this offset: mm:ss, h:mm:ss, or seconds.
         #[arg(long)]
         to: Option<String>,
-        /// Only chapter N (counting from 1), as `hex meetings chapters` lists them.
+        /// Only chapter N (counting from 1), as `gospell meetings chapters` lists them.
         #[arg(long, conflicts_with_all = ["from", "to"])]
         chapter: Option<usize>,
     },
@@ -142,7 +142,7 @@ pub enum MeetingsCommand {
         #[arg(long, default_value_t = 10, value_parser = clap::value_parser!(u32).range(1..=50))]
         limit: u32,
     },
-    /// Start recording a meeting in the running Hex, visibly, as the menu
+    /// Start recording a meeting in the running GoSpell, visibly, as the menu
     /// bar's Record Meeting does (needs meetings.enabled).
     Record {
         /// The meeting's title (default: the calendar event's, or a
@@ -164,10 +164,10 @@ pub enum MeetingsCommand {
     },
     /// Delete a finished meeting: move its exported Markdown and its recording
     /// folder to the Trash, as the Meetings pane's Delete does. Nothing is
-    /// removed outright, and Hex asks for no confirmation; ask the person
+    /// removed outright, and GoSpell asks for no confirmation; ask the person
     /// first.
     Delete {
-        /// The exact id `hex meetings list --json` prints.
+        /// The exact id `gospell meetings list --json` prints.
         id: String,
         #[command(flatten)]
         output: crate::control::cli::Output,
@@ -330,7 +330,7 @@ fn default_typing_wpm() -> u32 {
 
 /// A saved typing speed of any JSON shape: a number is clamped, and
 /// anything else (text, null, a negative number) reads as the default so one
-/// bad field never breaks `hex history`.
+/// bad field never breaks `gospell history`.
 fn lenient_typing_wpm<'de, D>(deserializer: D) -> std::result::Result<u32, D::Error>
 where
     D: serde::Deserializer<'de>,
@@ -349,14 +349,14 @@ struct StatsOutput {
     retention: HistoryRetention,
     #[serde(flatten)]
     stats: HistoryStats,
-    /// Labs › Dictation stats' daily rollup, filled in by `hex history
+    /// Labs › Dictation stats' daily rollup, filled in by `gospell history
     /// stats` after the totals; the command refuses while the lab is off, so
     /// successful output always has it.
     #[serde(skip_serializing_if = "Option::is_none")]
     yearly: Option<YearlyOutput>,
 }
 
-/// The Labs › Dictation stats rollup in `hex history stats --json`.
+/// The Labs › Dictation stats rollup in `gospell history stats --json`.
 #[derive(Serialize)]
 struct YearlyOutput {
     dictations: u64,
@@ -416,12 +416,12 @@ fn require_history_stats(on: bool) -> Result<()> {
         Ok(())
     } else {
         Err(eyre!(
-            "Dictation stats are a Labs feature and are off. Turn them on with `hex labs on history-stats` or in Settings › Labs."
+            "Dictation stats are a Labs feature and are off. Turn them on with `gospell labs on history-stats` or in Settings › Labs."
         ))
     }
 }
 
-/// Labs › Dictation stats' rollup for `hex history stats --json`. `hex
+/// Labs › Dictation stats' rollup for `gospell history stats --json`. `gospell
 /// history stats` refuses while the lab is off, so the field is always there.
 fn yearly_output(history: &Path, now: u64) -> YearlyOutput {
     let usage = crate::history::usage::Usage::load(
@@ -431,7 +431,7 @@ fn yearly_output(history: &Path, now: u64) -> YearlyOutput {
     YearlyOutput::from(&usage)
 }
 
-/// `hex history stats`.
+/// `gospell history stats`.
 fn history_stats(since: Option<&str>, until: Option<&str>, json: bool) -> Result<()> {
     require_history_stats(crate::labs::history_stats())?;
     let root = crate::app_paths::support_dir()?;
@@ -495,7 +495,7 @@ fn stats_text(stats: &HistoryStats) -> String {
     text
 }
 
-/// Labs › Keep recordings for `hex history`, read from the saved settings:
+/// Labs › Keep recordings for `gospell history`, read from the saved settings:
 /// this command never applies them to the process, so the runtime switch
 /// (`crate::labs::keep_recordings`) can read off while the lab is on.
 fn keep_recordings(settings: &AppSettings) -> bool {
@@ -772,15 +772,15 @@ pub fn meetings(command: &MeetingsCommand) -> Result<()> {
             )?;
             Ok(())
         }
-        // `main` sends these to the running Hex.
+        // `main` sends these to the running GoSpell.
         MeetingsCommand::Record { .. }
         | MeetingsCommand::Stop { .. }
         | MeetingsCommand::CopyLast { .. }
-        | MeetingsCommand::Delete { .. } => Err(eyre!("this command needs the running Hex")),
+        | MeetingsCommand::Delete { .. } => Err(eyre!("this command needs the running GoSpell")),
     }
 }
 
-/// A timed subtitle format for `hex meetings show --srt|--vtt`.
+/// A timed subtitle format for `gospell meetings show --srt|--vtt`.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum SubtitleFormat {
     Srt,

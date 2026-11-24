@@ -1,4 +1,4 @@
-//! The captures folder as `hex capture list|show|send|route` read it. Reads
+//! The captures folder as `gospell capture list|show|send|route` read it. Reads
 //! and explanations run on the control thread, off the listener; a send goes
 //! through the `capture-route` thread so it orders with the capsule's.
 
@@ -12,7 +12,7 @@ use crate::control::{
     ControlError, ControlReply, ScrawlCaptureDetail, ScrawlCaptureSession, ScrawlCaptureSummary,
 };
 
-/// How many captures `hex capture list` shows unless told.
+/// How many captures `gospell capture list` shows unless told.
 const LIST: usize = 20;
 
 pub fn list(limit: Option<usize>) -> Result<ControlReply, ControlError> {
@@ -149,7 +149,7 @@ mod tests {
     #[test]
     fn a_capture_on_disk_summarizes_its_mode_words_and_send() {
         let root = std::env::temp_dir().join(format!(
-            "hex-capture-library-{}",
+            "gospell-capture-library-{}",
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()
@@ -166,7 +166,7 @@ mod tests {
               "words":[{{"text":"make","t0":0,"t1":1}},{{"text":"it","t0":1,"t1":2}},
                        {{"text":"blue","t0":2,"t1":3}}]}},
             "strokes":[],"marks":[],"events":[],"keyframes":[],"contactSheet":"sheet.jpg",
-            "destination":{{"session":"ses_1","title":"Hex","via":"chosen"}}}}"#
+            "destination":{{"session":"ses_1","title":"GoSpell","via":"chosen"}}}}"#
         );
         std::fs::write(dir.join("scrawl.json"), manifest).unwrap();
         std::fs::write(dir.join(delivery::PENDING), "{}").unwrap();
@@ -182,7 +182,7 @@ mod tests {
             summary.sent_to,
             Some(ScrawlCaptureSession {
                 session: "ses_1".into(),
-                title: "Hex".into()
+                title: "GoSpell".into()
             })
         );
         assert!(summary.queued);
@@ -200,7 +200,7 @@ mod tests {
     #[test]
     fn a_capture_without_word_times_counts_the_words_it_says() {
         let root = std::env::temp_dir().join(format!(
-            "hex-capture-untimed-{}",
+            "gospell-capture-untimed-{}",
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()
@@ -213,7 +213,7 @@ mod tests {
             let manifest = format!(
                 r#"{{"version":1,"id":"a","createdAtMs":1792933491953,"durationMs":4000,
                 "target":{{"mode":"display","displayId":1,"frame":{frame}}},
-                "transcript":{{"source":"hex","text":"{text}","segments":[],"words":[]}},
+                "transcript":{{"source":"gospell","text":"{text}","segments":[],"words":[]}},
                 "strokes":[],"marks":[],"events":[],"keyframes":[],"contactSheet":"sheet.jpg"}}"#
             );
             std::fs::write(dir.join("scrawl.json"), manifest).unwrap();

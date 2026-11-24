@@ -31,7 +31,7 @@ case "$CHANNEL" in
     for existing in "$tag" "app-v$version"; do
       refs=$(gh api "repos/$GITHUB_REPOSITORY/git/matching-refs/tags/$existing" --jq '.[].ref')
       if grep -Fxq "refs/tags/$existing" <<< "$refs"; then
-        die "Hex $version is already tagged $existing; raise the version in Cargo.toml on dev first."
+        die "GoSpell $version is already tagged $existing; raise the version in Cargo.toml on dev first."
       fi
     done
     [ -f "docs/releases/$version.md" ] || die "Add release notes at docs/releases/$version.md first."
@@ -50,7 +50,7 @@ case "$CHANNEL" in
     number=$((GITHUB_RUN_NUMBER + 100))
     release_channel=dev release_version="0.0.0-dev-$number" tag=""
     # The dev changelog lists what each build changed (dev-notes branch).
-    notes="https://anoma.ly/hex/dev#$release_version"
+    notes="https://gospell.goml.io/dev#$release_version"
     if [ "$CHANNEL" = check ]; then
       tag="v0.0.0-test-$number"
       notes="https://github.com/$GITHUB_REPOSITORY/commit/$SHA"
@@ -61,7 +61,7 @@ esac
 {
   echo "version=$version"
   echo "channel=$CHANNEL"
-  echo "service=https://anoma.ly/release"
+  echo "service=https://goml.io/release"
   echo "tag=$tag"
   echo "notes-url=$notes"
   echo "release-channel=$release_channel"

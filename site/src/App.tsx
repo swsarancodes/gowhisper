@@ -4,7 +4,7 @@ import { guessPlatform, refinePlatform, type Platform } from "./platform"
 import { OptionKey, SoundToggle, useShout } from "./Shout"
 import signature from "./footer-signature.svg"
 
-function HexMark() {
+function GoSpellMark() {
   return (
     <svg aria-hidden="true" viewBox="0 0 64 64" className="wordmark__icon">
       <path d="M32 4 57 18.5v27L32 60 7 45.5v-27Z" />
@@ -55,13 +55,13 @@ export default function App() {
       <main className="page" ref={root} data-phase={shout.phase}>
         <canvas ref={canvas} className="stage" aria-hidden="true" />
         <header className="header">
-          <a className="wordmark" href={import.meta.env.BASE_URL} aria-label="Hex home" data-avoid>
-            <HexMark />
-            <span>Hex</span>
+          <a className="wordmark" href={import.meta.env.BASE_URL} aria-label="GoSpell home" data-avoid>
+            <GoSpellMark />
+            <span>GoSpell</span>
           </a>
           <div className="header__tools" data-avoid>
             {shout.phase === "started" && <SoundToggle muted={shout.muted} onToggle={shout.toggleMuted} />}
-            <a className="header__github" href="https://github.com/anomalyco/hex">
+            <a className="header__github" href="https://github.com/goml/gospell">
               <GitHubMark />
               <span>GitHub</span>
             </a>
@@ -96,7 +96,7 @@ export default function App() {
             </h1>
             <p>
               Local voice dictation for {osName}. Hold {shortcut}, say what you mean, and
-              Hex pastes it where you are.
+              GoSpell pastes it where you are.
             </p>
           </div>
 
@@ -107,7 +107,7 @@ export default function App() {
         <div className="copyright">
           <img src={signature} alt="" aria-hidden="true" width={163} height={64} />
           <p>
-            ©2026 <a href="https://anoma.ly">Anomaly</a>. All rights reserved.
+            ©2026 <a href="https://goml.io">GoML</a>. All rights reserved.
           </p>
         </div>
       </footer>

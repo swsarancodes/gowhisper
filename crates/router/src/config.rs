@@ -475,16 +475,16 @@ mod tests {
     fn terminal_rules_key_on_folders_but_never_home_or_root() {
         let config = parse_scrawl_config(
             r#"{"routing": {"terminals": {
-                "/p/board": "ses_b", "~/code/hex": "~/code/hex", "~": "ses_h", "/": "ses_r"}}}"#,
+                "/p/board": "ses_b", "~/code/gospell": "~/code/gospell", "~": "ses_h", "/": "ses_r"}}}"#,
         );
         assert_eq!(config.terminals.len(), 4, "kept as written");
         let home = crate::user_dirs::home_dir().unwrap();
         let mut rules = config.terminal_rules();
         rules.sort();
-        let hex = home.join("code/hex");
+        let gospell = home.join("code/gospell");
         let mut expected = vec![
             ("/p/board".to_owned(), PathBuf::from("ses_b")),
-            (hex.display().to_string(), hex),
+            (gospell.display().to_string(), gospell),
         ];
         expected.sort();
         assert_eq!(rules, expected);

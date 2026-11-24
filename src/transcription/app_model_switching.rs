@@ -2,7 +2,7 @@
 //! language switching follows the input source (Labs › Switch model with app).
 //!
 //! Matching is by application on macOS and Windows alike: a mode's website
-//! rules are ignored. Hex's own window, and a moment with no application in
+//! rules are ignored. GoSpell's own window, and a moment with no application in
 //! front at all, name no mode, so they change nothing.
 //!
 //! No models or workers live here: this only admits the latest mode choice
@@ -30,20 +30,20 @@ fn retry_backoff(failures: u32) -> Duration {
         .min(RETRY_MAX)
 }
 
-/// What a foreground read found. Hex's own window and a moment with no
+/// What a foreground read found. GoSpell's own window and a moment with no
 /// frontmost application name no mode, so the switcher keeps what it last
 /// matched and neither schedules nor cancels a switch.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum Observation<'a> {
-    /// An application other than Hex is in front: its own name, and on
+    /// An application other than GoSpell is in front: its own name, and on
     /// macOS the name Finder shows for its bundle when that differs.
     App(&'a str, Option<&'a str>),
-    /// Hex's own window is in front, or the system named no application.
+    /// GoSpell's own window is in front, or the system named no application.
     Ignored,
 }
 
 impl<'a> Observation<'a> {
-    /// A frontmost read: `None` is Hex's own window or no application at all.
+    /// A frontmost read: `None` is GoSpell's own window or no application at all.
     pub(crate) fn frontmost(application: Option<&'a str>, bundle_name: Option<&'a str>) -> Self {
         application.map_or(Self::Ignored, |application| {
             Self::App(application, bundle_name)
@@ -104,7 +104,7 @@ impl Switcher {
         }
     }
 
-    /// Feeds one foreground read. An ignored read is Hex's own window or no
+    /// Feeds one foreground read. An ignored read is GoSpell's own window or no
     /// application at all: it keeps the last match and its pending switch
     /// exactly as they were. Returns true on a real change, so the owner can
     /// cancel obsolete work.
@@ -255,7 +255,7 @@ pub(crate) fn mode_choice(
 }
 
 /// The choice of the mode in front at launch, recorded so launching never
-/// switches the model. Hex's own window names no mode.
+/// switches the model. GoSpell's own window names no mode.
 #[cfg(any(target_os = "macos", target_os = "windows"))]
 pub(crate) fn startup_choice(settings: &AppSettings) -> Option<KeyboardModelChoice> {
     #[cfg(target_os = "macos")]
@@ -477,17 +477,17 @@ mod tests {
     }
 
     #[test]
-    fn hexs_own_window_keeps_the_last_apps_choice_and_its_pending_switch() {
+    fn gospells_own_window_keeps_the_last_apps_choice_and_its_pending_switch() {
         let now = Instant::now();
         let mut switcher = Switcher::new(true, None);
         let current = selection(TranscriptionModelId::ParakeetUnifiedEnglish, "en");
         assert!(observe(&mut switcher, Observation::App("Notes", None), now));
         assert_eq!(switcher.take_due(now + DEBOUNCE, &current), Some(spanish()));
-        // Hex's own window names no mode: the Notes choice stays, nothing
+        // GoSpell's own window names no mode: the Notes choice stays, nothing
         // new is due, and the mode is never even looked up.
         assert!(!switcher.observe(
             Observation::Ignored,
-            |_, _| panic!("Hex's own window must not name a mode"),
+            |_, _| panic!("GoSpell's own window must not name a mode"),
             now + Duration::from_secs(1),
         ));
         assert_eq!(
@@ -507,7 +507,7 @@ mod tests {
     }
 
     #[test]
-    fn hex_in_front_during_the_debounce_does_not_cancel_the_switch() {
+    fn gospell_in_front_during_the_debounce_does_not_cancel_the_switch() {
         let now = Instant::now();
         let mut switcher = Switcher::new(true, None);
         let current = selection(TranscriptionModelId::ParakeetUnifiedEnglish, "en");

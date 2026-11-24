@@ -1,7 +1,7 @@
 //! What a catalog model's details view shows beyond its card: the credit
 //! its licence asks for, links to its source and licence, the notice its
 //! publisher supplied, measured resource use, and benchmarks the publisher
-//! measured (never Hex). Only models that need more than the card have one.
+//! measured (never GoSpell). Only models that need more than the card have one.
 
 use super::models::TranscriptionModelId;
 
@@ -13,7 +13,7 @@ pub struct ModelDetails {
     /// The NOTICE the publisher ships with the file.
     pub notice: &'static str,
     /// Peak memory while transcribing and where it was measured; `None`
-    /// when Hex hasn't measured it.
+    /// when GoSpell hasn't measured it.
     pub peak_memory: Option<(&'static str, &'static str)>,
     /// Published error rates per language, in percent.
     pub published: &'static [(&'static str, f64)],
@@ -168,7 +168,7 @@ const FLUID_SPEECH_PRO: ModelDetails = ModelDetails {
         ("uk", 4.77),
     ],
     published_conditions: "The card's FLEURS test figures (greedy decoding) for the reference \
-                           NeMo model, not the Q8_0 file Hex downloads. The Q8_0 card reports \
+                           NeMo model, not the Q8_0 file GoSpell downloads. The Q8_0 card reports \
                            only 10.2% WER on EdAcc's 600 accented-English clips against the \
                            .nemo's 10.1%. The card publishes no FLEURS English figure. Dataset \
                            revisions, normalization, and scorer versions unknown",

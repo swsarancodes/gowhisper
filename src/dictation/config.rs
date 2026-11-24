@@ -11,7 +11,7 @@ static READS_WINDOW_TITLE: AtomicBool = AtomicBool::new(false);
 /// Whether anything the user set up looks at the page: a mode chosen by
 /// website, an OpenCode rewrite (its prompt names the site), a script
 /// transformation (it receives the page address), or Labs › Rewrite by voice
-/// (its request carries the browser host). Otherwise Hex never asks a
+/// (its request carries the browser host). Otherwise GoSpell never asks a
 /// browser for its page. On macOS, any of these, the voice prompt's lab
 /// included, can bring up the Automation prompt for the browser.
 pub fn reads_browser() -> bool {
@@ -19,7 +19,7 @@ pub fn reads_browser() -> bool {
 }
 
 /// Whether a script transformation is set up, the only reader of the front
-/// window's title. Otherwise Hex never reads it.
+/// window's title. Otherwise GoSpell never reads it.
 pub fn reads_window_title() -> bool {
     READS_WINDOW_TITLE.load(Ordering::Acquire)
 }

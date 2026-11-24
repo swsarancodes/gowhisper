@@ -143,7 +143,7 @@ macro_rules! define_features {
 
 define_features! {
     Meetings => app(meetings.enabled), "meetings", Meetings, Everyone, EVERY, 20261030;
-    VoiceFilter => app(experimental.hex_microphone), "voice-filter", Dictation, Dev, MACOS_LINUX, 20261030;
+    VoiceFilter => app(experimental.gospell_microphone), "voice-filter", Dictation, Dev, MACOS_LINUX, 20261030;
     Playground => labs(playground), "playground", Dictation, Dev, EVERY, 20261030;
     LiveText => labs(live_text), "live-text", Dictation, Everyone, EVERY, 20261030;
     FasterLiveText => labs(faster_live_text), "faster-live-text", Dictation, Everyone, EVERY, 20261120;
@@ -244,23 +244,23 @@ impl Feature {
         self.descriptor().added
     }
 
-    /// The OSes that have the feature, in the order Hex's website names
+    /// The OSes that have the feature, in the order GoSpell's website names
     /// them. Linux's keyboard-language switching needs an X11 session.
     pub const fn oses(self) -> &'static [Os] {
         self.descriptor().oses
     }
 
-    /// The name `hex labs on|off` takes.
+    /// The name `gospell labs on|off` takes.
     pub const fn name(self) -> &'static str {
         self.descriptor().name
     }
 
-    /// Its `hex settings` key.
+    /// Its `gospell settings` key.
     pub const fn settings_key(self) -> &'static str {
         self.descriptor().settings_key
     }
 
-    /// Companion `hex settings` keys that belong to this feature.
+    /// Companion `gospell settings` keys that belong to this feature.
     #[cfg(test)]
     pub const fn extra_settings_keys(self) -> &'static [&'static str] {
         self.descriptor().extra_keys
@@ -270,7 +270,7 @@ impl Feature {
         Self::ALL.into_iter().find(|feature| feature.name() == name)
     }
 
-    /// The feature `hex settings` key `key` switches (its toggle, or a
+    /// The feature `gospell settings` key `key` switches (its toggle, or a
     /// companion key such as Unload when idle's minutes).
     pub fn for_settings_key(key: &str) -> Option<Self> {
         Self::ALL.into_iter().find(|feature| {
@@ -285,11 +285,11 @@ impl Feature {
         match self {
             Self::KeyboardModelSwitching => crate::keyboard_input_sources::available(),
             Self::AnnotateReplay => {
-                #[cfg(hex_capture)]
+                #[cfg(gospell_capture)]
                 {
                     crate::capture_host::replay_available()
                 }
-                #[cfg(not(hex_capture))]
+                #[cfg(not(gospell_capture))]
                 {
                     false
                 }
@@ -319,7 +319,7 @@ impl Feature {
             }
             Self::Screenshots =>
             {
-                #[cfg(hex_capture)]
+                #[cfg(gospell_capture)]
                 if on {
                     settings.clear_record_shortcut_sharing_capture();
                 }

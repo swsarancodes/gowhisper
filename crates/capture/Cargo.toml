@@ -12,7 +12,7 @@ helper = []
 input = []
 mic = ["dep:cpal"]
 phone = ["helper"]
-hex-client = []
+gospell-client = []
 cli = []
 
 [dependencies]

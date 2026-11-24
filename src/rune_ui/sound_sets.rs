@@ -106,7 +106,7 @@ fn choose(ui: &mut Ui, set: SoundSet) {
 
 /// Follows the slider in steps of 5% and saves where it lets go. Zero turns
 /// the sounds off and keeps the last volume, as
-/// `hex settings set sound_effect_volume 0` does; any other volume plays the
+/// `gospell settings set sound_effect_volume 0` does; any other volume plays the
 /// start sound at it.
 fn set_volume(ui: &mut Ui, value: f32, done: bool) {
     let volume = (value * 20.0).round() / 20.0;

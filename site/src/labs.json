@@ -60,7 +60,7 @@
       "oses": [
         "linux"
       ],
-      "summary": "On Wayland, show your words in the text box as you speak, then Hex types the text there",
+      "summary": "On Wayland, show your words in the text box as you speak, then GoSpell types the text there",
       "title": "Live typing"
     },
     {
@@ -84,7 +84,7 @@
       "oses": [
         "macos"
       ],
-      "summary": "Names in the window you're dictating into help Hex spell them. Never saved",
+      "summary": "Names in the window you're dictating into help GoSpell spell them. Never saved",
       "title": "Words on screen"
     },
     {
@@ -95,7 +95,7 @@
       "oses": [
         "macos"
       ],
-      "summary": "When you fix a name in text Hex just pasted, Hex adds the corrected spelling to Vocabulary. It watches only that field, for up to 5 minutes, and never sends it anywhere.",
+      "summary": "When you fix a name in text GoSpell just pasted, GoSpell adds the corrected spelling to Vocabulary. It watches only that field, for up to 5 minutes, and never sends it anywhere.",
       "title": "Learn from corrections"
     },
     {
@@ -119,7 +119,7 @@
         "windows",
         "linux"
       ],
-      "summary": "When you switch keyboard language, Hex switches to the speech model you picked for it",
+      "summary": "When you switch keyboard language, GoSpell switches to the speech model you picked for it",
       "title": "Switch model with keyboard language"
     },
     {
@@ -141,7 +141,7 @@
       "oses": [
         "macos"
       ],
-      "summary": "While dictating with Pause media: YouTube and other tabs, resumed only if Hex paused them",
+      "summary": "While dictating with Pause media: YouTube and other tabs, resumed only if GoSpell paused them",
       "title": "Also pause the browser"
     },
     {
@@ -214,7 +214,7 @@
       "oses": [
         "macos"
       ],
-      "summary": "If another app comes to the front while you dictate, Hex switches back to the app you started in before pasting. If it can't, nothing is pasted and Paste last dictation has the text.",
+      "summary": "If another app comes to the front while you dictate, GoSpell switches back to the app you started in before pasting. If it can't, nothing is pasted and Paste last dictation has the text.",
       "title": "Return to app"
     },
     {
@@ -409,7 +409,7 @@
         "windows",
         "linux"
       ],
-      "summary": "Add a Stats button to History that summarizes the dictations you kept, with time saved against your typing speed, the hour you dictate most, a year-long heatmap, and all-time totals kept beyond History's retention (counts only, no text). The hex history stats command prints it too",
+      "summary": "Add a Stats button to History that summarizes the dictations you kept, with time saved against your typing speed, the hour you dictate most, a year-long heatmap, and all-time totals kept beyond History's retention (counts only, no text). The gospell history stats command prints it too",
       "title": "Dictation stats"
     },
     {
@@ -482,7 +482,7 @@
       "oses": [
         "macos"
       ],
-      "summary": "Add your own speech model files saved in smaller formats (Q6_K, Q5_K, or Q4_K). They take less space, but Hex hasn't checked them, so accuracy may vary.",
+      "summary": "Add your own speech model files saved in smaller formats (Q6_K, Q5_K, or Q4_K). They take less space, but GoSpell hasn't checked them, so accuracy may vary.",
       "title": "Smaller model files"
     },
     {
@@ -507,7 +507,7 @@
         "macos",
         "linux"
       ],
-      "summary": "Use the key left of 1 on ISO keyboards, § or a dead key such as ^, alone as a shortcut; Hex takes it from every app while it's bound",
+      "summary": "Use the key left of 1 on ISO keyboards, § or a dead key such as ^, alone as a shortcut; GoSpell takes it from every app while it's bound",
       "title": "§ key alone"
     },
     {
@@ -518,7 +518,7 @@
       "oses": [
         "macos"
       ],
-      "summary": "Use the mic key in F5's spot on Mac laptops as a shortcut; once set, only Hex gets it",
+      "summary": "Use the mic key in F5's spot on Mac laptops as a shortcut; once set, only GoSpell gets it",
       "title": "Microphone key alone"
     },
     {
@@ -555,7 +555,7 @@
       "oses": [
         "macos"
       ],
-      "summary": "Hide Hex's icon from the menu bar. Shortcuts keep working; open Hex again from Finder or Spotlight for Settings",
+      "summary": "Hide GoSpell's icon from the menu bar. Shortcuts keep working; open GoSpell again from Finder or Spotlight for Settings",
       "title": "Hide menu bar icon"
     },
     {
@@ -632,7 +632,7 @@
       "oses": [
         "macos"
       ],
-      "summary": "Press Caps Lock to start dictating and again to finish. Hex keeps Caps Lock off and uses its light while it records and writes the text",
+      "summary": "Press Caps Lock to start dictating and again to finish. GoSpell keeps Caps Lock off and uses its light while it records and writes the text",
       "title": "Caps Lock dictation"
     },
     {
@@ -656,7 +656,7 @@
         "windows",
         "linux"
       ],
-      "summary": "Apps that use Hex's local API can ask for text with Global mode's replacements, corrections, rewriting, and transformations applied",
+      "summary": "Apps that use GoSpell's local API can ask for text with Global mode's replacements, corrections, rewriting, and transformations applied",
       "title": "Process API transcripts"
     },
     {
@@ -669,7 +669,7 @@
         "windows",
         "linux"
       ],
-      "summary": "Apps that use Hex's local API can ask when each word or phrase starts and ends",
+      "summary": "Apps that use GoSpell's local API can ask when each word or phrase starts and ends",
       "title": "Timestamps in API transcripts"
     },
     {
@@ -726,7 +726,7 @@
       "oses": [
         "macos"
       ],
-      "summary": "Add Pause Hex to the menu bar. While paused, Hex ignores its shortcuts so other apps get the keys",
+      "summary": "Add Pause GoSpell to the menu bar. While paused, GoSpell ignores its shortcuts so other apps get the keys",
       "title": "Pause from menu bar"
     },
     {
@@ -739,7 +739,7 @@
         "windows",
         "linux"
       ],
-      "summary": "Say \"rewrite this\" and then what you want; Hex redoes the text with the mode's AI model",
+      "summary": "Say \"rewrite this\" and then what you want; GoSpell redoes the text with the mode's AI model",
       "title": "Rewrite by voice"
     },
     {
@@ -827,7 +827,7 @@
         "windows",
         "linux"
       ],
-      "summary": "Drop a WAV, MP3, AAC, M4A, MP4, MOV, AIFF, CAF, FLAC, OGG, Opus, WebM, or MKV file on the Hex window to save its transcript as a text file next to it",
+      "summary": "Drop a WAV, MP3, AAC, M4A, MP4, MOV, AIFF, CAF, FLAC, OGG, Opus, WebM, or MKV file on the GoSpell window to save its transcript as a text file next to it",
       "title": "Transcribe dropped audio"
     },
     {
@@ -853,7 +853,7 @@
         "windows",
         "linux"
       ],
-      "summary": "Add a line to the end of each dictation, such as \"Sent from Hex\"",
+      "summary": "Add a line to the end of each dictation, such as \"Sent from GoSpell\"",
       "title": "Signature"
     },
     {

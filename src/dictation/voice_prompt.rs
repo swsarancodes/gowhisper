@@ -23,7 +23,7 @@ pub enum PhraseProblem {
 }
 
 impl PhraseProblem {
-    /// The reason the window and `hex settings` show.
+    /// The reason the window and `gospell settings` show.
     pub const fn message(self) -> &'static str {
         match self {
             Self::TooFewWords => "Use at least two words",

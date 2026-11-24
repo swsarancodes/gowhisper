@@ -33,12 +33,12 @@ use super::stream::StreamError;
 use windows::Win32::System::Threading::{CreateEventW, WaitForSingleObject};
 use windows::core::{HRESULT, HSTRING, IUnknown, Interface, PCWSTR, Ref, implement};
 
-use super::hex_microphone::{CaptureFeed, CaptureFeedSwitch, capture_feed};
+use super::gospell_microphone::{CaptureFeed, CaptureFeedSwitch, capture_feed};
 use super::input_format::{InputStream, StartedStream};
 use super::mix_format::{MixFormat, float_format_bytes};
 use super::{CaptureInstant, duration_for_frames};
 
-/// How long opening, across every path, may take before Hex gives up.
+/// How long opening, across every path, may take before GoSpell gives up.
 const OPEN_TIMEOUT: Duration = Duration::from_secs(15);
 /// How long one `ActivateAudioInterfaceAsync` may take to complete.
 const ACTIVATION_TIMEOUT: Duration = Duration::from_secs(3);
@@ -176,7 +176,7 @@ pub(super) fn start(device: &Device, device_name: &str) -> Result<StartedStream>
             run(&id, &name, &worker_stop, &ready_sender, &streams);
         })
         .map_err(|error| eyre!("could not start the microphone thread: {error}"))?;
-    let (sample_rate, hex_microphone) = match ready.recv_timeout(OPEN_TIMEOUT) {
+    let (sample_rate, gospell_microphone) = match ready.recv_timeout(OPEN_TIMEOUT) {
         Ok(Ok(opened)) => opened,
         Ok(Err(error)) => {
             let _ = worker.join();
@@ -197,7 +197,7 @@ pub(super) fn start(device: &Device, device_name: &str) -> Result<StartedStream>
         },
         chunks,
         stream_errors,
-        hex_microphone,
+        gospell_microphone,
         sample_rate,
     })
 }
@@ -441,7 +441,7 @@ fn open_with(
     if !format.is_decodable() {
         return Err(Failure {
             mix: Some(mix_format),
-            error: format!("Hex cannot decode this format ({format})"),
+            error: format!("GoSpell cannot decode this format ({format})"),
         });
     }
     if path == Path::SharedAudioStream {

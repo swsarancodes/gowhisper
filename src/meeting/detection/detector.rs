@@ -472,7 +472,7 @@ impl MeetingDetector {
             return None;
         }
         let candidate = self.observe_at(candidate, now, now_ms)?;
-        // A default of Always record starts only calls Hex can name;
+        // A default of Always record starts only calls GoSpell can name;
         // a browser page it can't is offered instead of recording every page.
         let records = match candidate.own_policy(choices) {
             Some(policy) => policy == MeetingPolicy::AlwaysRecord,

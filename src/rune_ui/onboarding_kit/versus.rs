@@ -1,4 +1,4 @@
-//! Without Hex, then with it, in one Messages conversation:
+//! Without GoSpell, then with it, in one Messages conversation:
 //!
 //! 1. The Launch Room's row in a Messages list dings and pulses with an
 //!    unread badge; clicking it opens the conversation ([`super::inbox`]).
@@ -7,11 +7,11 @@
 //!    panic builds, and a finger slips onto Return: `"Yse, we're dead"`.
 //!    Silence, then `"Read"`. Every fix makes it worse until Jay removes you
 //!    from the group mid-word ([`typing::Scene`]).
-//! 3. `"With Hex"` in two beats: the disaster rewinds back to Jay's question,
-//!    then the keyboard melts away to `⌥`, Hex's real `Dot scope` HUD
+//! 3. `"With GoSpell"` in two beats: the disaster rewinds back to Jay's question,
+//!    then the keyboard melts away to `⌥`, GoSpell's real `Dot scope` HUD
 //!    (`rune_hud.wgsl`) rises, and the answer lands in about 1.5 seconds.
 //!    Jay is delighted.
-//! 4. The score: what answering by hand cost against Hex's time.
+//! 4. The score: what answering by hand cost against GoSpell's time.
 //!
 //! One thing has the eye at a time; the rest dims, deeply only when the
 //! story freezes.
@@ -37,7 +37,7 @@ use super::mic_line::mic_line;
 use super::pill::{after_flight, pill, slot};
 use super::scene_script::{Script, fill};
 use super::stories::{Flow, Onboard, Step};
-use super::triumph::{self, HexBeats, Said};
+use super::triumph::{self, GoSpellBeats, Said};
 use super::typing::{Focus, Glyph, Line, Scene, Timing, Who};
 pub(crate) use stage_fx::VOICE_CALL_AT;
 use stage_fx::{camera, camera_focus, laptop_deck, laptop_lid, mode_call, mode_chip, slam};
@@ -83,12 +83,12 @@ const STACK: usize = 5;
 const SLOW_THREAD: f32 = 0.42;
 /// How long a line that cuts in while you type stays at full brightness.
 const CUT_IN: f64 = 0.8;
-/// `"Without Hex"`'s field holds one line.
+/// `"Without GoSpell"`'s field holds one line.
 const WITHOUT_LINES: usize = 1;
 /// From the stage settling to the button's clock: Jay's question arrives
 /// as the stage settles ([`typing::Scene`]'s lines before the button).
 const PRE_ROLL: f64 = 1.2;
-/// `"With Hex"`'s first beat: the disaster zips back out, newest first.
+/// `"With GoSpell"`'s first beat: the disaster zips back out, newest first.
 pub(crate) const REWIND: f64 = 0.48;
 const REWIND_STAGGER: f64 = 0.045;
 /// The rewind keeps the field locked until the removal has peeled away.
@@ -96,7 +96,7 @@ const UNLOCK: f64 = 0.1;
 /// How long the field stays empty after a send, before its placeholder.
 const CLEAR: f64 = 0.22;
 /// The second beat: the keyboard melts to `⌥` and the HUD rises; then `⌥`
-/// goes down this long after `"With Hex"` begins.
+/// goes down this long after `"With GoSpell"` begins.
 pub(crate) const BEFORE_KEY: f64 = 1.5;
 const MELT: f64 = 0.9;
 /// The keys start melting as the rewind settles, so the keyboard never
@@ -122,7 +122,7 @@ fn script() -> &'static Script<'static> {
     Script::chosen()
 }
 
-/// Your spoken line in `"With Hex"`.
+/// Your spoken line in `"With GoSpell"`.
 fn take() -> &'static Take {
     script().take()
 }
@@ -140,7 +140,7 @@ fn field_origin() -> [f32; 2] {
     field_text_origin([CARD_X, card_bottom(lines)], lines)
 }
 
-/// Seconds into `"Without Hex"`, once it has started.
+/// Seconds into `"Without GoSpell"`, once it has started.
 fn scene_time(s: &Onboard) -> Option<f64> {
     s.demo()?.typing_from().map(|from| s.now - from)
 }
@@ -158,7 +158,7 @@ fn scene_over(s: &Onboard) -> bool {
     scene_time(s).is_some_and(|t| t >= s.scene.duration())
 }
 
-/// `"Without Hex"` is waiting for the Launch Room's row.
+/// `"Without GoSpell"` is waiting for the Launch Room's row.
 pub(crate) fn waiting_to_start(s: &Onboard) -> bool {
     s.demo()
         .is_some_and(|demo| demo.step() == Step::Parked && demo.typing.is_none())
@@ -218,10 +218,10 @@ fn flights(s: &Onboard) -> Vec<(Flight, field_text::Slot<'static>)> {
         .map_or_else(Vec::new, |from| flights_from(s.streams(), from))
 }
 
-/// `"With Hex"`'s beats after the shortcut goes down: the answer sends once
-/// its words have landed, then the scene's cheers ([`HexBeats::plan`]).
-pub(crate) fn hex_beats(streams: bool, timing: &Timing) -> HexBeats {
-    HexBeats::plan(script(), send_at(take(), streams, timing), timing)
+/// `"With GoSpell"`'s beats after the shortcut goes down: the answer sends once
+/// its words have landed, then the scene's cheers ([`GoSpellBeats::plan`]).
+pub(crate) fn gospell_beats(streams: bool, timing: &Timing) -> GoSpellBeats {
+    GoSpellBeats::plan(script(), send_at(take(), streams, timing), timing)
 }
 
 /// When `take` leaves the field after the shortcut: once its words land.
@@ -230,20 +230,20 @@ pub(crate) fn send_at(take: &'static Take, streams: bool, timing: &Timing) -> f6
         .iter()
         .map(|(f, _)| f.arrives())
         .fold(take.release, f64::max);
-    landed + timing.hex_send
+    landed + timing.gospell_send
 }
 
 /// From `Heard` to the score.
-/// When `"With Hex"` has finished, from the shortcut going down.
-pub(crate) fn hex_done_secs(s: &Onboard) -> f64 {
-    hex_beats(s.streams(), &s.timing).done
+/// When `"With GoSpell"` has finished, from the shortcut going down.
+pub(crate) fn gospell_done_secs(s: &Onboard) -> f64 {
+    gospell_beats(s.streams(), &s.timing).done
 }
 
 pub(crate) fn reply_secs(s: &Onboard) -> f64 {
-    hex_beats(s.streams(), &s.timing).done - (take().release + 0.1)
+    gospell_beats(s.streams(), &s.timing).done - (take().release + 0.1)
 }
 
-/// Seconds since the shortcut went down on `"With Hex"`.
+/// Seconds since the shortcut went down on `"With GoSpell"`.
 fn take_time(s: &Onboard) -> Option<f64> {
     s.demo()?.take_from().map(|from| s.now - from)
 }
@@ -263,7 +263,7 @@ pub(super) fn skippable(s: &Onboard) -> bool {
     let step = demo.step();
     // Once the answer is out there's nothing left to skip, but for the
     // first run's celebration on the way to the microphone.
-    let playing = matches!(step, Step::Parked | Step::YourTurn | Step::Hearing) && !hex_sent(s)
+    let playing = matches!(step, Step::Parked | Step::YourTurn | Step::Hearing) && !gospell_sent(s)
         || s.flow == Flow::FirstRun && step == Step::Heard;
     playing && (s.had_model && s.granted || s.now - from >= SKIP_AFTER)
 }
@@ -274,12 +274,12 @@ pub(super) fn pushed_in(s: &Onboard) -> bool {
     s.step() == Step::Parked && scene_time(s).is_some_and(|t| camera(s, t).0 > 1.0)
 }
 
-/// `"With Hex"`'s answer has left the field.
-pub(crate) fn hex_sent(s: &Onboard) -> bool {
-    take_time(s).is_some_and(|t| t >= hex_beats(s.streams(), &s.timing).send)
+/// `"With GoSpell"`'s answer has left the field.
+pub(crate) fn gospell_sent(s: &Onboard) -> bool {
+    take_time(s).is_some_and(|t| t >= gospell_beats(s.streams(), &s.timing).send)
 }
 
-/// How many `"Without Hex"` replies have been sent.
+/// How many `"Without GoSpell"` replies have been sent.
 pub(super) fn sent_count(s: &Onboard) -> usize {
     match scene_time(s) {
         Some(t) if s.step() == Step::Parked => s.scene.sent(t),
@@ -381,16 +381,16 @@ pub(super) fn heading(p: Paint, s: &Onboard) -> El {
             tr("Talk instead of typing").to_string(),
             line(
                 "lead-intro",
-                tr("Hold a key and talk. Hex types it wherever your cursor is.").into(),
+                tr("Hold a key and talk. GoSpell types it wherever your cursor is.").into(),
             ),
         ),
         // The chip says it all; the line under it stays, empty, so the
-        // stage doesn't move when `"With Hex"` brings its own. Composed in
+        // stage doesn't move when `"With GoSpell"` brings its own. Composed in
         // two lines (the playground's layouts only, so English), it says what you
-        // do, as `"With Hex"`'s does.
+        // do, as `"With GoSpell"`'s does.
         Step::Parked if !scene_over(s) || s.demo_hears() => (
             "without",
-            tr("Without Hex").to_string(),
+            tr("Without GoSpell").to_string(),
             if Layout::chosen().two_lines() {
                 line("lead-type", "Type it by hand.".to_string())
             } else {
@@ -399,14 +399,14 @@ pub(super) fn heading(p: Paint, s: &Onboard) -> El {
         ),
         Step::Parked => (
             "with",
-            tr("With Hex").to_string(),
+            tr("With GoSpell").to_string(),
             line(
                 "lead-wait",
-                tr("Hex starts listening once the speech model has downloaded.").into(),
+                tr("GoSpell starts listening once the speech model has downloaded.").into(),
             ),
         ),
         Step::YourTurn | Step::Hearing | Step::Heard => {
-            ("with", tr("With Hex").to_string(), hold())
+            ("with", tr("With GoSpell").to_string(), hold())
         }
         _ if s.flow == Flow::FirstRun || s.flow == Flow::Versus => {
             let with = &script().with;
@@ -438,7 +438,7 @@ pub(super) fn heading(p: Paint, s: &Onboard) -> El {
     if Layout::chosen().split() {
         return split_heading(p, s, key, title, lead, mode);
     }
-    // The first run's download flies up past it from "Setting up Hex".
+    // The first run's download flies up past it from "Setting up GoSpell".
     after_flight(col(), s)
         .key(key)
         .gap(8.0)
@@ -506,8 +506,8 @@ fn smoothstep(u: f32) -> f32 {
     u * u * (3.0 - 2.0 * u)
 }
 
-/// Seconds into `"With Hex"`, from the rewind.
-fn hex_time(s: &Onboard) -> Option<f64> {
+/// Seconds into `"With GoSpell"`, from the rewind.
+fn gospell_time(s: &Onboard) -> Option<f64> {
     s.demo()?.voice_from().map(|from| s.now - from)
 }
 
@@ -635,7 +635,7 @@ pub(super) fn stage(p: Paint, s: &Onboard) -> El {
     let t = scene_time(s);
     let focus = t.map_or(Focus::Waiting, |t| s.scene.focus(t));
     let frozen = t.is_some_and(|t| s.scene.frozen(t));
-    let since = hex_time(s);
+    let since = gospell_time(s);
 
     // A single zero-bounce spring carries the deck and its key sweep.
     let enter_u = if reduced {
@@ -714,7 +714,7 @@ pub(super) fn stage(p: Paint, s: &Onboard) -> El {
     }
     .child(kb_el.motion_intent(MotionIntent::STEP));
 
-    // Real `Dot scope` phosphor HUD (`rune_hud.wgsl`) during `With Hex`: it
+    // Real `Dot scope` phosphor HUD (`rune_hud.wgsl`) during `With GoSpell`: it
     // unfolds as it rises into the space the keys melted out of, above `⌥`.
     let hud_el = since
         .filter(|&since| reduced || since >= HUD_RISES)
@@ -737,10 +737,10 @@ pub(super) fn stage(p: Paint, s: &Onboard) -> El {
         Some(t) if !reduced && !voice_phase => s.scene.knock(t),
         _ => 0.0,
     };
-    // One card throughout, so `"With Hex"` rewinds the same thread.
+    // One card throughout, so `"With GoSpell"` rewinds the same thread.
     let card = match since {
-        Some(since) => with_hex_card(p, s, since),
-        None => without_hex_card(p, s, focus, frozen, opening),
+        Some(since) => with_gospell_card(p, s, since),
+        None => without_gospell_card(p, s, focus, frozen, opening),
     };
     // It grows out of the row rather than fading in, unless Reduce Motion;
     // on screen open, it rises in under the heading.
@@ -838,7 +838,7 @@ pub(super) fn stage(p: Paint, s: &Onboard) -> El {
         |t| {
             triumph::effects(
                 p,
-                &hex_beats(s.streams(), &s.timing),
+                &gospell_beats(s.streams(), &s.timing),
                 t,
                 [STAGE_W, STAGE_H],
                 reduced,
@@ -913,7 +913,7 @@ fn boss_typing(p: Paint, script: &'static Script<'static>, now: f64, reduced: bo
     )
 }
 
-/// `"Without Hex"`'s thread at `t`: every line so far, each at
+/// `"Without GoSpell"`'s thread at `t`: every line so far, each at
 /// `opacity(line index, line)` with `"Read"` under the one it reads, and
 /// Jay's typing dots.
 /// The thread at scene time `t`. While the conversation opens out of its
@@ -995,9 +995,15 @@ fn thread_at(
     thread
 }
 
-/// The conversation as `"Without Hex"` stands now, Jay's question already
+/// The conversation as `"Without GoSpell"` stands now, Jay's question already
 /// there before the button.
-fn without_hex_card(p: Paint, s: &Onboard, focus: Focus, frozen: bool, opening: Option<f64>) -> El {
+fn without_gospell_card(
+    p: Paint,
+    s: &Onboard,
+    focus: Focus,
+    frozen: bool,
+    opening: Option<f64>,
+) -> El {
     let t = thread_time(s).unwrap_or(-1e-3);
     scene_card(p, s, &s.scene, t, focus, frozen, opening, look(p, opening))
 }
@@ -1095,12 +1101,12 @@ fn scene_card(
     )
 }
 
-/// The same question, answered by voice, `since` seconds into `"With Hex"`.
+/// The same question, answered by voice, `since` seconds into `"With GoSpell"`.
 /// It opens on the rewind: the disaster zips back out, newest first, until
 /// Jay's question is all that's left.
-fn with_hex_card(p: Paint, s: &Onboard, since: f64) -> El {
+fn with_gospell_card(p: Paint, s: &Onboard, since: f64) -> El {
     let reduced = s.reduced.get();
-    let beats = hex_beats(s.streams(), &s.timing);
+    let beats = gospell_beats(s.streams(), &s.timing);
     let t = take_time(s);
     let at = |when: f64| t.is_some_and(|t| t >= when);
     let sent = at(beats.send);
@@ -1143,7 +1149,7 @@ fn with_hex_card(p: Paint, s: &Onboard, since: f64) -> El {
             .collect();
         thread.push(bubble(
             p,
-            "hex-bubble".into(),
+            "gospell-bubble".into(),
             Side::You,
             Caption::None,
             take().text(),
@@ -1250,7 +1256,7 @@ fn with_hex_card(p: Paint, s: &Onboard, since: f64) -> El {
     )
 }
 
-/// What the keyboard is lit to at scene time `t` in `"Without Hex"`: up
+/// What the keyboard is lit to at scene time `t` in `"Without GoSpell"`: up
 /// while you type and through Return's flash, back while Jay talks, and down
 /// only when the story freezes.
 fn keyboard_target(s: &Onboard, t: f64) -> f32 {
@@ -1354,7 +1360,11 @@ fn words(p: Paint, s: &Onboard, nudge: [f32; 2]) -> El {
     let origin = field_origin();
     let font = FIELD_FONT.lh(super::cards::FIELD_LINE);
     // Once sent, the answer is its bubble.
-    let flights = if hex_sent(s) { Vec::new() } else { flights(s) };
+    let flights = if gospell_sent(s) {
+        Vec::new()
+    } else {
+        flights(s)
+    };
     let weight = 500.0 + 240.0 * CALM;
     // Just before the placeholder's first glyph until a word lands.
     let mut caret = -1.5;
@@ -1432,8 +1442,8 @@ mod tests {
     }
 
     #[test]
-    fn hex_sends_after_the_words_land_and_jay_replies_after() {
-        let beats = hex_beats(true, &Timing::default());
+    fn gospell_sends_after_the_words_land_and_jay_replies_after() {
+        let beats = gospell_beats(true, &Timing::default());
         let landed = flights_from(true, 0.0)
             .iter()
             .map(|(f, _)| f.arrives())

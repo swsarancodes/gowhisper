@@ -1,7 +1,7 @@
 //! Transcription: Apple's SpeechAnalyzer through `scrawl-helper` (measured word and segment
-//! timings), Hex when `"transcriber": "hex"` is set and Hex is connected (`crate::hex`; word
+//! timings), GoSpell when `"transcriber": "gospell"` is set and GoSpell is connected (`crate::gospell`; word
 //! times estimated), or a program of the user's when `"transcriber": "command"`
-//! (`crate::command_transcriber`). Any Hex or command trouble falls back to Apple for that
+//! (`crate::command_transcriber`). Any GoSpell or command trouble falls back to Apple for that
 //! recording.
 
 use std::path::{Path, PathBuf};
@@ -12,10 +12,10 @@ use anyhow::Result;
 use crate::audio::RecordedAudio;
 use crate::model::{TranscriptData, TranscriptSegment, WordTiming};
 
-/// Keep the previous English default; Hex, not Scrawl, validates model/language support.
+/// Keep the previous English default; GoSpell, not Scrawl, validates model/language support.
 pub const DEFAULT_LANGUAGE: &str = "en";
 
-/// Accept language-code syntax without maintaining another list of Hex's languages.
+/// Accept language-code syntax without maintaining another list of GoSpell's languages.
 /// Blank resets to English; disallow query delimiters before constructing the API URL.
 pub fn language_code(value: &str) -> Option<String> {
     let value = value.trim();
@@ -36,16 +36,16 @@ const MAX_MERGED_MS: u64 = 30_000;
 const MAX_FORCED_MERGE_MS: u64 = 8 * 60_000;
 pub const MAX_CLIPS: usize = 24;
 
-/// Hex's support folder, as Hex's `app_paths::support_dir` resolves it: `~/Library/Application
-/// Support/hex` on macOS, `%APPDATA%\hex` on Windows.
-pub fn hex_support_dir() -> PathBuf {
-    std::env::var_os("HEX_APPLICATION_SUPPORT_DIR")
+/// GoSpell's support folder, as GoSpell's `app_paths::support_dir` resolves it: `~/Library/Application
+/// Support/gospell` on macOS, `%APPDATA%\gospell` on Windows.
+pub fn gospell_support_dir() -> PathBuf {
+    std::env::var_os("GOSPELL_APPLICATION_SUPPORT_DIR")
         .map(PathBuf::from)
         .filter(|dir| !dir.as_os_str().is_empty())
         .unwrap_or_else(|| {
             scrawl_router::user_dirs::data_dir()
                 .unwrap_or_else(|| PathBuf::from("."))
-                .join("hex")
+                .join("gospell")
         })
 }
 
@@ -269,7 +269,7 @@ impl Transcriber for CommandTranscriber {
 pub enum Engine {
     #[default]
     Apple,
-    Hex,
+    GoSpell,
     Command,
 }
 
@@ -277,7 +277,7 @@ impl Engine {
     pub fn parse(name: &str) -> Option<Self> {
         match name.trim().to_ascii_lowercase().as_str() {
             "apple" => Some(Self::Apple),
-            "hex" => Some(Self::Hex),
+            "gospell" => Some(Self::GoSpell),
             "command" => Some(Self::Command),
             _ => None,
         }
@@ -286,7 +286,7 @@ impl Engine {
     pub fn name(self) -> &'static str {
         match self {
             Self::Apple => "apple",
-            Self::Hex => "hex",
+            Self::GoSpell => "gospell",
             Self::Command => "command",
         }
     }
@@ -310,7 +310,7 @@ impl Engine {
     pub fn preferred() -> Self {
         match OVERRIDE.load(Ordering::Relaxed) {
             1 => Self::Apple,
-            2 => Self::Hex,
+            2 => Self::GoSpell,
             3 => Self::Command,
             _ => Self::configured(),
         }
@@ -328,32 +328,32 @@ static OVERRIDE: AtomicU8 = AtomicU8::new(0);
 static LOGGED_NOT_CONNECTED: std::sync::Once = std::sync::Once::new();
 static LOGGED_NO_COMMAND: std::sync::Once = std::sync::Once::new();
 
-/// What the Settings window's Transcription controls show. A Hex preference stays saved while Hex
+/// What the Settings window's Transcription controls show. A GoSpell preference stays saved while GoSpell
 /// is away, but the active choice follows what recordings would really use.
 #[derive(Debug, PartialEq, Eq)]
 pub struct MenuState {
-    pub hex_title: &'static str,
-    pub hex_enabled: bool,
-    pub hex_checked: bool,
-    /// Ready Hex models as `(id, title, chosen)`, empty when Hex is away.
+    pub title: &'static str,
+    pub enabled: bool,
+    pub checked: bool,
+    /// Ready GoSpell models as `(id, title, chosen)`, empty when GoSpell is away.
     pub models: Vec<(String, String, bool)>,
 }
 
-#[cfg(feature = "hex-client")]
+#[cfg(feature = "gospell-client")]
 pub fn menu_state(
     preferred: Engine,
-    status: Option<&crate::hex::Status>,
+    status: Option<&crate::gospell::Status>,
     configured_model: Option<&str>,
 ) -> MenuState {
     let Some(status) = status else {
         return MenuState {
-            hex_title: "Hex (not running)",
-            hex_enabled: false,
-            hex_checked: false,
+            title: "GoSpell (not running)",
+            enabled: false,
+            checked: false,
             models: Vec::new(),
         };
     };
-    let chosen = crate::hex::pick_model(&status.models, configured_model);
+    let chosen = crate::gospell::pick_model(&status.models, configured_model);
     let models: Vec<_> = status
         .usable_models()
         .map(|model| {
@@ -371,9 +371,9 @@ pub fn menu_state(
         .collect();
     let ready = chosen.is_some();
     MenuState {
-        hex_title: if ready { "Hex" } else { "Hex (no model ready)" },
-        hex_enabled: ready,
-        hex_checked: ready && preferred == Engine::Hex,
+        title: if ready { "GoSpell" } else { "GoSpell (no model ready)" },
+        enabled: ready,
+        checked: ready && preferred == Engine::GoSpell,
         models,
     }
 }
@@ -383,7 +383,7 @@ pub fn set_override(engine: Engine) {
     OVERRIDE.store(
         match engine {
             Engine::Apple => 1,
-            Engine::Hex => 2,
+            Engine::GoSpell => 2,
             Engine::Command => 3,
         },
         Ordering::Relaxed,
@@ -410,8 +410,8 @@ pub fn transcribe(wav: Option<&Path>, audio: Option<&RecordedAudio>) -> Transcri
         || match engine {
             Engine::Apple => Ok(None),
             // A streamed recording's samples are in `wav`, which the fallback reads.
-            Engine::Hex if on_disk => Ok(None),
-            Engine::Hex => try_hex(audio),
+            Engine::GoSpell if on_disk => Ok(None),
+            Engine::GoSpell => try_gospell(audio),
             Engine::Command => try_command(wav, audio),
         },
         || {
@@ -508,7 +508,7 @@ fn finish_live(
 }
 
 /// The preferred engine when it isn't Apple, with Apple as the answer to anything it can't do.
-/// `other` returns `Ok(None)` when that engine isn't there at all (Hex not connected or without a
+/// `other` returns `Ok(None)` when that engine isn't there at all (GoSpell not connected or without a
 /// ready model, no usable `transcribeCommand`).
 fn run(
     engine: Engine,
@@ -517,7 +517,7 @@ fn run(
 ) -> TranscriptData {
     let name = match engine {
         Engine::Apple => return apple(),
-        Engine::Hex => "Hex",
+        Engine::GoSpell => "GoSpell",
         Engine::Command => "Command",
     };
     match other() {
@@ -551,33 +551,33 @@ fn try_command(wav: &Path, audio: &RecordedAudio) -> Result<Option<TranscriptDat
     Ok(Some(transcript))
 }
 
-#[cfg(feature = "hex-client")]
-fn try_hex(audio: &RecordedAudio) -> Result<Option<TranscriptData>> {
+#[cfg(feature = "gospell-client")]
+fn try_gospell(audio: &RecordedAudio) -> Result<Option<TranscriptData>> {
     let not_connected = |reason: String| {
         LOGGED_NOT_CONNECTED.call_once(|| {
             crate::log::scrawl_log(format!(
-                "Hex preferred but unavailable ({reason}); using {LOCAL_ENGINE_TITLE}"
+                "GoSpell preferred but unavailable ({reason}); using {LOCAL_ENGINE_TITLE}"
             ));
         });
         Ok(None)
     };
-    let client = match crate::hex::Client::connect() {
+    let client = match crate::gospell::Client::connect() {
         Ok(client) => client,
         Err(error) => return not_connected(format!("{error:#}")),
     };
     let models = client.models()?;
-    let configured = crate::handoff::hex_model();
-    let Some(model) = crate::hex::pick_model(&models, configured.as_deref()) else {
+    let configured = crate::handoff::gospell_model();
+    let Some(model) = crate::gospell::pick_model(&models, configured.as_deref()) else {
         return not_connected("no ready model".into());
     };
-    crate::hex::transcribe_audio(&client, &model, &crate::handoff::hex_language(), audio).map(Some)
+    crate::gospell::transcribe_audio(&client, &model, &crate::handoff::gospell_language(), audio).map(Some)
 }
 
-#[cfg(not(feature = "hex-client"))]
-fn try_hex(_audio: &RecordedAudio) -> Result<Option<TranscriptData>> {
+#[cfg(not(feature = "gospell-client"))]
+fn try_gospell(_audio: &RecordedAudio) -> Result<Option<TranscriptData>> {
     LOGGED_NOT_CONNECTED.call_once(|| {
         crate::log::scrawl_log(format!(
-            "Hex preferred but hex-client feature is disabled; using {LOCAL_ENGINE_TITLE}"
+            "GoSpell preferred but gospell-client feature is disabled; using {LOCAL_ENGINE_TITLE}"
         ));
     });
     Ok(None)
@@ -617,7 +617,7 @@ mod tests {
 
     #[test]
     fn engine_names_parse_and_unknown_is_not_an_engine() {
-        assert_eq!(Engine::parse("hex"), Some(Engine::Hex));
+        assert_eq!(Engine::parse("gospell"), Some(Engine::GoSpell));
         assert_eq!(Engine::parse(" Apple "), Some(Engine::Apple));
         assert_eq!(Engine::parse("Command"), Some(Engine::Command));
         assert_eq!(Engine::parse("whisper"), None);
@@ -637,7 +637,7 @@ mod tests {
     #[test]
     fn the_preferred_engine_is_used_when_it_answers() {
         for (engine, source) in [
-            (Engine::Hex, "hex:parakeet_v3"),
+            (Engine::GoSpell, "gospell:parakeet_v3"),
             (Engine::Command, "command:whisper-scrawl"),
         ] {
             let result = run(
@@ -651,7 +651,7 @@ mod tests {
 
     #[test]
     fn an_unavailable_or_failing_engine_falls_back_to_apple() {
-        for engine in [Engine::Hex, Engine::Command] {
+        for engine in [Engine::GoSpell, Engine::Command] {
             let apple = || named("speech-analyzer");
             assert_eq!(run(engine, || Ok(None), apple).source, "speech-analyzer");
             let failed = run(engine, || Err(anyhow::anyhow!("took too long")), apple);
@@ -660,9 +660,9 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "hex-client")]
+    #[cfg(feature = "gospell-client")]
     fn menu_follows_what_recordings_would_use() {
-        use crate::hex::{Model, Status};
+        use crate::gospell::{Model, Status};
         let status = |models: Vec<Model>| Status {
             version: "2.2.0".into(),
             models,
@@ -674,25 +674,25 @@ mod tests {
             verified: true,
         };
 
-        let away = menu_state(Engine::Hex, None, None);
-        assert!(!away.hex_checked && !away.hex_enabled);
-        assert_eq!(away.hex_title, "Hex (not running)");
+        let away = menu_state(Engine::GoSpell, None, None);
+        assert!(!away.checked && !away.enabled);
+        assert_eq!(away.title, "GoSpell (not running)");
 
         let up = status(vec![
             ready("parakeet_v3", "Parakeet v3"),
             ready("qwen3_asr06_b", ""),
         ]);
-        let hex = menu_state(Engine::Hex, Some(&up), Some("qwen3_asr06_b"));
-        assert!(hex.hex_checked && hex.hex_enabled);
+        let gospell = menu_state(Engine::GoSpell, Some(&up), Some("qwen3_asr06_b"));
+        assert!(gospell.checked && gospell.enabled);
         assert_eq!(
-            hex.models,
+            gospell.models,
             vec![
                 ("parakeet_v3".into(), "Parakeet v3".into(), false),
                 ("qwen3_asr06_b".into(), "qwen3_asr06_b".into(), true),
             ]
         );
         let apple = menu_state(Engine::Apple, Some(&up), None);
-        assert!(!apple.hex_checked && apple.hex_enabled);
+        assert!(!apple.checked && apple.enabled);
 
         let empty = status(vec![Model {
             id: "parakeet_v3".into(),
@@ -700,9 +700,9 @@ mod tests {
             installed: false,
             verified: false,
         }]);
-        let none = menu_state(Engine::Hex, Some(&empty), None);
-        assert!(!none.hex_checked && !none.hex_enabled && none.models.is_empty());
-        assert_eq!(none.hex_title, "Hex (no model ready)");
+        let none = menu_state(Engine::GoSpell, Some(&empty), None);
+        assert!(!none.checked && !none.enabled && none.models.is_empty());
+        assert_eq!(none.title, "GoSpell (no model ready)");
     }
 
     #[test]
@@ -718,7 +718,7 @@ mod tests {
                 assert_eq!(audio.sample_rate, 16_000);
                 assert_eq!(audio.samples.len(), 160);
                 Ok(Some(TranscriptData {
-                    source: "hex".into(),
+                    source: "gospell".into(),
                     model: Some("parakeet_v3".into()),
                     text: "hello world.".into(),
                     words: vec![
@@ -748,7 +748,7 @@ mod tests {
             }],
         );
         let tr = transcribe_with(None, Some(&audio), &InMemory);
-        assert_eq!(tr.source, "hex");
+        assert_eq!(tr.source, "gospell");
         assert_eq!(tr.words[0].t0, 260);
         assert_eq!(tr.words[0].t1, 300);
         assert_eq!(tr.words[1].t0, 310);
@@ -764,7 +764,7 @@ mod tests {
     #[test]
     fn a_transcript_without_word_times_counts_the_words_it_says() {
         let untimed = TranscriptData {
-            source: "hex".into(),
+            source: "gospell".into(),
             text: " make it blue ".into(),
             ..Default::default()
         };

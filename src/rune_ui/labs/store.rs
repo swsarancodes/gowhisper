@@ -578,9 +578,12 @@ mod tests {
         settle(&mut rt);
         assert!(rt.find("chip-more").is_some());
         assert!(rt.find("chip-models").is_none());
-        let target = deep_link::parse("hex://labs?category=models&tab=on&search=model", "hex")
-            .unwrap()
-            .unwrap();
+        let target = deep_link::parse(
+            "gospell://labs?category=models&tab=on&search=model",
+            "gospell",
+        )
+        .unwrap()
+        .unwrap();
         rt.update(|ui, tx| deep_link::open(ui, target, tx));
         settle(&mut rt);
         assert_eq!(rt.state.lab_store.group, Some(Group::Models));
@@ -615,9 +618,10 @@ mod tests {
                     rt.set_native_titlebar_band(28.0);
                     settle(&mut rt);
                     if from_link {
-                        let target = deep_link::parse("hex://labs?search=live%20text", "hex")
-                            .unwrap()
-                            .unwrap();
+                        let target =
+                            deep_link::parse("gospell://labs?search=live%20text", "gospell")
+                                .unwrap()
+                                .unwrap();
                         rt.update(|ui, tx| deep_link::open(ui, target, tx));
                         settle(&mut rt);
                     }

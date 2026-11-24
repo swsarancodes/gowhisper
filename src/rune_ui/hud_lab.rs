@@ -15,7 +15,7 @@ use super::controls::{
 use super::lists::{group_label, slider};
 use super::platform::{HudDemo, HudLab, PlatformRequest};
 use crate::desktop::i18n::tr;
-use crate::rune_hud::dot_scope::{self, KNOBS, Placement, Processing, Tuning};
+use crate::rune_hud::dot_scope::{self, KNOBS, Look, Placement, Processing, Tuning};
 
 const SLIDER_WIDTH: f32 = 360.0;
 
@@ -121,9 +121,13 @@ fn tune(ui: &mut Ui, change: impl FnOnce(&mut Tuning)) {
     configure(ui, |lab| change(&mut lab.tuning));
 }
 
-/// Dot scope's choices: how processing looks, where the HUD sits, and how
-/// the voice is levelled.
+/// Dot scope's choices: what the HUD draws, how processing looks, where
+/// the HUD sits, and how the voice is levelled.
 fn dot_scope_choices(p: Paint, tuning: &Tuning) -> El {
+    let look = Look::ALL
+        .iter()
+        .position(|look| *look == tuning.look)
+        .unwrap_or(0);
     let processing = Processing::ALL
         .iter()
         .position(|look| *look == tuning.processing)
@@ -133,6 +137,21 @@ fn dot_scope_choices(p: Paint, tuning: &Tuning) -> El {
         .position(|place| *place == tuning.placement)
         .unwrap_or(0);
     let rows = vec![
+        setting_row(
+            p,
+            "dot-look",
+            "Look",
+            Some(
+                "Embers gather into the GoML mark while GoSpell works; Dot scope is the classic dot field",
+            ),
+            segmented(
+                p,
+                "segments",
+                &Look::ALL.map(Look::label),
+                look,
+                |ui, index| tune(ui, |tuning| tuning.look = Look::ALL[index]),
+            ),
+        ),
         setting_row(
             p,
             "dot-processing",

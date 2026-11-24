@@ -230,7 +230,7 @@ pub(super) const UNTRANSCRIBED_SPEECH_SAMPLES: usize = 4_800;
 /// offline fallback, keeps every sample.
 ///
 /// It also checks the finalized text covers the speech the stream heard at
-/// both ends: speech before its start that Hex did not itself play means the
+/// both ends: speech before its start that GoSpell did not itself play means the
 /// stream lost its opening, speech well past its end means it dropped a
 /// phrase (#1101), and the whole clip decides. A buffered Parakeet stream
 /// times its first word later than its audio, in the whole-clip run too, so
@@ -256,7 +256,7 @@ pub(super) struct PauseCap<'a, S> {
     heard: bool,
     /// Silence fed after the clip, just before finalizing.
     trailing_silence: usize,
-    /// Clip samples of Hex's own sounds at the capture's head: the pre-roll
+    /// Clip samples of GoSpell's own sounds at the capture's head: the pre-roll
     /// and the start tone. Speech there is never a lost opening.
     head_ignored: usize,
     /// Speech samples the stream may leave before its text starts, wider for
@@ -289,7 +289,7 @@ impl<'a, S: StreamFeed> PauseCap<'a, S> {
         self
     }
 
-    /// Ignores `head` clip samples when it judges a lost opening, as Hex's own
+    /// Ignores `head` clip samples when it judges a lost opening, as GoSpell's own
     /// sounds at the capture's head are not speech the stream lost.
     pub(super) fn ignoring_head(mut self, head: usize) -> Self {
         self.head_ignored = head;
@@ -375,7 +375,7 @@ impl<S: StreamFeed> StreamFeed for PauseCap<'_, S> {
             && let Some(start_ms) = self.stream.text_start_ms()
         {
             // The threshold is the trailing check's, on the speech that ends
-            // before the text begins, without Hex's own sounds at the capture's
+            // before the text begins, without GoSpell's own sounds at the capture's
             // head. The wider Parakeet slack excuses only the 1.2 s before the
             // text, so a buffered stream also gets a span rule: at least
             // 100 ms of speech detected before the old 400 ms edge, and
@@ -582,7 +582,7 @@ pub(super) fn drive_stream(
                 }
             }
             Command::Feed { .. } => {}
-            // The capture learned that Hex's own output suppression took
+            // The capture learned that GoSpell's own output suppression took
             // effect after the stream began; ignore the audio it covered.
             Command::IgnoreHead { stream: s, head } if s == id => {
                 stream.raise_ignored_head(head);

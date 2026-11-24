@@ -26,6 +26,8 @@ fn dot_uniform_layout_matches_wgsl() {
     assert_eq!(std::mem::offset_of!(DotUniforms, plate_layout), 144);
     assert_eq!(std::mem::offset_of!(DotUniforms, island), 160);
     assert_eq!(std::mem::offset_of!(DotUniforms, field), 176);
+    assert_eq!(std::mem::offset_of!(DotUniforms, embers), 208);
+    assert_eq!(std::mem::offset_of!(DotUniforms, finale), 224);
 }
 
 #[test]
@@ -74,6 +76,7 @@ fn revealed(reveal: f32) -> dot_scope::Pose {
         clock: 0.0,
         done: 0.0,
         shift: 0.0,
+        finale: dot_scope::embers::Finale::default(),
     }
 }
 
@@ -195,8 +198,8 @@ fn place_on(
         plate: (f64::from(width) - 24.0, f64::from(dot_scope::PLATE_HEIGHT)),
         island_spread: f64::from(tuning.island_spread),
     };
-    // `HEX_HUD_EARS=1` places Labs' notch indicator instead.
-    if std::env::var("HEX_HUD_EARS").as_deref() == Ok("1")
+    // `GOSPELL_HUD_EARS=1` places Labs' notch indicator instead.
+    if std::env::var("GOSPELL_HUD_EARS").as_deref() == Ok("1")
         && let Some(placed) = crate::rune_hud::hud_placement::ears(screen, content)
     {
         return placed;
@@ -238,22 +241,23 @@ fn backdrop(
 /// at 60 fps over a desktop colour, from a fixed schedule:
 ///
 /// ```sh
-/// HEX_HUD_FRAMES=/tmp/frames cargo test --bin hex rune_hud_frames -- --ignored
+/// GOSPELL_HUD_FRAMES=/tmp/frames cargo test --bin gospell rune_hud_frames -- --ignored
 /// ```
 ///
-/// `HEX_HUD_TUNING` overrides Dot scope's tuning as JSON, such as
+/// `GOSPELL_HUD_TUNING` overrides Dot scope's tuning as JSON, such as
 /// `{"processing": "pulse", "placement": "notch"}`, placed on a 14-inch
-/// MacBook Pro, or with `HEX_HUD_SCREEN=studio` on a Studio Display (no
-/// notch); `HEX_HUD_EARS=1` draws Labs' notch indicator; `HEX_HUD_THEME=light` draws over a light desktop. `HEX_HUD_DUMP=<file>` also writes
+/// MacBook Pro, or with `GOSPELL_HUD_SCREEN=studio` on a Studio Display (no
+/// notch); `GOSPELL_HUD_EARS=1` draws Labs' notch indicator; `GOSPELL_HUD_THEME=light` draws over a light desktop. `GOSPELL_HUD_DUMP=<file>` also writes
 /// every frame's shader inputs, for rendering the same frames elsewhere.
 #[test]
 #[ignore = "writes frames for a review clip"]
 fn rune_hud_frames() {
-    let out = std::path::PathBuf::from(std::env::var("HEX_HUD_FRAMES").expect("HEX_HUD_FRAMES"));
+    let out =
+        std::path::PathBuf::from(std::env::var("GOSPELL_HUD_FRAMES").expect("GOSPELL_HUD_FRAMES"));
     std::fs::create_dir_all(&out).unwrap();
-    let dark = std::env::var("HEX_HUD_THEME").as_deref() != Ok("light");
+    let dark = std::env::var("GOSPELL_HUD_THEME").as_deref() != Ok("light");
     let mut fields = serde_json::to_value(Tuning::default()).unwrap();
-    if let Ok(json) = std::env::var("HEX_HUD_TUNING") {
+    if let Ok(json) = std::env::var("GOSPELL_HUD_TUNING") {
         let overrides: serde_json::Value = serde_json::from_str(&json).unwrap();
         for (key, value) in overrides.as_object().unwrap() {
             fields[key] = value.clone();
@@ -261,7 +265,7 @@ fn rune_hud_frames() {
     }
     let tuning: Tuning = serde_json::from_value(fields).unwrap();
     let start = Instant::now();
-    let screen = if std::env::var("HEX_HUD_SCREEN").as_deref() == Ok("studio") {
+    let screen = if std::env::var("GOSPELL_HUD_SCREEN").as_deref() == Ok("studio") {
         studio_display()
     } else {
         macbook()
@@ -276,9 +280,9 @@ fn rune_hud_frames() {
     let instance =
         wgpu::Instance::new(wgpu::InstanceDescriptor::new_without_display_handle_from_env());
     let adapter = block_on(instance.request_adapter(&Default::default())).expect("a GPU adapter");
-    // `HEX_HUD_BUFFERS=1` draws through the uniform buffer, as a device
+    // `GOSPELL_HUD_BUFFERS=1` draws through the uniform buffer, as a device
     // without immediates does.
-    let features = if std::env::var("HEX_HUD_BUFFERS").as_deref() == Ok("1") {
+    let features = if std::env::var("GOSPELL_HUD_BUFFERS").as_deref() == Ok("1") {
         wgpu::Features::empty()
     } else {
         adapter.features() & Painter::FEATURES
@@ -371,7 +375,7 @@ fn rune_hud_frames() {
             backdrop,
         );
     }
-    if let Ok(path) = std::env::var("HEX_HUD_DUMP") {
+    if let Ok(path) = std::env::var("GOSPELL_HUD_DUMP") {
         std::fs::write(path, dump).unwrap();
     }
 }
@@ -693,7 +697,7 @@ fn a_late_first_frame_keeps_its_backoff_and_its_hud() {
     assert!(!first_frame.start(start + FIRST_FRAME + Duration::from_secs(2), 1));
 }
 
-/// A blocked show only stops Hex from creating one; it never takes down a HUD a
+/// A blocked show only stops GoSpell from creating one; it never takes down a HUD a
 /// late frame put up. A fresh start tears down whatever an older recording left,
 /// while building nothing (#2175).
 #[test]
@@ -852,7 +856,7 @@ fn a_backing_off_hud_still_reports_its_last_failure() {
     assert!(first_frame.backing_off(start + FIRST_FRAME + Duration::from_secs(1)));
 }
 
-/// `reshow_due` is the recording's own recovery: a HUD Rune declined or Hex hid
+/// `reshow_due` is the recording's own recovery: a HUD Rune declined or GoSpell hid
 /// is asked for once, after its frames stop, and never again in that recording
 /// (#1793).
 #[test]
@@ -949,7 +953,7 @@ fn an_armed_timer_draws_for_meters_and_a_stopped_one_lets_a_meter_draw() {
 /// The timer arms from a start's own time, before any frame it draws, so the
 /// first frame after the show asks for the next one. It stops arming once no
 /// frame has drawn for `RESHOW_AFTER`: a show that fails draws nothing, and an
-/// always-asking timer would turn Rune's loop at 60 Hz with Hex idle. A hidden
+/// always-asking timer would turn Rune's loop at 60 Hz with GoSpell idle. A hidden
 /// HUD arms nothing either.
 #[test]
 fn the_timer_arms_from_a_start_and_stops_when_frames_stop() {

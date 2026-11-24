@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 use crate::dictation::vocabulary::{VocabularyEntry, serialize_saved};
 use crate::transcription::models::{TranscriptionModelId, TranscriptionSelection};
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 mod capture;
 mod dictation_processing;
 mod extra_shortcuts;
@@ -33,7 +33,7 @@ mod shortcut_repair;
 mod slots;
 mod typing_speed;
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 pub use capture::*;
 pub use dictation_processing::{
     DictationMode, DictationPostProcessing, DictationProcessingSettings,
@@ -73,7 +73,7 @@ static DOUBLE_TAP_ONLY: AtomicBool = AtomicBool::new(false);
 static SHORTCUT_TOGGLE: AtomicBool = AtomicBool::new(false);
 static MEETINGS_ENABLED: AtomicBool = AtomicBool::new(false);
 static PAUSE_BROWSER_MEDIA: AtomicBool = AtomicBool::new(false);
-static HEX_MICROPHONE_ENABLED: AtomicBool = AtomicBool::new(false);
+static GOSPELL_MICROPHONE_ENABLED: AtomicBool = AtomicBool::new(false);
 static MEETING_SUMMARIES: AtomicU8 = AtomicU8::new(MeetingSummaries::platform_default() as u8);
 static MEETING_INDICATOR_ENABLED: AtomicBool =
     AtomicBool::new(meetings::DEFAULT_SHOW_RECORDING_INDICATOR);
@@ -100,14 +100,14 @@ static HOTKEY_CAPTURE_ACTIVE: AtomicBool = AtomicBool::new(false);
 static SETTINGS_TEMP_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 static TRANSCRIPTION_SELECTION: OnceLock<RwLock<RuntimeTranscriptionSelection>> = OnceLock::new();
 static MICROPHONE_SELECTION: OnceLock<RwLock<RuntimeMicrophoneSelection>> = OnceLock::new();
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 static CAPTURE_SETTINGS: OnceLock<RwLock<CaptureSettings>> = OnceLock::new();
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 static SCRAWL_APP_RUNNING: AtomicBool = AtomicBool::new(false);
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 static CAPTURE_ON: AtomicBool = AtomicBool::new(false);
 /// [`CaptureSettings::capsule_flow`] for the capsule, without a lock.
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 static CAPSULE_FLOW: AtomicU8 = AtomicU8::new(0);
 
 #[derive(Default)]
@@ -126,33 +126,33 @@ struct RuntimeMicrophoneSelection {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(default)]
 pub struct ExperimentalSettings {
-    pub hex_microphone: bool,
-    pub hex_microphone_mode: crate::audio::voice_filter::VoiceFilterMode,
-    pub hex_microphone_comfort_noise: bool,
-    pub hex_microphone_strength: f32,
+    pub gospell_microphone: bool,
+    pub gospell_microphone_mode: crate::audio::voice_filter::VoiceFilterMode,
+    pub gospell_microphone_comfort_noise: bool,
+    pub gospell_microphone_strength: f32,
 }
 
 impl Default for ExperimentalSettings {
     fn default() -> Self {
         Self {
-            hex_microphone: false,
-            hex_microphone_mode: crate::audio::voice_filter::VoiceFilterMode::Muffled,
-            hex_microphone_comfort_noise: true,
-            hex_microphone_strength: 1.0,
+            gospell_microphone: false,
+            gospell_microphone_mode: crate::audio::voice_filter::VoiceFilterMode::Muffled,
+            gospell_microphone_comfort_noise: true,
+            gospell_microphone_strength: 1.0,
         }
     }
 }
 
-/// Whether the Voice Filter runs: the listener streams the Hex Microphone
-/// and Hex watches its driver. Its Labs toggle (`experimental.hex_microphone`,
-/// or `HEX_EXPERIMENTAL_MIC`) or an installed driver turns it on, so a driver
+/// Whether the Voice Filter runs: the listener streams the GoSpell Microphone
+/// and GoSpell watches its driver. Its Labs toggle (`experimental.gospell_microphone`,
+/// or `GOSPELL_EXPERIMENTAL_MIC`) or an installed driver turns it on, so a driver
 /// apps already use keeps receiving audio.
 pub fn voice_filter_enabled(setting: bool, driver_installed: bool) -> bool {
-    setting || env_hex_experimental_mic() || driver_installed
+    setting || env_gospell_experimental_mic() || driver_installed
 }
 
-pub fn env_hex_experimental_mic() -> bool {
-    std::env::var("HEX_EXPERIMENTAL_MIC")
+pub fn env_gospell_experimental_mic() -> bool {
+    std::env::var("GOSPELL_EXPERIMENTAL_MIC")
         .ok()
         .is_some_and(|v| matches!(v.trim(), "1" | "true" | "TRUE" | "yes"))
 }
@@ -308,7 +308,7 @@ pub struct AppSettings {
     )]
     pub retired_edit_hotkey: Option<serde_json::Value>,
     pub paste_last_hotkey: Option<HotkeyBinding>,
-    /// Toggle mode's cancel shortcut: discards the recording. Hex takes it
+    /// Toggle mode's cancel shortcut: discards the recording. GoSpell takes it
     /// only while a toggled recording runs; Hold mode has no cancel.
     pub cancel_hotkey: HotkeyBinding,
     /// Dictate without processing: records like the dictation shortcut and
@@ -356,10 +356,10 @@ pub struct AppSettings {
     )]
     pub typing_wpm: u32,
     pub meetings: MeetingSettings,
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     pub capture: CaptureSettings,
     /// Capture settings from a build with captures, kept as they were.
-    #[cfg(not(hex_capture))]
+    #[cfg(not(gospell_capture))]
     #[serde(rename = "capture", skip_serializing_if = "Option::is_none")]
     pub capture_from_other_build: Option<serde_json::Value>,
     #[serde(default)]
@@ -368,12 +368,12 @@ pub struct AppSettings {
     pub labs: LabsSettings,
     /// Labs › Screenshots' shortcut and folder (macOS).
     pub screenshots: ScreenshotSettings,
-    /// Start listening when Hex opens (Windows and Linux, where the
+    /// Start listening when GoSpell opens (Windows and Linux, where the
     /// listener can be off).
     pub enable_on_launch: bool,
     /// Paste with Ctrl-Shift-V for terminals (Linux and Windows).
     pub paste_with_shift: bool,
-    /// Hex keeps its own GNOME custom keyboard shortcuts, on GNOME without a
+    /// GoSpell keeps its own GNOME custom keyboard shortcuts, on GNOME without a
     /// shortcuts portal (Linux, #781).
     pub gnome_keyboard_shortcuts: bool,
     /// Let other apps see the dictation shortcut's key presses too
@@ -408,15 +408,15 @@ pub struct AppSettings {
 /// Moves English dictation to the streaming English model once.
 const STREAMING_ENGLISH_MIGRATION: &str = "streaming-english-model";
 /// Annotate became a default feature: on for everyone once.
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 const ANNOTATE_DEFAULT_MIGRATION: &str = "annotate-on-by-default";
-/// Settings saved by an `anomaly.hex` build. Up to 2.3.1 Hex was
+/// Settings saved by a `com.goml.gospell` build. Up to 2.3.1 Hex was
 /// `com.kitlangton.hex2` and used the same folder, so a file without this
 /// ID may carry onboarding finished under grants macOS no longer gives the
 /// new identity; the macOS launch checks setup once
 /// (`onboarding::recheck_after_identity_change`).
-const ANOMALY_IDENTITY_MIGRATION: &str = "anomaly-hex-identity";
-#[cfg(hex_capture)]
+const ANOMALY_IDENTITY_MIGRATION: &str = "goml-gospell-identity";
+#[cfg(gospell_capture)]
 const MIGRATIONS: &[&str] = &[
     STREAMING_ENGLISH_MIGRATION,
     ANNOTATE_DEFAULT_MIGRATION,
@@ -426,7 +426,7 @@ const MIGRATIONS: &[&str] = &[
     MEETING_LABS_SETTINGS_MIGRATION,
     labs::YEARLY_STATS_MERGE_MIGRATION,
 ];
-#[cfg(not(hex_capture))]
+#[cfg(not(gospell_capture))]
 const MIGRATIONS: &[&str] = &[
     STREAMING_ENGLISH_MIGRATION,
     ANOMALY_IDENTITY_MIGRATION,
@@ -437,11 +437,11 @@ const MIGRATIONS: &[&str] = &[
 ];
 /// Scrawl's settings were read into `capture` once. Left out of
 /// `MIGRATIONS` so new settings import them too.
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 const SCRAWL_IMPORT_MIGRATION: &str = "scrawl-capture-settings";
 /// Scrawl's router settings were read into `capture.routing` once: its own
 /// migration, as it came after the first import.
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 const SCRAWL_ROUTING_IMPORT_MIGRATION: &str = "scrawl-routing-settings";
 /// Meeting retention first saved `forever` as its default; that default is
 /// now unchosen (24 hours for new meetings, older ones kept).
@@ -499,9 +499,9 @@ impl Default for AppSettings {
             history_retention: crate::history::HistoryRetention::default(),
             typing_wpm: DEFAULT_TYPING_WPM,
             meetings: MeetingSettings::default(),
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             capture: CaptureSettings::default(),
-            #[cfg(not(hex_capture))]
+            #[cfg(not(gospell_capture))]
             capture_from_other_build: None,
             experimental: ExperimentalSettings::default(),
             labs: LabsSettings::default(),
@@ -637,9 +637,9 @@ impl AppSettings {
 
     pub fn load() -> Result<Self> {
         let path = path()?;
-        #[cfg_attr(not(hex_capture), allow(unused_mut))]
+        #[cfg_attr(not(gospell_capture), allow(unused_mut))]
         let mut settings = Self::load_from(&path)?;
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         {
             let base = settings.clone();
             let read = |path: PathBuf| fs::read(path).ok();
@@ -677,8 +677,8 @@ impl AppSettings {
     /// Reads Scrawl's settings into `capture`, never writing Scrawl's
     /// files: `engine` is `~/.config/scrawl/config.json` (transcriber,
     /// captures folder, retention) and `app` is the app's shortcut file.
-    /// Missing or unreadable values keep Hex's defaults.
-    #[cfg(hex_capture)]
+    /// Missing or unreadable values keep GoSpell's defaults.
+    #[cfg(gospell_capture)]
     fn import_scrawl_settings(&mut self, engine: Option<&[u8]>, app: Option<&[u8]>) {
         if let Some(config) = engine.and_then(|bytes| {
             serde_json::from_slice::<serde_json::Value>(bytes)
@@ -723,7 +723,7 @@ impl AppSettings {
     /// its rules, `autoSend`, and the `smartRouting` and `jevRouting`
     /// experiments, leniently as Scrawl reads them, leaving out the Jev key.
     /// A missing or unreadable file keeps the defaults.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     fn import_scrawl_routing(&mut self, engine: Option<&[u8]>) {
         let Some(serde_json::Value::Object(root)) =
             engine.and_then(|bytes| serde_json::from_slice(bytes).ok())
@@ -843,7 +843,7 @@ impl AppSettings {
         );
         crate::labs::apply(&self.labs);
         screenshots::apply_screenshots(self);
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         {
             *CAPTURE_SETTINGS
                 .get_or_init(Default::default)
@@ -857,11 +857,11 @@ impl AppSettings {
                 .unwrap_or_default();
             CAPSULE_FLOW.store(flow as u8, Ordering::Release);
         }
-        HEX_MICROPHONE_ENABLED.store(self.experimental.hex_microphone, Ordering::Release);
-        crate::audio::hex_microphone::sync_from_settings(
-            self.experimental.hex_microphone_mode,
-            self.experimental.hex_microphone_comfort_noise,
-            self.experimental.hex_microphone_strength,
+        GOSPELL_MICROPHONE_ENABLED.store(self.experimental.gospell_microphone, Ordering::Release);
+        crate::audio::gospell_microphone::sync_from_settings(
+            self.experimental.gospell_microphone_mode,
+            self.experimental.gospell_microphone_comfort_noise,
+            self.experimental.gospell_microphone_strength,
         );
         MEETING_SUMMARIES.store(self.meetings.summaries as u8, Ordering::Release);
         crate::meeting::generator::set_summary_model(self.meetings.opencode_model.as_deref());
@@ -991,7 +991,7 @@ impl AppSettings {
         self.migrate_meeting_summaries();
         self.migrate_meeting_labs();
         self.migrate_yearly_stats_lab();
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         if !self.has_migration(ANNOTATE_DEFAULT_MIGRATION) {
             self.capture.enabled = true;
             self.migrations.push(ANNOTATE_DEFAULT_MIGRATION.into());
@@ -1038,7 +1038,7 @@ impl AppSettings {
         self.migrations.iter().any(|applied| applied == id)
     }
 
-    /// Whether these settings come from before the `anomaly.hex` identity.
+    /// Whether these settings come from before the `com.goml.gospell` identity.
     #[cfg(target_os = "macos")]
     pub(crate) fn predates_anomaly_identity(&self) -> bool {
         !self.has_migration(ANOMALY_IDENTITY_MIGRATION)
@@ -1106,15 +1106,15 @@ impl AppSettings {
         RuntimeHotkeys {
             dictation: self.dictation_hotkey.runtime(),
             paste_last: self.paste_last_hotkey.as_ref().map(HotkeyBinding::runtime),
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             capture: self.capture_on().then(|| self.capture.hotkey.runtime()),
-            #[cfg(not(hex_capture))]
+            #[cfg(not(gospell_capture))]
             capture: None,
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             capture_replay: self
                 .active_capture_replay_hotkey()
                 .map(HotkeyBinding::runtime),
-            #[cfg(not(hex_capture))]
+            #[cfg(not(gospell_capture))]
             capture_replay: None,
             raw_dictation: self
                 .raw_dictation_hotkey
@@ -1142,7 +1142,7 @@ impl AppSettings {
     /// Labs › Second dictation shortcut's binding while it takes effect:
     /// its toggle on, bound, sharing no key with another active shortcut,
     /// and, on Linux and Windows, naming a key (both register a key). On
-    /// macOS a shortcut without a key can still run. Otherwise Hex matches,
+    /// macOS a shortcut without a key can still run. Otherwise GoSpell matches,
     /// suppresses, registers, and checks nothing for it.
     pub fn active_second_dictation_hotkey(&self) -> Option<&HotkeyBinding> {
         if !self.labs.second_dictation_shortcut {
@@ -1168,7 +1168,7 @@ impl AppSettings {
 
     /// Labs › Terminal paste shortcut's binding while it takes effect:
     /// Windows or Linux, its toggle on, bound, and sharing no key with
-    /// another active shortcut. Otherwise Hex registers, matches, and
+    /// another active shortcut. Otherwise GoSpell registers, matches, and
     /// checks nothing for it.
     #[cfg_attr(not(any(target_os = "windows", target_os = "linux")), allow(dead_code))]
     pub fn active_terminal_paste_hotkey(&self) -> Option<&HotkeyBinding> {
@@ -1183,7 +1183,7 @@ impl AppSettings {
     }
 
     /// Annotate is on: the person hasn't turned it off.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     pub fn capture_on(&self) -> bool {
         self.capture.enabled
     }
@@ -1191,7 +1191,7 @@ impl AppSettings {
     /// Labs › Annotate last 15 seconds shortcut while it takes effect: macOS 27+,
     /// Annotate and the Lab on, bound, and sharing no key with another active
     /// shortcut.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     pub fn active_capture_replay_hotkey(&self) -> Option<&HotkeyBinding> {
         if !cfg!(target_os = "macos")
             || !self.capture_on()
@@ -1292,12 +1292,12 @@ pub fn shortcut_toggle() -> bool {
 }
 
 /// [`voice_filter_enabled`] for the running listener.
-pub fn hex_microphone_enabled() -> bool {
+pub fn gospell_microphone_enabled() -> bool {
     crate::labs::Feature::VoiceFilter.shipped()
         && crate::labs::Feature::VoiceFilter.managed().is_none()
         && voice_filter_enabled(
-            HEX_MICROPHONE_ENABLED.load(Ordering::Acquire),
-            crate::audio::hex_microphone::driver_bundle_installed(),
+            GOSPELL_MICROPHONE_ENABLED.load(Ordering::Acquire),
+            crate::audio::gospell_microphone::driver_bundle_installed(),
         )
 }
 
@@ -1348,13 +1348,13 @@ pub fn refresh_layout_hotkeys() {
 }
 
 pub fn runtime_hotkeys() -> RuntimeHotkeys {
-    #[cfg_attr(not(hex_capture), allow(unused_mut))]
+    #[cfg_attr(not(gospell_capture), allow(unused_mut))]
     let mut hotkeys = HOTKEYS
         .get_or_init(Default::default)
         .read()
         .unwrap_or_else(|error| error.into_inner())
         .runtime;
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     if scrawl_app_running() {
         hotkeys.capture = None;
         hotkeys.capture_replay = None;
@@ -1388,14 +1388,14 @@ pub fn set_hotkey_capture_active(active: bool) {
 }
 
 /// Whether shortcut matching is suspended: a new shortcut binding is being
-/// recorded, or Labs › Pause from menu bar paused Hex. Every capture
+/// recorded, or Labs › Pause from menu bar paused GoSpell. Every capture
 /// shortcut reads this instead of `hotkey_capture_active` alone.
 pub fn shortcuts_suspended() -> bool {
     hotkey_capture_active() || crate::shortcut_pause::suspended()
 }
 
 /// The Dock policy while no Settings window is open. An open window always
-/// shows the icon: hiding it deactivates Hex asynchronously, which would drop
+/// shows the icon: hiding it deactivates GoSpell asynchronously, which would drop
 /// that window behind other applications.
 pub fn dock_icon_visible(show_dock_icon: bool, status_item_available: bool) -> bool {
     show_dock_icon || !status_item_available
@@ -1429,7 +1429,7 @@ pub fn set_dock_icon_visible(visible: bool) -> bool {
 #[cfg(target_os = "macos")]
 pub fn hide_application() {
     let Some(marker) = MainThreadMarker::new() else {
-        tracing::warn!("cannot hide Hex outside the main thread");
+        tracing::warn!("cannot hide GoSpell outside the main thread");
         return;
     };
     NSApplication::sharedApplication(marker).hide(None);
@@ -1462,13 +1462,13 @@ mod tests {
         let gnome = HotkeyBinding::linux_dictation_default(true);
         assert_eq!(gnome.keycaps(), ["Ctrl", "Alt", "Space"]);
         assert_ne!(gnome, HotkeyBinding::paste_last_default());
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         assert_ne!(gnome, HotkeyBinding::capture_default());
     }
 
     /// Annotate is on out of the box, so its shortcut and the rest of the
     /// defaults share no key on any OS.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     #[test]
     fn annotates_default_shortcuts_share_no_key() {
         let settings = AppSettings::default();
@@ -1478,7 +1478,7 @@ mod tests {
 
     /// A settings file from before Annotate was on by default turns it on
     /// once.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     #[test]
     fn annotate_turns_on_once_for_older_settings() {
         let mut settings = AppSettings {
@@ -1754,9 +1754,9 @@ mod tests {
             ..AppSettings::default()
         })
         .unwrap();
-        file["transcription"]["recognition_hints"] = "Hex, rune\nKaffar".into();
+        file["transcription"]["recognition_hints"] = "GoSpell, rune\nKaffar".into();
         file["transcription_recents"] = serde_json::json!([
-            {"model": "parakeet_v3", "language": "de", "recognition_hints": "Old; Hex"},
+            {"model": "parakeet_v3", "language": "de", "recognition_hints": "Old; GoSpell"},
             {"model": "qwen3_asr06_b", "language": "en", "recognition_hints": "Rodolfo"},
         ]);
         fs::write(&dir.path, serde_json::to_vec(&file).unwrap()).unwrap();
@@ -1766,7 +1766,7 @@ mod tests {
             .iter()
             .map(|entry| entry.term.as_str())
             .collect();
-        assert_eq!(terms, ["Rune", "Hex", "Kaffar", "Rodolfo", "Old"]);
+        assert_eq!(terms, ["Rune", "GoSpell", "Kaffar", "Rodolfo", "Old"]);
         assert_eq!(loaded.vocabulary[0].sounds_like, ["rune's"]);
         assert_eq!(loaded.sound_effect_volume, 0.25);
         let written = fs::read_to_string(&dir.path).unwrap();
@@ -2142,7 +2142,7 @@ mod tests {
 
     #[test]
     fn the_setting_or_an_installed_driver_turns_the_voice_filter_on_and_labs_never_does() {
-        if env_hex_experimental_mic() {
+        if env_gospell_experimental_mic() {
             return;
         }
         assert!(!voice_filter_enabled(false, false));
@@ -2214,7 +2214,7 @@ mod tests {
             settings
                 .meetings
                 .resolved_output_folder()
-                .ends_with("Hex Meetings")
+                .ends_with("GoSpell Meetings")
         );
         assert!(settings.text_replacements.is_empty());
     }
@@ -2462,7 +2462,7 @@ mod tests {
     impl TestSettingsDir {
         fn new(prefix: &str) -> Self {
             let directory = std::env::temp_dir().join(format!(
-                "hex-{prefix}-{}-{}",
+                "gospell-{prefix}-{}-{}",
                 std::process::id(),
                 SETTINGS_TEMP_SEQUENCE.fetch_add(1, Ordering::Relaxed),
             ));
@@ -2706,7 +2706,7 @@ mod tests {
     #[test]
     fn retired_commands_settings_load_cleanly_and_survive_saves() {
         let directory = std::env::temp_dir().join(format!(
-            "hex-retired-commands-{}-{}",
+            "gospell-retired-commands-{}-{}",
             std::process::id(),
             SETTINGS_TEMP_SEQUENCE.fetch_add(1, Ordering::Relaxed)
         ));
@@ -2743,7 +2743,7 @@ mod tests {
     #[test]
     fn retired_voice_action_settings_load_cleanly_and_survive_saves() {
         let directory = std::env::temp_dir().join(format!(
-            "hex-retired-voice-action-{}-{}",
+            "gospell-retired-voice-action-{}-{}",
             std::process::id(),
             SETTINGS_TEMP_SEQUENCE.fetch_add(1, Ordering::Relaxed)
         ));
@@ -3468,7 +3468,7 @@ mod tests {
         );
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     #[test]
     fn scrawls_routing_imports_without_its_jev_key() {
         let engine = br#"{

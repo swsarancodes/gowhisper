@@ -28,7 +28,7 @@ pub(super) fn handle_hotkey_action(
             // now, even if another one comes forward while the person talks.
             worker.remember_return_to_app();
             // Labs › YOLO mode: a shortcut started this capture
-            // unless a `hex dictation` command says otherwise below.
+            // unless a `gospell dictation` command says otherwise below.
             worker.set_started_by_shortcut(true);
             // The press started a capture, but it may still be provisional:
             // no page is read until the capture is held past its threshold.
@@ -41,7 +41,7 @@ pub(super) fn handle_hotkey_action(
                 feedback::play_provisional_start();
             }
             worker.prepare_paste();
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             crate::screenshots::narration::started();
             events.dictation(DictationPhase::Started, "")?;
             indicator.send(DictationIndicatorEvent::Started);
@@ -69,7 +69,7 @@ pub(super) fn handle_hotkey_action(
         HotkeyAction::Discard(_) | HotkeyAction::Cancel | HotkeyAction::CancelShortcut => {
             context.cancel();
             feedback::retract_start();
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             crate::screenshots::narration::ended();
             if action == HotkeyAction::CancelShortcut {
                 feedback::play(Tone::Cancel);
@@ -121,7 +121,7 @@ pub(super) fn finish_hotkey_dictation(
     }
     // A dictation over a screenshot lands its words there, never pasted; a
     // printing capture stops that shot's editor waiting instead.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     let print = print
         .inspect(|_| crate::screenshots::narration::ended())
         .or_else(crate::screenshots::narration::claim);
@@ -204,7 +204,7 @@ pub(super) fn finish_reply(finished: Option<FinishResult>, submitted: &str) -> C
     }
 }
 
-/// `hex dictation`: a start locks the shortcut machine as a double tap
+/// `gospell dictation`: a start locks the shortcut machine as a double tap
 /// does, so the next press or `stop` finishes it. A printing start keeps the
 /// command's reply here until that recording ends, however it ends.
 #[allow(clippy::too_many_arguments)]
@@ -294,7 +294,9 @@ pub(super) fn control_dictation(
                     hotkeys.keep_print(print);
                     ControlReply::done("Recording; the transcript comes back here when it ends")
                 } else {
-                    ControlReply::done("Recording; `hex dictation stop` or the shortcut finishes")
+                    ControlReply::done(
+                        "Recording; `gospell dictation stop` or the shortcut finishes",
+                    )
                 }
             } else {
                 hotkeys.suspend(Shortcut::Dictation);
@@ -353,7 +355,7 @@ pub(super) fn control_dictation(
                 ),
                 finished => finish_reply(
                     Some(finished),
-                    "Finished recording; Hex pastes the text when it's ready",
+                    "Finished recording; GoSpell pastes the text when it's ready",
                 ),
             }
         }
@@ -367,7 +369,7 @@ pub(super) fn paste_last(
     events: &mut EventLog,
 ) -> Result<ControlReply> {
     let reply = match worker.paste_last() {
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         Ok(()) if crate::paste::recent::enabled() => ControlReply::done("Pasting the latest item"),
         Ok(()) => ControlReply::done("Pasting the last dictation"),
         Err(error) => {

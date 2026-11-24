@@ -96,7 +96,7 @@ impl ModelRuntime {
 pub struct GgufArtifact {
     /// The file name in its repository, which every download URL uses.
     pub filename: Cow<'static, str>,
-    /// The name Hex stores it under in its one flat models folder, when that
+    /// The name GoSpell stores it under in its one flat models folder, when that
     /// must differ from `filename`. `None` keeps `filename`. Only a collision
     /// needs one: KBLab's and NbAiLab's Whisper medium files are both called
     /// `ggml-model-q5_0.bin` and are both 539,212,484 bytes, and the folder's
@@ -121,7 +121,7 @@ impl GgufArtifact {
         )
     }
 
-    /// The name Hex's models folder holds this artifact under.
+    /// The name GoSpell's models folder holds this artifact under.
     pub fn local_name(&self) -> &str {
         self.stored_as.unwrap_or(&self.filename)
     }
@@ -327,7 +327,7 @@ pub const MODELS: &[ModelDefinition] = &[
         // keeps v3's figure.
         realtime: "~33x",
         // LibriSpeech test-clean, transcribe.cpp's published conversion
-        // benchmark (`catalog/orukeet.json`); not measured in Hex.
+        // benchmark (`catalog/orukeet.json`); not measured in GoSpell.
         word_error_rate: Some(1.86),
         streams: false,
         runtime: gguf(&ORUKEET_ARTIFACT),
@@ -458,7 +458,7 @@ pub const MODELS: &[ModelDefinition] = &[
         // on a FLEURS English clip), so it keeps v3's figure.
         realtime: "~33x",
         // LibriSpeech test-clean, transcribe.cpp's published conversion
-        // benchmark (`model_benchmarks`); not measured in Hex.
+        // benchmark (`model_benchmarks`); not measured in GoSpell.
         word_error_rate: Some(1.80),
         streams: false,
         runtime: gguf(&PARAKEET_ULTRA_ARTIFACT),
@@ -474,7 +474,7 @@ pub const MODELS: &[ModelDefinition] = &[
         // On apollo's Vulkan GPU it ran 0.55 to 0.97 times as fast as
         // Parakeet v3 (17.9 s and 54.6 s German clips), against v3's ~33x.
         realtime: "~25x",
-        // LibriSpeech test-clean, Hex's run (`model_benchmarks`). On the same
+        // LibriSpeech test-clean, GoSpell's run (`model_benchmarks`). On the same
         // runs Parakeet v3 made fewer errors: 1.95% here, and on FLEURS 4.88%
         // English and 5.17% German against 7.91% and 10.39% (8.77% and
         // 10.46% with Auto). It is here to stream with the language set.
@@ -493,7 +493,7 @@ pub const MODELS: &[ModelDefinition] = &[
         // On apollo's Vulkan GPU it ran 1.2 to 1.4 times as fast as Parakeet
         // v3 (the FLEURS Russian test split, and a 10 s clip of it).
         realtime: "~40x",
-        // FLEURS Russian test, Hex's run (`model_benchmarks`): Parakeet v3
+        // FLEURS Russian test, GoSpell's run (`model_benchmarks`): Parakeet v3
         // scored 6.52% on the same run and Whisper large-v3-turbo 5.36%.
         word_error_rate: Some(5.37),
         streams: false,
@@ -509,7 +509,7 @@ pub const MODELS: &[ModelDefinition] = &[
         // On apollo's Vulkan GPU it ran FLEURS Norwegian at 0.89 times
         // Whisper large-v3-turbo's speed (37x and 41x real time).
         realtime: "~17x",
-        // FLEURS Norwegian test, Hex's run (`model_benchmarks`): Whisper
+        // FLEURS Norwegian test, GoSpell's run (`model_benchmarks`): Whisper
         // large-v3-turbo scored 8.94% on the same run.
         word_error_rate: Some(6.68),
         streams: false,
@@ -522,12 +522,12 @@ pub const MODELS: &[ModelDefinition] = &[
     ModelDefinition {
         id: TranscriptionModelId::KbWhisperMedium,
         name: text("KB-Whisper Medium"),
-        // Not timed in Hex. It is the same whisper-medium graph at the same
+        // Not timed in GoSpell. It is the same whisper-medium graph at the same
         // Q5_0 quantization as NB-Whisper Medium, which ran FLEURS Norwegian
         // at ~17x on apollo's Vulkan GPU.
         realtime: "~17x",
         // KBLab's model card for its default (standard) checkpoint on the
-        // FLEURS Swedish test (`model_benchmarks`); Hex has not measured it.
+        // FLEURS Swedish test (`model_benchmarks`); GoSpell has not measured it.
         word_error_rate: Some(6.6),
         streams: false,
         runtime: gguf(&KB_WHISPER_MEDIUM_ARTIFACT),
@@ -543,7 +543,7 @@ pub const MODELS: &[ModelDefinition] = &[
         // large-v3-turbo and 0.4 to 0.64 times Parakeet v3's speed (an 11 s
         // clip, and the FLEURS English and Japanese test splits).
         realtime: "~25x",
-        // FLEURS English test, Hex's run (`model_benchmarks`).
+        // FLEURS English test, GoSpell's run (`model_benchmarks`).
         word_error_rate: Some(4.77),
         streams: false,
         runtime: gguf(&GRANITE_SPEECH_5_ARTIFACT),

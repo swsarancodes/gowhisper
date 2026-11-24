@@ -1,10 +1,10 @@
 # Your Own Speech Models
 
-Hex can run a GGUF speech model that isn't in its catalog: a file you add with
+GoSpell can run a GGUF speech model that isn't in its catalog: a file you add with
 "Add model file…", or one another app already downloaded to the Hugging Face
 cache. Both are ordinary features on every OS (they left Labs as
-`custom-models`; `hex labs on|off custom-models` still answers and says so).
-Catalog models stay the tested path: Hex vouches for nothing in a file it
+`custom-models`; `gospell labs on|off custom-models` still answers and says so).
+Catalog models stay the tested path: GoSpell vouches for nothing in a file it
 didn't pin.
 
 ## Add A Model File
@@ -16,7 +16,7 @@ Picker header -> "Add model file…" -> native dialog (GGUF, All files)   // set
 │   gigaam (any other, e.g. llama.cpp's or SenseVoice.cpp's `sensevoice-small`,
 │   says the file was made for another program and needs a transcribe.cpp
 │   conversion, or the catalog's download; #1299);
-│   stt.variant; general.languages with a code Hex knows; only F32, F16, and
+│   stt.variant; general.languages with a code GoSpell knows; only F32, F16, and
 │   Q8_0 tensors (the types every build runs on Metal and Vulkan), plus
 │   Q4_K, Q5_K, and Q6_K while Labs › Smaller model files is on (macOS; the
 │   Vulkan builds embed no shaders for them); the tensor
@@ -33,10 +33,10 @@ Picker header -> "Add model file…" -> native dialog (GGUF, All files)   // set
 │   offline only (no streaming), no language prompt for a no-hint family,
 │   Auto when its header says it detects the language (as Parakeet v3-type
 │   files do), no benchmark; Use prepares it like a catalog model (verifies
-│   Hex's copy against its receipt instead of downloading). General's Language menu
-│   lists every language the file declares alongside Hex's usual ones,
+│   GoSpell's copy against its receipt instead of downloading). General's Language menu
+│   lists every language the file declares alongside GoSpell's usual ones,
 │   alphabetical by name (Norwegian `no`, Norwegian Nynorsk `nn`, …; #1148)
-├── Remove -> Hex's copy, receipt, and manifest only; not the active model
+├── Remove -> GoSpell's copy, receipt, and manifest only; not the active model
 ├── Changed (a copy replaced by a link or hard link to the same file reads as
 │   changed: its file ID and mtime moved) -> "Check again" rehashes the file:
 │   the recorded SHA-256 again -> new receipt, ready; else it stays changed.
@@ -50,7 +50,7 @@ Picker header -> "Add model file…" -> native dialog (GGUF, All files)   // set
     stays saved; the listener runs a downloaded fallback (the system language's
     recommendation if downloaded, else the first downloaded catalog model;
     custom_models::runnable); launch and setup wait only for that fallback
-    (onboarding::model_ready), and `hex status` names it under
+    (onboarding::model_ready), and `gospell status` names it under
     model.fallback with its reason; General's model row names the fallback and says
     to check it again in the picker (not "can't listen until downloaded",
     while the fallback is downloaded); the card warns
@@ -70,20 +70,20 @@ Picker header -> "Use model file where it is…" beside "Add model file…" -> t
 ├── custom_models::add_in_place on a worker: the import's header check, one full
 │   SHA-256, receipt and manifest (with the file's path, no Hugging Face origin)
 │   in models/custom/; nothing copied, nothing written near the file
-├── The same file imported by copy before -> same ID, keeps its name; Hex's
+├── The same file imported by copy before -> same ID, keeps its name; GoSpell's
 │   copy is removed only when the OS shows the chosen file is a different
 │   file (links resolved, device and inode or volume and file index); when
 │   unsure, the copy stays
-├── Hex's own copy chosen (a linked folder, a hard link, another case) ->
+├── GoSpell's own copy chosen (a linked folder, a hard link, another case) ->
 │   nothing changes; the import stays a copy
 ├── Card -> "Used where it is" · family · languages · the file's name; Use
 │   loads it from its path; later uses rehash only when size, mtime, or file ID
 │   change, and Check again accepts it when the contents still match
 ├── Another account changes or removes the file -> Changed or Missing, as above
-└── Forget -> Hex's receipt and record only; the file stays
+└── Forget -> GoSpell's receipt and record only; the file stays
 ```
 
-Off, the picker has no such button and Hex copies every added file as before.
+Off, the picker has no such button and GoSpell copies every added file as before.
 Shared folders and catalog models from a shared folder are not built.
 
 ## Smaller Model Files (Labs, macOS)
@@ -99,14 +99,14 @@ Labs › Smaller model files on (labs.k_quant_models, off by default, macOS)  //
 ├── The card stays in the picker with Rename and Remove, but no Use, while
 │   the lab is off, and says "Turn on Labs › Smaller model files to use it.";
 │   its availability folds in the lab (as Parakeet Ultra's does), so
-│   `hex model list`, the trays, and the menu bar leave it out
+│   `gospell model list`, the trays, and the menu bar leave it out
 ├── Saving it as the model while the lab is off (or on Linux and Windows,
 │   where the lab does not exist) -> the choice stays saved and the listener
 │   runs the default model, as for a missing import: General says it needs
-│   Labs › Smaller model files, and `hex status` says "its Labs toggle is
+│   Labs › Smaller model files, and `gospell status` says "its Labs toggle is
 │   off" (custom_models::fallback_reason)
-├── `hex model use <custom-…>` while the lab is off -> refused, naming
-│   `hex labs on k-quant-models`
+├── `gospell model use <custom-…>` while the lab is off -> refused, naming
+│   `gospell labs on k-quant-models`
 └── Off -> exactly the F32, F16, and Q8_0 rule and its message, byte for byte
 ```
 
@@ -118,7 +118,7 @@ neither list holds — Q5_0 and Q4_0 are the common ones from old-style
 quantizers — and those are still refused with the type named. Turning the lab
 off while a K-quant model is selected falls back to the default model at once
 (the choice stays saved), and turning it back on runs the saved import again.
-Hex has not measured any import's accuracy; a Q6_K, Q5_K, or Q4_K file may
+GoSpell has not measured any import's accuracy; a Q6_K, Q5_K, or Q4_K file may
 transcribe worse than its Q8_0 source.
 
 Checks:
@@ -131,19 +131,19 @@ Checks:
 [labs.rs](../../src/labs.rs). Not observed: a real K-quant file on Metal, and
 the row on a Mac screen.
 
-The local digest identifies the file Hex copied; it is not a publisher
+The local digest identifies the file GoSpell copied; it is not a publisher
 checksum. The selection, recent models, and keyboard-language mappings keep an
 import while it can't run (`models::validate_saved`), and a build that doesn't
 know `custom-…` keeps its default for that field without rewriting
-`settings.json` (#744). `hex model import <path> [--name N]`, `hex model rename
-<id> <name>`, `hex model repair <id>`, and `hex model remove <id>` (also `hex
-models …`) run in the CLI process; a running Hex lists the change at once (the
+`settings.json` (#744). `gospell model import <path> [--name N]`, `gospell model rename
+<id> <name>`, `gospell model repair <id>`, and `gospell model remove <id>` (also `gospell
+models …`) run in the CLI process; a running GoSpell lists the change at once (the
 registry rereads `models/custom/` when its folder changes).
 
 ## Found On This Computer
 
 ```ts
-Picker opens, onboarding starts, or `hex model list`/`hex model status` runs
+Picker opens, onboarding starts, or `gospell model list`/`gospell model status` runs
 one scan (found_models::scan)                                // setup.found-models
 ├── Where: $HF_HUB_CACHE, else $HF_HOME/hub, else ~/.cache/huggingface/hub
 │   (Windows %USERPROFILE%\.cache\huggingface\hub); models--*/snapshots/*/*.gguf
@@ -153,47 +153,47 @@ one scan (found_models::scan)                                // setup.found-mode
 ├── Exact catalog match: the snapshot links to blobs/<sha256> and that digest and
 │   size are a catalog pin (a plain copy: repository, file name, and size)
 │   -> that catalog model counts as downloaded; its card says "Found on this
-│   computer" and offers Use, never Download. It is not ready yet: only Hex's
+│   computer" and offers Use, never Download. It is not ready yet: only GoSpell's
 │   receipt for the full check (models/found/<model>.json) makes it ready, so
 │   Setup, Settings, and every listener agree (models::is_ready)
 ├── Other compatible files -> "Found on this computer" at the top of the picker:
-│   name · Not tested by Hex · Q8_0/F16/F32 · owner/name@revision · languages,
+│   name · Not tested by GoSpell · Q8_0/F16/F32 · owner/name@revision · languages,
 │   "It may be too big for this computer's GPU memory." when the tensor data
 │   plus a quarter exceeds the largest GPU transcribe.cpp reports, and
 │   "Compatible doesn't mean accurate: …"
 ├── Use -> full SHA-256 once (a catalog file against its pin; another file against
-│   its blob name), then prepared like any model. Receipts live with Hex:
+│   its blob name), then prepared like any model. Receipts live with GoSpell:
 │   models/found/<model>.json for a catalog file, models/custom/ for another;
 │   later uses rehash only when size, mtime, or file ID change
 ├── A failed check or load -> "Model could not be used." with the reason; the
 │   selection and any recorded audio stay as they were
-└── Delete/Remove on a found file -> Forget: Hex's record goes, the file stays.
-    Hex never writes, moves, or deletes inside the cache. A forgotten catalog
+└── Delete/Remove on a found file -> Forget: GoSpell's record goes, the file stays.
+    GoSpell never writes, moves, or deletes inside the cache. A forgotten catalog
     file is noted in models/found/<model>.forgotten.json, so later scans no
     longer count it as downloaded and its row offers Download (#1366)
 ```
 
-`hex model list` scans too and shows each model's source: `download`, `hex`,
-`imported`, or `found: owner/name@abcdef1`. `hex model status` scans for the
+`gospell model list` scans too and shows each model's source: `download`, `gospell`,
+`imported`, or `found: owner/name@abcdef1`. `gospell model status` scans for the
 same installed/unverified answer but prints no source. A compatible file not
 yet used is listed as `custom-<first 16 hex of its blob>` with `(not tested by
-Hex)`, and
-`hex model use <that id>` checks it in full and uses it in place. The local
+GoSpell)`, and
+`gospell model use <that id>` checks it in full and uses it in place. The local
 API's `/models` and the SDK's `ModelInfo.source` carry the same field.
 
 ## Onboarding Choice
 
 ```ts
 Onboarding opens -> scan; its own download waits until it answers  // setup.found-choice
-├── Nothing compatible found -> Setting up Hex, unchanged: the recommended
+├── Nothing compatible found -> Setting up GoSpell, unchanged: the recommended
 │   model downloads by itself, and the model step never shows
-└── Something found -> the first run's model step in place of Setting up Hex:
+└── Something found -> the first run's model step in place of Setting up GoSpell:
     "Choose a speech model", one card of radio rows, no buttons inside
-    ├── Hex's recommended model first, selected, [Recommended] -> "731 MB
+    ├── GoSpell's recommended model first, selected, [Recommended] -> "731 MB
     │   download", or "On this computer" when its exact file (same SHA-256) is
     │   in the cache (one row, never two)
     ├── Then each found file -> its name, "On this computer" (a catalog model)
-    │   or "On this computer · not tested by Hex"; no hashes, repositories,
+    │   or "On this computer · not tested by GoSpell"; no hashes, repositories,
     │   revisions, or compression
     ├── Picking a row starts it: ours downloads ("Downloading… 42%" on the row)
     │   or, already here, is checked in place; a found file is used where it
@@ -211,9 +211,9 @@ Onboarding opens -> scan; its own download waits until it answers  // setup.foun
 Observed on apollo (Linux, Radeon 8060S over Vulkan, 2026-11-01) with an
 isolated data folder and a fake hub holding Parakeet v3's pinned blob and
 Parakeet primeLine Q8_0 (`handy-computer/parakeet-primeline-gguf@cf04224`):
-`hex model list` showed v3 as `found: …@85ac09e` and primeLine as
-`custom-dbd1ec2985aea64d (not tested by Hex)`; `hex model use` loaded each in
-place, `hex model transcribe` transcribed with both, `hex model remove` forgot
+`gospell model list` showed v3 as `found: …@85ac09e` and primeLine as
+`custom-dbd1ec2985aea64d (not tested by GoSpell)`; `gospell model use` loaded each in
+place, `gospell model transcribe` transcribed with both, `gospell model remove` forgot
 primeLine and the cache's files, sizes, and times were unchanged. The
 onboarding and picker scenes rendered from that real scan. Earlier, the same
 primeLine file imported by copy transcribed the FLEURS German and English
@@ -245,9 +245,9 @@ downloaded, the full check refusing a mismatched file),
 
 ```ts
 Saved model ready? one check everywhere  // models::is_ready, model_ready
-├── Hex's own download or import -> installed, and its receipt is the check
+├── GoSpell's own download or import -> installed, and its receipt is the check
 ├── Catalog file in another app's cache, not checked yet -> installed but not
-│   ready; onboarding, Settings, and `hex status` never call it ready
+│   ready; onboarding, Settings, and `gospell status` never call it ready
 ├── Enable while it is not ready ->
 │   ├── Its file is here -> the existing installed-only preparation checks it
 │   │   against its pin (adopting it as models/found/<model>.json), then the
@@ -256,7 +256,7 @@ Saved model ready? one check everywhere  // models::is_ready, model_ready
 │       (no preparation and no error)
 ├── A check is verify-only: it never replaces the saved selection with a
 │   lost import's fallback (Windows, Linux, and macOS commit no settings)
-├── `hex model use` on the saved, unverified model -> the same check runs
+├── `gospell model use` on the saved, unverified model -> the same check runs
 │   instead of answering "already in use", and reports success only once the
 │   model is ready
 └── macOS launch with the listener waiting -> recognition starts with an
@@ -273,12 +273,12 @@ and
 ## A Download Another Process Runs
 
 ```ts
-models/.download.lock held by `hex model install` (a terminal) or another Hex,
+models/.download.lock held by `gospell model install` (a terminal) or another GoSpell,
 writing models/<file>.gguf.partial  // transcription::models::lock_downloads
-├── Onboarding, Settings, or `hex model install` starts the same model -> it
+├── Onboarding, Settings, or `gospell model install` starts the same model -> it
 │   waits for that lock instead of failing or downloading a second copy
 ├── While it waits, downloaded_bytes comes from the partial file's size, so
-│   `hex status --json`, the picker, and onboarding show that process's
+│   `gospell status --json`, the picker, and onboarding show that process's
 │   progress rather than 0%
 ├── The lock covers the whole models folder, so the progress shown is this
 │   model's partial file; while the other process fetches a different model
@@ -291,6 +291,6 @@ writing models/<file>.gguf.partial  // transcription::models::lock_downloads
 Checks: `transcription::models::tests::waiting_for_another_processs_download_reports_its_partial_bytes`
 holds the lock and writes three bytes of the partial, then asserts a waiting
 download reports those bytes and stops canceled without fetching anything.
-That a foreign lock makes `hex model install`/onboarding show it in the real
+That a foreign lock makes `gospell model install`/onboarding show it in the real
 service has **not** been run; the Linux app's snapshot was checked by reading
 `linux::app::snapshot`.

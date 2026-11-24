@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Builds a Spatial autocorrect model (HEXKeyboard/TypingModel/<lang>.hextm) from Google
+"""Builds a Spatial autocorrect model (GoSpellKeyboard/TypingModel/<lang>.gospelltm) from Google
 Books Ngram v3 (2020-02-17, CC BY 3.0) word and word-pair counts, keeping only words a
 word list knows: SCOWL (sizes up to 70) for English, RLA-ES (LibreOffice's es_ES and
 es_MX Hunspell dictionaries, used under their MPL 1.1 option) for Spanish. Counts are summed over 1980-2019.
@@ -10,7 +10,7 @@ English also takes two things the books can't give it:
   as rare as a word ranked 100,000th). Each contraction in CONTRACTIONS counts as often as
   its expansion's pair ("do not") when that is commoner, and the ones SCOWL lists only with
   a capital ("I'm") or not at all are added in lowercase.
-- en-extra-words.tsv beside this script: chat and tech words written for Hex ("app", "lol",
+- en-extra-words.tsv beside this script: chat and tech words written for GoSpell ("app", "lol",
   "csv"), each at its tier's cost; a word the books have only gets commoner.
 Both join the vocabulary before pairs are counted, so their pairs are counted too.
 
@@ -28,8 +28,8 @@ their licences and checksums are POLISH_INPUTS below; the build refuses a file w
 differs.
 
     python3 -m venv /tmp/venv && /tmp/venv/bin/pip install spylls   # Spanish only
-    /tmp/venv/bin/python scripts/build-typing-model.py es <workdir> HEXKeyboard/TypingModel/es.hextm
-    python3 scripts/build-typing-model.py pl <workdir> pl.hextm [nkjp+parlamint|nkjp|parlamint]
+    /tmp/venv/bin/python scripts/build-typing-model.py es <workdir> GoSpellKeyboard/TypingModel/es.gospelltm
+    python3 scripts/build-typing-model.py pl <workdir> pl.gospelltm [nkjp+parlamint|nkjp|parlamint]
 
 Needs about 7 GB free in <workdir> while it runs (English downloads ~240 GB of ngrams,
 Spanish ~50 GB, each file deleted once counted) and a fast connection; every stage is
@@ -469,7 +469,7 @@ def without_plain_twins(words, check=None):
 
 def main_polish(work, out_path, source):
     """Polish: `source`'s counts, the words PoliMorf knows less plain twins, the commonest
-    MAX_WORDS of them; then <out_path less .hextm>.valid."""
+    MAX_WORDS of them; then <out_path less .gospelltm>.valid."""
     os.makedirs(work, exist_ok=True)
     words, pairs = polish_counts(source.split("+")[0], work)
     check = polish_counts("parlamint", work)[0] if source == "nkjp+parlamint" else None
@@ -482,7 +482,7 @@ def main_polish(work, out_path, source):
     in_vocab = {k.encode("utf-8"): c for k, c in pairs.items() if all(p in vocab for p in k.split(" "))}
     write_model("pl", vocab, total, in_vocab, out_path, POLISH_MIN_PAIR[source])
     valid = sorted((w for w, c in listed.items() if c >= 2 and w not in vocab), key=lambda w: w.encode("utf-8"))
-    valid_path = (out_path[:-6] if out_path.endswith(".hextm") else out_path) + ".valid"
+    valid_path = (out_path[:-6] if out_path.endswith(".gospelltm") else out_path) + ".valid"
     with open(valid_path, "w", encoding="utf-8") as f:
         for w in valid:
             f.write(f"{w}\t{cost(listed[w] / total)}\n")

@@ -1,4 +1,4 @@
-//! Hex's own windows: which a capture leaves out of its recording, and
+//! GoSpell's own windows: which a capture leaves out of its recording, and
 //! which it looks through for clicks.
 
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -6,7 +6,7 @@ use std::sync::{Arc, LazyLock, Mutex};
 
 use scrawl_capture::capture::OwnWindows;
 
-/// Hex's windows a capture leaves out of its recording, one per role. A
+/// GoSpell's windows a capture leaves out of its recording, one per role. A
 /// capture reads them when it starts.
 pub(super) static OWN_WINDOWS: Mutex<OwnWindowIds> = Mutex::new(OwnWindowIds {
     capsule: None,
@@ -44,13 +44,13 @@ impl OwnWindowIds {
     }
 }
 
-/// Which of Hex's windows a capture leaves out.
+/// Which of GoSpell's windows a capture leaves out.
 #[derive(Clone, Copy, Debug)]
 pub enum OwnWindow {
     /// A panel far larger than the pill: click-through but for the pill
     /// ([`super::set_capsule_pill`]).
     Capsule,
-    /// Click-through, so a click on it never counts as a click on Hex.
+    /// Click-through, so a click on it never counts as a click on GoSpell.
     Ink,
     /// The on-screen picker, hidden before the capture it starts records.
     Picker,
@@ -94,7 +94,7 @@ pub fn exclude_window(role: OwnWindow, window: u32) {
     }
 }
 
-/// What a capture leaves out of its recording (every window Hex named) and
+/// What a capture leaves out of its recording (every window GoSpell named) and
 /// looks through for clicks: the ink overlay, and the capsule's panel, which
 /// lets clicks through everywhere but its pill. Clicks on the pill never
 /// reach the engine ([`super::CapsulePill`]).
@@ -111,16 +111,16 @@ pub(super) fn own_windows_of(own: &OwnWindowIds) -> OwnWindows {
 }
 
 /// `capture.show_overlays_in_recordings`: while set, a capture records every
-/// window of Hex's, its overlays included. A recording capture follows a
+/// window of GoSpell's, its overlays included. A recording capture follows a
 /// change at once.
 static OWN_WINDOWS_RECORDED: LazyLock<Arc<AtomicBool>> = LazyLock::new(Arc::default);
 
-/// Lets captures record Hex's own windows, or leaves them out again.
+/// Lets captures record GoSpell's own windows, or leaves them out again.
 pub fn record_own_windows(recorded: bool) {
     OWN_WINDOWS_RECORDED.store(recorded, Ordering::Release);
 }
 
-/// Whether screen recordings may show Hex's overlays, as last saved.
+/// Whether screen recordings may show GoSpell's overlays, as last saved.
 pub fn own_windows_recorded() -> bool {
     OWN_WINDOWS_RECORDED.load(Ordering::Acquire)
 }

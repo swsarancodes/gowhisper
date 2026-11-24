@@ -1,7 +1,7 @@
-//! What to learn from a correction: after Hex pastes a dictation, the field
+//! What to learn from a correction: after GoSpell pastes a dictation, the field
 //! can be read once more when the watch ends and compared with the text it
 //! held right after the paste. A replacement inside the pasted text that
-//! turns into a name-like word is the person telling us how Hex should have
+//! turns into a name-like word is the person telling us how GoSpell should have
 //! spelled it, so it becomes a vocabulary term. Everything here is pure: no
 //! settings store, no Accessibility, no clock.
 
@@ -27,7 +27,7 @@ const MIN_CHANGED: usize = 3;
 /// The vocabulary terms an edit of just-pasted text teaches.
 ///
 /// `baseline` is the whole field right after the paste, `inserted` the text
-/// Hex actually inserted into it (found at its last whole-word occurrence),
+/// GoSpell actually inserted into it (found at its last whole-word occurrence),
 /// `edited` the field when the watch ended, and `known` the current
 /// vocabulary. Empty when the field did not change, `inserted` is blank or
 /// missing from `baseline`, either field has more than [`MAX_WORDS`] words,
@@ -49,7 +49,7 @@ const MIN_CHANGED: usize = 3;
 /// A hunk is read when its added words include a name-like word, in the
 /// `edited` field's context:
 ///
-/// - all alphabetics uppercase and at least two letters, like HEX;
+/// - all alphabetics uppercase and at least two letters, like GOSPELL;
 /// - uppercase after the first letter, like iPhone or OpenCode;
 /// - letters mixed with digits, like GPT4 or B2B;
 /// - capitalized and not at the start of a sentence, like Raunak.

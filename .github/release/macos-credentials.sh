@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # macos-credentials.sh <dir>: imports the Developer ID certificate into a new
 # keychain in <dir> and writes the App Store Connect API key for notarytool
-# there. Prints nothing secret. Appends HEX_KEYCHAIN, HEX_SIGNING_IDENTITY,
-# and HEX_NOTARY_KEY to $GITHUB_ENV.
+# there. Prints nothing secret. Appends GOSPELL_KEYCHAIN, GOSPELL_SIGNING_IDENTITY,
+# and GOSPELL_NOTARY_KEY to $GITHUB_ENV.
 #
 # Environment: APPLE_SIGNING_CERTIFICATE (a base64 .p12 with no password),
-# APPLE_NOTARY_KEY (the .p8, as PEM or base64), HEX_TEAM_ID.
+# APPLE_NOTARY_KEY (the .p8, as PEM or base64), GOSPELL_TEAM_ID.
 . "$(dirname "$0")/lib.sh"
 
 dir=$1
@@ -32,8 +32,8 @@ security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$password
 # shellcheck disable=SC2046
 security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
 identity=$(security find-identity -v -p codesigning "$keychain" |
-  sed -n "s/.*\"\(Developer ID Application:.*($HEX_TEAM_ID)\)\"/\1/p" | head -1)
-[ -n "$identity" ] || die "APPLE_SIGNING_CERTIFICATE has no Developer ID Application identity for team $HEX_TEAM_ID."
+  sed -n "s/.*\"\(Developer ID Application:.*($GOSPELL_TEAM_ID)\)\"/\1/p" | head -1)
+[ -n "$identity" ] || die "APPLE_SIGNING_CERTIFICATE has no Developer ID Application identity for team $GOSPELL_TEAM_ID."
 echo "Signing as $identity."
 
 case "$APPLE_NOTARY_KEY" in
@@ -43,7 +43,7 @@ esac
 grep -q -- '-----BEGIN PRIVATE KEY-----' "$key" || die "APPLE_NOTARY_KEY is not an App Store Connect API key (.p8)."
 
 {
-  echo "HEX_KEYCHAIN=$keychain"
-  echo "HEX_SIGNING_IDENTITY=$identity"
-  echo "HEX_NOTARY_KEY=$key"
+  echo "GOSPELL_KEYCHAIN=$keychain"
+  echo "GOSPELL_SIGNING_IDENTITY=$identity"
+  echo "GOSPELL_NOTARY_KEY=$key"
 } >> "$GITHUB_ENV"

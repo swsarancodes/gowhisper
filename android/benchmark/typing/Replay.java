@@ -1,11 +1,11 @@
-package local.hex.bench;
+package local.gospell.bench;
 
-import ly.anoma.hex.typing.*;
+import com.goml.gospell.typing.*;
 import org.json.*;
 import java.io.*;
 import java.util.*;
 
-/** Runs via app_process against the actual installed APK. Never built into Hex. */
+/** Runs via app_process against the actual installed APK. Never built into GoSpell. */
 public final class Replay {
     static KeyGrid originalGeometry(String language) {
         // Portrait KeyboardLayout at 402 pt (side 6.5, gap 6, letter height 45, row gap 11), and its

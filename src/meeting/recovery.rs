@@ -1,4 +1,4 @@
-//! Meetings Hex left unfinished, and the launch recovery that finishes them.
+//! Meetings GoSpell left unfinished, and the launch recovery that finishes them.
 //!
 //! A quit or crash can kill the recorder before it finalises its WAVs: their
 //! `data` chunk still says 0 bytes and the manifest still says Recording. The
@@ -37,7 +37,7 @@ const MAX_RECOVERY_ATTEMPTS: u32 = 2;
 /// before loading its own model, as a recording without one does.
 const ENGINE_GRACE: Duration = Duration::from_secs(30);
 
-/// Finishes, once per launch, the transcripts of meetings Hex quit while
+/// Finishes, once per launch, the transcripts of meetings GoSpell quit while
 /// recording or that a crash left unfinished. It waits for the dictation
 /// engine so the work borrows its model rather than loading a second copy.
 pub(crate) struct PendingFinals {
@@ -73,7 +73,7 @@ impl PendingFinals {
             self.swept = true;
             super::sweep::remove_orphaned_imports();
         }
-        // A pass that stopped for a recording is offered again once Hex is
+        // A pass that stopped for a recording is offered again once GoSpell is
         // idle, so a backlog never competes with live audio.
         if self.stopped.swap(false, Ordering::AcqRel) {
             self.checked = false;
@@ -186,8 +186,8 @@ pub(super) fn stranded_among(meetings: &[MeetingManifest]) -> Vec<String> {
 
 /// Whether the launch pass could finish this meeting now. Retention only
 /// waits for unfinished meetings while it can: with Meetings off or no
-/// installed model they expire like any other. A reader process (`hex mcp`,
-/// `hex meetings`) never applied settings, so it mirrors the app's choice
+/// installed model they expire like any other. A reader process (`gospell mcp`,
+/// `gospell meetings`) never applied settings, so it mirrors the app's choice
 /// from `settings.json` instead of its in-memory flags.
 pub(super) fn can_recover() -> bool {
     if crate::app_settings::meetings_enabled() {
@@ -577,7 +577,8 @@ mod tests {
     use super::*;
 
     fn temporary(name: &str) -> PathBuf {
-        let path = std::env::temp_dir().join(format!("hex-recovery-{name}-{}", std::process::id()));
+        let path =
+            std::env::temp_dir().join(format!("gospell-recovery-{name}-{}", std::process::id()));
         let _ = fs::remove_dir_all(&path);
         fs::create_dir_all(&path).unwrap();
         path

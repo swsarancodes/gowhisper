@@ -26,12 +26,12 @@ pub(crate) struct DesktopTranscriptionSnapshot {
     pub(crate) selection: TranscriptionSelection,
     pub(crate) preparing: Option<TranscriptionModelId>,
     /// Where the loaded model runs; `None` before a load and once it is
-    /// unloaded, and on macOS, which `hex status` leaves out.
+    /// unloaded, and on macOS, which `gospell status` leaves out.
     #[serde(default)]
     pub(crate) backend: Option<crate::transcription::SpeechBackend>,
 }
 
-/// What the listener card and `hex status` say the listener is doing, on
+/// What the listener card and `gospell status` say the listener is doing, on
 /// every OS. Each name is translated, so a new status needs translations.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 #[serde(into = "&'static str", try_from = "String")]
@@ -115,7 +115,7 @@ pub(crate) struct DesktopListenerSnapshot {
     pub(crate) warming: bool,
     pub(crate) status: ListenerStatus,
     /// Why the listener itself could not run (stopped, or its HUD could not
-    /// show). `hex status` treats this as a stopped listener.
+    /// show). `gospell status` treats this as a stopped listener.
     #[serde(default)]
     pub(crate) warning: Option<String>,
     /// An environment notice while listening (e.g. a missing paste helper),
@@ -128,7 +128,7 @@ pub(crate) struct DesktopListenerSnapshot {
     pub(crate) last_failure: Option<String>,
     #[serde(default)]
     pub(crate) shortcuts: DesktopShortcuts,
-    /// The desktop can show its own dialog for Hex's shortcuts.
+    /// The desktop can show its own dialog for GoSpell's shortcuts.
     #[serde(default)]
     pub(crate) shortcuts_configurable: bool,
 }
@@ -139,11 +139,11 @@ pub(crate) enum DesktopShortcuts {
     /// No listener has registered its shortcuts yet: it is starting or stopped.
     #[default]
     Unregistered,
-    /// Hex registers the shortcuts Settings records (X11).
+    /// GoSpell registers the shortcuts Settings records (X11).
     Registered,
     /// The desktop's shortcuts portal bound these, in request order.
     Portal(Vec<DesktopGrantedShortcut>),
-    /// Nothing registers shortcuts: the desktop's keybindings run `hex` commands.
+    /// Nothing registers shortcuts: the desktop's keybindings run `gospell` commands.
     Commands,
 }
 
@@ -155,7 +155,7 @@ pub(crate) struct DesktopGrantedShortcut {
     pub(crate) trigger: Option<String>,
     /// The desktop assigns the key in its own configuration and its portal
     /// describes no trigger (Hyprland), so a missing trigger is not a
-    /// refusal: Hex cannot confirm which key, if any, runs it.
+    /// refusal: GoSpell cannot confirm which key, if any, runs it.
     #[serde(default)]
     pub(crate) unconfirmed: bool,
 }
@@ -186,7 +186,7 @@ pub(crate) enum DesktopUpdateStatus {
     SourceBuild,
     /// Installed by a package manager (pacman, Nix), which updates it.
     PackageManager,
-    /// The package manager that installed Hex serves another version.
+    /// The package manager that installed GoSpell serves another version.
     PackageUpdate {
         command: String,
     },

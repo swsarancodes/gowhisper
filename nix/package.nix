@@ -64,7 +64,7 @@ let
       libva
     ];
     ALSA_PLUGIN_DIR = symlinkJoin {
-      name = "hex-alsa-plugins";
+      name = "gospell-alsa-plugins";
       paths = [
         "${pipewire}/lib/alsa-lib"
         "${alsa-plugins}/lib/alsa-lib"
@@ -102,7 +102,7 @@ let
   );
 in
 rustPlatform.buildRustPackage (finalAttrs: {
-  pname = "hex";
+  pname = "gospell";
   version = (builtins.fromTOML (builtins.readFile ../Cargo.toml)).package.version;
 
   src = lib.fileset.toSource {
@@ -122,10 +122,10 @@ rustPlatform.buildRustPackage (finalAttrs: {
       # The Annotate skill the CLI reads into its instructions.
       ../skills
       # The iOS cleaner's instructions, compared by a test.
-      ../ios/HEXMobile/TranscriptCleanup.swift
+      ../ios/GoSpellMobile/TranscriptCleanup.swift
       # The Labs registry's published copy: a Rust test compares it to the registry.
       ../site/src/labs.json
-      ../macos/HexMicrophoneDriver/Info.plist
+      ../macos/GoSpellMicrophoneDriver/Info.plist
       # Built in: a 2.3.1 install moves itself into this installer's layout.
       ../.github/release/install-linux.sh
     ];
@@ -254,26 +254,26 @@ rustPlatform.buildRustPackage (finalAttrs: {
   env = buildEnv;
   # Desktop and installed-model tests are #[ignore]; run the remaining suite.
   doCheck = true;
-  # Hex's suite keeps process-global state (the lab switches, a model download
+  # GoSpell's suite keeps process-global state (the lab switches, a model download
   # in flight), while CI and `scripts/check` run nextest, which isolates each
   # test in its own process. Plain `cargo test` shares one process, so let
   # cargoCheckHook run it one test at a time (it sets RUST_TEST_THREADS=1).
   dontUseCargoParallelTests = true;
   preCheck = ''
-    export HOME="$TMPDIR/hex-test-home"
+    export HOME="$TMPDIR/gospell-test-home"
     mkdir -p "$HOME"
   '';
 
   postInstall = ''
-    install -Dm644 ${../packaging/anomaly.hex.desktop} $out/share/applications/anomaly.hex.desktop
+    install -Dm644 ${../packaging/com.goml.gospell.desktop} $out/share/applications/com.goml.gospell.desktop
     mkdir -p $out/share/icons
     cp -R ${../packaging/linux/icons/hicolor} $out/share/icons/hicolor
-    substituteInPlace $out/share/applications/anomaly.hex.desktop \
-      --replace-fail '@HEX_BIN@' "$out/bin/hex"
+    substituteInPlace $out/share/applications/com.goml.gospell.desktop \
+      --replace-fail '@GOSPELL_BIN@' "$out/bin/gospell"
   '';
 
   postFixup = ''
-    wrapProgram $out/bin/hex \
+    wrapProgram $out/bin/gospell \
       --prefix PATH : ${lib.makeBinPath runtimePackages} \
       --prefix LD_LIBRARY_PATH : ${runtimeEnv.LD_LIBRARY_PATH} \
       --set ALSA_PLUGIN_DIR ${runtimeEnv.ALSA_PLUGIN_DIR}
@@ -291,9 +291,9 @@ rustPlatform.buildRustPackage (finalAttrs: {
 
   meta = {
     description = "Local-first voice dictation (Linux beta)";
-    homepage = "https://anoma.ly/hex/";
+    homepage = "https://gospell.goml.io/";
     license = lib.licenses.mit;
-    mainProgram = "hex";
+    mainProgram = "gospell";
     platforms = [
       "x86_64-linux"
       "aarch64-linux"

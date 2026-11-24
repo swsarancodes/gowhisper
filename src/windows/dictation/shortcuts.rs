@@ -2,7 +2,7 @@
 
 use super::*;
 
-/// The next shortcut event or `hex` command, as the action the loop takes,
+/// The next shortcut event or `gospell` command, as the action the loop takes,
 /// when it occurred, whether it was deliberate (a command records at once,
 /// like a toggle press), and the shortcut's flavour. A printing stop leaves
 /// its reply in `print`.

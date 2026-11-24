@@ -28,7 +28,7 @@ pub enum KeySoundStyle {
     Felt,
     /// Rounded 22 ms low-pitch warm droplet.
     Soft,
-    /// Silent typing (only Hex's dictation tones play).
+    /// Silent typing (only GoSpell's dictation tones play).
     Silent,
 }
 
@@ -107,10 +107,10 @@ pub enum OnboardingTone {
     PermissionTick,
     /// `"Almost ready"` appearing while finishing a slow model download.
     AlmostReady,
-    /// One of the Hex logo's three hexagons landing on `"Hex is ready"`,
+    /// One of the GoSpell logo's three hexagons landing on `"GoSpell is ready"`,
     /// outside in (`0..3`), rising to resolve on the last.
     Build(u8),
-    /// A message arriving in the `"Without Hex"` conversation.
+    /// A message arriving in the `"Without GoSpell"` conversation.
     Incoming,
     /// A reply leaving the field.
     Sent,
@@ -128,11 +128,11 @@ pub enum OnboardingTone {
     SlowDown,
     /// A comic title slamming onto the stage: a heavy bass hit.
     Slam,
-    /// Confetti bursting over `"With Hex"`: a popper and falling paper.
+    /// Confetti bursting over `"With GoSpell"`: a popper and falling paper.
     Confetti,
-    /// Fireworks over `"With Hex"`: a whistle, a boom, and crackle.
+    /// Fireworks over `"With GoSpell"`: a whistle, a boom, and crackle.
     Fireworks,
-    /// The triumphant sting as `"With Hex"` peaks: one of the candidates
+    /// The triumphant sting as `"With GoSpell"` peaks: one of the candidates
     /// (`0..TRIUMPHS`) still being chosen between.
     Triumph(u8),
     /// A word shooting out of the HUD, one of three (`0..3`) so a burst
@@ -140,7 +140,7 @@ pub enum OnboardingTone {
     Word(u8),
     /// A card struck by lightning and dissolving.
     Burn,
-    /// `"Voice-first mode"` called as `"With Hex"` takes over: a rising
+    /// `"Voice-first mode"` called as `"With GoSpell"` takes over: a rising
     /// whoosh into a bright chord.
     ModeVoice,
 }
@@ -170,16 +170,16 @@ pub enum Tone {
     /// A first-run onboarding cue (typing clacks, shortcut keycap, motion landings).
     Onboarding(OnboardingTone),
     /// A Scrawl capture started recording.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     CaptureStart,
     /// It stopped and is being written.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     CaptureStop,
     /// Its auto-send went, once Undo ran out.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     CaptureSent,
     /// A send was taken back.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     CaptureUndo,
 }
 
@@ -231,7 +231,7 @@ fn feedback_volume() -> Option<f32> {
 ///
 /// On macOS an open output is a live CoreAudio IO client: coreaudiod services
 /// its render callbacks and keeps an idle-sleep assertion for it. coreaudiod
-/// logged client timeouts against Hex's open output (#1531), and a
+/// logged client timeouts against GoSpell's open output (#1531), and a
 /// shorter grace reduces how long such a client exists, so macOS releases the
 /// output about ten seconds after the last tone. Ten seconds still covers a
 /// quick start-tone to stop-tone dictation, though a dictation held past about
@@ -588,7 +588,7 @@ pub fn play_at(tone: Tone, percent: u8) {
 pub enum SoundSet {
     /// One kalimba-like voice playing one motif across a dictation.
     Signature = 0,
-    /// The sounds Hex played before the signature set. It has no done tone,
+    /// The sounds GoSpell played before the signature set. It has no done tone,
     /// and errors play macOS Basso as they did.
     #[default]
     Classic = 1,
@@ -615,7 +615,7 @@ impl SoundSet {
     /// The English name Settings shows, translated where it is shown.
     pub fn name(self) -> &'static str {
         match self {
-            Self::Signature => "Hex signature",
+            Self::Signature => "GoSpell signature",
             Self::Classic => "Classic",
             Self::Click => "Click",
             Self::Soft => "Soft tone",
@@ -629,7 +629,7 @@ impl SoundSet {
     pub fn character(self) -> &'static str {
         match self {
             Self::Signature => "A kalimba motif that rises and comes home",
-            Self::Classic => "The tones Hex first shipped with",
+            Self::Classic => "The tones GoSpell first shipped with",
             Self::Click => "Mechanical key clicks",
             Self::Soft => "Warm, rounded blips",
             Self::Wood => "Soft marimba and hollow wood blocks",
@@ -906,7 +906,7 @@ struct Sounds {
     /// In [`SoundSet::ALL`]'s order.
     sets: Vec<SetSounds>,
     onboarding: OnboardingSounds,
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     capture: CaptureSounds,
 }
 
@@ -918,7 +918,7 @@ impl Sounds {
                 .map(SetSounds::load)
                 .collect::<Result<_>>()?,
             onboarding: OnboardingSounds::load()?,
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             capture: CaptureSounds::load()?,
         })
     }
@@ -956,13 +956,13 @@ impl Sounds {
             }
             Tone::Onboarding(cue) => return self.onboarding.get(cue),
             Tone::Error => return sounds.error.as_ref(),
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Tone::CaptureStart => &sounds.start,
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Tone::CaptureStop => &sounds.stop,
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Tone::CaptureSent => sounds.done.as_ref().unwrap_or(&self.capture.sent),
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Tone::CaptureUndo => &self.capture.undo,
         })
     }
@@ -970,13 +970,13 @@ impl Sounds {
 
 /// The capture tones no set has: a send for sets without a done sound,
 /// so a send is never silent, and a taken-back send.
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 struct CaptureSounds {
     sent: SamplesBuffer,
     undo: SamplesBuffer,
 }
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 impl CaptureSounds {
     fn load() -> Result<Self> {
         macro_rules! sound {
@@ -1190,7 +1190,7 @@ fn open_output() -> Result<Opened<MixerDeviceSink>> {
 }
 
 /// Opening an output device that also records (a USB headset, a Mac VM's one
-/// sound device) makes macOS show its microphone prompt, so until Hex has
+/// sound device) makes macOS show its microphone prompt, so until GoSpell has
 /// asked for the microphone, tones stay silent on such a device.
 #[cfg(target_os = "macos")]
 fn output_waits_for_microphone() -> bool {
@@ -1382,7 +1382,7 @@ pub(crate) fn mix_offline_wav(
     Ok(())
 }
 
-/// Decodes one of Hex's bundled 16-bit PCM sounds.
+/// Decodes one of GoSpell's bundled 16-bit PCM sounds.
 /// `sound` played `cents` higher: the same samples at a faster rate.
 fn detune(sound: &SamplesBuffer, cents: f64) -> SamplesBuffer {
     let rate = f64::from(sound.sample_rate().get()) * 2f64.powf(cents / 1200.0);
@@ -1406,7 +1406,7 @@ fn decode_wav(bytes: &'static [u8]) -> Result<SamplesBuffer> {
     Ok(SamplesBuffer::new(channels, sample_rate, samples))
 }
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 fn decode(bytes: &'static [u8]) -> Result<SamplesBuffer> {
     let decoder =
         rodio::Decoder::new(Cursor::new(bytes)).wrap_err("could not decode feedback audio")?;
@@ -1611,7 +1611,7 @@ mod tests {
 
         // Offline mix with gain 0.0 writes pure silence; gain 0.5 writes audible cues.
         let dir = std::env::temp_dir().join(format!(
-            "hex-sfx-test-{}-{}",
+            "gospell-sfx-test-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -1977,11 +1977,11 @@ mod tests {
 
     /// Times the default output's tone path without recording it: from the
     /// request to the mixer's first pull of the tone, plus one output buffer
-    /// until that sample is presented. `HEX_TONE_PATH=legacy` measures the
+    /// until that sample is presented. `GOSPELL_TONE_PATH=legacy` measures the
     /// previous path (rodio's default 50 ms buffer). Route the default output
     /// to a virtual device first so nothing sounds aloud.
     #[test]
-    #[ignore = "opens the native default output; route it to a silent device or set HEX_TONE_MUTED"]
+    #[ignore = "opens the native default output; route it to a silent device or set GOSPELL_TONE_MUTED"]
     fn native_start_tone_path_latency() {
         use std::sync::Mutex;
 
@@ -2011,9 +2011,9 @@ mod tests {
             }
         }
 
-        let legacy = std::env::var("HEX_TONE_PATH").is_ok_and(|path| path == "legacy");
+        let legacy = std::env::var("GOSPELL_TONE_PATH").is_ok_and(|path| path == "legacy");
         // A muted probe times a real speaker path without sounding.
-        let gain = if std::env::var_os("HEX_TONE_MUTED").is_some() {
+        let gain = if std::env::var_os("GOSPELL_TONE_MUTED").is_some() {
             0.0
         } else {
             1.0

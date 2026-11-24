@@ -108,7 +108,7 @@ mod macos {
     const SCREEN_UNLOCKED: &str = "com.apple.screenIsUnlocked";
     /// The session dictionary's lock state: a CFBoolean while locked.
     const SESSION_LOCKED_KEY: &str = "CGSSessionScreenIsLocked";
-    /// `DeliverImmediately`, including while Hex is in the background; what
+    /// `DeliverImmediately`, including while GoSpell is in the background; what
     /// `keyboard_input_sources` uses for its distributed observer.
     const DELIVER_IMMEDIATELY: isize = 4;
 
@@ -153,7 +153,7 @@ mod macos {
             observe_workspace();
             observe_session();
             // The observers only report changes: a Mac already asleep or
-            // locked when Hex launched posted those before it listened.
+            // locked when GoSpell launched posted those before it listened.
             seed();
         });
     }

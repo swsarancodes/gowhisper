@@ -54,7 +54,7 @@ fn transcript_entries_coalesce_into_source_turns_without_hiding_long_pauses() {
 #[test]
 fn final_transcript_replaces_the_rolling_transcript_atomically() {
     let directory = std::env::temp_dir().join(format!(
-        "hex-meeting-transcript-{}-{}",
+        "gospell-meeting-transcript-{}-{}",
         std::process::id(),
         now_ms()
     ));
@@ -109,7 +109,7 @@ fn final_transcript_replaces_the_rolling_transcript_atomically() {
 #[test]
 fn reading_a_transcript_ignores_an_in_flight_trailing_write() {
     let path = std::env::temp_dir().join(format!(
-        "hex-transcript-tail-{}-{}.ndjson",
+        "gospell-transcript-tail-{}-{}.ndjson",
         std::process::id(),
         now_ms()
     ));
@@ -143,7 +143,7 @@ fn reading_a_transcript_ignores_an_in_flight_trailing_write() {
 #[test]
 fn capture_failures_are_persisted_instead_of_looking_interrupted() {
     let directory = std::env::temp_dir().join(format!(
-        "hex-meeting-failure-{}-{}",
+        "gospell-meeting-failure-{}-{}",
         std::process::id(),
         now_ms()
     ));
@@ -194,7 +194,7 @@ fn capture_failures_are_persisted_instead_of_looking_interrupted() {
 #[test]
 fn mid_meeting_capture_loss_proceeds_to_transcription_when_audio_was_recorded() {
     let directory = std::env::temp_dir().join(format!(
-        "hex-meeting-capture-loss-{}-{}",
+        "gospell-meeting-capture-loss-{}-{}",
         std::process::id(),
         now_ms()
     ));
@@ -303,7 +303,7 @@ fn abandoned_recording_and_finalization_are_recovered_as_interrupted() {
 #[test]
 fn meeting_lock_reports_liveness_across_file_descriptors() {
     let directory = std::env::temp_dir().join(format!(
-        "hex-meeting-lock-{}-{}",
+        "gospell-meeting-lock-{}-{}",
         std::process::id(),
         now_ms()
     ));
@@ -318,7 +318,11 @@ fn meeting_lock_reports_liveness_across_file_descriptors() {
 }
 
 fn finished_meeting(name: &str, title: &str) -> (PathBuf, PathBuf) {
-    let base = std::env::temp_dir().join(format!("hex-{name}-{}-{}", std::process::id(), now_ms()));
+    let base = std::env::temp_dir().join(format!(
+        "gospell-{name}-{}-{}",
+        std::process::id(),
+        now_ms()
+    ));
     let directory = base.join("1760000000000-1");
     fs::create_dir_all(&directory).unwrap();
     let export = base.join("2026-10-15 1418 Meeting.md");
@@ -642,7 +646,7 @@ fn deleting_refuses_a_transcribing_meeting_and_one_still_awaiting_its_final_tran
 
 #[test]
 fn deleting_refuses_ids_that_are_not_one_meeting_folder() {
-    let base = std::env::temp_dir().join(format!("hex-trash-unknown-{}", std::process::id()));
+    let base = std::env::temp_dir().join(format!("gospell-trash-unknown-{}", std::process::id()));
     let _ = fs::remove_dir_all(&base);
     fs::create_dir_all(base.join("1760000000000-1")).unwrap();
     let mut trashed = Vec::new();
@@ -703,8 +707,8 @@ fn the_exported_markdown_is_the_reveal_target_only_while_it_exists() {
 #[test]
 fn explorer_opens_a_folder_itself_without_the_select_switch() {
     assert_eq!(
-        explorer_open(Path::new(r"C:\Users\dax\Documents\Hex Meetings")).as_os_str(),
-        std::ffi::OsStr::new(r#""C:\Users\dax\Documents\Hex Meetings""#)
+        explorer_open(Path::new(r"C:\Users\dax\Documents\GoSpell Meetings")).as_os_str(),
+        std::ffi::OsStr::new(r#""C:\Users\dax\Documents\GoSpell Meetings""#)
     );
     assert_eq!(
         explorer_open(Path::new(r"D:\Notes,2026")).as_os_str(),
@@ -716,18 +720,18 @@ fn explorer_opens_a_folder_itself_without_the_select_switch() {
 fn explorer_selects_the_meeting_file_with_the_switch_outside_the_quotes() {
     assert_eq!(
         explorer_select(Path::new(
-            r"C:\Users\dax\Documents\Hex Meetings\Design sync.md"
+            r"C:\Users\dax\Documents\GoSpell Meetings\Design sync.md"
         ))
         .as_os_str(),
-        std::ffi::OsStr::new(r#"/select,"C:\Users\dax\Documents\Hex Meetings\Design sync.md""#)
+        std::ffi::OsStr::new(r#"/select,"C:\Users\dax\Documents\GoSpell Meetings\Design sync.md""#)
     );
     assert_eq!(
         explorer_select(Path::new(
-            r"C:\Users\dax\Documents\Hex Meetings\Design sync, notes.md"
+            r"C:\Users\dax\Documents\GoSpell Meetings\Design sync, notes.md"
         ))
         .as_os_str(),
         std::ffi::OsStr::new(
-            r#"/select,"C:\Users\dax\Documents\Hex Meetings\Design sync, notes.md""#
+            r#"/select,"C:\Users\dax\Documents\GoSpell Meetings\Design sync, notes.md""#
         )
     );
 }
@@ -1134,7 +1138,7 @@ fn expiry_leaves_a_markdown_copy_the_user_edited() {
         "the edited Markdown stays"
     );
 
-    // A Markdown written before Hex recorded its digest is not Hex's to move.
+    // A Markdown written before GoSpell recorded its digest is not GoSpell's to move.
     manifest.export_sha256 = None;
     write_manifest(&directory, &manifest).unwrap();
     trashed.clear();
@@ -1191,7 +1195,7 @@ fn expiry_trashes_a_notes_file_only_while_its_digest_matches() {
 }
 
 #[test]
-fn hex_rewriting_its_markdown_keeps_it_hexs_and_a_user_edit_does_not() {
+fn gospell_rewriting_its_markdown_keeps_it_gospells_and_a_user_edit_does_not() {
     let (base, directory) = finished_meeting("digest", "Meeting — 2:18 PM");
     let mut manifest = read_manifest(&directory).unwrap();
     let export = manifest.export_path.clone().unwrap();
@@ -1248,7 +1252,7 @@ fn a_source_that_resumes_after_an_outage_is_padded_back_onto_the_timeline() {
 #[test]
 fn writer_fills_a_capture_gap_with_silence_and_records_it() {
     let directory = std::env::temp_dir().join(format!(
-        "hex-meeting-gap-{}-{}",
+        "gospell-meeting-gap-{}-{}",
         std::process::id(),
         now_ms()
     ));

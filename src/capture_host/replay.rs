@@ -3,10 +3,10 @@
 //! While `labs.annotate_replay` and `capture.enabled` are both on (and
 //! `SCClipBufferingOutput` exists on the running macOS), a single background
 //! `capture-replay` worker keeps one `SCStream` + `SCClipBufferingOutput`
-//! open on the focused/main display with Hex's own overlays excluded. While
+//! open on the focused/main display with GoSpell's own overlays excluded. While
 //! the Lab is off, no worker thread, `SCStream`, or display listener exists.
 //!
-//! `hex capture replay` exports the last 15 s into `<bundle>/recording.mp4`
+//! `gospell capture replay` exports the last 15 s into `<bundle>/recording.mp4`
 //! and feeds it through the normal Annotate bundle pipeline (`capture.json`,
 //! `scrawl.json`, keyframes, `contact-sheet.png`, clipboard copy, and router).
 //! Holding `capture.replay_hotkey` freezes the 15 s clip at the moment of the
@@ -44,8 +44,8 @@ use serde::Serialize;
 use super::{AudioTimeline, FinishJob, SharedOutcomes};
 #[cfg(target_os = "macos")]
 use super::{
-    CaptureAudio, ChosenTranscriber, End, Sealed, Stage, TargetKind, Written, hex_engine_config,
-    lock, new_bundle_dir, remove_bundle, routing,
+    CaptureAudio, ChosenTranscriber, End, Sealed, Stage, TargetKind, Written,
+    gospell_engine_config, lock, new_bundle_dir, remove_bundle, routing,
 };
 use crate::audio::CaptureInstant;
 use crate::control::ControlReply;
@@ -241,7 +241,7 @@ impl Controller {
         }
     }
 
-    /// `hex capture replay`: exports the last 15 s immediately with no audio,
+    /// `gospell capture replay`: exports the last 15 s immediately with no audio,
     /// returning the queued bundle path on success or a `ControlReply` refusal.
     pub fn export_cli(
         &mut self,
@@ -278,7 +278,7 @@ impl Controller {
             if !crate::labs::annotate_replay() {
                 return Err(ControlReply::error(
                     "feature-off",
-                    "Annotate last 15 seconds is off; turn it on with: hex labs on annotate-replay",
+                    "Annotate last 15 seconds is off; turn it on with: gospell labs on annotate-replay",
                 ));
             }
             if active_recording || self.narrating.is_some() {
@@ -294,7 +294,7 @@ impl Controller {
                 return Err(denied);
             }
             let Some(jobs) = finisher else {
-                return Err(ControlReply::error("busy", "Hex is stopping"));
+                return Err(ControlReply::error("busy", "GoSpell is stopping"));
             };
             if self.worker.is_none() {
                 match start_worker() {
@@ -607,7 +607,7 @@ impl Controller {
 #[cfg(target_os = "macos")]
 fn requested_replay_duration_secs() -> f64 {
     if crate::dev_build::is_dev_build()
-        && let Ok(raw) = std::env::var("HEX_REPLAY_DURATION_SECS")
+        && let Ok(raw) = std::env::var("GOSPELL_REPLAY_DURATION_SECS")
         && let Ok(parsed) = raw.parse::<f64>()
     {
         return parsed;
@@ -624,7 +624,7 @@ fn check_screen_permission() -> Option<ControlReply> {
         super::screen_access::ScreenAccess::Allowed => None,
         super::screen_access::ScreenAccess::NeedsRestart => Some(ControlReply::error(
             "permission",
-            "Screen Recording turns on after Hex restarts",
+            "Screen Recording turns on after GoSpell restarts",
         )),
         super::screen_access::ScreenAccess::Off => {
             super::permissions::report_capture(
@@ -633,7 +633,7 @@ fn check_screen_permission() -> Option<ControlReply> {
             );
             Some(ControlReply::error(
                 "permission",
-                "Screen Recording is off for Hex",
+                "Screen Recording is off for GoSpell",
             ))
         }
     }
@@ -927,7 +927,7 @@ impl SealedReplay {
             },
         };
 
-        let engine_cfg = hex_engine_config();
+        let engine_cfg = gospell_engine_config();
         let transcriber = ChosenTranscriber;
         let (dir, bundle, summary) = scrawl_capture::pipeline::finalize_capture_bundle_for_config(
             &self.bundle,
@@ -1346,8 +1346,10 @@ mod tests {
 
     #[test]
     fn capture_manifest_matches_v1_schema_with_and_without_audio() {
-        let dir =
-            std::env::temp_dir().join(format!("hex-replay-manifest-test-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!(
+            "gospell-replay-manifest-test-{}",
+            std::process::id()
+        ));
         let _ = fs::remove_dir_all(&dir);
         fs::create_dir_all(&dir).unwrap();
 

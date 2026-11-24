@@ -96,7 +96,7 @@ pub(super) fn expect(target: CaptureTarget) {
         return;
     };
     let spawned = std::thread::Builder::new()
-        .name("hex-recording-dim".into())
+        .name("gospell-recording-dim".into())
         .spawn(move || watch(&dim, recorded, pick));
     if let Err(error) = spawned {
         tracing::warn!(%error, "could not watch the recording for its dim");

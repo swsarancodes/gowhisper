@@ -309,7 +309,7 @@ mod tests {
 
     fn temp_dir(name: &str) -> PathBuf {
         let directory =
-            std::env::temp_dir().join(format!("hex-usage-{}-{name}", std::process::id()));
+            std::env::temp_dir().join(format!("gospell-usage-{}-{name}", std::process::id()));
         let _ = fs::remove_dir_all(&directory);
         fs::create_dir_all(&directory).unwrap();
         directory

@@ -1,5 +1,5 @@
 //! Example macOS notifications to answer by voice, and the Messages
-//! group conversation `"Without Hex"` plays out in, drawn strictly with OpenCode
+//! group conversation `"Without GoSpell"` plays out in, drawn strictly with OpenCode
 //! theme tokens.
 
 use rune::{
@@ -92,8 +92,8 @@ pub(crate) const ADAM: Notice = Notice {
     app: App::Slack,
     from: "Adam",
     person: None,
-    place: Some("#hex"),
-    body: "hex just typed my standup into figma",
+    place: Some("#gospell"),
+    body: "gospell just typed my standup into figma",
     field: "Reply in thread",
 };
 

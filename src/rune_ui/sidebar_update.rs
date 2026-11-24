@@ -28,7 +28,7 @@ pub(super) fn control(ui: &Ui, p: Paint) -> Option<El> {
     )
 }
 
-/// Under Download update on Windows, why this Hex can't update itself and
+/// Under Download update on Windows, why this GoSpell can't update itself and
 /// what to do (#1352).
 pub(super) fn blocked(ui: &Ui, p: Paint) -> Option<El> {
     let view = ui.view.as_ref()?;

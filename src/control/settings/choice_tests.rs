@@ -131,7 +131,7 @@ fn every_choice_key_matches_its_enum_serde_names() {
                 serde_names(&MeetingRetention::ALL)
             }
             "meetings.default_policy" => serde_names(&MeetingPolicy::ALL),
-            "experimental.hex_microphone_mode" => {
+            "experimental.gospell_microphone_mode" => {
                 serde_names(&crate::audio::voice_filter::VoiceFilterMode::ALL)
             }
             "ui_language" => crate::desktop::i18n::LANGUAGE_CHOICES
@@ -141,9 +141,9 @@ fn every_choice_key_matches_its_enum_serde_names() {
             "transcription_device" => serde_names(&TranscriptionDevice::ALL),
             "indicator_position" => serde_names(&IndicatorPosition::ALL),
             "updates.channel" => serde_names(&UpdateChannel::ALL),
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             "capture.transcriber" => serde_names(&crate::app_settings::CaptureTranscriber::ALL),
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             "capture.capsule_flow" => serde_names(&crate::app_settings::CapsuleFlow::ALL),
             other => panic!(
                 "Kind::Choice key `{other}` is missing from every_choice_key_matches_its_enum_serde_names"

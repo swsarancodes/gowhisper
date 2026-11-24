@@ -1,4 +1,4 @@
-//! Shared typography, motion transitions, and the `"Hex is ready"` finale.
+//! Shared typography, motion transitions, and the `"GoSpell is ready"` finale.
 
 use rune::{El, Spring, SpringPair, TextStyle, Transition, col, el, row, text};
 use rune_kit::{Button, ButtonVariant};
@@ -7,7 +7,7 @@ use crate::desktop::i18n::tr;
 
 use super::super::controls::{KeySize, Paint, PushSize, key_tray, keycap};
 use super::fixture::Language;
-use super::hex_meter::{hex_logo, hex_meter};
+use super::gospell_meter::{gospell_logo, gospell_meter};
 use super::pill::{FLY, PILL};
 
 /// One display heading style across every onboarding step (`26 pt`, softened
@@ -144,7 +144,7 @@ pub(crate) fn keys(p: Paint, key: &str, caps: &[String], down: bool) -> El {
     )
 }
 
-/// Where Hex lives once onboarding closes, under `"Hex is ready"`.
+/// Where GoSpell lives once onboarding closes, under `"GoSpell is ready"`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Home {
     MenuBar,
@@ -165,20 +165,20 @@ impl Home {
     /// the computer's elsewhere.
     pub(super) fn ask_question(self) -> &'static str {
         match self {
-            Self::MenuBar => tr("Open Hex when your Mac starts?"),
-            Self::Tray | Self::Launcher => tr("Open Hex when your computer starts?"),
+            Self::MenuBar => tr("Open GoSpell when your Mac starts?"),
+            Self::Tray | Self::Launcher => tr("Open GoSpell when your computer starts?"),
         }
     }
 
     /// The ask once the login item is on.
     pub(super) fn ask_started(self) -> &'static str {
         match self {
-            Self::MenuBar => tr("Hex opens when your Mac starts."),
-            Self::Tray | Self::Launcher => tr("Hex opens when your computer starts."),
+            Self::MenuBar => tr("GoSpell opens when your Mac starts."),
+            Self::Tray | Self::Launcher => tr("GoSpell opens when your computer starts."),
         }
     }
 
-    /// The ask's line under the button: tiny, and asleep where Hex lives.
+    /// The ask's line under the button: tiny, and asleep where GoSpell lives.
     pub(super) fn ask_nap(self, toggle: bool) -> &'static str {
         match (self, toggle) {
             (Self::MenuBar, true) => {
@@ -203,9 +203,9 @@ impl Home {
     }
 }
 
-/// Final `"Hex is ready"` landing: the Hex logo builds outside in (its
+/// Final `"GoSpell is ready"` landing: the GoSpell logo builds outside in (its
 /// outline arriving from the top pill when `matched`), followed by
-/// staggered copy and where Hex lives. `age`: seconds since the page
+/// staggered copy and where GoSpell lives. `age`: seconds since the page
 /// appeared; `toggle`: the shortcut taps to start rather than holds.
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn ready(
@@ -218,7 +218,7 @@ pub(crate) fn ready(
     motion: Motion,
     home: Home,
 ) -> El {
-    let mark = hex_logo(p, "meter", 64.0, age, reduced, matched.is_some());
+    let mark = gospell_logo(p, "meter", 64.0, age, reduced, matched.is_some());
     let mark = match matched {
         Some(id) => el().key(id).matched(id).motion(FLY).child(mark),
         None => motion.staggered(mark.key("mark"), 0.0, 8.0),
@@ -235,7 +235,7 @@ pub(crate) fn ready(
                     .gap(10.0)
                     .items_center()
                     .child(
-                        text(tr("Hex is ready"))
+                        text(tr("GoSpell is ready"))
                             .key("title")
                             .font(title_font(p))
                             .color(p.text()),
@@ -283,7 +283,7 @@ pub(crate) fn around_keys(sentence: &str, tray: El, words: impl Fn(&str) -> El) 
         .collect()
 }
 
-/// Quiet capsule previewing the single-hexagon icon where Hex lives: the
+/// Quiet capsule previewing the GoML mark where GoSpell lives: the
 /// macOS menu bar, the Windows tray, or the Linux app launcher.
 fn menubar_hint(p: Paint, home: Home) -> El {
     let k = p.k;
@@ -296,7 +296,7 @@ fn menubar_hint(p: Paint, home: Home) -> El {
         .radius(15.0)
         .fill(k.c.surface_raised)
         .border(p.hair, k.c.border_weak)
-        .child(hex_meter(p, "menubar-hex", 14.0, 1.0, 1.0))
+        .child(gospell_meter(p, "menubar-gospell", 14.0, 1.0, 1.0))
         .child(el().key("sep").size(p.hair, 12.0).fill(k.c.border_base))
         .child(
             text(home.copy())

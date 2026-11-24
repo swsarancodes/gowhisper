@@ -5,9 +5,9 @@ word per line, sorted by UTF-8 bytes, with a trailing newline; only words the mo
 lines are the word alone; the others add a tab and the word's cost in eighths of a nat,
 round(8 ln(corpus / count)), as the model stores its words', so a rare word costs what it is.
 
-    python3 build-valid-words.py en scowl-2020.12.07.tar.gz en.hextm en.valid
-    python3 build-valid-words.py {es|de|fr|it} MODEL.hextm WORKDIR OUTPUT.valid [MIN_COUNT]
-    python3 build-valid-words.py nb MODEL.hextm WORKDIR OUTPUT.valid [MIN_COUNT]
+    python3 build-valid-words.py en scowl-2020.12.07.tar.gz en.gospelltm en.valid
+    python3 build-valid-words.py {es|de|fr|it} MODEL.gospelltm WORKDIR OUTPUT.valid [MIN_COUNT]
+    python3 build-valid-words.py nb MODEL.gospelltm WORKDIR OUTPUT.valid [MIN_COUNT]
 
 English: SCOWL spellings, sizes through 70. Spanish, German, French and Italian: Google Books Ngram
 v3 1-grams (2020-02-17, CC BY 3.0), 1980-2019, as build-capitals.py counts them into

@@ -1,6 +1,6 @@
 //! Apple's voice processing as dictation's microphone (macOS, Labs › Voice
 //! isolation). AVAudioEngine's input runs as a duplex voice-processing unit,
-//! so macOS's Control Center offers Voice Isolation for Hex, and its tap
+//! so macOS's Control Center offers Voice Isolation for GoSpell, and its tap
 //! delivers mono float samples on the same capture clock as cpal's streams.
 //!
 //! The Swift half is `src/voice_processing.swift`. It resolves the cpal
@@ -17,7 +17,7 @@ use std::sync::mpsc::{self, Receiver, Sender, SyncSender};
 
 use color_eyre::eyre::{Result, eyre};
 
-use super::hex_microphone::{CaptureFeed, CaptureFeedSwitch, capture_feed};
+use super::gospell_microphone::{CaptureFeed, CaptureFeedSwitch, capture_feed};
 use super::instant::{CaptureInstant, duration_for_frames};
 use super::stream::StreamError;
 
@@ -33,7 +33,7 @@ unsafe extern "C" {
     /// connected, and its tap installed, without starting the engine yet.
     /// Answers a retained handle, the capture rate and channel count, or null
     /// with a message in `error`.
-    fn hex_voice_processing_start(
+    fn gospell_voice_processing_start(
         device_uid: *const c_char,
         callback: TapCallback,
         error_callback: ErrorCallback,
@@ -44,10 +44,10 @@ unsafe extern "C" {
     ) -> *mut c_void;
     /// Starts the engine behind `handle` and verifies its device; 0 on
     /// success, else a message in `error`.
-    fn hex_voice_processing_begin(handle: *mut c_void, error: *mut *mut c_char) -> i32;
+    fn gospell_voice_processing_begin(handle: *mut c_void, error: *mut *mut c_char) -> i32;
     /// Removes the tap, stops the engine, and releases `handle`.
-    fn hex_voice_processing_stop(handle: *mut c_void);
-    fn hex_voice_processing_free_string(string: *mut c_char);
+    fn gospell_voice_processing_stop(handle: *mut c_void);
+    fn gospell_voice_processing_free_string(string: *mut c_char);
 }
 
 /// A running voice-processing stream; dropping it stops the engine.
@@ -79,7 +79,7 @@ pub(super) struct StartedVoiceProcessing {
     pub(super) stream: VoiceProcessingStream,
     pub(super) chunks: Receiver<(Vec<f32>, CaptureInstant)>,
     pub(super) stream_errors: Receiver<StreamError>,
-    pub(super) hex_microphone: CaptureFeedSwitch,
+    pub(super) gospell_microphone: CaptureFeedSwitch,
     pub(super) sample_rate: u32,
     pub(super) channels: u32,
 }
@@ -103,7 +103,7 @@ pub(super) fn start(device_uid: &str) -> Result<StartedVoiceProcessing> {
     // stays alive until the stream stops; the rate, channel, and error
     // pointers are valid for the call.
     let handle = unsafe {
-        hex_voice_processing_start(
+        gospell_voice_processing_start(
             uid.as_ptr(),
             deliver,
             report_error,
@@ -126,14 +126,14 @@ pub(super) fn start(device_uid: &str) -> Result<StartedVoiceProcessing> {
         // SAFETY: the handle owns the Swift capture, and the engine has not
         // started, so its tap cannot be running; both can be released here.
         unsafe {
-            hex_voice_processing_stop(handle);
+            gospell_voice_processing_stop(handle);
             drop(Box::from_raw(context));
         }
         return Err(eyre!(
             "voice processing reported an unusable format: {sample_rate} Hz, {channels} channels"
         ));
     }
-    let (feed, hex_microphone) = capture_feed(rate);
+    let (feed, gospell_microphone) = capture_feed(rate);
     // SAFETY: the engine has not started, so its installed tap cannot be
     // reading the context; and the context is the one this call owns.
     unsafe {
@@ -143,7 +143,7 @@ pub(super) fn start(device_uid: &str) -> Result<StartedVoiceProcessing> {
     }
     // SAFETY: `handle` is the retained capture this call owns, and `error`
     // answers an owned message when the begin fails.
-    let started = unsafe { hex_voice_processing_begin(handle, &mut error) };
+    let started = unsafe { gospell_voice_processing_begin(handle, &mut error) };
     if started != 0 {
         // SAFETY: the begin may have failed after starting the engine, so the
         // retained handle still owns its tap and engine to clean up.
@@ -151,7 +151,7 @@ pub(super) fn start(device_uid: &str) -> Result<StartedVoiceProcessing> {
         // SAFETY: the handle and context are this call's, and no tap can run
         // after the stop removes it.
         unsafe {
-            hex_voice_processing_stop(handle);
+            gospell_voice_processing_stop(handle);
             drop(Box::from_raw(context));
         }
         return Err(eyre!("voice processing would not start: {message}"));
@@ -160,7 +160,7 @@ pub(super) fn start(device_uid: &str) -> Result<StartedVoiceProcessing> {
         stream: VoiceProcessingStream { handle, context },
         chunks,
         stream_errors,
-        hex_microphone,
+        gospell_microphone,
         sample_rate: rate,
         channels,
     })
@@ -177,7 +177,7 @@ unsafe fn take_error(error: *mut c_char) -> String {
         .into_owned();
     // SAFETY: the bridge allocated the string with strdup, so free releases
     // it through the same allocator and this call no longer uses it.
-    unsafe { hex_voice_processing_free_string(error) };
+    unsafe { gospell_voice_processing_free_string(error) };
     message
 }
 
@@ -244,7 +244,7 @@ impl Drop for VoiceProcessingStream {
         // before it returns. Only then is the context freed, so no tap or
         // configuration callback can be running or start afterwards.
         unsafe {
-            hex_voice_processing_stop(self.handle);
+            gospell_voice_processing_stop(self.handle);
             drop(Box::from_raw(self.context));
         }
     }

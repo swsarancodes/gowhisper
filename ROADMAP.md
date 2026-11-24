@@ -1,6 +1,6 @@
 # Roadmap
 
-Hex ships the macOS product loop: configurable hold-to-talk local dictation,
+GoSpell ships the macOS product loop: configurable hold-to-talk local dictation,
 optional context-aware OpenCode post-processing, a Metal HUD, bounded paste
 workers, settings, and a signed app bundle. Meetings (beta) is a
 persisted opt-in (`meetings.enabled`, default off). Windows (x64 and ARM64) and
@@ -10,7 +10,7 @@ updates; they do not yet include meetings. Nix packaging for
 Linux is implemented and awaiting supported-host validation before release.
 The authenticated local transcription service now implements discovery,
 direct-child embedding, model preparation, and bounded host-audio transcription;
-`@kitlangton/hex@0.3.0` publishes ready transcribers through Promise and Effect
+`@goml/gospell@0.3.0` publishes ready transcribers through Promise and Effect
 entrypoints. Local Electron capture and native transcription have been exercised;
 signed helper packaging and a signed first-consumer integration remain. Follow the
 [embedded desktop delivery plan](docs/plans/typescript-sdk.md); Apple Silicon
@@ -43,7 +43,7 @@ owns Microphone, Accessibility, and Automation permissions.
 ## Finish Settings And First-Run Health
 
 Later, split features from settings into two windows (Kit, 2026-10-24; deferred
-in favour of the one-window feature-owned panes): the Hex window keeps what you
+in favour of the one-window feature-owned panes): the GoSpell window keeps what you
 use, History and Meetings recordings, and a separate Settings window (⌘, and
 the menu bar's Settings…) holds General, Modes,
 Meetings settings, and Experiments.
@@ -64,8 +64,8 @@ Keep Swift and Rust separate. Prefer the old app's existing Sparkle update windo
 with a website-only informational item to install the new app manually, with no
 data import or automatic replacement.
 Follow [`docs/plans/swift-app-handoff.md`](docs/plans/swift-app-handoff.md).
-The new app uses identity `com.kitlangton.hex2`, display name `Hex`, and filename
-`Hex.app`, with data in `hex`. Use Kit's approved
+The new app uses identity `com.goml.gospell`, display name `GoSpell`, and filename
+`GoSpell.app`, with data in `gospell`. Use Kit's approved
 Developer ID signing team and validate the new identity before release. The legacy
 S3 feed must never install a Rust payload. Publish
 the updated Rust artifact first, then the separately validated legacy feed notice.
@@ -83,9 +83,9 @@ without stopping accepted work. Linux no longer uses a tray.
 Keep app-managed updates limited to the user-local direct-install layout. A
 future Arch package must leave updates to the package manager. Nix owns its
 packaged installation and optional Home Manager service. Validate the Wayland
-beta on a compatible compositor with physical portal shortcuts, the `hex`
+beta on a compatible compositor with physical portal shortcuts, the `gospell`
 commands bound in a desktop without the portal, microphone, foreground paste,
-click-through HUD, and window close leaving the process running while `hex quit`
+click-through HUD, and window close leaving the process running while `gospell quit`
 drains and exits. See [`docs/plans/linux.md`](docs/plans/linux.md). Add
 context, meetings, or broader Wayland support only as explicit later capability
 slices.
@@ -150,30 +150,30 @@ with cold-microphone capture, before calling #77 done.
 
 Track the remaining shortcut requests explicitly:
 
-- [#82](https://github.com/anomalyco/hex/issues/82): menu-bar Pause/Resume ships
+- [#82](https://github.com/goml/gospell/issues/82): menu-bar Pause/Resume ships
   as the `pause-menu` Lab ([labs.md](docs/features/labs.md)), off by default.
   It suspends every capture shortcut and the secure-input Carbon hotkeys, passes
   every key event through, cancels only active capture, keeps accepted output,
   and requires a neutral keyboard before shortcuts go live again. App exclusions
   (pausing only in chosen apps) are a later slice.
-- [#77](https://github.com/anomalyco/hex/issues/77): Toggle mode is implemented;
+- [#77](https://github.com/goml/gospell/issues/77): Toggle mode is implemented;
   it still needs physical chord-discard and cold-microphone checks.
-- [#67](https://github.com/anomalyco/hex/issues/67): standalone keypad/character
+- [#67](https://github.com/goml/gospell/issues/67): standalone keypad/character
   bindings need explicit key-consumption, cancellation, and rebinding semantics.
-- [#37](https://github.com/anomalyco/hex/issues/37): Caps Lock remapped to
+- [#37](https://github.com/goml/gospell/issues/37): Caps Lock remapped to
   Control is read through a raw HID modifier tracker below macOS's keyboard
   filter, so a Right Control shortcut no longer starts from it while Either
   still does; the shortcut recorder applies the same normalization while the
-  listener's input monitor is running. Hex never requests Input Monitoring:
-  the tracker runs only when Hex already has it (turn Hex on under System
-  Settings › Privacy & Security › Input Monitoring and restart Hex), skips
+  listener's input monitor is running. GoSpell never requests Input Monitoring:
+  the tracker runs only when GoSpell already has it (turn GoSpell on under System
+  Settings › Privacy & Security › Input Monitoring and restart GoSpell), skips
   itself otherwise, and gives up rather than delay listener startup. Without
   it, Right Control still starts from a remapped Caps Lock, and correctness
   depends on the raw Caps Lock callback arriving before its flags event, which
   is unproven. Needs a physical remap run on hardware. CI covers constructed
   HID snapshots only.
 
-On-demand rewrite [PR #63](https://github.com/anomalyco/hex/pull/63) remains under
+On-demand rewrite [PR #63](https://github.com/goml/gospell/pull/63) remains under
 review: publish the shared last transcript only after successful paste, require
 explicit shortcut opt-in, prove generation while automatic processing is off at
 the generation boundary, and reuse the isolated native keyboard test harness.
@@ -202,7 +202,7 @@ pressure, and action failures. Recommendations may propose command-taxonomy
 changes but must not mutate compiled configuration automatically.
 
 Authenticated developer control now rides the existing loopback API through the
-debug-only `hex dev` subcommand: it inspects app state, drives semantic HUD
+debug-only `gospell dev` subcommand: it inspects app state, drives semantic HUD
 scenarios, opens/focuses panes, and toggles command mode.
 Extend the same bounded typed channel with fixture-audio capture, microphone
 recovery, model switching, permission snapshots, deterministic screenshots,
@@ -242,7 +242,7 @@ and the menu-bar recording state already exist; do not replace them.
 
 Search over titles, notes, and final transcripts, scrolling, and follow-live
 are implemented. Echo suppression is tuned on one real speaker-mode call
-(`hex meeting echo <dir>`); validate it on more rooms, volumes, and
+(`gospell meeting echo <dir>`); validate it on more rooms, volumes, and
 headphones, and record capture arrival times so offline replays need no
 `--microphone-offset-ms`.
 
@@ -254,11 +254,11 @@ noise suppression to the transcribed track, runs a second voice processor
 beside the call app's, and drops ScreenCaptureKit's shared capture clock. Revisit
 only if signal-level suppression proves insufficient, with a per-device opt-in.
 
-`hex mcp` serves meetings to agents read-only over stdio (full-text BM25
+`gospell mcp` serves meetings to agents read-only over stdio (full-text BM25
 with stemming and fuzzy matching, transcripts, stored notes). Next: on-device
 semantic search only when full-text misses real paraphrased queries
 (NaturalLanguage embeddings through a Swift bridge, cached under
-`~/Library/Caches/hex/meeting-index`), EventKit attendees in
+`~/Library/Caches/gospell/meeting-index`), EventKit attendees in
 `list_meetings`, and a one-shot Granola CSV import
 ([granola-import.md](docs/plans/granola-import.md)). Keep it a CLI subcommand;
 the npm-package guidance above applies only to a developer-control wrapper.
@@ -285,8 +285,8 @@ hint never switches or downloads anything itself.
 ## Shared Engine Service
 
 Later, not started. Move the engine into a launchd service
-(`anomaly.hex.engine`) serving the same `/streams` and `/transcriptions` API;
-the Hex UI becomes a client. Today the running app serves
+(`com.goml.gospell.engine`) serving the same `/streams` and `/transcriptions` API;
+the GoSpell UI becomes a client. Today the running app serves
 [`/streams`](docs/streams.md) on dictation's loaded model, with dictation
 first; the service keeps that contract, so stream clients such as Seer don't
 change.
@@ -303,9 +303,9 @@ used it on a real Mac:
 - A self-timer before the shot.
 - Pin a shot to the screen as a floating window.
 
-## Grow Hex Mobile (iOS)
+## Grow GoSpell Mobile (iOS)
 
-Hex Mobile is in TestFlight with an on-device dictation keyboard. These are the
+GoSpell Mobile is in TestFlight with an on-device dictation keyboard. These are the
 larger asks from testers (X replies and TestFlight feedback, Nov 2026) that
 aren't being built yet. Everything stays on device and commercially safe.
 
@@ -318,7 +318,7 @@ aren't being built yet. Everything stays on device and commercially safe.
   in light and dark.
 - **GIFs:** only with a design that keeps the keyboard offline by default,
   such as an opt-in search the user starts.
-- **Choose the speech model:** pick between the local models Hex supports
+- **Choose the speech model:** pick between the local models GoSpell supports
   (Apple Speech, Parakeet). No cloud models.
 - **Grammar-aware autocorrect:** use the whole phrase, not just the word, beyond
   the its/it's and their/they're pairs.
@@ -327,12 +327,12 @@ aren't being built yet. Everything stays on device and commercially safe.
 - **Interface languages:** translate the app into Ukrainian and more, with help
   from testers who offered.
 - **Start dictating on switch:** the Dictation bar can start recording when you
-  switch to Hex (built as an Experiment, `ios-dictation-bar-autostart`); needs
+  switch to GoSpell (built as an Experiment, `ios-dictation-bar-autostart`); needs
   real-iPhone checks before it ships.
 
 ## Deliberate Deferrals
 
-Do not generalize the `~/.config/hex` TypeScript transformation config into a
+Do not generalize the `~/.config/gospell` TypeScript transformation config into a
 plugin framework.
 
 Do not generalize the concrete macOS and Linux X11 adapters into a platform

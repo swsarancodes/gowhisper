@@ -49,7 +49,7 @@ const IDLE_RELEASED_WAIT: Duration = Duration::from_millis(50);
 static LISTENER: Mutex<Option<thread::Thread>> = Mutex::new(None);
 
 /// Ends the listener's idle wait at once: the keyboard hook calls it for
-/// each shortcut event, and the tray and `hex` commands after sending one.
+/// each shortcut event, and the tray and `gospell` commands after sending one.
 pub fn wake() {
     if let Some(listener) = LISTENER
         .lock()
@@ -71,7 +71,7 @@ struct Job {
     /// The shortcut that started this capture (dictation, raw, terminal
     /// paste, or second dictation).
     flavour: crate::dictation::DictationFlavour,
-    /// `hex dictation stop --print`: the text goes here, never pasted.
+    /// `gospell dictation stop --print`: the text goes here, never pasted.
     print: Option<PrintReply>,
     /// A physical dictation shortcut, not a control or API request.
     by_shortcut: bool,
@@ -147,7 +147,7 @@ pub struct WindowsDictationConfig {
     pub dictations: DictationQueue,
 }
 
-/// A request from outside the keyboard hook, from the tray or a `hex`
+/// A request from outside the keyboard hook, from the tray or a `gospell`
 /// command (`crate::control::host`), handled as its shortcut would be.
 #[derive(Debug)]
 pub enum ListenerCommand {
@@ -157,7 +157,7 @@ pub enum ListenerCommand {
         raw: bool,
     },
     PasteLast,
-    /// `hex dictation stop --print`.
+    /// `gospell dictation stop --print`.
     StopAndPrint(PrintReply),
 }
 
@@ -359,7 +359,7 @@ pub fn run(
     })?;
     emit_state(&mut events, VoiceState::Listening, &device_label)?;
     println!(
-        "Hex is ready on {}. Hold {} to dictate, release to paste; Ctrl-C stops.",
+        "GoSpell is ready on {}. Hold {} to dictate, release to paste; Ctrl-C stops.",
         device_label, hotkey_label
     );
 
@@ -487,7 +487,7 @@ pub fn run(
                         Some(host) => host.control(action, &timeline),
                         None => crate::control::ControlReply::error(
                             "feature-off",
-                            "Annotate is off; turn it on with `hex settings set capture.enabled on`",
+                            "Annotate is off; turn it on with `gospell settings set capture.enabled on`",
                         ),
                     });
                     continue;
@@ -626,7 +626,7 @@ pub fn run(
         for (id, result) in service_finished.try_iter() {
             service.complete(id, result);
         }
-        // A tray or `hex` command acts as its shortcut would, at once; a
+        // A tray or `gospell` command acts as its shortcut would, at once; a
         // printing stop's reply rides with the capture it finishes.
         let mut print = None;
         while !phase.is_finishing()
@@ -647,7 +647,7 @@ pub fn run(
                 None
             };
             match action {
-                // A client's dictation records: the shortcut and `hex
+                // A client's dictation records: the shortcut and `gospell
                 // dictation` neither start nor end anything.
                 HotkeyAction::Start | HotkeyAction::Finish | HotkeyAction::Cancel
                     if service.is_active() => {}
@@ -688,7 +688,7 @@ pub fn run(
                             occurred_at,
                             crate::dictation::hotkey_pre_roll(while_dictating),
                         );
-                        // A toggle press or a `hex` command is deliberate, so
+                        // A toggle press or a `gospell` command is deliberate, so
                         // it streams at once.
                         let feedback_started = toggle_mode || deliberate;
                         if feedback_started {

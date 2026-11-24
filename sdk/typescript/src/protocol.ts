@@ -1,4 +1,4 @@
-import { HexError } from "./errors.js"
+import { GoSpellError } from "./errors.js"
 import type {
   Capabilities,
   DictationLevel,
@@ -38,13 +38,13 @@ const number = (value: unknown): number | undefined =>
   typeof value === "number" && Number.isFinite(value) ? value : undefined
 
 const invalid = (description: string): never => {
-  throw new HexError("invalid-response", `HEX returned an invalid ${description}`)
+  throw new GoSpellError("invalid-response", `GOSPELL returned an invalid ${description}`)
 }
 
 const incompatibleApi = (apiVersion: unknown): never => {
-  throw new HexError(
+  throw new GoSpellError(
     "incompatible-api",
-    `HEX local API ${String(apiVersion ?? "unknown")} is incompatible with client API 2; install a matching HEX app`,
+    `GOSPELL local API ${String(apiVersion ?? "unknown")} is incompatible with client API 2; install a matching GOSPELL app`,
   )
 }
 
@@ -53,7 +53,7 @@ export const decodeEndpoint = (line: string): EmbeddedEndpoint => {
   try {
     value = JSON.parse(line)
   } catch (cause) {
-    throw new HexError("invalid-handshake", "HEX returned malformed startup JSON", { cause })
+    throw new GoSpellError("invalid-handshake", "GOSPELL returned malformed startup JSON", { cause })
   }
   return decodeEndpointValue(value)
 }
@@ -75,16 +75,16 @@ export const decodeEndpointValue = (value: unknown): EmbeddedEndpoint => {
     || !Number.isInteger(pid)
     || pid <= 0
   ) {
-    throw new HexError("invalid-handshake", "HEX returned an invalid startup handshake")
+    throw new GoSpellError("invalid-handshake", "GOSPELL returned an invalid startup handshake")
   }
   let parsed: URL
   try {
     parsed = new URL(url)
   } catch (cause) {
-    throw new HexError("invalid-handshake", "HEX returned an invalid service URL", { cause })
+    throw new GoSpellError("invalid-handshake", "GOSPELL returned an invalid service URL", { cause })
   }
   if (parsed.protocol !== "http:" || parsed.hostname !== "127.0.0.1" || parsed.username || parsed.password) {
-    throw new HexError("invalid-handshake", "HEX service URL is not an authenticated loopback endpoint")
+    throw new GoSpellError("invalid-handshake", "GOSPELL service URL is not an authenticated loopback endpoint")
   }
   return { type: "ready", url, token, apiVersion: "2", pid }
 }
@@ -279,7 +279,7 @@ export const decodeProgress = (value: unknown): ModelProgress | "ok" => {
       const error = record(input.error)
       const code = error && string(error.code)
       const message = error && string(error.message)
-      throw new HexError("model-prepare-failed", message ?? "HEX could not prepare the model", {
+      throw new GoSpellError("model-prepare-failed", message ?? "GOSPELL could not prepare the model", {
         ...(code === undefined ? {} : { remoteCode: code }),
       })
     }

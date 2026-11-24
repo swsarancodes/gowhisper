@@ -53,8 +53,8 @@ const TITLE_RETRY_MS: u64 = 60_000;
 const MAX_TITLE_ATTEMPTS: u8 = 3;
 const TITLE_CHECK_INTERVAL: Duration = Duration::from_secs(10);
 
-pub(super) const NOTES_START: &str = "<!-- hex:notes -->";
-pub(super) const NOTES_END: &str = "<!-- /hex:notes -->";
+pub(super) const NOTES_START: &str = "<!-- gospell:notes -->";
+pub(super) const NOTES_END: &str = "<!-- /gospell:notes -->";
 
 const NOTES_INSTRUCTIONS: &str = "You title and summarize meeting transcripts. Each line starts \
 with a timestamp and a speaker label: You is the person who recorded the meeting, and Them is \
@@ -88,7 +88,7 @@ pub struct MeetingNotes {
     #[serde(default)]
     pub transcript_chars: usize,
     /// The writer, and for OpenCode its `provider/model`. Notes written
-    /// before Hex recorded it have none.
+    /// before GoSpell recorded it have none.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub written_by: Option<NotesWriter>,
 }
@@ -657,7 +657,7 @@ pub(super) fn provisional_title(
     Ok(title)
 }
 
-/// Rewrites only Hex's parts of the Markdown: the heading when it still
+/// Rewrites only GoSpell's parts of the Markdown: the heading when it still
 /// reads `previous_title`, and the notes block between its markers (inserted
 /// above `## Transcript` the first time). Everything else is preserved.
 pub(super) fn apply_notes(
@@ -779,9 +779,9 @@ fn apply_notes_to_export(
 }
 
 /// The file is replaced atomically, and only if nothing changed it meanwhile.
-/// `written` is the SHA-256 of the copy Hex last wrote; it follows the
+/// `written` is the SHA-256 of the copy GoSpell last wrote; it follows the
 /// rewrite only while the file was still that copy, so a file the user
-/// edited never becomes Hex's to expire.
+/// edited never becomes GoSpell's to expire.
 fn rewrite_markdown_file(
     path: &Path,
     written: &mut Option<String>,
@@ -1007,7 +1007,7 @@ pub(super) fn entries_from_markdown(markdown: &str) -> Vec<TranscriptEntry> {
 
 /// Runs the real model on a transcript file without recording anything:
 /// first the provisional title at the point a recording would ask for it,
-/// then the final title and summary. Debug CLI: `hex meeting summarize <path>`.
+/// then the final title and summary. Debug CLI: `gospell meeting summarize <path>`.
 #[cfg(debug_assertions)]
 pub fn summarize_file(path: &Path, excerpt_chars: Option<usize>) -> Result<String> {
     generator::available().map_err(|reason| eyre!("{reason}"))?;
@@ -1237,7 +1237,7 @@ mod tests {
             "Names and terms that may appear: Kubernetes, Ana Ruiz\n\nCalendar event: Q4 launch sync\nAttendees: Ana Ruiz\n\nMeeting transcript:\n\n[00:00] You: Turn 0"
         ));
 
-        // No terms: the prompt is the one Hex sent before.
+        // No terms: the prompt is the one GoSpell sent before.
         let mut without = Vec::new();
         summarize_with_calendar(
             &conversation(2),
@@ -1549,7 +1549,7 @@ mod tests {
 
         let without_transcript = "# Notes\n\nSome text";
         let appended = apply_notes(without_transcript, "Other", "Title", &block);
-        assert!(appended.starts_with("# Notes\n\nSome text\n\n<!-- hex:notes -->"));
+        assert!(appended.starts_with("# Notes\n\nSome text\n\n<!-- gospell:notes -->"));
     }
 
     fn manifest() -> MeetingManifest {
@@ -1642,7 +1642,7 @@ mod tests {
     #[test]
     fn notes_files_are_rewritten_in_place_only_when_unchanged() {
         let folder = std::env::temp_dir().join(format!(
-            "hex-meeting-notes-{}-{}",
+            "gospell-meeting-notes-{}-{}",
             std::process::id(),
             now_ms()
         ));
@@ -1668,7 +1668,7 @@ mod tests {
     #[test]
     fn notes_rename_the_export_only_with_descriptive_file_names() {
         let folder = std::env::temp_dir().join(format!(
-            "hex-meeting-notes-name-{}-{}",
+            "gospell-meeting-notes-name-{}-{}",
             std::process::id(),
             now_ms()
         ));

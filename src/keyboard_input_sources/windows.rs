@@ -1,6 +1,6 @@
 //! Keyboard layouts (HKLs) as input sources. Windows keeps a layout per
-//! thread, so the current source is the keyboard-focused window's, and Hex's
-//! own windows name none, so focusing one is not a change. Hex reads them
+//! thread, so the current source is the keyboard-focused window's, and GoSpell's
+//! own windows name none, so focusing one is not a change. GoSpell reads them
 //! only while keyboard model switching is on.
 
 use windows_sys::Win32::Foundation::HWND;
@@ -30,7 +30,7 @@ fn id(layout: HKL) -> String {
     source_id(layout as usize as u32)
 }
 
-/// The keyboard-focused window's layout; `None` while one of Hex's own
+/// The keyboard-focused window's layout; `None` while one of GoSpell's own
 /// windows has the focus, without a window, as on the lock screen, or for a
 /// console that reports none.
 pub(crate) fn current() -> Option<String> {
@@ -41,7 +41,7 @@ pub(crate) fn current() -> Option<String> {
         let mut process_id = 0;
         let thread = GetWindowThreadProcessId(window, &mut process_id);
         // A window destroyed in between owns no thread, and
-        // `GetKeyboardLayout(0)` would answer for Hex's own runtime thread.
+        // `GetKeyboardLayout(0)` would answer for GoSpell's own runtime thread.
         if thread == 0 {
             return None;
         }

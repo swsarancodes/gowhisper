@@ -5,6 +5,9 @@
 // (`sstep`) because `coverage` relies on descending edges, which WGSL leaves
 // to the backend.
 //
+// With the Embers look (`dot_scope::embers`, GoML's) the dot buffer holds
+// embers instead of a field, and done draws GoML's mark.
+//
 // The viewport is the HUD's window: the whole overlay, or the Sounds sheet's
 // stage in the Settings window. `uv` runs across it and `position` is the
 // pixel within it. A linear (sRGB-format) target gets the colours decoded.
@@ -105,6 +108,12 @@ struct DotUniforms {
     // the plate's middle the dots' middle sits, pt: a field held by one end
     // keeps its dots where they are while the plate widens between columns.
     ears: vec4f,
+    // 1 for the Embers look, the embers' count, then the GoML mark's pop
+    // scale and opacity.
+    embers: vec4f,
+    // Embers' done: the flash, seconds since the ripple left (below 0 for
+    // none), the mark's diameter, pt, and the embers' size scale.
+    finale: vec4f,
 }
 
 // The island grown out of the notch: a box hanging from the screen's top
@@ -217,7 +226,7 @@ fn ears(window_point: vec2f, island_shape: f32) -> vec4f {
     }
 
     // Trailing: the level bars, at rest with light running through them
-    // while Hex works.
+    // while GoSpell works.
     let trail = (window_point - vec2f(inset, middle_y)) / s;
     let profile = array<f32, 5>(0.5, 0.8, 1.0, 0.75, 0.55);
     let rate = array<f32, 5>(1.7, 2.3, 1.9, 2.6, 2.1);
@@ -238,6 +247,103 @@ fn ears(window_point: vec2f, island_shape: f32) -> vec4f {
     result *= u.opacity * room * island_shape;
     result.a += island_shape * (1.0 - result.a);
     return result;
+}
+
+// GoML's orange (`site/public/favicon.svg`, #FF8600).
+const GOML_ORANGE: vec3f = vec3f(1.0, 0.525, 0.0);
+
+// GoML's G-arrow in its 36-unit mark, y down (`dot_scope::embers`): the left
+// half of a ring, and the arrow with its stem and the ring's foot as one
+// polygon. Signed distance in mark units, negative inside.
+fn mark_arrow(p: vec2f) -> f32 {
+    var v = array<vec2f, 12>(
+        vec2f(16.6, 25.282), vec2f(18.2489, 25.2842), vec2f(23.2149, 20.316),
+        vec2f(23.4288, 20.1064), vec2f(14.4135, 20.1064), vec2f(14.4135, 15.8149),
+        vec2f(23.4288, 15.8149), vec2f(18.8382, 11.2243), vec2f(21.8724, 8.19014),
+        vec2f(31.6386, 17.9585), vec2f(20.0235, 29.5758), vec2f(16.6, 29.5758));
+    var d = dot(p - v[0], p - v[0]);
+    var s = 1.0;
+    var j = 11;
+    for (var i = 0; i < 12; i++) {
+        let e = v[j] - v[i];
+        let w = p - v[i];
+        let b = w - e * clamp(dot(w, e) / dot(e, e), 0.0, 1.0);
+        d = min(d, dot(b, b));
+        let c = vec3<bool>((p.y >= v[i].y), (p.y < v[j].y), (e.x * w.y > e.y * w.x));
+        if (all(c) || all(!c)) {
+            s = -s;
+        }
+        j = i;
+    }
+    return s * sqrt(d);
+}
+
+fn mark_g(p: vec2f) -> f32 {
+    let center = vec2f(17.15, 17.976);
+    // The ring's lower end reaches under the arrow's foot and the foot
+    // starts inside the ring, so no two edges meet inside the G.
+    let end = select(center.x, center.x + 0.75, p.y > center.y);
+    let ring = max(abs(length(p - center) - 9.4) - 2.2, p.x - end);
+    return min(ring, mark_arrow(p));
+}
+
+// Embers: each ember a white-hot core in a soft halo, added like light; the
+// done flash where they met and the ripple leaving it; then the GoML mark,
+// popping in with a bloom. `point` is in the plate's points.
+fn embers(result: ptr<function, vec4f>, point: vec2f, shape: f32, aa: f32) {
+    var light = vec3f(0.0);
+    let count = i32(u.embers.y + 0.5);
+    for (var i = 0; i < count; i++) {
+        let n = i * 2;
+        let place = dots[n / 4][n % 4];
+        let look = dots[(n + 1) / 4][(n + 1) % 4];
+        let brightness = f32(look >> 16u) / 65535.0 * 2.0;
+        if (brightness < 0.002) {
+            continue;
+        }
+        let center = vec2f(f32(place & 0xffffu), f32(place >> 16u)) / 64.0 - vec2f(512.0);
+        let radius = max(f32((look >> 8u) & 0xffu) / 255.0 * 4.0, 0.05);
+        let halo = max(radius * 2.4, 0.8);
+        let d = length(point - center);
+        if (d > 2.0 * halo + aa) {
+            continue;
+        }
+        let color = mix(u.base.rgb, u.core.rgb, f32(look & 0xffu) / 255.0);
+        light += color * brightness * (coverage(d - radius, aa) + 0.14 * exp(-(d * d) / (halo * halo)));
+    }
+    let size = max(u.finale.w, 0.01);
+    let from_middle = length(point);
+    if (u.finale.x > 0.001) {
+        let t = clamp(from_middle / (14.0 * size), 0.0, 1.0);
+        light += mix(u.core.rgb, u.base.rgb, sqrt(t)) * u.finale.x * (1.0 - t) * (1.0 - t) * 1.6;
+    }
+    let age = u.finale.y;
+    if (age >= 0.0) {
+        let outer = (6.5 + age * 38.0) * size;
+        let inner = (6.5 + age * 24.0) * size;
+        let fade_outer = clamp(1.0 - age / 0.9, 0.0, 1.0);
+        let fade_inner = 0.5 * clamp(1.0 - age / 0.7, 0.0, 1.0);
+        light += GOML_ORANGE * (fade_outer * coverage(abs(from_middle - outer) - 0.4 * size, aa)
+            + fade_inner * coverage(abs(from_middle - inner) - 0.28 * size, aa));
+    }
+    let peak = max(light.r, max(light.g, light.b));
+    if (peak > 0.0001) {
+        let alpha = min(peak, 1.0);
+        composite(result, min(light / alpha, vec3f(1.0)), alpha * shape);
+    }
+
+    let mark = u.embers.w;
+    if (mark > 0.001) {
+        let scale = max(u.embers.z, 0.01);
+        let diameter = u.finale.z;
+        let q = point / scale;
+        let disc = length(q) - diameter * 0.5;
+        let bloom = 0.32 * exp(-max(disc, 0.0) / (diameter * 0.16));
+        composite(result, GOML_ORANGE, mark * bloom * shape);
+        composite(result, GOML_ORANGE, mark * coverage(disc * scale, aa) * shape);
+        let g = mark_g(q * (36.0 / diameter) + vec2f(18.0)) * (diameter / 36.0) * scale;
+        composite(result, vec3f(1.0), mark * coverage(g, aa) * shape);
+    }
 }
 
 // `var<immediate> u: DotUniforms;` on a device with immediates
@@ -282,6 +388,17 @@ fn dot_scope_fragment(in: Varyings) -> @location(0) vec4f {
         composite(&result, u.shadow.rgb, u.shadow.a * (0.5 - 0.5 * tanh(shadow_distance / 6.5)));
         composite(&result, u.plate.rgb, u.plate.a * shape);
         composite(&result, u.rim.rgb, u.rim.a * coverage(abs(distance) - 0.3, aa));
+    }
+
+    if (u.embers.x > 0.5) {
+        if (shape > 0.0005) {
+            embers(&result, point, shape, aa);
+        }
+        result *= u.opacity;
+        if (in_island) {
+            result.a += island_shape * (1.0 - result.a);
+        }
+        return for_target(dithered(result, position));
     }
 
     if (!dots_only && u.glow > 0.01) {

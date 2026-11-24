@@ -10,9 +10,9 @@ use crate::desktop::onboarding::Step;
 
 /// Every onboarding state a person can see, on macOS and on Linux and
 /// Windows. An intentional change refreshes these goldens in the same PR
-/// (`HEX_UPDATE_GOLDENS=1`).
+/// (`GOSPELL_UPDATE_GOLDENS=1`).
 pub(super) const SCENES: &[&str] = &[
-    // A fresh install: setting up Hex, the recommended model downloading.
+    // A fresh install: setting up GoSpell, the recommended model downloading.
     "onboarding",
     "mac-onboarding",
     // The download stopped; Continue without a model, then Settings.
@@ -43,7 +43,7 @@ pub(super) const SCENES: &[&str] = &[
     "onboarding-try",
     "mac-onboarding-try",
     "mac-onboarding-reopen",
-    // Hex is ready.
+    // GoSpell is ready.
     "onboarding-ready",
     "mac-onboarding-ready",
 ];
@@ -59,7 +59,7 @@ const OPTIONAL: &[&str] = &[
 
 /// Skip shows only on the optional pages, the demo and the practice, and
 /// passes over them to the next step setup still needs: permissions, then
-/// the model, else Hex is ready. It never closes onboarding.
+/// the model, else GoSpell is ready. It never closes onboarding.
 #[test]
 fn onboarding_skip() {
     for scene in SCENES {
@@ -94,7 +94,7 @@ fn onboarding_skip() {
     let mut rt = runtime("onboarding-demo", true, PANE_SIZE);
     skip(&mut rt, "onboarding-demo", Page::Waiting);
 
-    // Nothing left to set up: the demo and the practice skip to Hex is ready.
+    // Nothing left to set up: the demo and the practice skip to GoSpell is ready.
     let mut rt = runtime("onboarding-demo", true, PANE_SIZE);
     rt.update(|ui, tx| {
         ui.picker.installed = Some(vec![ui.settings.transcription.model]);
@@ -141,7 +141,7 @@ fn onboarding_continue_without_model() {
         "Add model file…"
     );
     assert!(
-        texts(&rt).contains(&"Hex can't dictate until a speech model is installed".to_owned()),
+        texts(&rt).contains(&"GoSpell can't dictate until a speech model is installed".to_owned()),
         "the status says so too"
     );
 
@@ -276,10 +276,10 @@ fn onboarding_goldens() {
 }
 
 /// A first run on Linux or Windows, in the clean data folder
-/// `HEX_APPLICATION_SUPPORT_DIR` names (no settings, no models, an empty
+/// `GOSPELL_APPLICATION_SUPPORT_DIR` names (no settings, no models, an empty
 /// Hugging Face cache): the real settings load, the real decision to open
 /// onboarding, the real download and verification of the model it picks,
-/// and every page to Hex is ready. Downloads the recommended model, so only
+/// and every page to GoSpell is ready. Downloads the recommended model, so only
 /// scripts/check-onboarding.sh runs it. The window here is a fixture, not
 /// connected to a service: the test does the service's download itself,
 /// plays the story on its own clock, and nothing writes the completion
@@ -289,8 +289,8 @@ fn onboarding_goldens() {
 fn onboarding_walkthrough() {
     let support = crate::app_paths::support_dir().unwrap();
     assert!(
-        std::env::var_os("HEX_APPLICATION_SUPPORT_DIR").is_some(),
-        "set HEX_APPLICATION_SUPPORT_DIR to a clean folder"
+        std::env::var_os("GOSPELL_APPLICATION_SUPPORT_DIR").is_some(),
+        "set GOSPELL_APPLICATION_SUPPORT_DIR to a clean folder"
     );
     assert!(
         std::fs::read_dir(&support).map_or(true, |mut entries| entries.next().is_none()),
@@ -326,13 +326,16 @@ fn onboarding_walkthrough() {
     let mut rt = runtime_for(ui, true, PANE_SIZE);
     let step = |rt: &Runtime<Ui>| rt.state.tour.as_ref().map(|tour| tour.flow.step());
     let shown = texts(&rt);
-    assert!(shown.contains(&"Setting up Hex".to_owned()), "{shown:?}");
+    assert!(
+        shown.contains(&"Setting up GoSpell".to_owned()),
+        "{shown:?}"
+    );
     assert!(
         !shown.contains(&"Choose a speech model".to_owned()),
         "nothing found, so no model step"
     );
 
-    // Setting up Hex asks the service for the recommended model at once.
+    // Setting up GoSpell asks the service for the recommended model at once.
     assert_eq!(step(&rt), Some(Step::Setup));
     let (model, language) = match sent(&rt) {
         [Request::ChooseModel { model, language }] => (*model, language.clone()),
@@ -363,27 +366,30 @@ fn onboarding_walkthrough() {
     );
     rt.state.picker.installed = Some(vec![model]);
 
-    // The story plays on: the demo, then the practice game ("With Hex")
-    // once the model is ready, then Hex is ready.
+    // The story plays on: the demo, then the practice game ("With GoSpell")
+    // once the model is ready, then GoSpell is ready.
     settle(&mut rt);
     rt.update(|ui, _| super::super::onboarding_kit::live::fixture_resume(ui, Page::Try));
     settle(&mut rt);
     assert_eq!(step(&rt), Some(Step::TryIt));
-    assert!(texts(&rt).contains(&"With Hex".to_owned()));
+    assert!(texts(&rt).contains(&"With GoSpell".to_owned()));
     assert!(rt.find("skip").is_some(), "Skip shows on the practice too");
     tap(&mut rt, "done");
-    assert!(texts(&rt).contains(&"Hex is ready".to_owned()));
-    tap(&mut rt, "start-using-hex");
-    assert!(rt.state.tour.is_none(), "Start using Hex closes onboarding");
+    assert!(texts(&rt).contains(&"GoSpell is ready".to_owned()));
+    tap(&mut rt, "start-using-gospell");
+    assert!(
+        rt.state.tour.is_none(),
+        "Start using GoSpell closes onboarding"
+    );
     assert!(rt.state.first_run.is_none());
     println!(
-        "onboarding walkthrough: Setting up Hex -> {} downloaded ({} bytes) -> Your turn -> Hex is ready",
+        "onboarding walkthrough: Setting up GoSpell -> {} downloaded ({} bytes) -> Your turn -> GoSpell is ready",
         definition.name,
         downloaded.load(std::sync::atomic::Ordering::Relaxed)
     );
 }
 
-/// The practice and Hex is ready speak the interface language, the
+/// The practice and GoSpell is ready speak the interface language, the
 /// shortcut's keycaps sitting where the translation puts `{keys}`.
 #[test]
 fn the_practice_and_ready_pages_are_translated() {
@@ -401,7 +407,7 @@ fn the_practice_and_ready_pages_are_translated() {
         "anywhere, then talk.",
         "to answer",
         "Keyboard mode",
-        "Hex is ready",
+        "GoSpell is ready",
     ];
     for (scene, expected) in [
         (
@@ -430,7 +436,7 @@ fn the_practice_and_ready_pages_are_translated() {
 }
 
 /// A shortcut that didn't start leaves only the way out: no hold prompt or
-/// idle pill inviting a press that does nothing, and one Reopen Hex.
+/// idle pill inviting a press that does nothing, and one Reopen GoSpell.
 #[test]
 fn a_shortcut_that_did_not_start_shows_only_reopen() {
     let rt = runtime("mac-onboarding-reopen", true, PANE_SIZE);
@@ -445,13 +451,15 @@ fn a_shortcut_that_did_not_start_shows_only_reopen() {
     assert_eq!(
         rt.elements()
             .iter()
-            .filter(|e| !e.exiting && e.path.ends_with("/reopen-hex"))
+            .filter(|e| !e.exiting && e.path.ends_with("/reopen-gospell"))
             .count(),
         1,
-        "one Reopen Hex"
+        "one Reopen GoSpell"
     );
     assert!(
-        shown.iter().any(|t| t == "Hex's shortcut didn't start."),
+        shown
+            .iter()
+            .any(|t| t == "GoSpell's shortcut didn't start."),
         "{shown:?}"
     );
 }
@@ -490,7 +498,7 @@ fn the_login_ask_speaks_each_platforms_wording() {
 
     let mac = texts(&runtime("mac-onboarding-ready", true, PANE_SIZE));
     assert!(
-        mac.contains(&"Open Hex when your Mac starts?".to_owned()),
+        mac.contains(&"Open GoSpell when your Mac starts?".to_owned()),
         "{mac:?}"
     );
     assert!(
@@ -509,7 +517,7 @@ fn the_login_ask_speaks_each_platforms_wording() {
                 PANE_SIZE,
             ));
             assert!(
-                off.contains(&"Open Hex when your computer starts?".to_owned()),
+                off.contains(&"Open GoSpell when your computer starts?".to_owned()),
                 "{caps:?}: {off:?}"
             );
             assert!(
@@ -531,7 +539,7 @@ fn the_login_ask_speaks_each_platforms_wording() {
             PANE_SIZE,
         ));
         assert!(
-            on.contains(&"Hex opens when your computer starts.".to_owned()),
+            on.contains(&"GoSpell opens when your computer starts.".to_owned()),
             "{caps:?}: {on:?}"
         );
         assert!(

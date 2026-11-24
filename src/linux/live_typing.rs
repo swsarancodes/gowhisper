@@ -5,7 +5,7 @@
 //!
 //! One owner thread holds a private Wayland connection. A capture's Begin
 //! creates `zwp_input_method_v2` for the seat, and Finish or Cancel destroys
-//! it, so Hex never holds the seat's input method while idle and another
+//! it, so GoSpell never holds the seat's input method while idle and another
 //! input method keeps working. Everything is bounded: capture sends never
 //! wait, preedits coalesce, and a Finish uses one shared claim so a caller
 //! that gives up never pastes over a commit the owner already owns. Control
@@ -182,7 +182,7 @@ impl LiveTyping {
         let thread_accepting = accepting.clone();
         let thread_queued = queued.clone();
         if let Err(error) = thread::Builder::new()
-            .name("hex-live-typing".into())
+            .name("gospell-live-typing".into())
             .spawn(move || {
                 run(
                     receiver,

@@ -1,18 +1,18 @@
 import { describe, expect, it, vi } from "vitest"
 import { writeFile } from "node:fs/promises"
 import { join } from "node:path"
-import { connect, create, HexError } from "../src/index.js"
+import { connect, create, GoSpellError } from "../src/index.js"
 import { makeClient } from "../src/client.js"
 import { fixtureEndpoint, helper, options, processIsAlive, withTempDir } from "./support.js"
 
 describe("Promise client", () => {
   it.each([
-    ["{", "startup-failed", "Could not read the running HEX endpoint"],
-    ["null", "invalid-handshake", "HEX discovery contained an invalid endpoint"],
-    ["{}", "invalid-handshake", "HEX returned an invalid startup handshake"],
-    [JSON.stringify({ port: "bad", token: "", apiVersion: "2", pid: 1 }), "invalid-handshake", "HEX returned an invalid service URL"],
+    ["{", "startup-failed", "Could not read the running GOSPELL endpoint"],
+    ["null", "invalid-handshake", "GOSPELL discovery contained an invalid endpoint"],
+    ["{}", "invalid-handshake", "GOSPELL returned an invalid startup handshake"],
+    [JSON.stringify({ port: "bad", token: "", apiVersion: "2", pid: 1 }), "invalid-handshake", "GOSPELL returned an invalid service URL"],
   ])("preserves discovery errors for %s without making a request", async (contents, code, message) => {
-    await withTempDir("hex-discovery-", async (directory) => {
+    await withTempDir("gospell-discovery-", async (directory) => {
       const discoveryPath = join(directory, "local-api.json")
       const fetch = vi.fn<typeof globalThis.fetch>()
       await writeFile(discoveryPath, contents)
@@ -22,7 +22,7 @@ describe("Promise client", () => {
   })
 
   it("continues accepting a string discovery port and an empty token", async () => {
-    await withTempDir("hex-discovery-", async (directory) => {
+    await withTempDir("gospell-discovery-", async (directory) => {
       const discoveryPath = join(directory, "local-api.json")
       const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(Response.json({ version: "test", apiVersion: "2" }))
       await writeFile(discoveryPath, JSON.stringify({ port: "1234", token: "", apiVersion: "2", pid: 1 }))
@@ -52,23 +52,23 @@ describe("Promise client", () => {
       audio: { data: new Uint8Array([1, 2, 3]), contentType: "audio/wav" },
       model: "parakeet_v2",
       language: "en",
-    })).toEqual({ transcript: "hello from hex", durationMs: 750 })
+    })).toEqual({ transcript: "hello from gospell", durationMs: 750 })
     expect(await host.client.transcribe({
       audio: { data: new Uint8Array([1, 2, 3]), contentType: "audio/wav" },
       model: "parakeet_v2",
       language: "en",
       process: "global",
-    })).toEqual({ transcript: "hello from hex", durationMs: 750, processed: "Hello from Hex." })
+    })).toEqual({ transcript: "hello from gospell", durationMs: 750, processed: "Hello from GoSpell." })
     expect(await host.client.transcribe({
       audio: { data: new Uint8Array([1, 2, 3]), contentType: "audio/wav" },
       model: "parakeet_v2",
       language: "en",
       timestamps: "segment",
     })).toEqual({
-      transcript: "hello from hex",
+      transcript: "hello from gospell",
       durationMs: 750,
       timestampGranularity: "segment",
-      segments: [{ text: "hello from hex", startMs: 0, endMs: 750 }],
+      segments: [{ text: "hello from gospell", startMs: 0, endMs: 750 }],
     })
     expect(await host.client.transcribe({
       audio: { data: new Uint8Array([1, 2, 3]), contentType: "audio/wav" },
@@ -76,14 +76,14 @@ describe("Promise client", () => {
       language: "en",
       timestamps: "word",
     })).toEqual({
-      transcript: "hello from hex",
+      transcript: "hello from gospell",
       durationMs: 750,
       timestampGranularity: "word",
-      segments: [{ text: "hello from hex", startMs: 0, endMs: 750 }],
+      segments: [{ text: "hello from gospell", startMs: 0, endMs: 750 }],
       words: [
         { text: "hello", startMs: 0, endMs: 300 },
         { text: "from", startMs: 320, endMs: 480 },
-        { text: "hex", startMs: 500, endMs: 750 },
+        { text: "gospell", startMs: 500, endMs: 750 },
       ],
     })
     // `none` sends no query parameter, so the response is the untimed one.
@@ -92,7 +92,7 @@ describe("Promise client", () => {
       model: "parakeet_v2",
       language: "en",
       timestamps: "none",
-    })).toEqual({ transcript: "hello from hex", durationMs: 750 })
+    })).toEqual({ transcript: "hello from gospell", durationMs: 750 })
 
     const pid = host.pid
     expect(processIsAlive(pid)).toBe(true)
@@ -104,25 +104,25 @@ describe("Promise client", () => {
   it("rejects an endpoint outside loopback and cleans up the child", async () => {
     const result = create({
       command: [process.execPath, helper],
-      env: { HEX_FAKE_MODE: "bad-handshake" },
+      env: { GOSPELL_FAKE_MODE: "bad-handshake" },
     })
 
-    await expect(result).rejects.toMatchObject({ code: "invalid-handshake" } satisfies Partial<HexError>)
+    await expect(result).rejects.toMatchObject({ code: "invalid-handshake" } satisfies Partial<GoSpellError>)
   })
 
   it("reports an early helper exit", async () => {
     const result = create({
       command: [process.execPath, helper],
-      env: { HEX_FAKE_MODE: "exit-before-ready" },
+      env: { GOSPELL_FAKE_MODE: "exit-before-ready" },
     })
 
-    await expect(result).rejects.toMatchObject({ code: "service-exited" } satisfies Partial<HexError>)
+    await expect(result).rejects.toMatchObject({ code: "service-exited" } satisfies Partial<GoSpellError>)
   })
 
   it("preserves cancellation after SSE response headers", async () => {
     const host = await create({
       ...options(),
-      env: { HEX_FAKE_PREPARE_HANG: "1" },
+      env: { GOSPELL_FAKE_PREPARE_HANG: "1" },
     })
     const controller = new AbortController()
     try {
@@ -130,28 +130,28 @@ describe("Promise client", () => {
         signal: controller.signal,
         onProgress: () => controller.abort("test cancellation"),
       })
-      await expect(preparation).rejects.toMatchObject({ code: "cancelled" } satisfies Partial<HexError>)
+      await expect(preparation).rejects.toMatchObject({ code: "cancelled" } satisfies Partial<GoSpellError>)
     } finally {
       await host.close()
     }
   })
 
   it("owns a running-app dictation handle with live levels and raw completion", async () => {
-    await withTempDir("hex-client-", async (directory) => {
+    await withTempDir("gospell-client-", async (directory) => {
       const discoveryPath = join(directory, "local-api.json")
       const host = await create({
         ...options(),
         env: {
-          HEX_FAKE_SERVICE_CAPTURE: "1",
-          HEX_FAKE_DISCOVERY_PATH: discoveryPath,
-          HEX_FAKE_FINISH_RETRY: "1",
+          GOSPELL_FAKE_SERVICE_CAPTURE: "1",
+          GOSPELL_FAKE_DISCOVERY_PATH: discoveryPath,
+          GOSPELL_FAKE_FINISH_RETRY: "1",
         },
       })
       try {
-        const hex = await connect({ discoveryPath })
-        expect(await hex.capabilities()).toMatchObject({ serviceCapture: true })
-        const recording = await hex.dictation.start({ source: "tp7" })
-        expect(recording.ownerToken).toMatch(/^hex_capture_/)
+        const gospell = await connect({ discoveryPath })
+        expect(await gospell.capabilities()).toMatchObject({ serviceCapture: true })
+        const recording = await gospell.dictation.start({ source: "tp7" })
+        expect(recording.ownerToken).toMatch(/^gospell_capture_/)
         expect(recording.sampleRate).toBe(48_000)
         const levelIterator = recording.levels[Symbol.asyncIterator]()
         const first = await levelIterator.next()
@@ -165,12 +165,12 @@ describe("Promise client", () => {
         await expect(recording.finish()).rejects.toMatchObject({
           code: "request-failed",
           status: 503,
-        } satisfies Partial<HexError>)
+        } satisfies Partial<GoSpellError>)
         expect(await recording.finish()).toEqual({
           transcript: "running app text",
           durationMs: 1234,
         })
-        const cancelled = await hex.dictation.start({ source: "tp7" })
+        const cancelled = await gospell.dictation.start({ source: "tp7" })
         await cancelled.cancel()
         await cancelled.cancel()
       } finally {
@@ -246,7 +246,7 @@ describe("Promise client", () => {
   })
 
   it("rejects a legacy running app before sending a request", async () => {
-    await withTempDir("hex-client-legacy-", async (directory) => {
+    await withTempDir("gospell-client-legacy-", async (directory) => {
       const discoveryPath = join(directory, "local-api.json")
       let requested = false
       await writeFile(discoveryPath, JSON.stringify({
@@ -261,7 +261,7 @@ describe("Promise client", () => {
           requested = true
           throw new Error("legacy app should not receive a request")
         },
-      })).rejects.toMatchObject({ code: "incompatible-api" } satisfies Partial<HexError>)
+      })).rejects.toMatchObject({ code: "incompatible-api" } satisfies Partial<GoSpellError>)
       expect(requested).toBe(false)
     })
   })
@@ -269,7 +269,7 @@ describe("Promise client", () => {
   it("does not let a buffered terminal event overtake cancellation", async () => {
     const host = await create({
       ...options(),
-      env: { HEX_FAKE_PREPARE_BATCH: "1" },
+      env: { GOSPELL_FAKE_PREPARE_BATCH: "1" },
     })
     const controller = new AbortController()
     try {
@@ -277,7 +277,7 @@ describe("Promise client", () => {
         signal: controller.signal,
         onProgress: () => controller.abort("test cancellation"),
       })
-      await expect(preparation).rejects.toMatchObject({ code: "cancelled" } satisfies Partial<HexError>)
+      await expect(preparation).rejects.toMatchObject({ code: "cancelled" } satisfies Partial<GoSpellError>)
     } finally {
       await host.close()
     }
@@ -286,7 +286,7 @@ describe("Promise client", () => {
   it("bounds an unconsumed observation stream and cancels it through return", async () => {
     const host = await create({
       ...options(),
-      env: { HEX_FAKE_SERVICE_CAPTURE: "1", HEX_FAKE_LEVEL_BURST: "1" },
+      env: { GOSPELL_FAKE_SERVICE_CAPTURE: "1", GOSPELL_FAKE_LEVEL_BURST: "1" },
     })
     try {
       const recording = await host.client.dictation.start({ source: "buffer-test" })
@@ -306,7 +306,7 @@ describe("Promise client", () => {
   it("preserves remote HTTP and SSE error codes", async () => {
     const httpHost = await create({
       ...options(),
-      env: { HEX_FAKE_TRANSCRIBE_ERROR: "1" },
+      env: { GOSPELL_FAKE_TRANSCRIBE_ERROR: "1" },
     })
     try {
       const transcription = httpHost.client.transcribe({
@@ -317,20 +317,20 @@ describe("Promise client", () => {
         code: "request-failed",
         status: 409,
         remoteCode: "model-not-ready",
-      } satisfies Partial<HexError>)
+      } satisfies Partial<GoSpellError>)
     } finally {
       await httpHost.close()
     }
 
     const sseHost = await create({
       ...options(),
-      env: { HEX_FAKE_PREPARE_ERROR: "1" },
+      env: { GOSPELL_FAKE_PREPARE_ERROR: "1" },
     })
     try {
       await expect(sseHost.client.models.prepare("parakeet_v2")).rejects.toMatchObject({
         code: "model-prepare-failed",
         remoteCode: "load-failed",
-      } satisfies Partial<HexError>)
+      } satisfies Partial<GoSpellError>)
     } finally {
       await sseHost.close()
     }
@@ -341,7 +341,7 @@ describe("Promise client", () => {
     try {
       await expect(host.client.models.prepare("parakeet_v3")).rejects.toMatchObject({
         code: "invalid-response",
-      } satisfies Partial<HexError>)
+      } satisfies Partial<GoSpellError>)
     } finally {
       await host.close()
     }

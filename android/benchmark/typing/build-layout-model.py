@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build German, French, Italian and Bokmål HXTM v3 files with the shared iOS count reader / model writer.
-    python3 build-layout-model.py {de|fr|it|nb} SOURCE_CACHE OUTPUT.hextm
+    python3 build-layout-model.py {de|fr|it|nb} SOURCE_CACHE OUTPUT.gospelltm
 German, French and Italian: every untagged Google Books v3 shard of the language, 1980–2019,
 spellings from the corpus alone (no second dictionary). French and Italian keep elided forms
 as the books' tokens have them ("c'est", "l'homme", "dell'anno"), the apostrophe only between

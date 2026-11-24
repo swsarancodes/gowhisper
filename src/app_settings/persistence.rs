@@ -84,7 +84,7 @@ impl AppSettings {
                         Some(LaunchNote::Unparseable(reason.launch_note()))
                     }
                     Some(LoadIssue::Unreadable) => Some(LaunchNote::Failed(
-                        "Hex couldn't read settings.json and started with defaults. Your file wasn't changed; restart Hex once it can be read.".into(),
+                        "GoSpell couldn't read settings.json and started with defaults. Your file wasn't changed; restart GoSpell once it can be read.".into(),
                     )),
                     None => None,
                 };
@@ -95,7 +95,7 @@ impl AppSettings {
                 LaunchLoad {
                     settings: Self::default(),
                     note: Some(LaunchNote::Failed(format!(
-                        "Hex couldn't read its settings and started with defaults. ({error:#})"
+                        "GoSpell couldn't read its settings and started with defaults. ({error:#})"
                     ))),
                 }
             }
@@ -135,7 +135,7 @@ impl AppSettings {
     /// Publishes the saved values the embedded transcription service reads:
     /// the Labs switches transcription checks (Labs › Vocabulary help
     /// gates the list), the vocabulary and its boost, and, on Linux and
-    /// Windows, the speech engine. `hex transcribe` and the TypeScript SDK's
+    /// Windows, the speech engine. `gospell transcribe` and the TypeScript SDK's
     /// direct child start that service without the app's launch, so nothing
     /// else publishes these for it; this writes nothing.
     pub(crate) fn apply_for_embedded_service() -> Option<Self> {
@@ -226,7 +226,7 @@ impl AppSettings {
         // After every repair that can put Annotate back on its default
         // shortcut, which a saved record shortcut may now share: a mouse
         // button with Labs › Mouse shortcuts off, or a bare left click.
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         settings.clear_record_shortcut_sharing_capture();
         settings.migrate_legacy_replacements();
         settings.normalize_mode_application_names();
@@ -355,7 +355,7 @@ impl AppSettings {
         // They may be stale defaults, so a fixed file must be loaded instead.
         if self.source.revision != 0 && !self.source.writable {
             return Err(eyre!(
-                "settings.json couldn't be read when Hex loaded it. Restart Hex to load the fixed file. Nothing was saved."
+                "settings.json couldn't be read when GoSpell loaded it. Restart GoSpell to load the fixed file. Nothing was saved."
             ));
         }
         match &original {
@@ -499,13 +499,13 @@ pub(crate) enum LoadIssue {
 }
 
 impl LoadIssue {
-    /// What a running Hex says when a saved edit can't be adopted.
+    /// What a running GoSpell says when a saved edit can't be adopted.
     #[cfg(target_os = "linux")]
     pub(crate) fn reload_error(&self) -> String {
         match self {
             Self::Unparseable(reason) => reason.reload_error(),
             Self::Unreadable => {
-                "Hex couldn't read settings.json; keeping the settings it already has.".into()
+                "GoSpell couldn't read settings.json; keeping the settings it already has.".into()
             }
         }
     }
@@ -537,7 +537,7 @@ impl Unparseable {
 
     fn launch_note(&self) -> String {
         format!(
-            "Hex couldn't read settings.json and started with defaults. Your file wasn't changed; fix or remove it, then restart Hex. ({})",
+            "GoSpell couldn't read settings.json and started with defaults. Your file wasn't changed; fix or remove it, then restart GoSpell. ({})",
             self.reason()
         )
     }
@@ -545,16 +545,16 @@ impl Unparseable {
     /// The error a save returns; nothing is written.
     fn save_error(&self) -> String {
         format!(
-            "settings.json {}. Fix or remove it, then restart Hex. Nothing was saved.",
+            "settings.json {}. Fix or remove it, then restart GoSpell. Nothing was saved.",
             self.sentence()
         )
     }
 
-    /// What a running Hex says when a saved edit isn't a JSON object.
+    /// What a running GoSpell says when a saved edit isn't a JSON object.
     #[cfg(target_os = "linux")]
     fn reload_error(&self) -> String {
         format!(
-            "settings.json {}. Fix or remove it, then restart Hex.",
+            "settings.json {}. Fix or remove it, then restart GoSpell.",
             self.sentence()
         )
     }
@@ -661,7 +661,7 @@ fn needs_backup(data: &[u8]) -> bool {
         || crate::transcription::models::validate_saved(&settings.transcription).is_err()
 }
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 pub(super) fn healthy_file(path: &Path) -> bool {
     fs::read(path).is_ok_and(|data| !needs_backup(&data))
 }

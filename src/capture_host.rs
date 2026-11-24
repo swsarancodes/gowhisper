@@ -1,13 +1,13 @@
 //! The `capture` experiment (macOS, Linux, and Windows): Scrawl's capture
-//! engine, the `scrawl-capture` crate, hosted inside Hex. Step 3 of
-//! `docs/plans/capture-in-hex.md`. Everything here is shared; what differs
+//! engine, the `scrawl-capture` crate, hosted inside GoSpell. Step 3 of
+//! `docs/plans/capture-in-gospell.md`. Everything here is shared; what differs
 //! by OS is the engine's own platform adapter (ScreenCaptureKit; the portal,
 //! PipeWire and VA-API; or Windows.Graphics.Capture), where the audio
 //! timeline comes from (`DictationAudio` on macOS, the Linux and Windows
 //! listeners' [`ListenerTimeline`]), "While dictating" ([`Environment`]),
 //! the transcriber, and the clipboard.
 //!
-//! The engine records the screen and writes the bundle; Hex owns the
+//! The engine records the screen and writes the bundle; GoSpell owns the
 //! microphone and the model. A capture copies audio from the dictation
 //! timeline through a bounded sink (no second stream) and hands it to
 //! `SealedCapture::finish` ([`AudioIn::External`]), and its words come from
@@ -24,7 +24,7 @@
 //!
 //! While a capture records it holds a recording-environment session with
 //! "While dictating" (`recording_audio_behavior`, read at each start),
-//! released when it stops, is cancelled, or Hex quits; dictation's own
+//! released when it stops, is cancelled, or GoSpell quits; dictation's own
 //! session composes with it.
 //!
 //! Views never reach into the host: every change to a capture (started,
@@ -65,7 +65,7 @@ use scrawl_capture::transcribe::Transcriber;
 
 pub(crate) mod annotate_read;
 mod drawing;
-// `hex annotate`'s folder commands; Windows has no control transport for
+// `gospell annotate`'s folder commands; Windows has no control transport for
 // them yet.
 #[cfg_attr(target_os = "windows", allow(dead_code))]
 mod library;
@@ -200,7 +200,7 @@ const SCREEN_CHECK: Duration = Duration::from_millis(100);
 const START_RETRY: Duration = Duration::from_secs(60);
 
 // ---------------------------------------------------------------------------
-// The engine, as Hex runs it.
+// The engine, as GoSpell runs it.
 
 /// What [`CaptureHost`] needs from an engine: Scrawl's in the app, and in
 /// tests one that records no screen.
@@ -270,7 +270,7 @@ pub enum CaptureTarget {
     /// centre.
     Area { rect: [f64; 4] },
     /// The first cabled iPhone ([`CaptureSnapshot::phone`]), mirrored in a
-    /// window while it records. The narration is Hex's microphone timeline,
+    /// window while it records. The narration is GoSpell's microphone timeline,
     /// as for the screen; the mirror opens no microphone.
     Phone,
 }
@@ -333,7 +333,7 @@ pub enum CaptureCommand {
     Hold(bool),
     /// Pastes the capsule's written capture, never a later completion.
     Paste(PathBuf),
-    /// Opens the newest written capture's contact sheet: Hex has no review
+    /// Opens the newest written capture's contact sheet: GoSpell has no review
     /// window, and opening the bundle could launch Scrawl.app, which takes
     /// captures over.
     Inspect,
@@ -381,7 +381,7 @@ struct Written {
     words: usize,
     /// Spans of its audio that went missing.
     gaps: usize,
-    /// Where its audio stops, when Hex had to stop keeping it.
+    /// Where its audio stops, when GoSpell had to stop keeping it.
     audio_stopped_at_ms: Option<u64>,
     /// Why it has no transcript, if it has none.
     missing_transcript: Option<String>,
@@ -443,13 +443,13 @@ impl Sealed for scrawl_capture::capture::SealedCapture {
 }
 
 /// Scrawl's engine with nothing machine-wide: no ingest server (port
-/// 47777), delivery retries, or global shortcuts. Hex never calls
+/// 47777), delivery retries, or global shortcuts. GoSpell never calls
 /// `install_shared_resources`.
 fn scrawl_engine(
     events: SyncSender<Event>,
     transcriber: Arc<dyn Transcriber>,
 ) -> scrawl_capture::capture::Engine {
-    scrawl_capture::capture::Engine::new(Arc::new(HexHost { events }), Arc::new(HexConfig))
+    scrawl_capture::capture::Engine::new(Arc::new(GoSpellHost { events }), Arc::new(GoSpellConfig))
         .with_resources(SharedResources::none())
         .with_transcriber(transcriber)
 }
@@ -473,7 +473,7 @@ fn movie_for(clip: bool, screenshots: &crate::app_settings::ScreenshotSettings) 
 }
 
 /// What the capture asks for: `target`, on the clock the dictation timeline
-/// shares, with Hex's audio and Hex's folder, its movie made as `movie` says.
+/// shares, with GoSpell's audio and GoSpell's folder, its movie made as `movie` says.
 fn start_request(
     t0: CaptureInstant,
     bundle: PathBuf,
@@ -549,11 +549,11 @@ fn portal_token() -> scrawl_capture::capture::PortalToken {
 /// them) and logs through tracing. Never blocks: a full channel drops the
 /// event. `Engine::new` also makes it the crate's process-wide log sink, so
 /// the engine's own log lines arrive here once, never in Scrawl's log file.
-struct HexHost {
+struct GoSpellHost {
     events: SyncSender<Event>,
 }
 
-impl Host for HexHost {
+impl Host for GoSpellHost {
     fn emit(&self, event: Event) {
         if let Err(TrySendError::Full(event)) = self.events.try_send(event) {
             tracing::warn!(?event, "capture event queue is full; dropping an event");
@@ -565,7 +565,7 @@ impl Host for HexHost {
     }
 
     fn metric(&self, name: &str, ms: f64) {
-        tracing::debug!(target: "hex::capture", name, ms, "capture metric");
+        tracing::debug!(target: "gospell::capture", name, ms, "capture metric");
     }
 
     fn own_windows(&self) -> OwnWindows {
@@ -661,20 +661,20 @@ fn on_pill(origin: [f64; 2], pill: [f32; 4], x: f64, y: f64) -> bool {
     x >= left && x <= left + pw && y >= top && y <= top + ph
 }
 
-/// The engine's settings, from Hex rather than `~/.config/scrawl`. The
-/// captures folder, retention, and transcriber are Hex's `capture.*`
+/// The engine's settings, from GoSpell rather than `~/.config/scrawl`. The
+/// captures folder, retention, and transcriber are GoSpell's `capture.*`
 /// settings, applied by [`CaptureHost`]; the rest are Scrawl's defaults,
 /// chosen here: auto-crop on (it applies to display captures), and the
 /// `agentContext` summary format off.
-struct HexConfig;
+struct GoSpellConfig;
 
-impl ConfigSource for HexConfig {
+impl ConfigSource for GoSpellConfig {
     fn engine_config(&self) -> anyhow::Result<EngineConfig> {
-        Ok(hex_engine_config())
+        Ok(gospell_engine_config())
     }
 }
 
-fn hex_engine_config() -> EngineConfig {
+fn gospell_engine_config() -> EngineConfig {
     let mut config = EngineConfig::default();
     config.autocrop = Some(serde_json::Value::Bool(true));
     config
@@ -976,7 +976,7 @@ struct FinishJob {
     look: Receiver<routing::Look>,
 }
 
-/// The `hex capture` controller, owned by the listener beside its
+/// The `gospell capture` controller, owned by the listener beside its
 /// `DictationAudio`. The recording capture gets a `capture-audio` thread
 /// that starts the engine (off the listener's thread) and collects its
 /// audio, and stops recording the screen the moment the capture is sealed;
@@ -1019,7 +1019,7 @@ impl CaptureHost {
         if !crate::app_settings::capture_on() {
             return None;
         }
-        tracing::info!("Annotate is on: `hex annotate` is available");
+        tracing::info!("Annotate is on: `gospell annotate` is available");
         let host = shared_engine(engine.as_ref()).and_then(|engine| {
             let mut host = Self::with(engine, None)?;
             host.environment = Some(environment.clone());
@@ -1209,7 +1209,7 @@ impl CaptureHost {
         reply
     }
 
-    /// `hex annotate draw` (Linux, for desktops without the shortcuts
+    /// `gospell annotate draw` (Linux, for desktops without the shortcuts
     /// portal): while a capture records it turns the pen on or off;
     /// otherwise it starts one and arms the pen to turn on once its engine
     /// attaches.
@@ -1368,7 +1368,7 @@ impl CaptureHost {
         result.unwrap_or_else(|error| ControlReply::error("failed", format!("{error:#}")))
     }
 
-    /// Cancels a recording capture, as when Hex quits, and waits a bounded
+    /// Cancels a recording capture, as when GoSpell quits, and waits a bounded
     /// time for its cleanup and for captures still writing. Quitting stops
     /// their transcription, so they keep their audio without words.
     pub fn shutdown(&mut self, audio: &impl AudioTimeline) {
@@ -1500,7 +1500,7 @@ impl CaptureHost {
     /// Why no capture can start now, besides one already recording.
     fn refuse_start(&self) -> Option<ControlReply> {
         if self.finisher.is_none() {
-            return Some(ControlReply::error("busy", "Hex is stopping"));
+            return Some(ControlReply::error("busy", "GoSpell is stopping"));
         }
         let writing = lock(&self.outcomes).finishing_count();
         (writing >= MAX_FINISHING).then(|| {
@@ -1537,11 +1537,11 @@ impl CaptureHost {
             permissions::report_capture(need, clip);
             return Ok(ControlReply::error(
                 "permission",
-                format!("{} is off for Hex", need.name()),
+                format!("{} is off for GoSpell", need.name()),
             ));
         }
         let Some((jobs, _)) = &self.finisher else {
-            return Ok(ControlReply::error("busy", "Hex is stopping"));
+            return Ok(ControlReply::error("busy", "GoSpell is stopping"));
         };
         self.ended.retain(|collector| !collector.is_finished());
         let captures_dir = self
@@ -1751,7 +1751,7 @@ impl CaptureHost {
 }
 
 /// While captures are on, notes every couple of seconds whether Scrawl's own
-/// app runs: it then owns the capture shortcut, and Hex doesn't match it.
+/// app runs: it then owns the capture shortcut, and GoSpell doesn't match it.
 fn watch_scrawl() {
     const EVERY: Duration = Duration::from_secs(2);
     static LAST: Mutex<Option<Instant>> = Mutex::new(None);
@@ -1784,7 +1784,7 @@ pub fn scrawl_running() -> bool {
     false
 }
 
-/// Asks Scrawl's own app to quit, as "Use Hex for annotations" does.
+/// Asks Scrawl's own app to quit, as "Use GoSpell for annotations" does.
 #[cfg(target_os = "macos")]
 pub fn quit_scrawl() {
     use objc2_app_kit::NSRunningApplication;
@@ -1801,7 +1801,7 @@ pub fn quit_scrawl() {
 }
 
 // ---------------------------------------------------------------------------
-// Input from Hex's event tap.
+// Input from GoSpell's event tap.
 
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 /// What the session tap reports while a capture records.
@@ -2048,7 +2048,7 @@ impl LiveInput {
     /// The `capture-input` thread: the engine's pure input rules turn each
     /// tap event into the event Scrawl's own taps would have sent, on the
     /// capture's clock; the engine then applies its ink and own-window
-    /// rules (Hex's windows are this process's).
+    /// rules (GoSpell's windows are this process's).
     fn forward(&self, received: Receiver<(CaptureInstant, Tapped)>) {
         let mut pill = CapsulePill::default();
         for (at, tapped) in received {
@@ -2069,14 +2069,14 @@ impl LiveInput {
                     ),
                     modifiers: modifiers(flags),
                 },
-                // Wayland reports no keys to Hex outside its own windows.
+                // Wayland reports no keys to GoSpell outside its own windows.
                 #[cfg(not(target_os = "macos"))]
                 Tapped::Key { .. } => continue,
             };
             let Some(event) = target.rules.translate(t_ms, input).map(drawing::as_pen) else {
                 continue;
             };
-            // A press or scroll on the capsule's pill is Hex's; anywhere
+            // A press or scroll on the capsule's pill is GoSpell's; anywhere
             // else on its panel it's the app's beneath.
             if let scrawl_capture::capture::InputEvent::ButtonDown { x, y, .. }
             | scrawl_capture::capture::InputEvent::Scroll { x, y, .. } = event
@@ -2122,10 +2122,10 @@ pub enum ShortcutActivity {
 pub enum CaptureControl {
     Scrawl(ScrawlCaptureAction),
     Command(CaptureCommand),
-    /// Drawing on or off, or a recording that draws (`hex annotate draw`).
+    /// Drawing on or off, or a recording that draws (`gospell annotate draw`).
     #[cfg(target_os = "linux")]
     Draw,
-    /// A `hex annotate start|stop|cancel|status` that waits for the host's
+    /// A `gospell annotate start|stop|cancel|status` that waits for the host's
     /// answer on the sender.
     #[cfg(not(target_os = "macos"))]
     Reply(ScrawlCaptureAction, SyncSender<ControlReply>),
@@ -2135,7 +2135,7 @@ pub enum CaptureControl {
 #[cfg(target_os = "macos")]
 pub fn send_to_listener(control: CaptureControl) -> Result<()> {
     use crate::recognition::RecognitionControl;
-    let runtime = crate::macos_rune::runtime().ok_or_else(|| eyre!("Hex is starting"))?;
+    let runtime = crate::macos_rune::runtime().ok_or_else(|| eyre!("GoSpell is starting"))?;
     let (reply, _) = mpsc::sync_channel(1);
     runtime
         .recognition(match control {
@@ -2159,9 +2159,9 @@ pub fn send_to_listener(control: CaptureControl) -> Result<()> {
         .lock()
         .unwrap_or_else(|error| error.into_inner())
         .as_ref()
-        .ok_or_else(|| eyre!("Hex is not listening"))?
+        .ok_or_else(|| eyre!("GoSpell is not listening"))?
         .try_send(control)
-        .map_err(|_| eyre!("Hex is busy; try again"))
+        .map_err(|_| eyre!("GoSpell is busy; try again"))
 }
 
 /// Makes the calling listener the one capsule commands reach.
@@ -2358,7 +2358,7 @@ impl CaptureShortcut {
         self.armed.is_some()
     }
 
-    /// Whether Hex's tap keeps Escape from the app for captures: only for
+    /// Whether GoSpell's tap keeps Escape from the app for captures: only for
     /// this press before it records, and for the capsule's picker. (An open
     /// list takes Escape at the session tap.) A recording capture never
     /// takes it, and a send's Undo is a click.
@@ -2379,7 +2379,7 @@ impl CaptureShortcut {
     }
 }
 
-/// The keys the capsule takes from Hex's tap while it is on screen: it never
+/// The keys the capsule takes from GoSpell's tap while it is on screen: it never
 /// takes focus, so these never reach the app in front. Windows hands them over
 /// from its keyboard hook, where the overlay never takes the keyboard either.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -2387,7 +2387,7 @@ pub enum CapsuleKeys {
     /// The picker: the capture shortcut ([`CapsuleKey::Shortcut`]) and Escape.
     Picker,
     /// The open list: every key press without ⌘ or ⌃ (Ctrl, Alt or the Windows
-    /// key on Windows) that isn't one of Hex's shortcuts.
+    /// key on Windows) that isn't one of GoSpell's shortcuts.
     List,
     /// A capture's suggestions: the capture shortcut, which opens the
     /// search ([`CapsuleKey::Shortcut`]), Shift, and a mouse press
@@ -2399,7 +2399,7 @@ pub enum CapsuleKeys {
 }
 
 #[cfg_attr(target_os = "linux", allow(dead_code))]
-/// A key the capsule gets from Hex's tap, or from the Windows keyboard hook.
+/// A key the capsule gets from GoSpell's tap, or from the Windows keyboard hook.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum CapsuleKey {
     /// The capture shortcut: the picker records what it is on, and the
@@ -2574,7 +2574,7 @@ pub fn opens_search(typed: &str) -> bool {
 /// What the tap does with a key press while the list is open.
 #[derive(Debug, Eq, PartialEq)]
 pub enum ListTap {
-    /// Not the list's: ⌘ or ⌃ held, or one of Hex's shortcuts.
+    /// Not the list's: ⌘ or ⌃ held, or one of GoSpell's shortcuts.
     Pass,
     /// Kept from the app; the list does nothing with it.
     Swallow,
@@ -2747,7 +2747,7 @@ enum HandOff {
 #[cfg(target_os = "macos")]
 fn hand_off(how: HandOff, bundle: &Path) -> anyhow::Result<()> {
     objc2::rc::autoreleasepool(|_| match how {
-        // ⌘V from Hex's keyboard layout snapshot, marked as Hex's: the
+        // ⌘V from GoSpell's keyboard layout snapshot, marked as GoSpell's: the
         // crate's own reads TIS off the main thread. A capture replaces what
         // a dictation watch has in front of it, as another paste would.
         HandOff::Paste => {
@@ -2760,7 +2760,7 @@ fn hand_off(how: HandOff, bundle: &Path) -> anyhow::Result<()> {
     })
 }
 
-/// Linux pastes as the Mac does, through Hex's own paste path (Wayland or
+/// Linux pastes as the Mac does, through GoSpell's own paste path (Wayland or
 /// X11): the contact sheet, then the summary. An app that takes no images
 /// (a terminal) gets only the summary, which names the contact sheet.
 #[cfg(target_os = "linux")]
@@ -2940,7 +2940,7 @@ fn collect(
             };
             let (give_look, look) = mpsc::sync_channel(1);
             // Starts are refused while the queue is full, so it has room
-            // unless Hex is stopping.
+            // unless GoSpell is stopping.
             let job = FinishJob {
                 bundle: bundle.clone(),
                 capture,
@@ -2973,7 +2973,7 @@ fn collect(
     lock(outcomes).settle(bundle, Stage::Cancelled, None);
 }
 
-/// `hex dev capture-replay`: runs a capture through [`CaptureHost`] on a
+/// `gospell dev capture-replay`: runs a capture through [`CaptureHost`] on a
 /// fresh transcription engine with the selected model, feeding `wavs` in
 /// place of the dictation timeline, and returns the finished bundle. Scrawl's
 /// engine records the screen meanwhile, which needs Screen Recording.
@@ -3183,7 +3183,7 @@ mod tests {
     /// The capsule is one 640×424 panel above everything, but only its pill
     /// takes clicks: a click elsewhere on the panel, or under the
     /// full-screen ink overlay, is a click on the app beneath, while one on
-    /// the pill is Hex's and never reaches the engine.
+    /// the pill is GoSpell's and never reaches the engine.
     #[test]
     fn only_the_capsules_pill_and_not_its_panel_takes_clicks() {
         use scrawl_capture::windows::RawWindow;
@@ -3218,7 +3218,7 @@ mod tests {
             ..
         } = own_windows_of(&roles);
         assert_eq!(excluded, [capsule, ink, dim]);
-        let engine_says_hex = |x, y| {
+        let engine_says_gospell = |x, y| {
             scrawl_capture::capture::on_own_window(
                 &windows,
                 (x, y),
@@ -3231,13 +3231,13 @@ mod tests {
         let pill = [160.0, 14.0, 320.0, 44.0];
         let origin = panel_origin(&windows, capsule).unwrap();
         assert_eq!(origin, [544.0, 0.0]);
-        let hex_takes = |x, y| on_pill(origin, pill, x, y) || engine_says_hex(x, y);
+        let gospell_takes = |x, y| on_pill(origin, pill, x, y) || engine_says_gospell(x, y);
 
-        assert!(hex_takes(864.0, 36.0), "the pill");
-        assert!(!hex_takes(600.0, 300.0), "the panel's empty part");
-        assert!(!hex_takes(864.0, 100.0), "just under the pill");
+        assert!(gospell_takes(864.0, 36.0), "the pill");
+        assert!(!gospell_takes(600.0, 300.0), "the panel's empty part");
+        assert!(!gospell_takes(864.0, 100.0), "just under the pill");
         assert!(
-            !hex_takes(1500.0, 900.0),
+            !gospell_takes(1500.0, 900.0),
             "under the ink overlay and a recording's dim only"
         );
         assert_eq!(panel_origin(&windows, 99), None, "a panel not on screen");
@@ -3252,7 +3252,7 @@ mod tests {
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
             .as_nanos();
-        std::env::temp_dir().join(format!("hex-capture-{name}-{unique}"))
+        std::env::temp_dir().join(format!("gospell-capture-{name}-{unique}"))
     }
 
     /// A temp `audio.wav` in its own folder, with the folder made.
@@ -3542,7 +3542,7 @@ mod tests {
     }
 
     /// Scrawl's engine minus the screen: it writes the bundle with Scrawl's
-    /// own writer from the audio Hex hands it and no frames.
+    /// own writer from the audio GoSpell hands it and no frames.
     struct FakeEngine {
         transcriber: Arc<dyn Transcriber>,
         starts: Mutex<Vec<Start>>,
@@ -3765,7 +3765,7 @@ mod tests {
         assert!(last.gaps.is_some());
         assert_eq!(last.missing_transcript, None);
 
-        // Hex's audio, on Hex's clock, into Hex's folder; nothing else.
+        // GoSpell's audio, on GoSpell's clock, into GoSpell's folder; nothing else.
         let start = engine.starts.lock().unwrap()[0].clone();
         assert_eq!(start.audio, AudioIn::External);
         assert_eq!(start.movie, MovieQuality::Compact);
@@ -3916,8 +3916,8 @@ mod tests {
     }
 
     #[test]
-    fn the_engine_config_comes_from_hex() {
-        let config = HexConfig.engine_config().unwrap();
+    fn the_engine_config_comes_from_gospell() {
+        let config = GoSpellConfig.engine_config().unwrap();
         assert_eq!(
             scrawl_capture::autocrop::Settings::from_engine_config(&config),
             Some(Default::default()),
@@ -4368,7 +4368,7 @@ mod tests {
     }
 
     #[test]
-    fn an_iphone_capture_narrates_with_hex_audio_and_finishes_when_its_mirror_ends() {
+    fn an_iphone_capture_narrates_with_gospell_audio_and_finishes_when_its_mirror_ends() {
         let dir = temp_dir("phone");
         let audio = FakeTimeline::default();
         let engine = Arc::new(FakeEngine {
@@ -4410,7 +4410,7 @@ mod tests {
 
     #[cfg(target_os = "macos")]
     /// Kit: Escape may be meant for the app being recorded, so it never
-    /// ends a recording capture, and Hex's tap lets it through.
+    /// ends a recording capture, and GoSpell's tap lets it through.
     #[test]
     fn escape_never_ends_a_recording_capture() {
         let dir = temp_dir("escape");
@@ -4511,7 +4511,7 @@ mod tests {
 
     #[cfg(target_os = "macos")]
     #[test]
-    fn a_capture_stays_quiet_until_it_stops_is_cancelled_or_hex_quits() {
+    fn a_capture_stays_quiet_until_it_stops_is_cancelled_or_gospell_quits() {
         use crate::audio::recording_environment::Effect::Mute;
         use crate::audio::recording_environment::observed::{
             self,
@@ -4850,7 +4850,7 @@ mod tests {
         assert_eq!(shortcut.input(key(false, 0), hotkeys, free), None);
         assert_eq!(shortcut.input(InputEvent::Flags(0), hotkeys, free), None);
 
-        // A capture started another way meanwhile (`hex capture start`):
+        // A capture started another way meanwhile (`gospell capture start`):
         // Escape only disarms the press, and ends nothing.
         assert_eq!(shortcut.input(key(true, chord), hotkeys, free), None);
         let started = ShortcutActivity::Recording {
@@ -4914,8 +4914,8 @@ mod tests {
         // Capture ending while the Annotate key is held resets drawing so the
         // next capture's tap finishes cleanly instead of reading as Drew.
         let live = LiveInput::shared().expect("capture-input thread");
-        let first = PathBuf::from("/tmp/hex-draw-reset-1");
-        let second = PathBuf::from("/tmp/hex-draw-reset-2");
+        let first = PathBuf::from("/tmp/gospell-draw-reset-1");
+        let second = PathBuf::from("/tmp/gospell-draw-reset-2");
         live.recording(Some(&first));
         assert_eq!(
             shortcut.input(key(true, chord), hotkeys, recording(3_000)),
@@ -5240,7 +5240,7 @@ mod tests {
                 word_lag(*model),
                 Some(lag),
                 "{} has a new pinned file: measure its word lag again \
-                 (docs/plans/capture-in-hex.md) before keeping the correction",
+                 (docs/plans/capture-in-gospell.md) before keeping the correction",
                 model.as_str()
             );
         }

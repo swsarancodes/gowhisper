@@ -41,7 +41,7 @@ pub enum StatusItemAction {
     StartMeeting,
     StopMeeting,
     CopyLastMeetingTranscript,
-    /// Pause Hex, or Resume Hex while shortcuts are suspended (Labs › Pause
+    /// Pause GoSpell, or Resume GoSpell while shortcuts are suspended (Labs › Pause
     /// from menu bar).
     TogglePause,
     /// Copy chapter `n` of the recording meeting (Labs).
@@ -116,7 +116,7 @@ objc2::define_class!(
         /// corner, at once (it's safe from any thread).
         #[unsafe(method(restoreCapture:))]
         fn restore_capture(&self, _sender: &AnyObject) {
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             crate::screenshots::restore_last();
         }
 
@@ -271,7 +271,7 @@ enum Row {
     RecordMeeting,
     MeetingSeparator,
     /// Labs › Pause from menu bar: hidden until the menu opens with it on.
-    PauseHex,
+    PauseGoSpell,
     PasteLast,
     /// Labs › Copy dictation audio: hidden until the menu opens with it on.
     CopyLastDictationAudio,
@@ -304,7 +304,7 @@ const ROWS: [Row; 24] = [
     Row::CopySection,
     Row::RecordMeeting,
     Row::MeetingSeparator,
-    Row::PauseHex,
+    Row::PauseGoSpell,
     Row::PasteLast,
     Row::CopyLastDictationAudio,
     Row::CopyRecentDictation,
@@ -331,8 +331,8 @@ impl Row {
             Row::StopMeeting => label("Stop & Transcribe", tr("Stop & transcribe")),
             Row::CopySection => label("Copy Section", tr("Copy section")),
             Row::RecordMeeting => label("Record Meeting", tr("Record meeting")),
-            Row::PauseHex => pause_title(false),
-            #[cfg(hex_capture)]
+            Row::PauseGoSpell => pause_title(false),
+            #[cfg(gospell_capture)]
             Row::PasteLast if crate::paste::recent::enabled() => {
                 label("Paste Last", tr("Paste last"))
             }
@@ -359,7 +359,7 @@ impl Row {
     fn titled_by_state(self) -> bool {
         matches!(
             self,
-            Row::UpcomingSlot | Row::MeetingStatus | Row::PauseHex | Row::Update
+            Row::UpcomingSlot | Row::MeetingStatus | Row::PauseGoSpell | Row::Update
         )
     }
 
@@ -369,7 +369,7 @@ impl Row {
             Row::MeetingStatus => sel!(openMeetings:),
             Row::StopMeeting => sel!(stopMeeting:),
             Row::RecordMeeting => sel!(startMeeting:),
-            Row::PauseHex => sel!(togglePause:),
+            Row::PauseGoSpell => sel!(togglePause:),
             Row::PasteLast => sel!(pasteLast:),
             Row::CopyLastDictationAudio => sel!(copyLastDictationAudio:),
             Row::CopyLastMeetingTranscript => sel!(copyLastMeetingTranscript:),
@@ -411,7 +411,7 @@ impl Row {
                 | Row::CopySection
                 | Row::RecordMeeting
                 | Row::MeetingSeparator
-                | Row::PauseHex
+                | Row::PauseGoSpell
                 | Row::CopyLastDictationAudio
                 | Row::CopyRecentDictation
                 | Row::CopyLastMeetingTranscript
@@ -559,7 +559,7 @@ pub fn install() -> Result<Receiver<StatusItemAction>> {
         MainThreadMarker::new().ok_or_else(|| eyre!("status item requires the main thread"))?;
     let (actions, receiver) = sync_channel(8);
     let target = StatusItemTarget::new(actions, mtm);
-    let menu = NSMenu::initWithTitle(NSMenu::alloc(mtm), &NSString::from_str("Hex"));
+    let menu = NSMenu::initWithTitle(NSMenu::alloc(mtm), &NSString::from_str("GoSpell"));
     let meeting_sections_menu =
         NSMenu::initWithTitle(NSMenu::alloc(mtm), &NSString::from_str("Copy Section"));
     let recent_menu = NSMenu::initWithTitle(
@@ -667,8 +667,8 @@ pub fn install() -> Result<Receiver<StatusItemAction>> {
     let button = item
         .button(mtm)
         .ok_or_else(|| eyre!("status item button is unavailable"))?;
-    let symbol = status_bar_icon(IDLE_ICON_PNG, "Hex")?;
-    let recording_symbol = status_bar_icon(RECORDING_ICON_PNG, "Hex is recording a meeting")?;
+    let symbol = status_bar_icon(IDLE_ICON_PNG, "GoSpell")?;
+    let recording_symbol = status_bar_icon(RECORDING_ICON_PNG, "GoSpell is recording a meeting")?;
     button.setImage(Some(&symbol));
     button.setImagePosition(NSCellImagePosition::ImageLeading);
     // SAFETY: the target answers `menuNeedsUpdate:` and outlives the menu's
@@ -697,7 +697,7 @@ pub fn install() -> Result<Receiver<StatusItemAction>> {
             paste_last: row(Row::PasteLast),
             paste_last_key: RefCell::new(None),
             copy_last_dictation_audio: row(Row::CopyLastDictationAudio),
-            pause: row(Row::PauseHex),
+            pause: row(Row::PauseGoSpell),
             pause_title: RefCell::new(pause_title(false)),
             recent: row(Row::CopyRecentDictation),
             recent_menu,
@@ -726,7 +726,7 @@ pub fn install() -> Result<Receiver<StatusItemAction>> {
 fn status_bar_icon(png: &[u8], accessibility_description: &str) -> Result<Retained<NSImage>> {
     let data = NSData::with_bytes(png);
     let image = NSImage::initWithData(NSImage::alloc(), &data)
-        .ok_or_else(|| eyre!("could not decode Hex status item icon"))?;
+        .ok_or_else(|| eyre!("could not decode GoSpell status item icon"))?;
     image.setSize(NSSize::new(STATUS_ICON_POINTS, STATUS_ICON_POINTS));
     image.setTemplate(true);
     image.setAccessibilityDescription(Some(&NSString::from_str(accessibility_description)));
@@ -898,13 +898,13 @@ fn icon_shown(hide: bool, meeting_active: bool) -> bool {
     !hide || meeting_active
 }
 
-/// Labs › Pause from menu bar's row: Pause Hex while shortcuts run, Resume
-/// Hex while they are paused or a resume waits for a neutral keyboard.
+/// Labs › Pause from menu bar's row: Pause GoSpell while shortcuts run, Resume
+/// GoSpell while they are paused or a resume waits for a neutral keyboard.
 fn pause_title(suspended: bool) -> String {
     if suspended {
-        tr("Resume Hex").into()
+        tr("Resume GoSpell").into()
     } else {
-        tr("Pause Hex").into()
+        tr("Pause GoSpell").into()
     }
 }
 
@@ -1076,10 +1076,10 @@ fn hide_upcoming(controller: &StatusItemController) {
     controller.upcoming_meetings.borrow_mut().clear();
 }
 
-/// Shows Pause Hex while Labs › Pause from menu bar is on, reads Resume Hex
+/// Shows Pause GoSpell while Labs › Pause from menu bar is on, reads Resume GoSpell
 /// while shortcuts are suspended, and resumes at once if the lab turned off
 /// under a pause. The title follows the pause state itself, so it reads
-/// Resume Hex while a resume waits for a neutral keyboard too.
+/// Resume GoSpell while a resume waits for a neutral keyboard too.
 pub fn update_pause() {
     let on = crate::labs::pause_menu();
     crate::shortcut_pause::reconcile(on);
@@ -1097,12 +1097,12 @@ pub fn update_pause() {
     });
 }
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 fn restore_capture_enabled() -> bool {
     crate::screenshots::can_restore()
 }
 
-#[cfg(not(hex_capture))]
+#[cfg(not(gospell_capture))]
 fn restore_capture_enabled() -> bool {
     false
 }
@@ -1326,7 +1326,7 @@ mod tests {
                 "Copy Section".into(),
                 "Record Meeting".into(),
                 "—".into(),
-                "Pause Hex".into(),
+                "Pause GoSpell".into(),
                 "Paste Last Dictation".into(),
                 "Copy Last Dictation Audio".into(),
                 "Copy Recent Dictation".into(),
@@ -1440,12 +1440,12 @@ mod tests {
     #[test]
     fn the_pause_row_reads_pause_or_resume() {
         // Suspended covers a pause and the resume that waits for a neutral
-        // keyboard, so the row never says Pause Hex while keys are inert.
-        assert_eq!(pause_title(false), "Pause Hex");
-        assert_eq!(pause_title(true), "Resume Hex");
-        assert_eq!(Row::PauseHex.title().as_deref(), Some("Pause Hex"));
-        assert!(Row::PauseHex.action().is_some());
-        assert!(Row::PauseHex.starts_hidden());
+        // keyboard, so the row never says Pause GoSpell while keys are inert.
+        assert_eq!(pause_title(false), "Pause GoSpell");
+        assert_eq!(pause_title(true), "Resume GoSpell");
+        assert_eq!(Row::PauseGoSpell.title().as_deref(), Some("Pause GoSpell"));
+        assert!(Row::PauseGoSpell.action().is_some());
+        assert!(Row::PauseGoSpell.starts_hidden());
     }
 
     #[test]
@@ -1476,8 +1476,8 @@ mod tests {
     #[test]
     fn status_bar_icons_load_as_18pt_retina_templates() {
         for (png, description) in [
-            (IDLE_ICON_PNG, "Hex"),
-            (RECORDING_ICON_PNG, "Hex is recording a meeting"),
+            (IDLE_ICON_PNG, "GoSpell"),
+            (RECORDING_ICON_PNG, "GoSpell is recording a meeting"),
         ] {
             let icon = status_bar_icon(png, description).unwrap();
             assert!(icon.isTemplate());

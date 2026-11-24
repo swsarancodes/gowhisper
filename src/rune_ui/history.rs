@@ -26,7 +26,7 @@ mod audio;
 mod heatmap;
 mod selection;
 mod stats;
-#[cfg(all(target_os = "macos", hex_capture))]
+#[cfg(all(target_os = "macos", gospell_capture))]
 pub(super) mod unified;
 
 pub(super) use self::audio::AudioCopy;
@@ -35,7 +35,7 @@ pub(super) use self::stats::close_stats;
 
 #[derive(Default)]
 pub(super) struct HistoryPane {
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     pub(super) unified: unified::Pane,
     store: Option<History>,
     pub(super) entries: Vec<HistoryEntry>,
@@ -124,7 +124,7 @@ impl HistoryPane {
     /// The host's store; `None` when it could not open one.
     pub(super) fn shared(store: Option<History>) -> Self {
         Self {
-            #[cfg(all(target_os = "macos", hex_capture))]
+            #[cfg(all(target_os = "macos", gospell_capture))]
             unified: unified::Pane::live(),
             error: store
                 .is_none()
@@ -637,7 +637,7 @@ fn transcribe_again(
     let (sender, receiver) = channel();
     let waker = ui.modes.waker.clone();
     let started = std::thread::Builder::new()
-        .name("hex-transcribe-again".into())
+        .name("gospell-transcribe-again".into())
         .spawn(move || {
             let _ = sender.send(crate::history::recordings::retranscribe(&path, selection));
             if let Some(waker) = &waker {
@@ -743,7 +743,7 @@ fn delete(ui: &mut Ui, id: u64) {
 
 /// The header's retention menu and the list + detail body.
 pub(super) fn pane(ui: &Ui, p: Paint, cx: &mut Cx<Ui>, layer: &mut Vec<El>) -> (Vec<El>, El) {
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     if ui.history.unified.enabled {
         return unified::view(ui, p, cx, layer);
     }
@@ -849,7 +849,7 @@ fn kept_label(retention: HistoryRetention) -> String {
 /// chosen, the menu gives way to its confirmation until it is answered.
 fn header_actions(ui: &Ui, p: Paint, layer: &mut Vec<El>) -> Vec<El> {
     let (confirm_clear, offer_clear) = (tr("Clear all history"), tr("Clear all history…"));
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     let (confirm_clear, offer_clear) = if ui.history.unified.enabled {
         (
             tr("Clear dictation history"),

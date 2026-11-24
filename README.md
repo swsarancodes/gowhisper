@@ -1,12 +1,12 @@
-# Hex
+# GoSpell
 
-Hex is local voice dictation for Mac, Windows and Linux. Hold a key, speak, and
+GoSpell is local voice dictation for Mac, Windows and Linux. Hold a key, speak, and
 it pastes.
 
 ## How it works
 
 - hold the shortcut, speak, then let go
-- Hex transcribes on your device and pastes into whatever app you're in
+- GoSpell transcribes on your device and pastes into whatever app you're in
 - the first run downloads a speech model; after that nothing leaves your machine
 - experimental features live in Labs, at the bottom of the sidebar
 
@@ -20,7 +20,7 @@ it pastes.
 - Output runs every dictation through steps you choose (word replacements,
   built-in cleanups, your own scripts, an optional OpenCode rewrite), with
   different steps per app or website
-- Vocabulary is one list of names Hex should know; Whisper and Qwen3-ASR read
+- Vocabulary is one list of names GoSpell should know; Whisper and Qwen3-ASR read
   it while transcribing, Parakeet models read it with Labs › Vocabulary help
   on, and the OpenCode rewrite uses it
 - Annotate records the screen while you draw and talk, on macOS, Linux and
@@ -31,17 +31,17 @@ it pastes.
 
 Output and History:
 
-<img src="docs/images/output.png" width="600" alt="Hex output: the steps every dictation runs, a Try box, and different steps per app">
+<img src="docs/images/output.png" width="600" alt="GoSpell output: the steps every dictation runs, a Try box, and different steps per app">
 
-<img src="docs/images/history.png" width="600" alt="Hex history: past dictations, a search field, and one entry's raw transcript, app, processing and model">
+<img src="docs/images/history.png" width="600" alt="GoSpell history: past dictations, a search field, and one entry's raw transcript, app, processing and model">
 
 ## Speech models
 
-Hex downloads one model the first time it runs and transcribes with it on your
+GoSpell downloads one model the first time it runs and transcribes with it on your
 machine from then on. On an English system that's Parakeet Unified English: it
 writes while you talk, so the text is ready when you let go. Other languages
 start with the model recommended for them. That model also serves meetings and
-`hex transcribe`.
+`gospell transcribe`.
 
 Settings' picker offers more, among others:
 
@@ -67,45 +67,61 @@ itself from the dev channel.
 
 | Platform | Stable | Dev |
 | --- | --- | --- |
-| macOS (Apple silicon) | [DMG](https://anoma.ly/hex/download/macos-arm64-dmg) | [DMG](https://anoma.ly/hex/download/dev/macos-arm64-dmg) |
-| Windows x64 | [Installer](https://anoma.ly/hex/download/windows-x64-setup) | [Installer](https://anoma.ly/hex/download/dev/windows-x64-setup) |
-| Windows ARM64 | [Installer](https://anoma.ly/hex/download/windows-arm64-setup) | [Installer](https://anoma.ly/hex/download/dev/windows-arm64-setup) |
-| Linux x86_64 | [Executable](https://anoma.ly/hex/download/linux-x64) | [Executable](https://anoma.ly/hex/download/dev/linux-x64) |
-| Linux x86_64 (Debian, Ubuntu) | [.deb](https://anoma.ly/hex/download/linux-x64-deb) | [.deb](https://anoma.ly/hex/download/dev/linux-x64-deb) |
-| Linux x86_64 (Fedora, openSUSE) | [.rpm](https://anoma.ly/hex/download/linux-x64-rpm) | [.rpm](https://anoma.ly/hex/download/dev/linux-x64-rpm) |
-| Linux ARM64 | [Executable](https://anoma.ly/hex/download/linux-arm64) | [Executable](https://anoma.ly/hex/download/dev/linux-arm64) |
-| Linux ARM64 (Debian, Ubuntu) | [.deb](https://anoma.ly/hex/download/linux-arm64-deb) | [.deb](https://anoma.ly/hex/download/dev/linux-arm64-deb) |
-| Linux ARM64 (Fedora, openSUSE) | [.rpm](https://anoma.ly/hex/download/linux-arm64-rpm) | [.rpm](https://anoma.ly/hex/download/dev/linux-arm64-rpm) |
+| macOS (Apple silicon) | [DMG](https://gospell.goml.io/download/macos-arm64-dmg) | [DMG](https://gospell.goml.io/download/dev/macos-arm64-dmg) |
+| Windows x64 | [Installer](https://gospell.goml.io/download/windows-x64-setup) | [Installer](https://gospell.goml.io/download/dev/windows-x64-setup) |
+| Windows ARM64 | [Installer](https://gospell.goml.io/download/windows-arm64-setup) | [Installer](https://gospell.goml.io/download/dev/windows-arm64-setup) |
+| Linux x86_64 | [Executable](https://gospell.goml.io/download/linux-x64) | [Executable](https://gospell.goml.io/download/dev/linux-x64) |
+| Linux x86_64 (Debian, Ubuntu) | [.deb](https://gospell.goml.io/download/linux-x64-deb) | [.deb](https://gospell.goml.io/download/dev/linux-x64-deb) |
+| Linux x86_64 (Fedora, openSUSE) | [.rpm](https://gospell.goml.io/download/linux-x64-rpm) | [.rpm](https://gospell.goml.io/download/dev/linux-x64-rpm) |
+| Linux ARM64 | [Executable](https://gospell.goml.io/download/linux-arm64) | [Executable](https://gospell.goml.io/download/dev/linux-arm64) |
+| Linux ARM64 (Debian, Ubuntu) | [.deb](https://gospell.goml.io/download/linux-arm64-deb) | [.deb](https://gospell.goml.io/download/dev/linux-arm64-deb) |
+| Linux ARM64 (Fedora, openSUSE) | [.rpm](https://gospell.goml.io/download/linux-arm64-rpm) | [.rpm](https://gospell.goml.io/download/dev/linux-arm64-rpm) |
 
 Or install with:
 
-- Homebrew: `brew install --cask anomalyco/tap/hex`
-- AUR: `yay -S hex-bin`
-- install script (Linux): `curl -fsSL https://anoma.ly/hex/install-linux.sh | sh`
-- Nix (Linux): `nix profile add github:anomalyco/hex`
+- Homebrew: `brew install --cask goml/tap/gospell`
+- AUR: `yay -S gospell-bin`
+- install script (Linux): `curl -fsSL https://gospell.goml.io/install-linux.sh | sh`
+- Nix (Linux): `nix profile add github:goml/gospell`
+
+### Without a developer account
+
+GoSpell builds and runs unsigned. On a Mac, build it, then clear the
+quarantine flag and open it:
+
+```bash
+GOSPELL_RELEASE_UNSIGNED=1 GOSPELL_LOCAL_BUILD=1 scripts/build-app.sh
+```
+
+```bash
+ditto target/app/GoSpell.app /Applications/GoSpell.app && xattr -dr com.apple.quarantine /Applications/GoSpell.app && open /Applications/GoSpell.app
+```
+
+Windows, Linux, sharing a build, and permissions after a rebuild:
+[Install and run GoSpell without a developer account](docs/install-without-developer-id.md).
 
 ## Command line
 
-`hex transcribe meeting.m4a` prints a recording's transcript, whether or not
+`gospell transcribe meeting.m4a` prints a recording's transcript, whether or not
 the app is running. It reads WAV, AIFF, CAF, FLAC, MP3, Ogg, WebM, and
-MP4/M4A/MOV, including a video's soundtrack. The same `hex` controls the
-running app (`hex status`, `hex dictation`, `hex settings`); see
+MP4/M4A/MOV, including a video's soundtrack. The same `gospell` controls the
+running app (`gospell status`, `gospell dictation`, `gospell settings`); see
 [`docs/cli.md`](docs/cli.md).
 
 On macOS the CLI is inside the app. Homebrew links it for you; otherwise link
 it somewhere on your `PATH` that you own:
 
 ```sh
-ln -s /Applications/Hex.app/Contents/MacOS/hex ~/.local/bin/hex
+ln -s /Applications/GoSpell.app/Contents/MacOS/gospell ~/.local/bin/gospell
 ```
 
-Linux and Windows installs put `hex` on your `PATH`.
+Linux and Windows installs put `gospell` on your `PATH`.
 
 More docs are in [`docs/`](docs/README.md).
 
 ## Contributing
 
-We don't take pull requests. [Open an issue](https://github.com/anomalyco/hex/issues)
+We don't take pull requests. [Open an issue](https://github.com/goml/gospell/issues)
 describing the bug or idea, and our agents usually turn it around fast.
 
 MIT licensed.

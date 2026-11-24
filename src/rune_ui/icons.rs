@@ -39,7 +39,7 @@ macro_rules! line_icon {
 
 line_icon!(
     KEYBOARD,
-    "hex-row-keyboard",
+    "gospell-row-keyboard",
     [
         "M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z",
         "M6 8h.01",
@@ -54,7 +54,7 @@ line_icon!(
 );
 line_icon!(
     CAMERA,
-    "hex-row-camera",
+    "gospell-row-camera",
     [
         "M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z",
         "M15 13a3 3 0 1 1-6 0 3 3 0 0 1 6 0z",
@@ -62,19 +62,19 @@ line_icon!(
 );
 line_icon!(
     BLUETOOTH,
-    "hex-row-bluetooth",
+    "gospell-row-bluetooth",
     ["m7 7 10 10-5 5V2l5 5L7 17"]
 );
 line_icon!(
     WAVE,
-    "hex-row-wave",
+    "gospell-row-wave",
     [
         "M2 10v3", "M6 6v11", "M10 3v18", "M14 8v7", "M18 5v13", "M22 10v3",
     ]
 );
 line_icon!(
     LANGUAGES,
-    "hex-row-languages",
+    "gospell-row-languages",
     [
         "m5 8 6 6",
         "m4 14 6-6 2-3",
@@ -86,7 +86,7 @@ line_icon!(
 );
 line_icon!(
     MIC,
-    "hex-row-mic",
+    "gospell-row-mic",
     [
         "M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z",
         "M19 10v2a7 7 0 0 1-14 0v-2",
@@ -96,7 +96,7 @@ line_icon!(
 #[cfg(target_os = "macos")]
 line_icon!(
     MIC_OFF,
-    "hex-row-mic-off",
+    "gospell-row-mic-off",
     [
         "M12 19v3",
         "M15 9.34V5a3 3 0 0 0-5.68-1.33",
@@ -108,17 +108,17 @@ line_icon!(
 );
 line_icon!(
     POWER,
-    "hex-row-power",
+    "gospell-row-power",
     ["M12 2v10", "M18.4 6.6a9 9 0 1 1-12.77.04"]
 );
 line_icon!(
     SIDE,
-    "hex-row-side",
+    "gospell-row-side",
     ["M8 3 4 7l4 4", "M4 7h16", "m16 21 4-4-4-4", "M20 17H4"]
 );
 line_icon!(
     HAND,
-    "hex-row-hand",
+    "gospell-row-hand",
     [
         "M18 11V6a2 2 0 0 0-4 0",
         "M14 10V4a2 2 0 0 0-4 0v2",
@@ -128,7 +128,7 @@ line_icon!(
 );
 line_icon!(
     TIMER,
-    "hex-row-timer",
+    "gospell-row-timer",
     [
         "M10 2h4",
         "m12 14 3-3",
@@ -137,17 +137,17 @@ line_icon!(
 );
 line_icon!(
     ZAP,
-    "hex-row-zap",
+    "gospell-row-zap",
     [
         "M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z",
     ]
 );
 macro_rules! book_icons {
     ($outline:literal) => {
-        line_icon!(PLAIN_BOOK, "hex-plain-book", [$outline]);
+        line_icon!(PLAIN_BOOK, "gospell-plain-book", [$outline]);
         line_icon!(
             BOOK,
-            "hex-row-book",
+            "gospell-row-book",
             [$outline, "m8 13 4-7 4 7", "M9.1 11h5.7"]
         );
     };
@@ -157,7 +157,7 @@ book_icons!(
 );
 line_icon!(
     PASTE,
-    "hex-row-paste",
+    "gospell-row-paste",
     [
         "M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z",
         "M16 4h2a2 2 0 0 1 2 2v1.344",
@@ -168,7 +168,7 @@ line_icon!(
 );
 line_icon!(
     MUTE,
-    "hex-row-mute",
+    "gospell-row-mute",
     [
         "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z",
         "M22 9l-6 6",
@@ -177,7 +177,7 @@ line_icon!(
 );
 line_icon!(
     VOLUME,
-    "hex-row-volume",
+    "gospell-row-volume",
     [
         "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z",
         "M16 9a5 5 0 0 1 0 6",
@@ -186,7 +186,7 @@ line_icon!(
 );
 line_icon!(
     PANEL,
-    "hex-row-panel",
+    "gospell-row-panel",
     [
         "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z",
         "M3 9h18",
@@ -194,21 +194,25 @@ line_icon!(
 );
 line_icon!(
     DOCK,
-    "hex-row-dock",
+    "gospell-row-dock",
     [
         "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z",
         "M3 15h18",
     ]
 );
-line_icon!(TERMINAL, "hex-row-terminal", ["m4 17 6-6-6-6", "M12 19h8"]);
+line_icon!(
+    TERMINAL,
+    "gospell-row-terminal",
+    ["m4 17 6-6-6-6", "M12 19h8"]
+);
 line_icon!(
     PLAY,
-    "hex-row-play",
+    "gospell-row-play",
     ["M6 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L7.5 3.64A1 1 0 0 0 6 4.5z"]
 );
 line_icon!(
     BELL,
-    "hex-row-bell",
+    "gospell-row-bell",
     [
         "M10.268 21a2 2 0 0 0 3.464 0",
         "M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326",
@@ -216,7 +220,7 @@ line_icon!(
 );
 line_icon!(
     GLOBE,
-    "hex-row-globe",
+    "gospell-row-globe",
     [
         "M2 12a10 10 0 1 0 20 0a10 10 0 1 0-20 0",
         "M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20",
@@ -225,7 +229,7 @@ line_icon!(
 );
 line_icon!(
     REFRESH,
-    "hex-row-refresh",
+    "gospell-row-refresh",
     [
         "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8",
         "M21 3v5h-5",
@@ -235,21 +239,21 @@ line_icon!(
 );
 line_icon!(
     FOLDER,
-    "hex-row-folder",
+    "gospell-row-folder",
     [
         "M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z",
     ]
 );
 line_icon!(
     SPARKLES,
-    "hex-row-sparkles",
+    "gospell-row-sparkles",
     [
         "M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z",
     ]
 );
 line_icon!(
     SPEAKER,
-    "hex-row-speaker",
+    "gospell-row-speaker",
     [
         "M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z",
         "M12 6h.01",
@@ -258,12 +262,12 @@ line_icon!(
 );
 line_icon!(
     PILL,
-    "hex-row-pill",
+    "gospell-row-pill",
     ["M8 7h8a5 5 0 0 1 0 10H8A5 5 0 0 1 8 7z", "M9 12h.01",]
 );
 line_icon!(
     CALENDAR,
-    "hex-row-calendar",
+    "gospell-row-calendar",
     [
         "M8 2v4",
         "M16 2v4",
@@ -273,12 +277,12 @@ line_icon!(
 );
 line_icon!(
     CLOCK,
-    "hex-row-clock",
+    "gospell-row-clock",
     ["M2 12a10 10 0 1 0 20 0a10 10 0 1 0-20 0", "M12 6v6l4 2"]
 );
 line_icon!(
     MOUSE,
-    "hex-row-mouse",
+    "gospell-row-mouse",
     [
         "M12 2a6 6 0 0 1 6 6v8a6 6 0 0 1-12 0V8a6 6 0 0 1 6-6z",
         "M12 6v4"
@@ -286,7 +290,7 @@ line_icon!(
 );
 line_icon!(
     CALL,
-    "hex-row-call",
+    "gospell-row-call",
     [
         "m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5",
         "M4 6h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z",
@@ -294,7 +298,7 @@ line_icon!(
 );
 line_icon!(
     CIRCLE_X,
-    "hex-row-circle-x",
+    "gospell-row-circle-x",
     [
         "M2 12a10 10 0 1 0 20 0a10 10 0 1 0-20 0",
         "m15 9-6 6",
@@ -303,7 +307,7 @@ line_icon!(
 );
 line_icon!(
     PEN,
-    "hex-row-pen",
+    "gospell-row-pen",
     [
         "M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4.5 1.5L5 15z",
         "m13.5 6.5 3 3",
@@ -311,13 +315,13 @@ line_icon!(
 );
 line_icon!(
     ARROW_TOOL,
-    "hex-row-arrow-tool",
+    "gospell-row-arrow-tool",
     ["M5 19 19 5", "M10 5h9v9"]
 );
-line_icon!(BOX_TOOL, "hex-row-box", ["M4 5h16v14H4z"]);
-line_icon!(TEXT_TOOL, "hex-row-text-tool", ["M5 5h14", "M12 5v15"]);
+line_icon!(BOX_TOOL, "gospell-row-box", ["M4 5h16v14H4z"]);
+line_icon!(TEXT_TOOL, "gospell-row-text-tool", ["M5 5h14", "M12 5v15"]);
 line_icon!(
     CROP_TOOL,
-    "hex-row-crop",
+    "gospell-row-crop",
     ["M7 2.5V17h14.5", "M2.5 7H17v14.5"]
 );

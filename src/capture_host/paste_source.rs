@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 use scrawl_capture::model::ScrawlBundle;
 use serde::{Deserialize, Serialize};
 
-const READY: &str = ".hex-annotate-v1";
+const READY: &str = ".gospell-annotate-v1";
 const DAY_MS: u64 = 86_400_000;
 
 #[derive(Clone, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]

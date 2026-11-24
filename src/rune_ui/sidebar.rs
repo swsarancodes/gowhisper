@@ -4,48 +4,48 @@
 use super::*;
 
 static SETTINGS_ICON: Icon = Icon {
-    name: "hex-settings",
+    name: "gospell-settings",
     view: 24.0,
     body: include_str!("../../assets/icons/settings.svg"),
 };
 static MODES_ICON: Icon = Icon {
-    name: "hex-modes",
+    name: "gospell-modes",
     view: 24.0,
     body: include_str!("../../assets/icons/modes.svg"),
 };
 static OUTPUT_ICON: Icon = Icon {
-    name: "hex-output",
+    name: "gospell-output",
     view: 24.0,
     body: include_str!("../../assets/icons/output.svg"),
 };
 static HISTORY_ICON: Icon = Icon {
-    name: "hex-history",
+    name: "gospell-history",
     view: 24.0,
     body: include_str!("../../assets/icons/history.svg"),
 };
 static ACTIVITY_ICON: Icon = Icon {
-    name: "hex-activity",
+    name: "gospell-activity",
     view: 24.0,
     body: include_str!("../../assets/icons/activity.svg"),
 };
 static HUD_LAB_ICON: Icon = Icon {
-    name: "hex-hud-lab",
+    name: "gospell-hud-lab",
     view: 24.0,
     body: include_str!("../../assets/icons/hud-lab.svg"),
 };
 pub(super) static VOICE_FILTER_ICON: Icon = Icon {
-    name: "hex-voice-filter",
+    name: "gospell-voice-filter",
     view: 24.0,
     body: include_str!("../../assets/icons/voice-filter.svg"),
 };
 static MEETINGS_ICON: Icon = Icon {
-    name: "hex-meetings",
+    name: "gospell-meetings",
     view: 24.0,
     body: include_str!("../../assets/icons/meetings.svg"),
 };
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 pub(super) static SCRAWL_ICON: Icon = Icon {
-    name: "hex-scrawl",
+    name: "gospell-scrawl",
     view: 24.0,
     body: include_str!("../../assets/icons/scrawl.svg"),
 };
@@ -57,7 +57,7 @@ pub(super) enum Pane {
     /// Dictation, output, and application basics.
     #[default]
     General,
-    /// What Hex does to every dictation and in some apps, read-only: the
+    /// What GoSpell does to every dictation and in some apps, read-only: the
     /// person's agent edits it.
     Output,
     /// The old per-app editor, in the sidebar while Labs › Modes editor is on
@@ -68,14 +68,14 @@ pub(super) enum Pane {
     History,
     /// The shots and recordings Labs › Screenshots saved (macOS, while
     /// it's on).
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     Captures,
-    /// Annotate (Scrawl's captures inside Hex): the switch, shortcuts,
+    /// Annotate (Scrawl's captures inside GoSpell): the switch, shortcuts,
     /// permission, transcriber, folder, retention, and Scrawl's own app.
     /// Dev builds, macOS and Linux only.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     Annotate,
-    /// The Hex Microphone's driver, tuning, and try-it demo (macOS, while
+    /// The GoSpell Microphone's driver, tuning, and try-it demo (macOS, while
     /// its Labs toggle is on).
     VoiceFilter,
     /// The dictation indicator's tuning scene (Playground only).
@@ -93,9 +93,9 @@ impl Pane {
         Pane::Modes,
         Pane::Meetings,
         Pane::History,
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         Pane::Captures,
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         Pane::Annotate,
         Pane::VoiceFilter,
         Pane::HudLab,
@@ -111,12 +111,12 @@ impl Pane {
             Pane::Meetings => caps.meetings && meetings::available(ui),
             // On from Labs (dev builds), or while its driver is installed.
             Pane::VoiceFilter => caps.fun && fun::running(ui),
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Pane::Annotate => ui.platform.scrawl.is_some(),
             // The Lab turns on only on macOS.
-            #[cfg(all(target_os = "macos", hex_capture))]
+            #[cfg(all(target_os = "macos", gospell_capture))]
             Pane::Captures if ui.history.unified.enabled => false,
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Pane::Captures => ui.settings.labs.screenshots,
             _ => true,
         }
@@ -128,10 +128,10 @@ impl Pane {
             Pane::Output => tr("Output"),
             Pane::Modes => tr("Modes"),
             Pane::History => tr("History"),
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Pane::Captures => tr("Captures"),
             Pane::Meetings => tr("Meetings"),
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Pane::Annotate => tr("Annotate"),
             Pane::VoiceFilter => tr("Voice Filter"),
             Pane::HudLab => "HUD Lab",
@@ -146,10 +146,10 @@ impl Pane {
             Pane::Output => "nav-output",
             Pane::Modes => "nav-modes",
             Pane::History => "nav-history",
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Pane::Captures => "nav-captures",
             Pane::Meetings => "nav-meetings",
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Pane::Annotate => "nav-annotate",
             Pane::VoiceFilter => "nav-voice-filter",
             Pane::HudLab => "nav-hud-lab",
@@ -164,10 +164,10 @@ impl Pane {
             Pane::Output => &OUTPUT_ICON,
             Pane::Modes => &MODES_ICON,
             Pane::History => &HISTORY_ICON,
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Pane::Captures => &captures::CAPTURES_ICON,
             Pane::Meetings => &MEETINGS_ICON,
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Pane::Annotate => &SCRAWL_ICON,
             Pane::VoiceFilter => &VOICE_FILTER_ICON,
             Pane::HudLab => &HUD_LAB_ICON,
@@ -295,7 +295,7 @@ fn footer(ui: &Ui, p: Paint) -> El {
         // (#1120); the hourly check alone never changes its words.
         Some(status @ (DesktopUpdateStatus::Current | DesktopUpdateStatus::Failed)) => {
             let words = match status {
-                DesktopUpdateStatus::Current if ui.update_asked => tr("Hex is up to date"),
+                DesktopUpdateStatus::Current if ui.update_asked => tr("GoSpell is up to date"),
                 DesktopUpdateStatus::Failed if ui.update_asked => tr("Couldn't check for updates"),
                 _ => tr("Check for updates"),
             };
@@ -369,9 +369,9 @@ fn footer(ui: &Ui, p: Paint) -> El {
             .center_y()
             .child(version)
             .child(
-                line("quit", tr("Quit Hex"), c.text_muted)
+                line("quit", tr("Quit GoSpell"), c.text_muted)
                     .role("button")
-                    .label(tr("Quit Hex"))
+                    .label(tr("Quit GoSpell"))
                     .hover(c.hover)
                     .press(c.pressed)
                     .focusable(true)
@@ -472,7 +472,7 @@ pub(super) enum BuildKind {
 fn build_kind() -> BuildKind {
     if crate::app_paths::is_local_build() {
         BuildKind::Local
-    } else if option_env!("HEX_TEST_BUILD") == Some("1") {
+    } else if option_env!("GOSPELL_TEST_BUILD") == Some("1") {
         BuildKind::Test
     } else {
         BuildKind::Release
@@ -487,7 +487,7 @@ pub(super) const FOOTER_LINE: f32 = 20.0;
 fn version_label() -> String {
     // Goldens render a fixed version: a local build's names its commit.
     let version = if cfg!(test) { "0.0.0" } else { crate::VERSION };
-    match option_env!("HEX_COMMIT") {
+    match option_env!("GOSPELL_COMMIT") {
         Some(commit) => {
             let kind = if crate::app_paths::is_local_build() {
                 "local"

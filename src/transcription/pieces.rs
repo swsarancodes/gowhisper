@@ -1,6 +1,6 @@
 //! A saved recording read as pieces: streaming decode, downmix, 16 kHz
 //! resampling, and the quiet-point cut the GGUF adapters use for a long clip,
-//! so a caller holds about one 30 s piece instead of the whole file. `hex
+//! so a caller holds about one 30 s piece instead of the whole file. `gospell
 //! transcribe` and a finished capture's transcription share it.
 //!
 //! WAV reads through Hound, as the local API reads an upload; every other
@@ -21,7 +21,7 @@ use crate::transcription::gguf_session::quiet_cut;
 use crate::transcription::service::{AudioError, WavFormat, validate_wav_input, wav_format};
 
 /// 30 s at 16 kHz: the longest piece, the longest clip the local API runs
-/// on the running Hex's dictation engine's loaded copy when it holds the
+/// on the running GoSpell's dictation engine's loaded copy when it holds the
 /// model, instead of its service loading a second copy.
 pub(crate) const PIECE_SAMPLES: usize = crate::transcription::service::SHARED_MAX_SAMPLES;
 /// Frames decoded per WAV read: 85 ms at 48 kHz, so a piece is cut near its
@@ -35,11 +35,11 @@ pub(crate) enum PieceError {
     Io(std::io::Error),
     /// A WAV whose rate or channels this build does not take.
     Audio(AudioError),
-    /// Not a container Hex reads.
+    /// Not a container GoSpell reads.
     NotMedia,
     /// A container with no audio track, such as a silent screen recording.
     NoAudioTrack,
-    /// An audio track in a codec Hex can't decode, named.
+    /// An audio track in a codec GoSpell can't decode, named.
     UnsupportedCodec(String),
     /// The file holds no audio at all.
     Empty,
@@ -47,7 +47,7 @@ pub(crate) enum PieceError {
     /// file is truncated or corrupt.
     Incomplete,
     /// A WAV could not be read after the up-front read accepted it: it
-    /// changed, or could no longer be read, while Hex was transcribing it.
+    /// changed, or could no longer be read, while GoSpell was transcribing it.
     Changed { at_ms: u64 },
     /// Compressed audio stopped decoding partway through.
     Damaged { at_ms: u64 },
@@ -93,8 +93,8 @@ impl std::fmt::Debug for Pieces {
 
 impl Pieces {
     /// Opens `path`, picks its audio, and decodes its first block, so a file
-    /// Hex cannot read is refused before any model is loaded, downloaded, or
-    /// Hex is asked.
+    /// GoSpell cannot read is refused before any model is loaded, downloaded, or
+    /// GoSpell is asked.
     pub(crate) fn open(path: &Path) -> Result<Self, PieceError> {
         let file = File::open(path).map_err(PieceError::Io)?;
         if let Ok(reader) = WavReader::new(BufReader::new(file)) {
@@ -421,7 +421,7 @@ mod tests {
     /// parallel in one process and share `TMPDIR`.
     fn temp(name: &str) -> std::path::PathBuf {
         std::env::temp_dir().join(format!(
-            "hex-transcribe-pieces-{name}-{}.wav",
+            "gospell-transcribe-pieces-{name}-{}.wav",
             std::process::id()
         ))
     }
@@ -650,7 +650,7 @@ mod tests {
     /// Each fixture is half a second of a 440 Hz sine, with video beside it
     /// in `sine-video.mp4`.
     #[test]
-    fn every_container_hex_reads_decodes_to_its_sixteen_kilohertz_audio() {
+    fn every_container_gospell_reads_decodes_to_its_sixteen_kilohertz_audio() {
         for name in [
             "sine-aac.m4a",
             "sine-aac.caf",
@@ -735,7 +735,7 @@ mod tests {
 
     #[test]
     fn a_missing_file_keeps_its_own_error() {
-        let error = Pieces::open(Path::new("/nonexistent/hex-transcribe.wav")).unwrap_err();
+        let error = Pieces::open(Path::new("/nonexistent/gospell-transcribe.wav")).unwrap_err();
         assert!(matches!(error, PieceError::Io(_)), "{error:?}");
     }
 

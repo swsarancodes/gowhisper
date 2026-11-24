@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(hexspeech LANGUAGES C CXX)
+project(gospellspeech LANGUAGES C CXX)
 
 include(FetchContent)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Link Whisper and ggml into the JNI library" FORCE)
@@ -19,6 +19,6 @@ FetchContent_Declare(whisper_cpp
     TLS_VERIFY ON)
 FetchContent_MakeAvailable(whisper_cpp)
 
-add_library(hexspeech SHARED hexspeech.cpp)
-target_compile_features(hexspeech PRIVATE cxx_std_17)
-target_link_libraries(hexspeech PRIVATE whisper android log)
+add_library(gospellspeech SHARED gospellspeech.cpp)
+target_compile_features(gospellspeech PRIVATE cxx_std_17)
+target_link_libraries(gospellspeech PRIVATE whisper android log)

@@ -988,33 +988,33 @@ pub(super) fn shell_word(path: &str) -> String {
     }
 }
 
-/// This Hex's executable, to run its `hex meetings` commands.
-pub(super) fn hex_command() -> String {
+/// This GoSpell's executable, to run its `gospell meetings` commands.
+pub(super) fn gospell_command() -> String {
     std::env::current_exe()
         .map(|path| shell_word(&path.to_string_lossy()))
-        .unwrap_or_else(|_| "hex".to_owned())
+        .unwrap_or_else(|_| "gospell".to_owned())
 }
 
-/// Tells a coding agent how to read meeting `id` with `hex meetings`.
+/// Tells a coding agent how to read meeting `id` with `gospell meetings`.
 /// `recording` is how far its transcript reaches while it still records.
-pub(super) fn agent_prompt(hex: &str, id: &str, title: &str, recording: Option<u64>) -> String {
+pub(super) fn agent_prompt(gospell: &str, id: &str, title: &str, recording: Option<u64>) -> String {
     let id = shell_word(id);
     let search = format!(
         "Find a topic, then read around the time it came up:\n  \
-         {hex} meetings search \"<words>\"\n  \
-         {hex} meetings show {id} --from <mm:ss> --to <mm:ss> --md\n"
+         {gospell} meetings search \"<words>\"\n  \
+         {gospell} meetings show {id} --from <mm:ss> --to <mm:ss> --md\n"
     );
     match recording {
         Some(reached_ms) => format!(
-            "Use my Hex meeting {title:?} as context. It is still recording.\n\n\
-             Read the transcript so far:\n  {hex} meetings show {id} --md\n\n\
+            "Use my GoSpell meeting {title:?} as context. It is still recording.\n\n\
+             Read the transcript so far:\n  {gospell} meetings show {id} --md\n\n\
              Catch up on what was said since this prompt (the first turn may repeat):\n  \
-             {hex} meetings show {id} --from {} --md\n\n{search}",
+             {gospell} meetings show {id} --from {} --md\n\n{search}",
             meeting::format_duration(reached_ms),
         ),
         None => format!(
-            "Use my Hex meeting {title:?} as context.\n\n\
-             Read its notes and transcript:\n  {hex} meetings show {id} --md\n\n{search}"
+            "Use my GoSpell meeting {title:?} as context.\n\n\
+             Read its notes and transcript:\n  {gospell} meetings show {id} --md\n\n{search}"
         ),
     }
 }

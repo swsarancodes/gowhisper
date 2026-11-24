@@ -1,8 +1,8 @@
 <resources>
     <!-- 键盘自己的字符串（简体中文），与应用的分开。 -->
-    <string name="keyboard_hint_hold">按住 Hex 说话</string>
+    <string name="keyboard_hint_hold">按住 GoSpell 说话</string>
     <string name="keyboard_hint_password">密码框中不能听写</string>
-    <string name="keyboard_hint_microphone">请在 Hex 中允许使用麦克风</string>
+    <string name="keyboard_hint_microphone">请在 GoSpell 中允许使用麦克风</string>
     <string name="keyboard_note_microphone">麦克风不可用，请再试一次。</string>
     <string name="keyboard_note_transcribe">无法转录，请再试一次。</string>
     <string name="keyboard_note_no_speech">没有听到说话</string>
@@ -10,7 +10,7 @@
     <string name="keyboard_cancel_dictation">取消听写</string>
     <string name="keyboard_finish_dictation">完成听写</string>
     <string name="keyboard_undo_dictation">撤销听写</string>
-    <string name="keyboard_pane">Hex 键盘，%1$s</string>
+    <string name="keyboard_pane">GoSpell 键盘，%1$s</string>
     <string name="keyboard_shift_on">已启用 Shift</string>
     <string name="keyboard_caps_lock_on">已启用大写锁定</string>
     <string name="keyboard_more_characters">显示更多字符</string>
@@ -20,14 +20,14 @@
     <string name="keyboard_recording">正在录音</string>
     <string name="keyboard_keep">保留 %1$s</string>
     <string name="keyboard_suggest">建议 %1$s</string>
-    <string name="keyboard_menu">Hex 菜单</string>
-    <string name="keyboard_menu_open">"Hex 菜单  ›"</string>
+    <string name="keyboard_menu">GoSpell 菜单</string>
+    <string name="keyboard_menu_open">"GoSpell 菜单  ›"</string>
     <string name="keyboard_menu_done">完成</string>
     <string name="keyboard_numbers">数字和符号</string>
     <string name="keyboard_letters">字母</string>
     <string name="keyboard_emoji">表情符号</string>
     <string name="keyboard_next">下一个键盘</string>
-    <string name="keyboard_hex">Hex 听写</string>
+    <string name="keyboard_gospell">GoSpell 听写</string>
     <string name="keyboard_space">空格</string>
     <string name="keyboard_period">句点</string>
     <string name="keyboard_comma">逗号</string>

@@ -1,4 +1,4 @@
-//! The stream geometry Hex asks a Parakeet buffered model for: the env
+//! The stream geometry GoSpell asks a Parakeet buffered model for: the env
 //! overrides, else Labs › Faster live text, else the model's own default.
 //!
 //! A live stream's first words can only be decoded once the model has heard a
@@ -16,7 +16,7 @@ use transcribe_cpp::{ParakeetBufferedStreamOptions, StreamExtension, StreamOptio
 use crate::transcription::gguf_header;
 
 /// The chunk Labs › Faster live text aims for, in encoder frames: 7 frames of
-/// 80 ms is 560 ms, the balanced tuple of every Parakeet buffered menu Hex
+/// 80 ms is 560 ms, the balanced tuple of every Parakeet buffered menu GoSpell
 /// ships (Unified English `(70, 7, 7)`: 1.12 s of lookahead against the
 /// default's 2.08 s, at about 1.6 times the encoder work).
 const FASTER_TARGET_FRAMES: i32 = 7;
@@ -25,7 +25,7 @@ const FASTER_TARGET_FRAMES: i32 = 7;
 /// same words, so a menu without a chunk of 2 to 7 frames keeps the default.
 const FASTER_MIN_FRAMES: i32 = 2;
 /// The encoder frame every shipped Parakeet streaming model uses. A file
-/// whose header Hex cannot read still asks for the lab's tuple in these
+/// whose header GoSpell cannot read still asks for the lab's tuple in these
 /// frames; the native stream begin validates it against the model's real
 /// menu, and the default geometry takes care of a model that has none.
 const SHIPPED_FRAME_MS: i32 = 80;
@@ -122,9 +122,9 @@ fn faster_frames(chunk_choices: &[i32], right_choices: &[i32]) -> Option<(i32, i
 /// not match; see [`StreamCache`].
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub(crate) struct StreamTuning {
-    /// `HEX_STREAM_CHUNK_MS`, when it parses.
+    /// `GOSPELL_STREAM_CHUNK_MS`, when it parses.
     chunk_ms: Option<i32>,
-    /// `HEX_STREAM_RIGHT_MS`, when it parses.
+    /// `GOSPELL_STREAM_RIGHT_MS`, when it parses.
     right_ms: Option<i32>,
     /// Labs › Faster live text, read now.
     faster: bool,
@@ -140,8 +140,8 @@ impl StreamTuning {
                 .and_then(|value| value.parse::<i32>().ok())
         };
         Self {
-            chunk_ms: read("HEX_STREAM_CHUNK_MS"),
-            right_ms: read("HEX_STREAM_RIGHT_MS"),
+            chunk_ms: read("GOSPELL_STREAM_CHUNK_MS"),
+            right_ms: read("GOSPELL_STREAM_RIGHT_MS"),
             faster: crate::labs::faster_live_text(),
         }
     }
@@ -160,8 +160,8 @@ impl StreamTuning {
     }
 
     /// The buffered-stream extension this tuning asks for, or `None` for the
-    /// model's own default geometry. `HEX_STREAM_CHUNK_MS` and
-    /// `HEX_STREAM_RIGHT_MS` take precedence over the Labs toggle; a chunk
+    /// model's own default geometry. `GOSPELL_STREAM_CHUNK_MS` and
+    /// `GOSPELL_STREAM_RIGHT_MS` take precedence over the Labs toggle; a chunk
     /// alone keeps setting the right context too, as it always has.
     fn extension(self, menus: Option<&StreamMenus>) -> Option<ParakeetBufferedStreamOptions> {
         let (chunk_ms, right_ms) = if self.chunk_ms.is_some() || self.right_ms.is_some() {

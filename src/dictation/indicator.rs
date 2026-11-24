@@ -9,7 +9,7 @@
 use std::collections::BTreeSet;
 use std::time::{Duration, Instant};
 
-use crate::rune_hud::dot_scope::{self, Pose, Scope, Stage, Tuning};
+use crate::rune_hud::dot_scope::{self, Look, Pose, Scope, Stage, Tuning};
 use crate::rune_hud::hud_placement::Island;
 
 /// The loudness before any meter arrives, dBFS.
@@ -23,6 +23,10 @@ const COMPLETED_VISIBLE_DURATION: Duration = Duration::from_millis(100);
 /// How long the notch indicator holds its checkmark before folding back,
 /// as long as a system confirmation stays up.
 const EARS_COMPLETED_VISIBLE_DURATION: Duration = Duration::from_millis(700);
+/// How long Embers' done shows: the collapse, the flash, and the GoML mark
+/// popping in with its ripple ([`dot_scope::embers::FINALE`]).
+const EMBERS_COMPLETED_VISIBLE_DURATION: Duration =
+    Duration::from_millis((dot_scope::embers::FINALE * 1000.0) as u64);
 const FAILED_VISIBLE_DURATION: Duration = Duration::from_millis(600);
 
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
@@ -199,7 +203,9 @@ pub struct DotFrame {
     pub tuning: Tuning,
     pub columns: usize,
     pub rows: usize,
-    /// (brightness, freshness) per dot, row by row, as normalized u16s.
+    /// (brightness, freshness) per dot, row by row, as normalized u16s; with
+    /// [`Look::Embers`], two words per ember instead
+    /// ([`dot_scope::embers::Embers::words`]).
     pub dots: Vec<[u16; 2]>,
 }
 
@@ -312,17 +318,21 @@ impl IndicatorModel {
 
     /// The frame as it stands, without advancing.
     pub fn frame(&self) -> DotFrame {
+        let tuning = self.scope.tuning();
         DotFrame {
             pose: self.scope.pose(),
-            tuning: self.scope.tuning(),
+            tuning,
             columns: self.scope.columns(),
             rows: self.scope.rows(),
-            dots: self
-                .scope
-                .dots()
-                .iter()
-                .map(|value| value.map(|v| (v.clamp(0.0, 1.0) * 65535.0).round() as u16))
-                .collect(),
+            dots: if tuning.look == Look::Embers {
+                self.scope.ember_words()
+            } else {
+                self.scope
+                    .dots()
+                    .iter()
+                    .map(|value| value.map(|v| (v.clamp(0.0, 1.0) * 65535.0).round() as u16))
+                    .collect()
+            },
         }
     }
 
@@ -455,6 +465,8 @@ impl IndicatorModel {
         let ears = self.island.is_some_and(|island| island.ears);
         let completed_duration = if ears {
             EARS_COMPLETED_VISIBLE_DURATION
+        } else if self.tuning.look == Look::Embers {
+            EMBERS_COMPLETED_VISIBLE_DURATION
         } else {
             COMPLETED_VISIBLE_DURATION
         };
@@ -659,6 +671,14 @@ mod tests {
             .collect()
     }
 
+    /// The classic dot field, for the checks that read its dots.
+    fn dots() -> Tuning {
+        Tuning {
+            look: Look::Dots,
+            ..Tuning::default()
+        }
+    }
+
     fn lit(frame: &DotFrame) -> u32 {
         frame.dots.iter().map(|[power, _]| u32::from(*power)).sum()
     }
@@ -698,7 +718,7 @@ mod tests {
     #[test]
     fn a_dictation_records_processes_finishes_and_settles() {
         let start = Instant::now();
-        let mut model = IndicatorModel::new(Tuning::default(), start);
+        let mut model = IndicatorModel::new(dots(), start);
         model.handle(DictationIndicatorEvent::Started, start, false);
         model.handle(DictationIndicatorEvent::DemoVoice, start, false);
         let frames = run(&mut model, start, 0.0, 1.0);
@@ -726,6 +746,36 @@ mod tests {
         assert!(!model.active(), "settled out of sight");
     }
 
+    /// Embers gather into the G while GoSpell works, and done pops the
+    /// GoML mark before the HUD goes.
+    #[test]
+    fn embers_gather_then_finish_with_the_mark() {
+        let start = Instant::now();
+        let mut model = IndicatorModel::new(Tuning::default(), start);
+        model.handle(DictationIndicatorEvent::Started, start, false);
+        model.handle(DictationIndicatorEvent::DemoVoice, start, false);
+        let frame = run(&mut model, start, 0.0, 1.0).pop().unwrap();
+        assert_eq!(frame.dots.len(), 2 * dot_scope::embers::COUNT);
+        assert_eq!(frame.pose.finale.mark, 0.0);
+        model.handle(
+            DictationIndicatorEvent::Submitted { job_id: 1 },
+            at(start, 1.0),
+            false,
+        );
+        run(&mut model, start, 1.0, 1.5);
+        model.handle(
+            DictationIndicatorEvent::JobCompleted { job_id: 1 },
+            at(start, 2.5),
+            false,
+        );
+        let finale = run(&mut model, start, 2.5, 0.8).pop().unwrap().pose.finale;
+        assert_eq!(model.stage, Stage::Done);
+        assert_eq!(finale.mark, 1.0);
+        assert!(finale.pop > 0.9, "popped: {}", finale.pop);
+        run(&mut model, start, 3.3, 2.0);
+        assert!(!model.active(), "settled out of sight");
+    }
+
     #[test]
     fn processing_that_ran_long_enough_finishes_at_once() {
         let start = Instant::now();
@@ -749,9 +799,9 @@ mod tests {
     #[test]
     fn the_notch_indicator_holds_done_for_its_checkmark() {
         // How shown the HUD is `seconds` after done begins.
-        let shown_after = |island: Option<Island>, seconds: f32| {
+        let shown_after = |tuning: Tuning, island: Option<Island>, seconds: f32| {
             let start = Instant::now();
-            let mut model = IndicatorModel::new(Tuning::default(), start);
+            let mut model = IndicatorModel::new(tuning, start);
             model.set_island(island);
             model.handle(DictationIndicatorEvent::Started, start, false);
             run(&mut model, start, 0.0, 0.5);
@@ -775,17 +825,23 @@ mod tests {
             ears: true,
         };
         assert!(
-            shown_after(Some(ears), 0.6) > 0.95,
+            shown_after(dots(), Some(ears), 0.6) > 0.95,
             "the checkmark stays up"
         );
         assert!(
-            shown_after(Some(ears), 1.3) < 0.05,
+            shown_after(dots(), Some(ears), 1.3) < 0.05,
             "then the ears fold back"
         );
         assert!(
-            shown_after(None, 0.6) < 0.05,
+            shown_after(dots(), None, 0.6) < 0.05,
             "Dot scope still collapses at once"
         );
+        let embers = Tuning::default();
+        assert!(
+            shown_after(embers, None, 0.6) > 0.95,
+            "Embers holds done while the GoML mark pops in"
+        );
+        assert!(shown_after(embers, None, 1.5) < 0.05, "then the HUD goes");
     }
 
     #[test]

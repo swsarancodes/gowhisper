@@ -1,29 +1,29 @@
 #!/bin/sh
-# Mirrors another Mac's Hex meetings folder for a local, read-only `hex mcp
+# Mirrors another Mac's GoSpell meetings folder for a local, read-only `gospell mcp
 # --meetings-dir`. One rsync over SSH; audio (*.wav), lock, and temporary
 # files stay behind. Updated files land together at the end of the transfer
 # (--delay-updates), and meetings trashed on the source disappear here.
 #
 # Exits quietly when the source is asleep or unreachable, so a LaunchAgent can
-# run it every few minutes. The mirror and its meeting folders stay owner-only. See scripts/launchd/hex-meetings-mirror.plist.
+# run it every few minutes. The mirror and its meeting folders stay owner-only. See scripts/launchd/gospell-meetings-mirror.plist.
 #
 # Environment:
-#   HEX_MEETINGS_HOST    SSH host (default: pro)
-#   HEX_MEETINGS_SOURCE  folder on the host, relative to its home
-#                        (default: Library/Application Support/hex/meetings)
-#   HEX_MEETINGS_MIRROR  local mirror (default: ~/Library/Caches/hex-meetings-mirror)
+#   GOSPELL_MEETINGS_HOST    SSH host (default: pro)
+#   GOSPELL_MEETINGS_SOURCE  folder on the host, relative to its home
+#                        (default: Library/Application Support/gospell/meetings)
+#   GOSPELL_MEETINGS_MIRROR  local mirror (default: ~/Library/Caches/gospell-meetings-mirror)
 set -eu
 
-host=${HEX_MEETINGS_HOST:-pro}
-source_dir=${HEX_MEETINGS_SOURCE:-Library/Application Support/hex/meetings}
-mirror=${HEX_MEETINGS_MIRROR:-$HOME/Library/Caches/hex-meetings-mirror}
+host=${GOSPELL_MEETINGS_HOST:-pro}
+source_dir=${GOSPELL_MEETINGS_SOURCE:-Library/Application Support/gospell/meetings}
+mirror=${GOSPELL_MEETINGS_MIRROR:-$HOME/Library/Caches/gospell-meetings-mirror}
 
 mkdir -p "$mirror"
 chmod 700 "$mirror"
 
 # The remote shell splits the path, so escape its spaces.
 remote_path=$(printf '%s/' "${source_dir%/}" | sed 's/ /\\ /g')
-errors=$(mktemp "${TMPDIR:-/tmp}/hex-meetings-mirror.XXXXXX")
+errors=$(mktemp "${TMPDIR:-/tmp}/gospell-meetings-mirror.XXXXXX")
 trap 'rm -f "$errors"' EXIT
 
 status=0

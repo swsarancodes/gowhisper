@@ -325,7 +325,7 @@ pub(crate) fn controller_loop(
     Ok(())
 }
 
-/// How often meetings past their retention move to the Trash while Hex runs.
+/// How often meetings past their retention move to the Trash while GoSpell runs.
 const EXPIRY_INTERVAL: Duration = Duration::from_secs(60 * 60);
 
 /// Moves meetings past their retention to the Trash: at launch, then
@@ -697,7 +697,7 @@ impl Reminders {
     }
 
     /// The scheduler pass over the meetings last read. A reminder waits
-    /// while Hex records; it shows after, if still due.
+    /// while GoSpell records; it shows after, if still due.
     fn step(&mut self, recording: bool, now_ms: i64, lead_ms: i64) -> Option<ReminderUpdate> {
         if recording {
             return None;
@@ -721,7 +721,7 @@ impl Reminders {
             lead_ms,
         ) {
             start.meeting.calendar = Some(calendar_context(meeting));
-            // A title the user gave (`hex meetings record --title`) wins.
+            // A title the user gave (`gospell meetings record --title`) wins.
             if !(candidate.named
                 && candidate.source == crate::meeting::detection::MeetingSource::Manual)
             {
@@ -1105,7 +1105,7 @@ fn withdraw_stop(
     true
 }
 
-/// Whether a recording stops on its own once its call ends: only one Hex
+/// Whether a recording stops on its own once its call ends: only one GoSpell
 /// started automatically (Always record), and only with Stop when
 /// the call ends on. Manual and offered recordings never do.
 fn stops_when_call_ends(automatic: bool, lab_on: bool) -> bool {

@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 
 /// What `macos::stage` names an unpacked update's folder with, beside the
 /// installed bundle. Only this exact prefix is ever removed.
-pub const PREFIX: &str = ".Hex-update-";
+pub const PREFIX: &str = ".GoSpell-update-";
 
 /// An unpacked update this process could not remove.
 ///
@@ -80,25 +80,26 @@ mod tests {
     use super::*;
 
     fn temporary(name: &str) -> PathBuf {
-        let path = std::env::temp_dir().join(format!("hex-staging-{name}-{}", std::process::id()));
+        let path =
+            std::env::temp_dir().join(format!("gospell-staging-{name}-{}", std::process::id()));
         let _ = fs::remove_dir_all(&path);
         fs::create_dir_all(&path).unwrap();
         path
     }
 
-    /// A stand-in for the installed `Hex.app` in `root`.
+    /// A stand-in for the installed `GoSpell.app` in `root`.
     fn bundle(root: &Path) -> PathBuf {
-        let bundle = root.join("Hex.app");
+        let bundle = root.join("GoSpell.app");
         fs::create_dir_all(bundle.join("Contents/MacOS")).unwrap();
-        fs::write(bundle.join("Contents/MacOS/hex"), "running").unwrap();
+        fs::write(bundle.join("Contents/MacOS/gospell"), "running").unwrap();
         bundle
     }
 
     /// A stand-in for `stage`'s `.<name>-update-<version>` folder.
     fn staged(root: &Path, version: &str) -> PathBuf {
         let staged = root.join(format!("{PREFIX}{version}"));
-        fs::create_dir_all(staged.join("Hex.app/Contents")).unwrap();
-        fs::write(staged.join("Hex.app/Contents/version"), version).unwrap();
+        fs::create_dir_all(staged.join("GoSpell.app/Contents")).unwrap();
+        fs::write(staged.join("GoSpell.app/Contents/version"), version).unwrap();
         staged
     }
 
@@ -121,7 +122,7 @@ mod tests {
         );
         assert!(bundle.exists(), "the running bundle survives");
         assert_eq!(
-            fs::read_to_string(bundle.join("Contents/MacOS/hex")).unwrap(),
+            fs::read_to_string(bundle.join("Contents/MacOS/gospell")).unwrap(),
             "running"
         );
         assert!(root.join("Other.app").exists(), "another app is not ours");
@@ -135,7 +136,7 @@ mod tests {
         let bundle = bundle(&root);
         let replaced = staged(&root, "0.0.0-dev-1014");
         let staging = staged(&root, "0.0.0-dev-1017");
-        fs::write(replaced.join("Hex.app/Contents/marker"), "replaced").unwrap();
+        fs::write(replaced.join("GoSpell.app/Contents/marker"), "replaced").unwrap();
 
         let failures = remove_beside(&bundle, Some(&staging));
 
@@ -190,7 +191,7 @@ mod tests {
     fn a_bundle_running_from_a_staging_folder_keeps_that_folder() {
         let root = temporary("inside");
         let staging = staged(&root, "0.0.0-dev-1046");
-        let bundle = staging.join("Hex.app");
+        let bundle = staging.join("GoSpell.app");
 
         let failures = remove_beside(&bundle, None);
 
@@ -206,14 +207,14 @@ mod tests {
         let root = temporary("symlink");
         let bundle = bundle(&root);
         let precious = root.join("precious");
-        fs::create_dir_all(precious.join("Hex.app")).unwrap();
+        fs::create_dir_all(precious.join("GoSpell.app")).unwrap();
         std::os::unix::fs::symlink(&precious, root.join(format!("{PREFIX}1.0.0"))).unwrap();
 
         let failures = remove_beside(&bundle, None);
 
         assert!(failures.is_empty());
         assert!(
-            precious.join("Hex.app").exists(),
+            precious.join("GoSpell.app").exists(),
             "nothing behind it is touched"
         );
         assert!(

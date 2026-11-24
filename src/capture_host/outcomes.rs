@@ -14,8 +14,8 @@ use super::{CaptureRoute, End, TargetKind, Written};
 use crate::audio::CaptureInstant;
 use crate::control::ScrawlCaptureOutcome;
 
-/// Every capture Hex knows about, as one value. A view (the capture
-/// capsule, the menu bar, `hex capture`) reads it whole instead of reaching
+/// Every capture GoSpell knows about, as one value. A view (the capture
+/// capsule, the menu bar, `gospell capture`) reads it whole instead of reaching
 /// into the host, and [`watch`] says when it changed.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct CaptureSnapshot {
@@ -64,10 +64,10 @@ pub struct SettledCapture {
     /// no transcript, if it has none.
     pub words: Option<usize>,
     pub gaps: Option<usize>,
-    /// Where a written capture's audio stops, when Hex had to stop keeping it.
+    /// Where a written capture's audio stops, when GoSpell had to stop keeping it.
     pub audio_stopped_at_ms: Option<u64>,
     pub missing_transcript: Option<String>,
-    /// Why a capture failed, when Hex knows.
+    /// Why a capture failed, when GoSpell knows.
     pub error: Option<String>,
     /// Why a written capture's summary didn't reach the clipboard; `None`
     /// once it did (or for a capture that isn't copied).

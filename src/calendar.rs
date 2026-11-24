@@ -3,7 +3,7 @@
 //! (`calendar.swift`) is macOS-only; the model here is plain data so Settings
 //! fixtures render on every OS.
 //!
-//! Hex asks for calendar access only when the user clicks Connect calendar,
+//! GoSpell asks for calendar access only when the user clicks Connect calendar,
 //! reads events locally through EventKit, and makes no network request.
 
 use std::collections::HashMap;
@@ -20,7 +20,7 @@ pub const LATE_GRACE_MS: i64 = 5 * 60 * 1_000;
 pub const REMINDER_AFTER_START_MS: i64 = 60 * 1_000;
 /// The shortest time a reminder stays up, for one shown late.
 pub const REMINDER_MIN_MS: i64 = 30 * 1_000;
-/// How far ahead Hex reads events: enough for the reminder poll and the
+/// How far ahead GoSpell reads events: enough for the reminder poll and the
 /// Settings list.
 pub const LOOKAHEAD_MS: i64 = 48 * 60 * 60 * 1_000;
 /// The most events one read returns.
@@ -63,7 +63,7 @@ pub struct AccessAnswer {
     /// EventKit's completion said yes.
     pub granted: bool,
     /// EventKit's status read right after the answer. It can still say
-    /// "not determined" in the process that asked, until Hex relaunches.
+    /// "not determined" in the process that asked, until GoSpell relaunches.
     pub status: CalendarAccess,
     /// The request's error, such as a missing usage description.
     pub error: Option<String>,
@@ -117,7 +117,7 @@ pub struct CalendarEvent {
     pub url: Option<String>,
 }
 
-/// A video call service Hex recognizes in an invitation.
+/// A video call service GoSpell recognizes in an invitation.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum CallProvider {
     Zoom,
@@ -538,17 +538,17 @@ mod native {
     use crate::app_settings::CalendarSettings;
 
     unsafe extern "C" {
-        fn hex_calendar_authorization() -> i32;
-        fn hex_calendar_request_access(granted: *mut bool, error: *mut *mut c_char) -> i32;
-        fn hex_calendar_change_count() -> u64;
-        fn hex_calendar_calendars() -> *mut c_char;
-        fn hex_calendar_events(from_ms: f64, to_ms: f64, limit: i32) -> *mut c_char;
-        fn hex_calendar_free_string(string: *mut c_char);
+        fn gospell_calendar_authorization() -> i32;
+        fn gospell_calendar_request_access(granted: *mut bool, error: *mut *mut c_char) -> i32;
+        fn gospell_calendar_change_count() -> u64;
+        fn gospell_calendar_calendars() -> *mut c_char;
+        fn gospell_calendar_events(from_ms: f64, to_ms: f64, limit: i32) -> *mut c_char;
+        fn gospell_calendar_free_string(string: *mut c_char);
     }
 
     pub fn access() -> CalendarAccess {
         // SAFETY: An EventKit status query without arguments.
-        CalendarAccess::from_code(unsafe { hex_calendar_authorization() })
+        CalendarAccess::from_code(unsafe { gospell_calendar_authorization() })
     }
 
     /// Shows the macOS prompt when access was never decided. Blocks until
@@ -559,7 +559,7 @@ mod native {
         // SAFETY: Blocks on EventKit's completion handler and writes both
         // out-pointers, which outlive the call.
         let status = CalendarAccess::from_code(unsafe {
-            hex_calendar_request_access(&mut granted, &mut error)
+            gospell_calendar_request_access(&mut granted, &mut error)
         });
         let error = (!error.is_null()).then(|| {
             // SAFETY: The bridge returned a valid C string it allocated.
@@ -567,7 +567,7 @@ mod native {
                 .to_string_lossy()
                 .into_owned();
             // SAFETY: Freed once, by the allocator that made it.
-            unsafe { hex_calendar_free_string(error) };
+            unsafe { gospell_calendar_free_string(error) };
             message
         });
         AccessAnswer {
@@ -580,17 +580,17 @@ mod native {
     /// Bumps whenever the calendar database changes.
     pub fn change_count() -> u64 {
         // SAFETY: Reads a counter the bridge's notification observer bumps.
-        unsafe { hex_calendar_change_count() }
+        unsafe { gospell_calendar_change_count() }
     }
 
     pub fn calendars() -> Result<Vec<CalendarInfo>> {
         // SAFETY: Returns an owned, NUL-terminated JSON string or null.
-        decode(unsafe { hex_calendar_calendars() })
+        decode(unsafe { gospell_calendar_calendars() })
     }
 
     pub fn events(from_ms: i64, to_ms: i64) -> Result<Vec<CalendarEvent>> {
         // SAFETY: Returns an owned, NUL-terminated JSON string or null.
-        decode(unsafe { hex_calendar_events(from_ms as f64, to_ms as f64, super::MAX_EVENTS) })
+        decode(unsafe { gospell_calendar_events(from_ms as f64, to_ms as f64, super::MAX_EVENTS) })
     }
 
     /// The included meetings from a little before now through the lookahead:
@@ -634,7 +634,7 @@ mod native {
         // SAFETY: The bridge returned a valid C string it allocated.
         let json = unsafe { CStr::from_ptr(string) }.to_bytes().to_vec();
         // SAFETY: Freed once, by the allocator that made it.
-        unsafe { hex_calendar_free_string(string) };
+        unsafe { gospell_calendar_free_string(string) };
         Ok(serde_json::from_slice(&json)?)
     }
 

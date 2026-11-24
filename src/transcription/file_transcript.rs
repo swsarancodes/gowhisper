@@ -10,7 +10,7 @@
 //! A file's own folder takes the transcript unless it is unwritable or the
 //! file sits in the OS temp folder, where a promised drop's copy lands: then
 //! the transcript goes to Downloads. A taken name gets " 2", " 3", and so on,
-//! and the write itself is atomic, so a transcript Hex cannot finish never
+//! and the write itself is atomic, so a transcript GoSpell cannot finish never
 //! replaces another one; a crash between reserving a name and the rename can
 //! still leave an empty `<stem>.txt`.
 
@@ -38,7 +38,7 @@ const MAX_ATTEMPTS: usize = 1_000;
 
 /// The common file extensions for audio containers the shared pieces reader
 /// decodes, without the dot, on every OS. The reader detects the format from
-/// the file's contents rather than the name, so this is the list Hex offers,
+/// the file's contents rather than the name, so this is the list GoSpell offers,
 /// not an exhaustive one: what the window's drop target, its "Transcribe a
 /// file…" dialog, and their copy all offer.
 pub const EXTENSIONS: &[&str] = &[
@@ -69,7 +69,7 @@ pub enum FileTranscriptError {
     NoAudioTrack { path: PathBuf },
     /// The file holds no audio at all.
     NoAudio { path: PathBuf },
-    /// The file is truncated or changed while Hex read it, with where that
+    /// The file is truncated or changed while GoSpell read it, with where that
     /// was found when the reader knew (a compressed file that stopped
     /// decoding partway).
     Corrupt { path: PathBuf, at_ms: Option<u64> },
@@ -93,7 +93,7 @@ impl std::fmt::Display for FileTranscriptError {
             }
             Self::UnsupportedFormat { path } => write!(
                 formatter,
-                "{} is not a kind of audio file Hex can transcribe; drop a {FORMATS} file",
+                "{} is not a kind of audio file GoSpell can transcribe; drop a {FORMATS} file",
                 path.display()
             ),
             Self::Unreadable { path, reason } => {
@@ -101,7 +101,7 @@ impl std::fmt::Display for FileTranscriptError {
             }
             Self::UnsupportedCodec { path, codec } => write!(
                 formatter,
-                "{} holds audio in a codec Hex cannot decode ({codec})",
+                "{} holds audio in a codec GoSpell cannot decode ({codec})",
                 path.display()
             ),
             Self::NoAudioTrack { path } => {
@@ -164,7 +164,7 @@ pub fn transcribe_audio_file(
     }
     let mut pieces = Pieces::open(source).map_err(|error| file_error(source, error))?;
     // A saved file is read whole once before a model loads, as
-    // `hex transcribe` does, so a truncated WAV is refused rather than
+    // `gospell transcribe` does, so a truncated WAV is refused rather than
     // failing after minutes of transcription. Compressed audio decodes once,
     // as it transcribes, and damage found later names the position where it
     // is (`12:34` into the file).
@@ -224,7 +224,7 @@ fn still_wanted(cancel: &AtomicBool) -> Result<(), FileTranscriptError> {
 
 /// Decodes and transcribes every piece in order, joining their text with one
 /// space. A piece the speech detector hears nothing in comes back empty and
-/// adds nothing, as it does for `hex transcribe`.
+/// adds nothing, as it does for `gospell transcribe`.
 fn transcribe_pieces(
     pieces: &mut Pieces,
     handle: &TranscriptionServiceHandle,
@@ -278,7 +278,7 @@ fn transcribe_piece(
     let Some(admission) = handle.admit_audio() else {
         debug_assert!(false, "a file's fresh service refused its first clip");
         return Err(transcription_failed(
-            "Hex's transcription service refused the file's first clip",
+            "GoSpell's transcription service refused the file's first clip",
         ));
     };
     let job = handle
@@ -309,7 +309,7 @@ fn service_error(error: TranscriptionServiceError) -> FileTranscriptError {
             transcription_failed("Another transcription is running")
         }
         TranscriptionServiceError::Unavailable => {
-            transcription_failed("Hex's transcription service stopped")
+            transcription_failed("GoSpell's transcription service stopped")
         }
         TranscriptionServiceError::Cancelled => FileTranscriptError::Cancelled,
         TranscriptionServiceError::Model(message) => FileTranscriptError::ModelUnavailable(message),
@@ -358,7 +358,7 @@ fn file_error(path: &Path, error: PieceError) -> FileTranscriptError {
         },
         PieceError::NotMedia => FileTranscriptError::Unreadable {
             path: path.to_path_buf(),
-            reason: "it is not an audio or video file Hex can read".into(),
+            reason: "it is not an audio or video file GoSpell can read".into(),
         },
         PieceError::Audio(error) => FileTranscriptError::Unreadable {
             path: path.to_path_buf(),
@@ -386,7 +386,7 @@ fn clock(ms: u64) -> String {
 /// Why a WAV this build can't take was refused, for the unreadable message.
 fn audio_reason(error: &AudioError) -> &'static str {
     match error {
-        AudioError::Unsupported => "its sample rate or channels are ones Hex cannot decode",
+        AudioError::Unsupported => "its sample rate or channels are ones GoSpell cannot decode",
         AudioError::Invalid => "its WAV audio is malformed",
         AudioError::ResourceExhausted => "it is too large to decode",
     }
@@ -483,7 +483,7 @@ fn resolve(path: &Path) -> PathBuf {
 fn directory_is_writable(directory: &Path) -> bool {
     static SEQUENCE: AtomicU64 = AtomicU64::new(0);
     let probe = directory.join(format!(
-        ".hex-transcribe-{}-{}.tmp",
+        ".gospell-transcribe-{}-{}.tmp",
         std::process::id(),
         SEQUENCE.fetch_add(1, Ordering::Relaxed)
     ));
@@ -565,8 +565,10 @@ mod tests {
     use crate::transcription::pieces::PIECE_SAMPLES;
 
     fn temp_directory(name: &str) -> PathBuf {
-        let directory =
-            std::env::temp_dir().join(format!("hex-transcribe-file-{name}-{}", std::process::id()));
+        let directory = std::env::temp_dir().join(format!(
+            "gospell-transcribe-file-{name}-{}",
+            std::process::id()
+        ));
         let _ = fs::remove_dir_all(&directory);
         fs::create_dir_all(&directory).unwrap();
         directory
@@ -673,7 +675,7 @@ mod tests {
     #[test]
     fn a_file_in_the_temp_folder_sends_the_transcript_to_downloads() {
         for source in [
-            "/tmp/hex-drop.m4a",
+            "/tmp/gospell-drop.m4a",
             "/tmp/TemporaryItems/x/talk.mp3",
             "/tmpfoo/talk.wav",
         ] {
@@ -736,7 +738,7 @@ mod tests {
         ));
     }
 
-    /// A WAV is read whole once before a model loads, as `hex transcribe`
+    /// A WAV is read whole once before a model loads, as `gospell transcribe`
     /// does, so a truncated file is refused up front instead of after
     /// minutes of transcription.
     #[test]
@@ -958,7 +960,9 @@ mod tests {
             PieceError::UnsupportedCodec("AC-3".into()),
         );
         assert!(
-            codec.to_string().contains("codec Hex cannot decode (AC-3)"),
+            codec
+                .to_string()
+                .contains("codec GoSpell cannot decode (AC-3)"),
             "{codec}"
         );
         assert!(

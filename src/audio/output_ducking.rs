@@ -358,7 +358,7 @@ mod tests {
     #[test]
     fn a_guard_that_changes_nothing_reports_no_moment() {
         // An already silent output has nothing to lower, so a capture hearing
-        // its microphone has not missed anything Hex suppressed.
+        // its microphone has not missed anything GoSpell suppressed.
         let (report, outcome) = mpsc::channel();
         let guard = Guard::start_reporting(
             0.2,

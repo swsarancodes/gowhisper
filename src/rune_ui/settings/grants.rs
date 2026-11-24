@@ -10,7 +10,7 @@ use crate::desktop::host::{DesktopGrantedShortcut, DesktopShortcuts};
 use crate::desktop::i18n::{tr, tr_fill};
 
 /// What a shortcuts portal granted for `target`, since the desktop decides
-/// which trigger Hex actually gets.
+/// which trigger GoSpell actually gets.
 pub(in crate::rune_ui) fn granted(
     ui: &Ui,
     p: Paint,
@@ -26,7 +26,7 @@ pub(in crate::rune_ui) fn granted(
             unconfirmed: true,
             ..
         } => (
-            tr("Your desktop assigns this key itself, so Hex can't confirm it").to_string(),
+            tr("Your desktop assigns this key itself, so GoSpell can't confirm it").to_string(),
             p.muted(),
         ),
         DesktopGrantedShortcut { trigger: None, .. } => (
@@ -54,9 +54,9 @@ pub(in crate::rune_ui) fn portal_grant(
         // The portal never holds the cancel key.
         ShortcutTarget::Cancel => return None,
         // The portal lists Annotate's shortcut under that name.
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         ShortcutTarget::Capture => "Annotate",
-        #[cfg(all(hex_capture, target_os = "macos"))]
+        #[cfg(all(gospell_capture, target_os = "macos"))]
         ShortcutTarget::CaptureReplay => return None,
         // Only Linux lists this one under its own name; macOS and Windows
         // have no shortcuts portal.
@@ -75,7 +75,7 @@ pub(in crate::rune_ui) fn portal_grant(
 /// Keys GNOME keeps for itself by default (window menu, input sources, app
 /// switching, the overview, screenshots, …), normalized as [`chord`] writes
 /// them. A portal shortcut on one is listed in GNOME Settings but never
-/// reaches Hex (#723).
+/// reaches GoSpell (#723).
 const GNOME_KEYS: &[&str] = &[
     "alt+space",
     "super+space",
@@ -136,7 +136,7 @@ pub(in crate::rune_ui) fn on_gnome() -> bool {
 }
 
 /// On GNOME, the note under `target`'s row when its key, the one GNOME
-/// granted or else the one Hex asks for, is one GNOME keeps for itself.
+/// granted or else the one GoSpell asks for, is one GNOME keeps for itself.
 pub(in crate::rune_ui) fn gnome_clash_note(
     ui: &Ui,
     p: Paint,
@@ -156,7 +156,7 @@ pub(in crate::rune_ui) fn gnome_clash_note(
         note(
             "gnome-clash",
             &tr_fill(
-                "GNOME uses {} itself, so it never reaches Hex. Record another shortcut, or change it in GNOME Settings › Keyboard › Keyboard Shortcuts.",
+                "GNOME uses {} itself, so it never reaches GoSpell. Record another shortcut, or change it in GNOME Settings › Keyboard › Keyboard Shortcuts.",
                 &keys,
             ),
             p.danger(),

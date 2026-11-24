@@ -95,7 +95,7 @@ pub(super) fn copy_audio(ui: &mut Ui, id: u64) {
     let (sender, receiver) = channel();
     let waker = ui.modes.waker.clone();
     let started = std::thread::Builder::new()
-        .name("hex-copy-audio".into())
+        .name("gospell-copy-audio".into())
         .spawn(move || {
             let copied = crate::history::recordings::copy_to_clipboard(&path)
                 .map_err(|error| format!("{error:#}"));

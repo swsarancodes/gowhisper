@@ -48,7 +48,7 @@ pub fn screen_vocabulary() -> bool {
     feature_on(Feature::ScreenVocabulary)
 }
 
-/// Names a person fixes in text Hex just pasted join Vocabulary, read from
+/// Names a person fixes in text GoSpell just pasted join Vocabulary, read from
 /// that field alone for a few minutes after the paste (macOS; read as each
 /// paste commits).
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
@@ -81,7 +81,7 @@ pub fn cursor_context() -> bool {
 
 /// A finished Annotate capture copies to the clipboard as one light zip file
 /// rather than its image and summary (read where a written capture is copied).
-#[cfg_attr(not(hex_capture), allow(dead_code))]
+#[cfg_attr(not(gospell_capture), allow(dead_code))]
 pub fn copy_capture_zip() -> bool {
     feature_on(Feature::CopyCaptureZip)
 }
@@ -91,7 +91,7 @@ pub fn copy_capture_zip() -> bool {
 /// into the app in front, History, and Paste Last. The capture keeps
 /// recording, and its narration hears the words too. Read at each press the
 /// capture would otherwise swallow, on every OS.
-#[cfg_attr(not(hex_capture), allow(dead_code))]
+#[cfg_attr(not(gospell_capture), allow(dead_code))]
 pub fn dictate_while_annotating() -> bool {
     feature_on(Feature::DictateWhileAnnotating)
 }
@@ -226,7 +226,7 @@ pub fn parakeet_ultra() -> bool {
 }
 
 /// Labs › Dictation stats: History's summary of retained dictations, the
-/// daily rollup that outlives retention, and `hex history stats` (read as
+/// daily rollup that outlives retention, and `gospell history stats` (read as
 /// each entry is recorded, when the History pane reloads, and when the
 /// command starts). Off, the rollup is never written or read.
 pub fn history_stats() -> bool {
@@ -364,7 +364,7 @@ pub fn screenshots() -> bool {
 }
 
 /// Annotate's rolling 15 s display replay buffer (`SCClipBufferingOutput`,
-/// macOS 27+; read where the replay worker starts and on each `hex capture
+/// macOS 27+; read where the replay worker starts and on each `gospell capture
 /// replay`).
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 pub fn annotate_replay() -> bool {
@@ -386,7 +386,7 @@ pub fn speakers_only() -> bool {
     feature_on(Feature::SpeakersOnly)
 }
 
-/// The menu bar offers Pause Hex, and every capture shortcut is inert while
+/// The menu bar offers Pause GoSpell, and every capture shortcut is inert while
 /// it is paused (macOS; read each time the status item refreshes, as each
 /// shortcut's suspension is read, and when settings change so turning the
 /// lab off resumes).
@@ -405,7 +405,7 @@ pub fn calendar_menu() -> bool {
 }
 
 /// A physical Caps Lock press starts and stops dictation, and its light
-/// follows Hex's recording and processing (macOS; read by the listener on
+/// follows GoSpell's recording and processing (macOS; read by the listener on
 /// every pass and by the event tap and HID tracker through their own flag).
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 pub fn caps_lock_dictation() -> bool {
@@ -538,7 +538,7 @@ pub fn paste_last_picker() -> bool {
     feature_on(Feature::PasteLastPicker)
 }
 
-/// Labs › Agent tools for captures: `hex annotate inspect`, `zoom`, `frames`,
+/// Labs › Agent tools for captures: `gospell annotate inspect`, `zoom`, `frames`,
 /// and `skill` read a capture bundle in the CLI process (read by each of those
 /// commands, in a process that never applied settings). An Annotate lock holds
 /// it off even with its saved switch on.

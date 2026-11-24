@@ -1,6 +1,6 @@
-//! The local API a one-shot command talks to: the running Hex's, chosen once
-//! from its discovery file, or with no Hex running an embedded
-//! `hex service --embedded` this command starts and owns, the way the
+//! The local API a one-shot command talks to: the running GoSpell's, chosen once
+//! from its discovery file, or with no GoSpell running an embedded
+//! `gospell service --embedded` this command starts and owns, the way the
 //! TypeScript SDK owns its direct child. The child never publishes itself,
 //! exits when its stdin closes, and is released on every exit: success,
 //! failure, and Ctrl-C.
@@ -31,8 +31,8 @@ struct Owned {
     stdin: Option<ChildStdin>,
 }
 
-/// The running Hex's endpoint, or a started embedded service's when no Hex
-/// runs. A Hex that runs but can't be used is an error, never a reason to
+/// The running GoSpell's endpoint, or a started embedded service's when no GoSpell
+/// runs. A GoSpell that runs but can't be used is an error, never a reason to
 /// start a second service beside it.
 pub(super) fn endpoint() -> Result<Endpoint, String> {
     match crate::local_api::discover() {
@@ -47,8 +47,8 @@ fn lock() -> std::sync::MutexGuard<'static, Option<Owned>> {
 }
 
 fn start() -> Result<Endpoint, String> {
-    let executable =
-        std::env::current_exe().map_err(|error| format!("couldn't find Hex itself: {error}"))?;
+    let executable = std::env::current_exe()
+        .map_err(|error| format!("couldn't find GoSpell itself: {error}"))?;
     let mut command = crate::desktop::background_process::command(executable);
     command
         .args(["service", "--embedded"])
@@ -61,20 +61,20 @@ fn start() -> Result<Endpoint, String> {
     std::os::unix::process::CommandExt::process_group(&mut command, 0);
     let mut child = command
         .spawn()
-        .map_err(|error| format!("couldn't start Hex's transcription service: {error}"))?;
+        .map_err(|error| format!("couldn't start GoSpell's transcription service: {error}"))?;
     let pid = child.id();
     let stdout = child.stdout.take();
     let stdin = child.stdin.take();
     *lock() = Some(Owned { child, stdin });
     let line = stdout
-        .ok_or_else(|| "Hex's transcription service has no output".to_owned())
+        .ok_or_else(|| "GoSpell's transcription service has no output".to_owned())
         .and_then(ready_line);
     let endpoint =
         line.and_then(|line| Endpoint::embedded(&line, pid).map_err(|error| format!("{error:#}")));
     if endpoint.is_err() {
         release();
     }
-    endpoint.map_err(|error| format!("Hex's transcription service didn't start: {error}"))
+    endpoint.map_err(|error| format!("GoSpell's transcription service didn't start: {error}"))
 }
 
 /// The one line the child prints once it listens, read on a thread so a

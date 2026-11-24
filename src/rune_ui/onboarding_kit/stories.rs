@@ -24,7 +24,7 @@ use super::super::controls::Paint;
 use super::cards::{self, Caption, Side, TAP_BOX, bubble};
 use super::dictated::Dictated;
 use super::fixture::{ANSWER_TRY, Download, EXAMPLE_REPLIES, Language, Speech, Take, downloaded};
-use super::hex_meter::BUILD_SECS;
+use super::gospell_meter::BUILD_SECS;
 use super::hud_stage::{FlowHud, LiveHud};
 use super::live::Live;
 use super::scene_script::Script;
@@ -51,8 +51,8 @@ const SLOW_SECS: f64 = 31.0;
 /// model lands, mid-sketch.
 const SKETCH_DOWNLOAD_SECS: f64 = 59.2;
 const DOWNLOAD_HOLD: f64 = 2.8;
-/// How long the first run's `"Setting up Hex"` holds before its download
-/// flies up and `"Without Hex"` opens.
+/// How long the first run's `"Setting up GoSpell"` holds before its download
+/// flies up and `"Without GoSpell"` opens.
 const FIRST_RUN_HOLD: f64 = 1.6;
 const PERMISSIONS_WAIT: f64 = 0.6;
 const CLOSE_SECS: f64 = 0.65;
@@ -129,9 +129,9 @@ pub(crate) struct Onboard {
     pub(crate) pill_up: bool,
     pub(crate) pill_flew: f64,
     polled: f64,
-    /// Every pause and the key pace of `"Without Hex"`, tunable live.
+    /// Every pause and the key pace of `"Without GoSpell"`, tunable live.
     pub(crate) timing: typing::Timing,
-    /// `"Without Hex"` as [`Self::timing`] times it.
+    /// `"Without GoSpell"` as [`Self::timing`] times it.
     pub(crate) scene: typing::Scene,
     pub(crate) partial: &'static str,
     pub(crate) take: &'static Take,
@@ -155,10 +155,10 @@ pub(crate) struct Onboard {
     pub(crate) hud: LiveHud,
     pub(crate) flow_hud: FlowHud,
     pub(crate) sfx: SfxTrack,
-    /// Set when this is Hex's real first run (Labs):
+    /// Set when this is GoSpell's real first run (Labs):
     /// what the window's tour reports, in place of the fixtures.
     pub(crate) live: Option<Live>,
-    /// `"Hex is ready"`'s Launch at login ask.
+    /// `"GoSpell is ready"`'s Launch at login ask.
     pub(crate) login: super::login::LoginAsk,
     /// The dictated words flying into the practice field.
     pub(crate) dictated: Dictated,
@@ -175,14 +175,14 @@ pub(crate) struct Onboard {
     pub(crate) autoplay: bool,
     /// The real download as the first run shows it.
     pub(crate) replay: replay::Replay,
-    /// Where Hex lives once onboarding closes, under `"Hex is ready"`.
+    /// Where GoSpell lives once onboarding closes, under `"GoSpell is ready"`.
     pub(crate) home: super::landing::Home,
     /// `"Watch another one"` on `"Almost ready"`.
     pub(crate) sketches: super::sketches::Sketches,
 }
 
 /// A story's dictation of [`ANSWER_TRY`] on the interactive `"Your turn"`,
-/// through the same live words and paste as Hex's real one.
+/// through the same live words and paste as GoSpell's real one.
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct Rehearsal {
     /// Whether the model sends live words while the shortcut is held.
@@ -340,7 +340,7 @@ impl Onboard {
     }
 
     /// Toggles the inline language capsule button (`English` ↔ `French`) on
-    /// `"Setting up Hex"`.
+    /// `"Setting up GoSpell"`.
     pub(crate) fn cycle_language(&mut self) {
         let next = match self.language.unwrap_or(self.wants) {
             Language::English => Language::Other,
@@ -373,7 +373,7 @@ impl Onboard {
     }
 
     /// Called when the interactive `"Your turn"` [`TextArea`] changes (e.g. a
-    /// real dictation paste from Hex lands or the user types).
+    /// real dictation paste from GoSpell lands or the user types).
     pub(crate) fn on_practice_change(&mut self, _: &mut Tx) {
         if super::game::changed(self) {
             return;
@@ -413,7 +413,7 @@ impl Onboard {
     }
 
     /// Skip on the demo or the practice: on to the next step setup still
-    /// needs (the permissions, then the model), else Hex is ready.
+    /// needs (the permissions, then the model), else GoSpell is ready.
     pub(crate) fn skip_optional(&mut self) {
         if !self.step().optional() {
             return;
@@ -428,7 +428,7 @@ impl Onboard {
     }
 
     /// Leaving the practice: Accessibility, if it's still to ask for, then
-    /// `"Hex is ready"`.
+    /// `"GoSpell is ready"`.
     pub(crate) fn after_game(&mut self) {
         if self.granted {
             self.jump_to_ready();
@@ -532,11 +532,11 @@ impl Onboard {
         });
         self.manual_override = true;
         self.sfx.on_opened(self.now);
-        self.sfx.on_without_hex(from, &self.scene);
+        self.sfx.on_without_gospell(from, &self.scene);
         self.auto_due_at = Some(from + self.scene.duration());
     }
 
-    /// `"Without Hex"` with the conversation already open: Jay's messages
+    /// `"Without GoSpell"` with the conversation already open: Jay's messages
     /// land in it one by one, each with its sound, and the scene's clock
     /// starts after them. The first run opens this way.
     pub(crate) fn open_scene(&mut self) {
@@ -552,7 +552,7 @@ impl Onboard {
             in_place: true,
         });
         self.sfx.on_arrivals(from, &self.scene);
-        self.sfx.on_without_hex(from, &self.scene);
+        self.sfx.on_without_gospell(from, &self.scene);
         self.auto_due_at = Some(from + self.scene.duration());
     }
 
@@ -660,7 +660,7 @@ impl Onboard {
         self.sfx.on_ready(self.now, self.reduced.get());
     }
 
-    /// Seconds since `"Hex is ready"` appeared; a scene opened on it shows
+    /// Seconds since `"GoSpell is ready"` appeared; a scene opened on it shows
     /// it settled.
     pub(crate) fn ready_age(&self) -> f64 {
         self.beat
@@ -727,7 +727,7 @@ pub(crate) fn add<S: 'static>(playground: Playground<S>) -> Playground<S> {
             Onboard::new(Flow::Shout)
         }))
         .story(story(
-            "Prototypes/Onboarding/Without Hex · With Hex",
+            "Prototypes/Onboarding/Without GoSpell · With GoSpell",
             || Onboard::new(Flow::Versus),
         ))
         .story(first_run())
@@ -835,7 +835,7 @@ fn first_run() -> Story<Onboard> {
     .variant("Mac in French", |s| s.wants = Language::Other)
     .variant("Model already downloaded", |s| s.had_model = true)
     .variant("Permissions already granted", |s| s.granted = true)
-    .variant("Hex is ready", |s| {
+    .variant("GoSpell is ready", |s| {
         s.had_model = true;
         s.jump_to_ready();
     })
@@ -921,7 +921,7 @@ fn view(s: &Onboard, cx: &mut Cx<Onboard>) -> El {
 }
 
 fn play(s: &mut Onboard, play: &mut Play<'_, Onboard>) {
-    // A story opened on `"Hex is ready"` plays that page again.
+    // A story opened on `"GoSpell is ready"` plays that page again.
     let on_ready = s.step() == Step::Ready;
     s.now = play.now();
     s.beat = Beat::Pick;
@@ -957,7 +957,7 @@ fn start_first_run(s: &mut Onboard, play: &mut Play<'_, Onboard>) {
     play.wake_after(Duration::ZERO);
 }
 
-/// `"Without Hex"`, waiting for the Launch Room's row.
+/// `"Without GoSpell"`, waiting for the Launch Room's row.
 fn park(s: &mut Onboard, now: f64) {
     s.beat = Beat::Demo(DemoBeat::parked(now));
     s.sfx.on_parked(now, s.had_model);
@@ -1063,7 +1063,7 @@ fn next_beat(s: &mut Onboard, now: f64) -> Option<f64> {
 /// there to press `Continue →`.
 const SCORE_HOLD: f64 = 4.5;
 
-/// `"With Hex"`: the shortcut goes down and Jay's answer is spoken.
+/// `"With GoSpell"`: the shortcut goes down and Jay's answer is spoken.
 fn hear(s: &mut Onboard, now: f64) {
     s.take = Script::chosen().take();
     if let Some(demo) = s.beat.demo_mut() {
@@ -1074,14 +1074,14 @@ fn hear(s: &mut Onboard, now: f64) {
         versus::launches(s.streams()).into_iter().map(|at| now + at),
         &mut super::sfx::WordHits::default(),
     );
-    let beats = versus::hex_beats(s.streams(), &s.timing);
-    s.sfx.on_hex_reply(now, &beats);
+    let beats = versus::gospell_beats(s.streams(), &s.timing);
+    s.sfx.on_gospell_reply(now, &beats);
 }
 
-/// The first run: `"Without Hex"` and a scripted `"With Hex"` play while
+/// The first run: `"Without GoSpell"` and a scripted `"With GoSpell"` play while
 /// the model downloads, then the microphone, the practice game as the
-/// user's own `"With Hex"` once the model is in, Accessibility, and
-/// `"Hex is ready"`.
+/// user's own `"With GoSpell"` once the model is in, Accessibility, and
+/// `"GoSpell is ready"`.
 pub(super) fn first_run_next(s: &mut Onboard, now: f64) -> Option<f64> {
     const WAIT: f64 = 0.25;
     match s.step() {
@@ -1109,8 +1109,8 @@ pub(super) fn first_run_next(s: &mut Onboard, now: f64) -> Option<f64> {
             s.open_scene();
             Some(s.scene.lead_in() + s.scene.duration() + COMEDY_HOLD)
         }
-        // `"Without Hex"` plays out and its last line holds a beat; then
-        // `"With Hex"` shows how it goes, with nothing asked of the user
+        // `"Without GoSpell"` plays out and its last line holds a beat; then
+        // `"With GoSpell"` shows how it goes, with nothing asked of the user
         // yet.
         Step::Parked => {
             let from = s.beat.demo()?.typing_from()?;
@@ -1140,7 +1140,7 @@ pub(super) fn first_run_next(s: &mut Onboard, now: f64) -> Option<f64> {
                 .beat
                 .demo()
                 .and_then(DemoBeat::take_from)
-                .map_or(now, |from| from + versus::hex_done_secs(s));
+                .map_or(now, |from| from + versus::gospell_done_secs(s));
             let left = done + ENDING_HOLD - now;
             if left > 1e-3 {
                 return Some(left);
@@ -1186,7 +1186,7 @@ pub(super) fn first_run_next(s: &mut Onboard, now: f64) -> Option<f64> {
             s.jump_to_ready();
             None
         }
-        // The first run has no score: `"With Hex"` goes on to the microphone.
+        // The first run has no score: `"With GoSpell"` goes on to the microphone.
         Step::Done | Step::Ready => None,
     }
 }
@@ -1197,13 +1197,13 @@ pub(crate) const TAPS_BEFORE_TOGGLE: u8 = 2;
 /// The longest gap between polls that still plays a flight.
 const FLIGHT_SEEN: f64 = 0.25;
 
-/// How long `"Without Hex"`'s last line holds before the first run moves on,
+/// How long `"Without GoSpell"`'s last line holds before the first run moves on,
 /// after the scene's own hold on the removal ([`typing::Timing::fired`]).
 const COMEDY_HOLD: f64 = 0.8;
-/// How long `"With Hex"`'s happy ending stays before the first run moves on.
+/// How long `"With GoSpell"`'s happy ending stays before the first run moves on.
 const ENDING_HOLD: f64 = 1.5;
 
-/// Out of the comedy, by `"With Hex"`'s end or `Skip →`.
+/// Out of the comedy, by `"With GoSpell"`'s end or `Skip →`.
 fn leave_comedy(s: &mut Onboard, now: f64) -> Option<f64> {
     if s.mic_granted || s.granted {
         to_practice(s, now)
@@ -1238,8 +1238,8 @@ fn to_accessibility(s: &mut Onboard, now: f64) -> Option<f64> {
     Some(permissions::AX_SECS)
 }
 
-/// On to the practice game as `"With Hex"`, once Hex can hear: until the
-/// model is in, a calm `"Almost ready"`. Hex's shortcut works only with
+/// On to the practice game as `"With GoSpell"`, once GoSpell can hear: until the
+/// model is in, a calm `"Almost ready"`. GoSpell's shortcut works only with
 /// Accessibility, so a real first run without it asks for it first.
 fn to_practice(s: &mut Onboard, now: f64) -> Option<f64> {
     const WAIT: f64 = 0.25;
@@ -1326,20 +1326,20 @@ pub(super) fn advance_to(s: &mut Onboard, now: f64, tx: &mut Tx) -> bool {
     tx.trace_channel("onboarding.mic", "level", s.listening_peak().unwrap_or(0.0));
     if let Some(demo) = s.beat.demo() {
         let sent_seen = demo.sent_seen;
-        let hex_seen = demo.hex_seen;
-        // A sent `"Without Hex"` reply lifts out of the field into its bubble.
+        let gospell_seen = demo.gospell_seen;
+        // A sent `"Without GoSpell"` reply lifts out of the field into its bubble.
         let sent = versus::sent_count(s);
         for i in sent_seen..sent {
             tx.launch("typed/line0", format!("sent-bubble-{i}"));
         }
-        // `"With Hex"`'s answer lifts out of the field from its first word.
-        let hex_sent = versus::hex_sent(s);
-        if hex_sent && !hex_seen {
-            tx.launch("w0", "hex-bubble");
+        // `"With GoSpell"`'s answer lifts out of the field from its first word.
+        let gospell_sent = versus::gospell_sent(s);
+        if gospell_sent && !gospell_seen {
+            tx.launch("w0", "gospell-bubble");
         }
         if let Some(demo) = s.beat.demo_mut() {
             demo.sent_seen = sent;
-            demo.hex_seen = hex_sent;
+            demo.gospell_seen = gospell_sent;
         }
     }
     super::sketches::advance(s, now, tx);
@@ -1354,7 +1354,7 @@ pub(super) fn advance_to(s: &mut Onboard, now: f64, tx: &mut Tx) -> bool {
     if trying && super::game::step(s, now) {
         s.hud.clear();
     } else if trying {
-        // The real first run follows Hex's own dictation, which sounds its
+        // The real first run follows GoSpell's own dictation, which sounds its
         // own tones; a rehearsal plays one without them.
         let real = match s.rehearsal {
             Some(rehearsal) => Some(rehearsal.held(now)),
@@ -1447,7 +1447,7 @@ pub(super) fn advance_to(s: &mut Onboard, now: f64, tx: &mut Tx) -> bool {
         || (step == Step::Ready && !s.reduced.get() && s.ready_age() < BUILD_SECS);
     moving |= s.dictated.moving();
 
-    // The real first run's download comes from Hex (`live::poll`).
+    // The real first run's download comes from GoSpell (`live::poll`).
     let from = s.download_from.filter(|_| s.live.is_none());
     if let Some(download) = s.download.as_mut().filter(|_| s.live.is_some()) {
         if download.done() {
@@ -1580,7 +1580,7 @@ mod tests {
         let mut s = Onboard::new(Flow::FirstRun);
         s.jump_to_try();
         assert_eq!(s.step(), Step::Try);
-        s.practice.text = "Testing live dictation in Hex.".into();
+        s.practice.text = "Testing live dictation in GoSpell.".into();
         let mut tx = Tx::default();
         s.on_practice_change(&mut tx);
         assert_eq!(s.step(), Step::TryHeard);
@@ -1593,7 +1593,7 @@ mod tests {
         let mut s = Onboard::new(Flow::FirstRun);
         s.granted = true;
         s.jump_to_try();
-        s.practice.text = "Testing live dictation in Hex.".into();
+        s.practice.text = "Testing live dictation in GoSpell.".into();
         s.on_practice_change(&mut Tx::default());
         s.press_continue();
         assert_eq!(s.step(), Step::Ready);
@@ -1632,7 +1632,7 @@ mod tests {
     }
 
     #[test]
-    fn with_hex_plays_itself_after_without_hex_then_asks_for_the_microphone() {
+    fn with_gospell_plays_itself_after_without_gospell_then_asks_for_the_microphone() {
         use crate::feedback::{OnboardingTone, Tone};
         let mut s = Onboard::new(Flow::FirstRun);
         s.had_model = true;
@@ -1665,13 +1665,16 @@ mod tests {
         );
         // From `⌥` going down to the microphone, polled every 0.05 s: the
         // demo, then the end of the scene held for a beat.
-        let with_hex = now - shortcut.unwrap();
+        let with_gospell = now - shortcut.unwrap();
         assert!(
-            with_hex <= super::super::triumph::MAX_SECS + ENDING_HOLD + 0.1,
-            "{with_hex:.1} s"
+            with_gospell <= super::super::triumph::MAX_SECS + ENDING_HOLD + 0.1,
+            "{with_gospell:.1} s"
         );
-        let demo = versus::hex_done_secs(&s);
-        assert!(with_hex >= demo + ENDING_HOLD - 0.1, "{with_hex:.1} s");
+        let demo = versus::gospell_done_secs(&s);
+        assert!(
+            with_gospell >= demo + ENDING_HOLD - 0.1,
+            "{with_gospell:.1} s"
+        );
         let fired = |tone: Tone| s.sfx.fired_cues().iter().any(|&(_, t, _)| t == tone);
         assert!(fired(Tone::Onboarding(OnboardingTone::ShortcutDown)));
         assert!(
@@ -1746,7 +1749,7 @@ mod tests {
             .count();
         assert_eq!(
             triumphs, 2,
-            "`With Hex`'s payoff and the game's first score card"
+            "`With GoSpell`'s payoff and the game's first score card"
         );
     }
 
@@ -1840,7 +1843,7 @@ mod tests {
     }
 
     #[test]
-    fn skip_leaves_with_hex_too() {
+    fn skip_leaves_with_gospell_too() {
         let mut s = Onboard::new(Flow::FirstRun);
         s.had_model = true;
         s.begin_live(0.0);
@@ -1928,7 +1931,7 @@ mod tests {
             demo.enter_your_turn(12.0);
             demo.enter_hearing(13.0);
             demo.sent_seen = 3;
-            demo.hex_seen = true;
+            demo.gospell_seen = true;
         }
         assert!(s.typing_from().is_some());
         assert!(s.beat.active_take_from().is_some());

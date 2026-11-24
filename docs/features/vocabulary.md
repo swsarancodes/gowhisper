@@ -1,9 +1,9 @@
 # Vocabulary
 
-One shared list of names Hex should know (people, projects, products), each
+One shared list of names GoSpell should know (people, projects, products), each
 with optional "sounds like" spellings a transcript may show instead. An empty
 list (the default) changes nothing. The window edits the list on macOS,
-Linux, and Windows; the `hex vocabulary` commands are macOS only for now.
+Linux, and Windows; the `gospell vocabulary` commands are macOS only for now.
 
 ```ts
 General › Vocabulary   // vocabulary.settings; after Language
@@ -39,7 +39,7 @@ General › Vocabulary   // vocabulary.settings; after Language
 │   │   "Added 3 terms, updated 2", "Updated 2 terms, skipped 1", "No new terms in that
 │   │   file" only when nothing changed, "No terms found in that file", or the error; a
 │   │   failed save says so instead of reporting success
-│   └── Export… -> a save dialog named hex-vocabulary.csv; appends .csv only when the
+│   └── Export… -> a save dialog named gospell-vocabulary.csv; appends .csv only when the
 │       name has no extension and <name>.csv doesn't exist, writes the four-column
 │       header then term, spellings joined by ", ", and two empty cells, quoting what
 │       needs it, atomically; "Exported N terms"
@@ -50,14 +50,14 @@ General › Vocabulary   // vocabulary.settings; after Language
 ├── Past the limits -> Keep the term (cut to 64 characters) and the spellings
 │   that fit; inline danger note    // never drops the term
 └── Boost -> no control in the window: Normal (default) unless changed with
-    `hex settings set vocabulary_boost off|light|normal|strong`
+    `gospell settings set vocabulary_boost off|light|normal|strong`
     (settings.json `vocabulary_boost`)  // vocabulary.boost
 
 Transcription (Parakeet: RNN-T and TDT, Underdog Bark and Nemotron 3.5 ASR too)  // vocabulary.transcription; transcription::gguf_session::with_vocabulary
 ├── Parakeet takes the list unless the boost is Off (labs.md)
 ├── Every run and live stream reads the list and the boost at its start:
 │   dictation, meetings, captures, the local API
-│   └── `hex transcribe` with no Hex running starts `hex service --embedded`,
+│   └── `gospell transcribe` with no GoSpell running starts `gospell service --embedded`,
 │       as does the TypeScript SDK's direct child on every start; it reads
 │       the saved vocabulary, boost, Labs switches, and speech engine once
 │       when it starts (AppSettings::apply_for_embedded_service); a saved
@@ -111,7 +111,7 @@ Context prompt (Whisper incl. ivrit.ai, NB-Whisper and KB-Whisper, Qwen3-ASR, Qw
 │   text
 ├── Parakeet does it in the engine (above). Other models and Apple Speech
 │   don't: a model without a vocabulary slot never reads the list, so the
-│   Settings note and `hex status` stay accurate for them
+│   Settings note and `gospell status` stay accurate for them
 ├── vocabulary_boost Off turns it off, as does an entry with no usable spelling
 ├── Uses the whole vocabulary, not only the terms that fit in the prompt: a
 │   spelling is corrected even when its term did not fit
@@ -156,7 +156,7 @@ Words on screen (Labs › Words on screen, macOS)  // vocabulary.screen
 ├── Only that capture: meetings, the local API, and OpenCode rewriting never
 │   see the terms, and only the term count and read time are logged, at debug
 ├── One reader runs at a time; an intend with no pending capture reads nothing
-└── Password fields and their subtrees are skipped; Hex's own window is never
+└── Password fields and their subtrees are skipped; GoSpell's own window is never
     read
     // checks: dictation::screen_vocabulary::tests (Qdrant, sentence starts,
     // acronyms, long all-caps words, stoplist and log levels, hashes, ordinals,
@@ -168,15 +168,15 @@ Words on screen (Labs › Words on screen, macOS)  // vocabulary.screen
     // a real Mac
 
 Learn from corrections (Labs › Learn from corrections, macOS)  // vocabulary.learn
-├── Off by default; after a dictation is pasted, Hex watches only the field it
+├── Off by default; after a dictation is pasted, GoSpell watches only the field it
 │   pasted into, reading it about every 100 ms for up to 5 minutes
 ├── The first read retries for up to a second until the app shows the paste;
-│   it compares what Hex actually inserted, never the transcript
+│   it compares what GoSpell actually inserted, never the transcript
 ├── It stops on a focus change, an empty or vanished field, a newer paste, or
 │   the timeout; the lab turned off stops it too and learns nothing, and a
 │   read a newer paste overtook is discarded
 ├── Only a real Paste starts a watch: a copy, a Service or Print output, a
-│   YOLO send, and Hex's own window start none
+│   YOLO send, and GoSpell's own window start none
 ├── It compares the final text with what it pasted and adds up to 5 name-like
 │   corrected words to Vocabulary: capitalized mid-sentence, all caps, mixed
 │   case, letters with digits, and short phrases of those. A word after a
@@ -184,7 +184,7 @@ Learn from corrections (Labs › Learn from corrections, macOS)  // vocabulary.l
 ├── Password fields, fields over 20,000 characters, text over 400 words,
 │   rewrites (more than 3 inserted words and over 60% changed), plain
 │   lowercase words, and terms already in Vocabulary are skipped
-├── A learned term is saved like `hex vocabulary add` (vocabulary.add on the
+├── A learned term is saved like `gospell vocabulary add` (vocabulary.add on the
 │   saved list, then one settings update that applies it, and an open window
 │   adopts it; vocabulary.cli)
 └── Nothing leaves the Mac; the one logged event holds the term count only
@@ -193,7 +193,7 @@ Learn from corrections (Labs › Learn from corrections, macOS)  // vocabulary.l
     // a_reading_a_newer_paste_overtook_is_discarded,
     // only_the_lab_turning_off_discards_a_correction,
     // only_a_paste_the_person_can_still_fix_is_watched,
-    // learned_terms_join_the_list_the_way_hex_vocabulary_add_does, and
+    // learned_terms_join_the_list_the_way_gospell_vocabulary_add_does, and
     // a_full_list_keeps_its_terms_and_takes_no_more in correction_watch.rs;
     // learns_a_short_correction_past_its_sixty_percent,
     // ignores_a_long_rewrite, the_pasted_text_matches_only_on_word_boundaries,
@@ -208,15 +208,15 @@ Recognition hints, folded in                // vocabulary.hints
 │   recent models (newest first), split on commas, semicolons, and line
 │   breaks, become terms; names already listed (any case) are skipped, and
 │   the rewritten file drops the field
-└── `hex settings get|set transcription.recognition_hints` -> deprecated alias:
+└── `gospell settings get|set transcription.recognition_hints` -> deprecated alias:
     reads the terms comma-separated; set adds names (cli.md)
 
-hex vocabulary                           // vocabulary.cli
+gospell vocabulary                           // vocabulary.cli
 ├── list [--json]
 ├── add <term> [--sounds-like a,b] -> New term, or new spellings merged into it
 │   └── Already there, nothing new -> changed: false
 ├── remove <term> -> Any case
-└── Running Hex saves and reloads settings; an open window adopts the change
+└── Running GoSpell saves and reloads settings; an open window adopts the change
 
 A mode's own vocabulary                  // vocabulary.modes; DictationMode::vocabulary
 ├── settings.json `dictation_processing.modes[].vocabulary`, same entries; no
@@ -250,7 +250,7 @@ Meeting notes (Labs › Vocabulary in meeting notes)  // vocabulary.notes
     calendar event; it shares the transcript's excerpt budget (#1154)
 
 Search                                   // vocabulary.search
-├── hex meetings search, MCP search_transcripts, hex history --search
+├── gospell meetings search, MCP search_transcripts, gospell history --search
 ├── Query word = a one-word term, fuzzy on
 │   ├── Its "sounds like" spellings, or the term as two words -> 0.5 (like a prefix)
 │   └── A word that sounds like it (≥2 consonant sounds, ≤ half the letters changed,
@@ -259,12 +259,12 @@ Search                                   // vocabulary.search
 ```
 
 The list lives in `settings.json` as `vocabulary`, each entry a plain term
-(`"Rune"`) or `{term, sounds_like}`; both load, and Hex writes a term without
-spellings as a plain string. `hex vocabulary list --json` keeps the object form.
+(`"Rune"`) or `{term, sounds_like}`; both load, and GoSpell writes a term without
+spellings as a plain string. `gospell vocabulary list --json` keeps the object form.
 It is written only when non-empty, so older files load unchanged and are not
 rewritten. Terms are unique ignoring case; at most 500 terms, 64 characters
-each, and 16 spellings per term. Read-only commands (`hex history`,
-`hex meetings`, `hex mcp`) read the field straight from the file and never load
+each, and 16 spellings per term. Read-only commands (`gospell history`,
+`gospell meetings`, `gospell mcp`) read the field straight from the file and never load
 or migrate settings.
 
 Short names with few consonant sounds (Rune, Dax) would sound like too many
@@ -276,8 +276,8 @@ scoring; other near matches still go in only when the model scores the term
 close to what it heard on the same audio. Because that pass never asks how the
 term sounds, a spelling that is also an ordinary word is replaced whenever it's
 heard, so keep spellings distinctive. Exact spellings count toward the 16
-candidate spans per decode and sort first. Both live in Hex's transcribe.cpp fork
-(branch `hex/vocabulary-sounds-like`: `decode_rnnt_tree` and
+candidate spans per decode and sort first. Both live in GoSpell's transcribe.cpp fork
+(branch `gospell/vocabulary-sounds-like`: `decode_rnnt_tree` and
 `rescore_vocabulary` in `src/arch/parakeet/decoder.cpp`, while `vocabulary.cpp`
 finds candidates, classifies spans, and runs the exact-spelling pass,
 `force_vocabulary_spellings`); measurements are in
@@ -286,7 +286,7 @@ finds candidates, classifies spans, and runs the exact-spelling pass,
 Provisional defaults, each changed in one place:
 
 ```ts
-hex vocabulary listed in --help          // control/cli.rs: add #[command(hide = true)] to hide it
+gospell vocabulary listed in --help          // control/cli.rs: add #[command(hide = true)] to hide it
 Prompt wording                           // dictation/processor.rs: vocabulary_lines
 Chapter prompt wording                   // meeting/chapters.rs: vocabulary_line
 Short-name rule                          // meeting/query.rs: SOUND_ALIKE_MIN_CONSONANTS
@@ -343,7 +343,7 @@ checks the per-slot wiring;
 reads the saved list, boost, and Labs switches through the no-write path and
 checks the bias they produce; publishing them into the embedded service's
 globals, and `run_service` calling that, have no automated check, so only a
-separate `hex service --embedded` process shows them;
+separate `gospell service --embedded` process shows them;
 `recognition_hints_alias_the_vocabulary` in
 [control/settings.rs](../../src/control/settings.rs);
 `whisper_and_qwen3_asr_read_the_vocabulary_as_a_prompt_and_parakeet_biases` in
@@ -376,11 +376,11 @@ sheet's exit) in [rune_ui/tests.rs](../../src/rune_ui/tests.rs);
 `only_parakeet_based_models_use_the_vocabulary` in
 [transcription/models.rs](../../src/transcription/models.rs); transcribe.cpp's
 `tests/parakeet_vocabulary_unit.cpp` (fork branch
-`hex/vocabulary-sounds-like`) covers the pure spelling pass, overlap order
+`gospell/vocabulary-sounds-like`) covers the pure spelling pass, overlap order
 (longest span, then earliest), the 1-character rule, and the span rules, but
-Hex CI does not run it. Not observed: an end-to-end audio check of a forced
+GoSpell CI does not run it. Not observed: an end-to-end audio check of a forced
 spelling replacement. Scenes:
 `mac-settings-vocabulary`, `mac-settings-vocabulary-empty`,
 `vocabulary-unused` (Whisper, no golden). Passed on macOS on
-2026-10-23; the unused-model note's checks have not been observed running. Not yet observed: the sheet edited in a running Hex, a CLI edit
-against a running Hex, or a rewrite with a live provider.
+2026-10-23; the unused-model note's checks have not been observed running. Not yet observed: the sheet edited in a running GoSpell, a CLI edit
+against a running GoSpell, or a rewrite with a live provider.

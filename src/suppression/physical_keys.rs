@@ -10,10 +10,10 @@
 //! blocking.
 //!
 //! The manager opens with `kIOHIDOptionsTypeNone` and never seizes a device,
-//! so every key still reaches the foreground application. Hex never requests
-//! Input Monitoring, so the tracker runs only when Hex already has it: a user
-//! can turn Hex on under System Settings › Privacy & Security › Input
-//! Monitoring and restart Hex. `IOHIDCheckAccess` gates the tracker before it
+//! so every key still reaches the foreground application. GoSpell never requests
+//! Input Monitoring, so the tracker runs only when GoSpell already has it: a user
+//! can turn GoSpell on under System Settings › Privacy & Security › Input
+//! Monitoring and restart GoSpell. `IOHIDCheckAccess` gates the tracker before it
 //! opens; without that permission it stays inactive without opening or
 //! prompting, and matching keeps using CoreGraphics flags unchanged, including
 //! Right Control starting from a remapped Caps Lock.
@@ -286,7 +286,7 @@ impl PhysicalKeyMonitor {
         let thread_stop = stop.clone();
         let (ready_sender, ready_receiver) = mpsc::sync_channel(1);
         let worker = thread::Builder::new()
-            .name("hex-physical-keys".into())
+            .name("gospell-physical-keys".into())
             .spawn(move || run(thread_run_loop, thread_stop, ready_sender));
         let worker = match worker {
             Ok(worker) => worker,
@@ -340,9 +340,9 @@ fn run(
     stop: Arc<AtomicBool>,
     ready: SyncSender<Option<u64>>,
 ) {
-    // Hex never calls IOHIDRequestAccess: asking could prompt for Input
-    // Monitoring, which Hex's onboarding deliberately never requests. The
-    // tracker runs only when Hex already has Input Monitoring; without it, a
+    // GoSpell never calls IOHIDRequestAccess: asking could prompt for Input
+    // Monitoring, which GoSpell's onboarding deliberately never requests. The
+    // tracker runs only when GoSpell already has Input Monitoring; without it, a
     // remapped Caps Lock keeps starting a Right Control shortcut.
     // SAFETY: a read-only access query.
     let access = unsafe { IOHIDCheckAccess(IOHID_REQUEST_TYPE_LISTEN_EVENT) };

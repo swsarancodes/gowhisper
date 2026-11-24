@@ -18,7 +18,7 @@ use objc2_foundation::{NSArray, NSData, NSString};
 use super::clipboard_restore::{
     CLIPBOARD_RESTORE_DELAY, ClipboardRestore as SharedClipboardRestore, RestoreDecision,
 };
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 use super::recent;
 use crate::continuation::{Continuation, InputActivity};
 use crate::keyboard;
@@ -43,7 +43,7 @@ pub(crate) fn note_paste() {
 }
 
 pub struct Paster {
-    #[cfg_attr(not(hex_capture), allow(dead_code))]
+    #[cfg_attr(not(gospell_capture), allow(dead_code))]
     pub(super) clipboard: Retained<NSPasteboard>,
     pub(super) activity: InputActivity,
     pub(super) continuation: Continuation,
@@ -72,7 +72,7 @@ pub(super) struct PreparedClipboard {
     capture_ms: u128,
 }
 
-/// How Hex inserts a dictation into an app that can't take a paste.
+/// How GoSpell inserts a dictation into an app that can't take a paste.
 enum Typing {
     /// Type the text as fast as its events post: Chromium 155 and 156 can drop
     /// a ⌘V that races their own pasteboard change notification.
@@ -108,11 +108,11 @@ const BAD_PASTEBOARD_FLAVOR: i32 = -25133;
 const DUPLICATE_PASTEBOARD_FLAVOR: i32 = -25134;
 const PASTE_SETTLE_DELAY: Duration = Duration::from_millis(100);
 // Chromium 155 and 156 on macOS can drop a ⌘V that races its own pasteboard
-// change notification, however long Hex waits first (#136, #212). The bug
+// change notification, however long GoSpell waits first (#136, #212). The bug
 // arrived with Chromium CL 8217390 and is fixed by CL 8503629 in 157.
 const CLIPBOARD_RACE_CHROMIUM: RangeInclusive<u32> = 155..=156;
-// Microsoft's Windows App (formerly Microsoft Remote Desktop) reads Hex's
-// synthetic ⌘V as a bare "v" (#1048), so Hex types its dictation instead,
+// Microsoft's Windows App (formerly Microsoft Remote Desktop) reads GoSpell's
+// synthetic ⌘V as a bare "v" (#1048), so GoSpell types its dictation instead,
 // one paced key at a time.
 const REMOTE_DESKTOP_CLIENTS: &[&str] = &["com.microsoft.rdc.macos", "com.microsoft.windowsapp"];
 const SYSTEM_TRANSLATED_FLAVOR: u32 = 1 << 8;
@@ -248,7 +248,7 @@ impl Paster {
 
     /// A selected dictation is text only. The picker has no route, Return,
     /// or copy-only mode, and it never activates another app.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     pub(super) fn insert_recent_text(&mut self, text: &str, target: &recent::Target) -> Result<()> {
         self.insert_text(text, PasteMode::Continue, Some(&|| target.unchanged()))
             .map(drop)
@@ -390,7 +390,7 @@ impl Paster {
                 return Err(eyre!("paste target changed"));
             }
             if self.clipboard.changeCount() != previous_change_count {
-                return Err(eyre!("clipboard changed while Hex was preserving it"));
+                return Err(eyre!("clipboard changed while GoSpell was preserving it"));
             }
             // Standalone text starts its own sentence, once the clipboard is
             // safely preserved; a failure before this leaves the continuation
@@ -921,7 +921,7 @@ mod tests {
 
     #[test]
     fn detects_the_chromium_major_version_from_the_bundle_framework() {
-        let root = std::env::temp_dir().join(format!("hex-chromium-{}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("gospell-chromium-{}", std::process::id()));
         let bundle = |name: &str, frameworks: &[(&str, &[&str])]| {
             let bundle = root.join(name);
             for (framework, versions) in frameworks {
@@ -1166,10 +1166,10 @@ mod tests {
         let clipboard = NSPasteboard::pasteboardWithUniqueName();
         let expected = [
             vec![
-                ("com.hex.fixture.text", b"text".to_vec()),
-                ("com.hex.fixture.rich", b"rich text".to_vec()),
+                ("com.gospell.fixture.text", b"text".to_vec()),
+                ("com.gospell.fixture.rich", b"rich text".to_vec()),
             ],
-            vec![("com.hex.fixture.image", vec![1, 2, 3, 4])],
+            vec![("com.gospell.fixture.image", vec![1, 2, 3, 4])],
         ];
         let items = expected
             .iter()
@@ -1200,7 +1200,7 @@ mod tests {
         let item = NSPasteboardItem::new();
         assert!(item.setData_forType(
             &NSData::with_bytes(b"first"),
-            &NSString::from_str("com.hex.fixture.first")
+            &NSString::from_str("com.gospell.fixture.first")
         ));
         clipboard.clearContents();
         write_items(&clipboard, &[item]).unwrap();
@@ -1217,7 +1217,7 @@ mod tests {
         let item = NSPasteboardItem::new();
         assert!(item.setData_forType(
             &NSData::with_bytes(b"second"),
-            &NSString::from_str("com.hex.fixture.second")
+            &NSString::from_str("com.gospell.fixture.second")
         ));
         clipboard.clearContents();
         write_items(&clipboard, &[item]).unwrap();

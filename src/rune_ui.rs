@@ -1,4 +1,4 @@
-//! Hex's window on every OS, on Rune.
+//! GoSpell's window on every OS, on Rune.
 //!
 //! The window talks to a host in the same process: on Linux the dictation
 //! host beside it (`linux_host`); on Windows and macOS the runtime thread
@@ -11,7 +11,7 @@
 
 mod activity;
 mod calls;
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 pub(crate) mod capture_capsule;
 mod controls;
 #[cfg(target_os = "macos")]
@@ -42,7 +42,7 @@ pub(crate) mod live_text;
 pub(crate) mod meeting_capsules;
 mod meetings;
 pub(crate) use self::meetings::meeting_import_failed;
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 mod captures;
 mod meetings_host;
 pub(crate) use meetings_host::{meeting_failed, meeting_settings_saved};
@@ -55,7 +55,7 @@ mod onboarding;
 mod onboarding_kit;
 mod output;
 mod paste_access;
-#[cfg(all(hex_capture, target_os = "macos"))]
+#[cfg(all(gospell_capture, target_os = "macos"))]
 pub(crate) mod paste_picker;
 mod picker;
 mod platform;
@@ -63,9 +63,9 @@ mod platform_settings;
 pub(crate) mod playground;
 mod practice;
 mod scenes;
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 mod scrawl;
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 pub(crate) mod screenshot_thumbnail;
 mod settings;
 mod shortcut_mode;
@@ -108,7 +108,7 @@ const DRAFT_DELAY: Duration = Duration::from_millis(250);
 /// the setup beat, permission polling) is checked while the window shows.
 const WINDOW_TICK: Duration = Duration::from_millis(250);
 
-/// Runs the Linux window's app on the main thread until Hex quits: the
+/// Runs the Linux window's app on the main thread until GoSpell quits: the
 /// window side of `linux_app`'s seam. It starts without a window; each
 /// `Activate` opens or focuses it with the launcher's activation token, and
 /// closing it keeps the app, its state, and the host running.
@@ -121,7 +121,7 @@ pub(crate) fn run_app(
 ) -> Result<(), String> {
     use crate::linux::service::{Activation, Control};
     // Rune ends a quitting app with `_exit` unless it is told an app has work
-    // after the loop. Hex does: the teardown below stops a meeting recording
+    // after the loop. GoSpell does: the teardown below stops a meeting recording
     // and joins it.
     rune::orderly_exit();
     rune::set_app_id(crate::linux::portal::APP_ID);
@@ -158,7 +158,7 @@ pub(crate) fn run_app(
     let quit = app.handle();
     let window = app.handle();
     std::thread::Builder::new()
-        .name("hex-window-requests".into())
+        .name("gospell-window-requests".into())
         .spawn(move || {
             while let Ok(request) = requests.recv() {
                 match request {
@@ -184,8 +184,8 @@ pub(crate) fn run_app(
         })
         .expect("could not start the window request thread");
     // Rune r399 prints a startup error and exits the process from `run` on
-    // native targets. Hex's window is optional (no display, no GPU), so take
-    // the error and let `run_window` report it and keep Hex running (#979).
+    // native targets. GoSpell's window is optional (no display, no GPU), so take
+    // the error and let `run_window` report it and keep GoSpell running (#979).
     let result = app.try_run();
     if result.is_ok() {
         // Quitting is marked before the stop, so a recording cannot start
@@ -225,14 +225,14 @@ fn managed_note() -> &'static str {
     tr("Managed by your organization")
 }
 
-/// A `hex://` link the system opened with Hex: a story link opens the window
+/// A `gospell://` link the system opened with GoSpell: a story link opens the window
 /// on that playground story; anything else is ignored.
 #[cfg(target_os = "macos")]
 fn on_open_url(ui: &mut Ui, link: &str, tx: &mut Tx) {
     if let Some(target) = deep_link::parse(link, story_link::scheme()) {
         match target {
             Ok(target) => deep_link::open(ui, target, tx),
-            Err(why) => tracing::warn!(%why, "ignored a link opened with Hex"),
+            Err(why) => tracing::warn!(%why, "ignored a link opened with GoSpell"),
         }
         crate::macos_rune::bring_window_forward();
         return;
@@ -240,7 +240,7 @@ fn on_open_url(ui: &mut Ui, link: &str, tx: &mut Tx) {
     let link = match story_link::parse(link, story_link::scheme()) {
         Ok(link) => link,
         Err(why) => {
-            tracing::warn!(%why, "ignored a link opened with Hex");
+            tracing::warn!(%why, "ignored a link opened with GoSpell");
             return;
         }
     };
@@ -250,7 +250,7 @@ fn on_open_url(ui: &mut Ui, link: &str, tx: &mut Tx) {
     crate::macos_rune::bring_window_forward();
 }
 
-/// `hex app -- --snap …`: a headless render of a fixture scene. With the
+/// `gospell app -- --snap …`: a headless render of a fixture scene. With the
 /// Labs on, `--playground [story]` renders the playground.
 #[cfg(any(target_os = "macos", target_os = "windows"))]
 pub(crate) fn render_app(rune_args: Vec<String>) -> rune::App<Ui> {
@@ -259,9 +259,9 @@ pub(crate) fn render_app(rune_args: Vec<String>) -> rune::App<Ui> {
         .iter()
         .any(|arg| arg == "--snap" || arg == "--video" || arg == "--list-scenes");
     onboarding_kit::set_live_window(playground && !headless);
-    // A render is in English unless `HEX_RENDER_LANGUAGE` names an
+    // A render is in English unless `GOSPELL_RENDER_LANGUAGE` names an
     // interface language (`ru`, `pl`, …) to check its copy in.
-    if let Ok(code) = std::env::var("HEX_RENDER_LANGUAGE") {
+    if let Ok(code) = std::env::var("GOSPELL_RENDER_LANGUAGE") {
         crate::desktop::i18n::apply(Some(&code));
     }
     // Fixtures only: a render never reads, migrates, or saves the user's
@@ -377,7 +377,7 @@ fn build(init: impl FnOnce() -> Ui + 'static, playground: PlaygroundMode) -> run
 }
 
 /// Closing the window saves pending text edits and stops a shortcut
-/// recording, as leaving a pane does. Hex keeps running.
+/// recording, as leaving a pane does. GoSpell keeps running.
 fn on_close(ui: &mut Ui, tx: &mut Tx) {
     find_popover::close(ui);
     ui.flush_drafts();
@@ -408,7 +408,7 @@ fn on_close(ui: &mut Ui, tx: &mut Tx) {
     let _ = tx;
 }
 
-/// Where the menu bar, a meeting, or a `hex window show` sends the window.
+/// Where the menu bar, a meeting, or a `gospell window show` sends the window.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum Destination {
     Settings,
@@ -420,7 +420,7 @@ pub(crate) enum Destination {
     History,
 }
 
-/// Where `hex window show` opens the window. While Meetings is off, its
+/// Where `gospell window show` opens the window. While Meetings is off, its
 /// pane shows the opt-in.
 #[cfg(not(target_os = "macos"))]
 pub(crate) fn destination(pane: Option<crate::control::Pane>) -> Destination {
@@ -462,17 +462,17 @@ pub(crate) fn show(ui: &mut Ui, destination: Destination, tx: &mut Tx) {
     }
 }
 
-#[cfg(all(target_os = "macos", hex_capture))]
+#[cfg(all(target_os = "macos", gospell_capture))]
 pub(crate) use history::unified::show_all_history;
 pub(crate) use platform::{capabilities, capability};
 
-/// `hex onboarding reset`: replays the first run in the window now; the
+/// `gospell onboarding reset`: replays the first run in the window now; the
 /// window also shows why it couldn't.
 pub(crate) fn restart_onboarding(ui: &mut Ui, tx: &mut Tx) -> Result<(), String> {
     onboarding_kit::live::restart(ui, tx).inspect_err(|why| ui.error = Some(why.clone()))
 }
 
-/// The pane the window shows, by its `hex window show` name: General is
+/// The pane the window shows, by its `gospell window show` name: General is
 /// still `settings` there.
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 pub(crate) fn current_pane(ui: &Ui) -> &'static str {
@@ -495,7 +495,7 @@ pub(crate) fn hotkey_key_named(name: &str) -> Result<HotkeyKey, &'static str> {
     Ok(HotkeyKey::named(name))
 }
 
-/// The OS's shortcut rules for `hex settings set`.
+/// The OS's shortcut rules for `gospell settings set`.
 pub(crate) fn shortcut_rules() -> crate::control::settings::ShortcutRules {
     crate::control::settings::ShortcutRules {
         key_named: |name| hotkey_key_named(name).map_err(str::to_owned),
@@ -516,8 +516,8 @@ pub(crate) fn update_check_asked(ui: &mut Ui) {
     ui.update_asked = true;
 }
 
-/// `hex app -- --snap out.png --scene …`: a headless render of a fixture
-/// scene, or `live` for the running Hex's `hex status`.
+/// `gospell app -- --snap out.png --scene …`: a headless render of a fixture
+/// scene, or `live` for the running GoSpell's `gospell status`.
 #[cfg(target_os = "linux")]
 pub(crate) fn render() {
     let with_playground =
@@ -554,7 +554,7 @@ pub(crate) fn fixed_window() -> rune::WindowOptions {
 
 fn spec() -> AppSpec<Ui> {
     AppSpec {
-        title: "Hex",
+        title: "GoSpell",
         size: WINDOW_SIZE,
         min_size: Some(MIN_WINDOW_SIZE),
         init: Ui::fixture_base,
@@ -592,7 +592,7 @@ struct ServiceView {
     transcription: DesktopTranscriptionSnapshot,
     update_status: DesktopUpdateStatus,
     update_notes: Option<crate::desktop::host::UpdateNotes>,
-    /// Why this Hex can't update itself, beside Download update (Windows).
+    /// Why this GoSpell can't update itself, beside Download update (Windows).
     update_blocked: Option<&'static str>,
     /// The service is recording or saving a shortcut.
     editing: bool,
@@ -631,7 +631,7 @@ enum Menu {
     /// The transformations a mode can add (the Modes pane).
     Transformations,
     /// How long annotations are kept (the Annotate pane).
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     CaptureRetention,
     /// A settings row's quiet select, by the row's key.
     Pick(&'static str),
@@ -683,12 +683,12 @@ pub(crate) struct Ui {
     /// The Labs store's search, tab, and chip.
     lab_store: labs::Store,
     /// Labs › Screenshots' saves-folder chooser, on the card.
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     screenshot_folder: labs::screenshots::FolderChoice,
     /// A scene previewing the badge of a build kind this binary is not.
     build_preview: Option<BuildKind>,
     /// A scene showing the Paste Last picker over the window.
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     paste_preview: bool,
     capture: Capture,
     vocabulary: vocabulary::VocabularyEditor,
@@ -702,11 +702,11 @@ pub(crate) struct Ui {
     /// Labs › Transcribe dropped audio: the drop target, its queue, and the
     /// toast of the file running or the last one's outcome.
     drop: drop_transcribe::DropTranscribe,
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     captures: captures::CapturesPane,
     /// The Annotate pane's Agents section: coding agents' skill folders and
-    /// the hex link, read when the pane opens and after an install.
-    #[cfg(hex_capture)]
+    /// the gospell link, read when the pane opens and after an install.
+    #[cfg(gospell_capture)]
     agents: scrawl::Agents,
     modes: modes::ModesPane,
     output: output::OutputPane,
@@ -715,7 +715,7 @@ pub(crate) struct Ui {
     found: found::FoundState,
     explainer: explainer::Explainer,
     sound_sets: sound_sets::SoundSets,
-    /// Meetings › Settings' Calls sheet and the calls Hex has seen.
+    /// Meetings › Settings' Calls sheet and the calls GoSpell has seen.
     calls: calls::Calls,
     tour: Option<onboarding::Tour>,
     /// The new first run over the tour (Labs).
@@ -729,7 +729,7 @@ pub(crate) struct Ui {
     hud_copied: bool,
     /// HUD Lab saved Dot scope's tuning, until the next change.
     hud_saved: bool,
-    /// Settings saves and Quit Hex a fixture recorded.
+    /// Settings saves and Quit GoSpell a fixture recorded.
     saved: usize,
     quit_requested: bool,
     /// The person asked for an update check (the footer or the menu bar),
@@ -827,10 +827,10 @@ impl Ui {
             advanced: Vec::new(),
             labs_open: false,
             lab_store: labs::Store::default(),
-            #[cfg(all(target_os = "macos", hex_capture))]
+            #[cfg(all(target_os = "macos", gospell_capture))]
             screenshot_folder: labs::screenshots::FolderChoice::default(),
             build_preview: None,
-            #[cfg(all(target_os = "macos", hex_capture))]
+            #[cfg(all(target_os = "macos", gospell_capture))]
             paste_preview: false,
             capture: Capture::Idle,
             vocabulary,
@@ -840,9 +840,9 @@ impl Ui {
             models: models::Models::default(),
             history: history::HistoryPane::default(),
             drop: drop_transcribe::DropTranscribe::default(),
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             captures: captures::CapturesPane::default(),
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             agents: scrawl::Agents::default(),
             modes,
             output: output::OutputPane::default(),
@@ -998,7 +998,7 @@ impl Ui {
             ) => {
                 // Previews grant Screen Recording on the second ask, as for
                 // system audio.
-                #[cfg(hex_capture)]
+                #[cfg(gospell_capture)]
                 if *kind == crate::desktop::onboarding::PermissionKind::ScreenRecording
                     && self.host.is_fixture()
                     && self.platform.asked(*kind)
@@ -1025,7 +1025,7 @@ impl Ui {
                 self.platform.clear_stale(kind);
                 self.platform.note_asked(kind);
             }
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             platform::PlatformRequest::Scrawl(platform::ScrawlRequest::QuitScrawl) => {
                 let fixture = self.host.is_fixture();
                 if let Some(view) = self.platform.scrawl.as_mut() {
@@ -1125,7 +1125,7 @@ impl Ui {
     /// Adopts settings the host saved, unless they are the stale copy of an
     /// edit this window just made. An editor with typing not yet saved
     /// keeps it; every other editor and setting is adopted beneath, so the
-    /// draft's save never writes back what another writer (`hex settings
+    /// draft's save never writes back what another writer (`gospell settings
     /// set`, a capture's saved rule) changed meanwhile.
     fn adopt(&mut self, service: AppSettings) -> bool {
         if service.source.revision != 0 && service.source.revision <= self.settings.source.revision
@@ -1216,7 +1216,7 @@ impl Ui {
     /// Switches panes at once: the new pane replaces the old without a fade,
     /// already at rest (a grant's morph doesn't replay).
     fn select_pane(&mut self, pane: Pane, tx: &mut Tx) {
-        #[cfg(all(target_os = "macos", hex_capture))]
+        #[cfg(all(target_os = "macos", gospell_capture))]
         let pane = history::unified::destination(self, pane);
         let labs = std::mem::take(&mut self.labs_open);
         if self.pane == pane && !labs {
@@ -1236,7 +1236,7 @@ impl Ui {
         match pane {
             Pane::History => self.history.reload(self.settings.labs.history_stats),
             Pane::HudLab => self.ask(platform::PlatformRequest::ConfigureHud(self.platform.hud)),
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Pane::Annotate => {
                 self.ask(platform::PlatformRequest::Scrawl(
                     platform::ScrawlRequest::Refresh,
@@ -1269,7 +1269,7 @@ fn on_key(ui: &mut Ui, event: &rune::KeyEvent, tx: &mut Tx) -> bool {
         tx.toggle_playground();
         return true;
     }
-    // Ctrl+Q quits Hex on Linux, as Quit Hex in the sidebar does (#808).
+    // Ctrl+Q quits GoSpell on Linux, as Quit GoSpell in the sidebar does (#808).
     // macOS's menu bar owns ⌘Q; Windows quits from its tray.
     #[cfg(target_os = "linux")]
     if event.key == rune::Key::Command('q') && !event.mods.shift && !event.mods.alt {
@@ -1352,7 +1352,7 @@ fn local_meetings(ui: &mut Ui) -> bool {
 fn setup(ui: &mut Ui, waker: Waker) {
     ui.modes.waker = Some(waker.clone());
     ui.modes.icon_cache = Some(rune::ImageCache::new(waker.clone()));
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     ui.captures.set_cache(rune::ImageCache::new(waker.clone()));
     if let Service::Pending(connect) = &mut ui.service {
         let connect = std::mem::take(connect);
@@ -1395,9 +1395,9 @@ fn poll(ui: &mut Ui, clock: f64, tx: &mut Tx) -> bool {
         ui.settings.labs.history_stats,
         ui.settings.typing_wpm,
     );
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     let mut changed = ui.captures.poll(ui.pane == Pane::Captures && !ui.labs_open) | changed;
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     {
         changed |= history::unified::poll(ui);
     }
@@ -1421,7 +1421,7 @@ fn poll(ui: &mut Ui, clock: f64, tx: &mut Tx) -> bool {
     changed |= meetings::poll_import(ui);
     changed |= vocabulary::poll(ui);
     // Labs › Screenshots' folder chooser, on macOS.
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     {
         changed |= labs::screenshots::poll(ui);
     }
@@ -1504,8 +1504,8 @@ fn poll(ui: &mut Ui, clock: f64, tx: &mut Tx) -> bool {
     changed | settings::advance_capture(ui, clock, tx)
 }
 
-/// Adopted settings may hide the pane on screen: the Hex Microphone turned off
-/// from `hex settings` hides Voice Filter, and Labs › Modes editor turned off
+/// Adopted settings may hide the pane on screen: the GoSpell Microphone turned off
+/// from `gospell settings` hides Voice Filter, and Labs › Modes editor turned off
 /// while the editor shows hides Modes. The window leaves, Output standing in
 /// for the editor it replaced. Returns whether the pane moved.
 fn leave_hidden_pane(ui: &mut Ui) -> bool {
@@ -1545,10 +1545,10 @@ fn view(ui: &Ui, cx: &mut Cx<Ui>) -> El {
         ),
         Pane::Modes => modes::pane(ui, p, &mut layer),
         Pane::History => history::pane(ui, p, cx, &mut layer),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         Pane::Captures => (Vec::new(), captures::pane(ui, p)),
         Pane::Meetings => meetings::pane(ui, p, &mut layer),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         Pane::Annotate => (Vec::new(), scrawl::pane(ui, p, &mut layer)),
         Pane::VoiceFilter => (Vec::new(), fun::pane(ui, p)),
         Pane::HudLab => hud_lab::pane(ui, p),
@@ -1604,7 +1604,7 @@ fn view(ui: &Ui, cx: &mut Cx<Ui>) -> El {
         Some(Modal::Calls) => layer.extend(calls::modal(ui, p)),
         None => {}
     }
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     if ui.paste_preview {
         layer.push(paste_picker::preview(p));
     }
@@ -1630,8 +1630,8 @@ fn window_focused(ui: &mut Ui, focused: bool, tx: &mut Tx) {
         ui.send(Request::Desktop(DesktopAction::WindowFocused));
     }
     // Screen Recording is often switched on in System Settings, so the
-    // Annotate pane reads it again as soon as Hex comes back.
-    #[cfg(hex_capture)]
+    // Annotate pane reads it again as soon as GoSpell comes back.
+    #[cfg(gospell_capture)]
     if focused && ui.pane == Pane::Annotate && ui.platform.scrawl.is_some() {
         ui.ask(platform::PlatformRequest::Scrawl(
             platform::ScrawlRequest::Refresh,
@@ -1662,7 +1662,7 @@ fn faded_body(k: &rune_kit::Kit, key: &str, content: El, fades: (f32, f32)) -> E
 #[cfg(all(test, target_os = "linux"))]
 mod tests;
 
-#[cfg(any(test, hex_capture))]
+#[cfg(any(test, gospell_capture))]
 mod offscreen;
 
 #[cfg(test)]

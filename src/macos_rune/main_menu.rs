@@ -8,7 +8,7 @@ use objc2_foundation::{MainThreadMarker, NSString};
 
 use super::MenuTarget;
 
-/// The menu bar while the window is active: Hex, File, View (with the
+/// The menu bar while the window is active: GoSpell, File, View (with the
 /// Labs), Window.
 /// Rune draws no Edit menu items, so ⌘C/⌘V reach its text fields as keys.
 pub(super) fn install_main_menu(target: &MenuTarget, mtm: MainThreadMarker) {
@@ -23,9 +23,9 @@ pub(super) fn install_main_menu(target: &MenuTarget, mtm: MainThreadMarker) {
     application.extend([
         Some(("Settings…", sel!(showSettings:), ",")),
         None,
-        Some((hide.as_str(), sel!(hideHex:), "h")),
+        Some((hide.as_str(), sel!(hideGoSpell:), "h")),
         None,
-        Some((quit.as_str(), sel!(quitHex:), "q")),
+        Some((quit.as_str(), sel!(quitGoSpell:), "q")),
     ]);
     let mut menus = vec![
         (name, application),

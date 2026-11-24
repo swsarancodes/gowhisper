@@ -1,5 +1,5 @@
-// Writes the Labs pages into the built site: labs.html (/hex/labs),
-// labs/<id>.html (/hex/labs/<id>), and a 1200 × 630 social card beside each
+// Writes the Labs pages into the built site: labs.html (/gospell/labs),
+// labs/<id>.html (/gospell/labs/<id>), and a 1200 × 630 social card beside each
 // (scripts/card.ts), and adds the pages to the sitemap. src/labs.json comes
 // from the app's Labs registry. A lab the stable release's source names is in that release; the
 // rest are Dev-build only, and so is every lab when the source can't be read.
@@ -24,9 +24,9 @@ const address = `${origin.replace("https://", "")}/labs`
 
 async function stableSource(): Promise<string | undefined> {
   if (data.channel !== "stable") return undefined
-  const url = `https://raw.githubusercontent.com/anomalyco/hex/v${data.version}/src/labs.rs`
+  const url = `https://raw.githubusercontent.com/goml/gospell/v${data.version}/src/labs.rs`
   try {
-    const response = await fetch(url, { headers: { "User-Agent": "hex-site" } })
+    const response = await fetch(url, { headers: { "User-Agent": "gospell-site" } })
     if (response.ok) return await response.text()
     console.warn(`${url} answered ${response.status}; every lab says Dev build.`)
   } catch (error) {
@@ -38,17 +38,17 @@ async function stableSource(): Promise<string | undefined> {
 const source = await stableSource()
 const channel = (lab: Lab): Channel => (source !== undefined && inSource(lab, source) ? { stable: data.version } : { dev: true })
 
-const site = (path: string) => join(assets, path.slice("/hex/".length))
-mkdirSync(site("/hex/labs/"), { recursive: true })
+const site = (path: string) => join(assets, path.slice("/gospell/".length))
+mkdirSync(site("/gospell/labs/"), { recursive: true })
 for (const lab of labs) {
   writeFileSync(site(`${pagePath(lab)}.html`), renderLab(lab, channel(lab), origin))
-  writeFileSync(site(`${pagePath(lab)}.png`), await card("Hex Labs", lab.title, cardLine(lab.summary), `${osList(lab.oses)} · ${address}`))
+  writeFileSync(site(`${pagePath(lab)}.png`), await card("GoSpell Labs", lab.title, cardLine(lab.summary), `${osList(lab.oses)} · ${address}`))
 }
 writeFileSync(site(`${INDEX_PATH}.html`), renderIndex(labs, origin))
-writeFileSync(site(`${INDEX_PATH}.png`), await card("Hex Labs", "Labs", "Features Hex is trying out, each off until you turn it on.", address))
+writeFileSync(site(`${INDEX_PATH}.png`), await card("GoSpell Labs", "Labs", "Features GoSpell is trying out, each off until you turn it on.", address))
 
 const sitemap = join(assets, "sitemap.xml")
-const urls = [INDEX_PATH, ...labs.map(pagePath)].map((path) => `  <url><loc>${origin}${path.slice("/hex".length)}</loc></url>`)
+const urls = [INDEX_PATH, ...labs.map(pagePath)].map((path) => `  <url><loc>${origin}${path.slice("/gospell".length)}</loc></url>`)
 writeFileSync(sitemap, readFileSync(sitemap, "utf8").replace("</urlset>", `${urls.join("\n")}\n</urlset>`))
 const stable = labs.filter((lab) => "stable" in channel(lab)).length
-console.log(`Labs: ${labs.length} pages (${stable} in Hex ${data.version}, ${labs.length - stable} Dev build only).`)
+console.log(`Labs: ${labs.length} pages (${stable} in GoSpell ${data.version}, ${labs.length - stable} Dev build only).`)

@@ -1,5 +1,5 @@
 //! A screenshot's file and clipboard: a PNG named as macOS names its own
-//! (`Hex Screenshot 2026-11-04 at 14.03.22.png`), saved to the folder and
+//! (`GoSpell Screenshot 2026-11-04 at 14.03.22.png`), saved to the folder and
 //! put on the clipboard as the image and the file.
 
 use std::path::{Path, PathBuf};
@@ -37,7 +37,7 @@ impl Stamp {
 /// A shot's file name, as [`name_as`] names it.
 #[cfg(test)]
 pub(crate) fn file_name(at: Stamp, copy: u32) -> String {
-    name_as("Hex Screenshot", "png", at, copy)
+    name_as("GoSpell Screenshot", "png", at, copy)
 }
 
 /// `<stem> 2026-11-04 at 14.03.22.<extension>`, then ` (2)`, ` (3)`… for
@@ -61,13 +61,13 @@ fn name_as(stem: &str, extension: &str, at: Stamp, copy: u32) -> String {
 
 /// A path in `folder` no file holds yet.
 pub(crate) fn free_path(folder: &Path, at: Stamp) -> PathBuf {
-    free_path_as(folder, at, "Hex Screenshot", "png")
+    free_path_as(folder, at, "GoSpell Screenshot", "png")
 }
 
 /// A path in `folder` no file holds yet for a recording:
-/// `Hex Recording 2026-11-04 at 14.03.22.mp4`.
+/// `GoSpell Recording 2026-11-04 at 14.03.22.mp4`.
 pub(crate) fn recording_path(folder: &Path) -> PathBuf {
-    free_path_as(folder, Stamp::now(), "Hex Recording", "mp4")
+    free_path_as(folder, Stamp::now(), "GoSpell Recording", "mp4")
 }
 
 fn free_path_as(folder: &Path, at: Stamp, stem: &str, extension: &str) -> PathBuf {
@@ -204,17 +204,18 @@ mod tests {
     fn a_screenshot_is_named_as_macos_names_its_own() {
         assert_eq!(
             file_name(AT, 1),
-            "Hex Screenshot 2026-11-04 at 14.03.22.png"
+            "GoSpell Screenshot 2026-11-04 at 14.03.22.png"
         );
         assert_eq!(
             file_name(AT, 2),
-            "Hex Screenshot 2026-11-04 at 14.03.22 (2).png"
+            "GoSpell Screenshot 2026-11-04 at 14.03.22 (2).png"
         );
     }
 
     #[test]
     fn a_second_screenshot_in_the_same_second_gets_its_own_file() {
-        let folder = std::env::temp_dir().join(format!("hex-screenshot-{}", std::process::id()));
+        let folder =
+            std::env::temp_dir().join(format!("gospell-screenshot-{}", std::process::id()));
         std::fs::create_dir_all(&folder).unwrap();
         std::fs::write(folder.join(file_name(AT, 1)), b"").unwrap();
         assert_eq!(free_path(&folder, AT), folder.join(file_name(AT, 2)));
@@ -223,7 +224,7 @@ mod tests {
 
     #[test]
     fn a_save_replaces_the_file_chosen_and_leaves_nothing_beside_it() {
-        let folder = std::env::temp_dir().join(format!("hex-save-to-{}", std::process::id()));
+        let folder = std::env::temp_dir().join(format!("gospell-save-to-{}", std::process::id()));
         std::fs::create_dir_all(&folder).unwrap();
         let path = folder.join(file_name(AT, 1));
         std::fs::write(&path, b"before").unwrap();

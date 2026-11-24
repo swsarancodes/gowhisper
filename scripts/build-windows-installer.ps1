@@ -1,12 +1,12 @@
-# Builds hex-setup-<version>-windows-<x64|arm64>.exe, the per-user Windows
-# installer, around an already-built (and signed) release hex.exe and its
-# console entry point hex.com. Installs the pinned Inno Setup when ISCC is
+# Builds gospell-setup-<version>-windows-<x64|arm64>.exe, the per-user Windows
+# installer, around an already-built (and signed) release gospell.exe and its
+# console entry point gospell.com. Installs the pinned Inno Setup when ISCC is
 # missing, and re-pins another installed version to it. The installer embeds
 # both byte for byte. -Console is left out only to wrap a release published
-# before hex.com.
+# before gospell.com.
 #
-#   scripts/build-windows-installer.ps1 -Executable dist\hex-2.4.0-windows-x64.exe `
-#     -Console dist\hex-2.4.0-windows-x64.com -Version 2.3.0 -Arch x86_64 -OutDir dist
+#   scripts/build-windows-installer.ps1 -Executable dist\gospell-2.4.0-windows-x64.exe `
+#     -Console dist\gospell-2.4.0-windows-x64.com -Version 2.3.0 -Arch x86_64 -OutDir dist
 #
 # The setup engine (the copy Setup extracts to %TEMP% at launch and the
 # installed uninstaller) is signed in two passes on separate runners, because
@@ -54,7 +54,7 @@ if ($SignedEngineDir) {
     if ($signedEngines.Count -eq 0) { throw "No signed uninst-*.e32 in $SignedEngineDir." }
 }
 $label = if ($Arch -eq 'x86_64') { 'x64' } else { 'arm64' }
-$issFile = Join-Path (Split-Path -Parent $PSScriptRoot) 'packaging\windows\hex.iss'
+$issFile = Join-Path (Split-Path -Parent $PSScriptRoot) 'packaging\windows\gospell.iss'
 
 function Find-Iscc {
     # The installed compiler first, so a shim on PATH never decides which one
@@ -121,14 +121,14 @@ function Get-IsccVersion {
     # ("-") and /O- disables output, so nothing is built; the throwaway
     # OutputDir is only there because ISCC uses it for scratch files, and
     # never the caller's.
-    $dir = Join-Path ([IO.Path]::GetTempPath()) ("hex-inno-version-" + [guid]::NewGuid().ToString('N'))
+    $dir = Join-Path ([IO.Path]::GetTempPath()) ("gospell-inno-version-" + [guid]::NewGuid().ToString('N'))
     New-Item -ItemType Directory -Force $dir | Out-Null
     try {
         $lines = @(
             '[Setup]',
-            'AppName=Hex Inno Setup version probe',
+            'AppName=GoSpell Inno Setup version probe',
             'AppVersion=0.0.1',
-            'DefaultDirName={autopf}\HexInnoSetupVersionProbe',
+            'DefaultDirName={autopf}\GoSpellInnoSetupVersionProbe',
             "OutputDir=$dir",
             'OutputBaseFilename=probe',
             'Uninstallable=no'
@@ -161,7 +161,7 @@ if ($engineSigning) {
 }
 
 if ($ExtractSignedEngine) {
-    $temp = Join-Path ([IO.Path]::GetTempPath()) "hex-setup-engine-$Arch"
+    $temp = Join-Path ([IO.Path]::GetTempPath()) "gospell-setup-engine-$Arch"
     $compileOut = Join-Path $temp 'out'
     $engineDir = Join-Path $temp 'engine'
     foreach ($dir in $compileOut, $engineDir) {
@@ -209,7 +209,7 @@ if ($result.ExitCode -ne 0) {
     }
     throw "ISCC failed with exit code $($result.ExitCode).`n$($result.Text)"
 }
-$installer = Join-Path $OutDir "hex-setup-$Version-windows-$label.exe"
+$installer = Join-Path $OutDir "gospell-setup-$Version-windows-$label.exe"
 if (-not (Test-Path $installer)) { throw "ISCC did not produce $installer." }
 # Leave the caller a successful native exit code, as scripts/test-windows-installer.ps1 does.
 $global:LASTEXITCODE = 0

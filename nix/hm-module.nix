@@ -5,9 +5,9 @@
   ...
 }:
 let
-  cfg = config.programs.hex;
+  cfg = config.programs.gospell;
   json = pkgs.formats.json { };
-  supportDir = "${config.xdg.dataHome}/hex";
+  supportDir = "${config.xdg.dataHome}/gospell";
   settings =
     lib.filterAttrs (_: value: value != null) {
       dictation_hotkey = cfg.shortcut;
@@ -18,7 +18,7 @@ let
   # User managers have no network-online.target of their own, so this asks
   # the system's, then tries anyway; failed downloads retry.
   installModel = pkgs.writeShellApplication {
-    name = "hex-install-model";
+    name = "gospell-install-model";
     runtimeInputs = [
       pkgs.coreutils
       pkgs.systemd
@@ -32,7 +32,7 @@ let
     '';
   };
   waitForSession = pkgs.writeShellApplication {
-    name = "hex-wait-for-session";
+    name = "gospell-wait-for-session";
     runtimeInputs = [
       pkgs.coreutils
       pkgs.gnugrep
@@ -42,13 +42,13 @@ let
   };
 in
 {
-  options.programs.hex = {
-    enable = lib.mkEnableOption "Hex local voice dictation";
+  options.programs.gospell = {
+    enable = lib.mkEnableOption "GoSpell local voice dictation";
     package = lib.mkOption {
       type = lib.types.package;
-      description = "Hex package to install.";
+      description = "GoSpell package to install.";
     };
-    autostart = lib.mkEnableOption "Hex startup with the graphical session";
+    autostart = lib.mkEnableOption "GoSpell startup with the graphical session";
     systemdTarget = lib.mkOption {
       type = lib.types.str;
       default = "graphical-session.target";
@@ -70,9 +70,9 @@ in
         }
       '';
       description = ''
-        Settings applied on every activation, keyed as `hex settings list`
-        names them. Declared keys overwrite Hex's values; settings changed in
-        the window that aren't declared here keep their values. A running Hex
+        Settings applied on every activation, keyed as `gospell settings list`
+        names them. Declared keys overwrite GoSpell's values; settings changed in
+        the window that aren't declared here keep their values. A running GoSpell
         adopts them at once; otherwise they are written to settings.json.
       '';
     };
@@ -87,7 +87,7 @@ in
       default = null;
       example = "parakeet_v3";
       description = ''
-        Transcription model id from `hex model list`. Declaring it only
+        Transcription model id from `gospell model list`. Declaring it only
         selects it; set `installModel` to download it.
       '';
     };
@@ -110,22 +110,22 @@ in
           "x86_64-linux"
           "aarch64-linux"
         ];
-        message = "The Hex Nix package supports x86_64-linux and aarch64-linux only.";
+        message = "The GoSpell Nix package supports x86_64-linux and aarch64-linux only.";
       }
     ];
     home.packages = [ cfg.package ];
-    # After reloadSystemd, so a restarted Hex is the one that answers.
-    home.activation.hexSettings = lib.mkIf (settings != { }) (
+    # After reloadSystemd, so a restarted GoSpell is the one that answers.
+    home.activation.gospellSettings = lib.mkIf (settings != { }) (
       lib.hm.dag.entryAfter [ "reloadSystemd" ] ''
-        if ! run ${pkgs.coreutils}/bin/env HEX_APPLICATION_SUPPORT_DIR=${lib.escapeShellArg supportDir} \
-          ${lib.getExe cfg.package} settings apply ${json.generate "hex-settings.json" settings}; then
-          warnEcho "Hex didn't apply programs.hex.settings; see the message above."
+        if ! run ${pkgs.coreutils}/bin/env GOSPELL_APPLICATION_SUPPORT_DIR=${lib.escapeShellArg supportDir} \
+          ${lib.getExe cfg.package} settings apply ${json.generate "gospell-settings.json" settings}; then
+          warnEcho "GoSpell didn't apply programs.gospell.settings; see the message above."
         fi
       ''
     );
-    systemd.user.services.hex = {
+    systemd.user.services.gospell = {
       Unit = {
-        Description = "Hex local voice dictation";
+        Description = "GoSpell local voice dictation";
         After = [ cfg.systemdTarget ];
         PartOf = [ cfg.systemdTarget ];
       };
@@ -134,7 +134,7 @@ in
         NotifyAccess = "main";
         ExecStartPre = lib.getExe waitForSession;
         ExecStart = "${lib.getExe cfg.package} service";
-        Environment = [ "HEX_APPLICATION_SUPPORT_DIR=${supportDir}" ];
+        Environment = [ "GOSPELL_APPLICATION_SUPPORT_DIR=${supportDir}" ];
         EnvironmentFile = "-${supportDir}/session.env";
         TimeoutStartSec = 35;
         Restart = "on-failure";
@@ -145,12 +145,12 @@ in
       Install.WantedBy = lib.optionals cfg.autostart [ cfg.systemdTarget ];
     };
     # Type=exec, so a switch never waits on the download.
-    systemd.user.services.hex-model = lib.mkIf cfg.installModel {
-      Unit.Description = "Download Hex's selected transcription model";
+    systemd.user.services.gospell-model = lib.mkIf cfg.installModel {
+      Unit.Description = "Download GoSpell's selected transcription model";
       Service = {
         Type = "exec";
         ExecStart = lib.getExe installModel;
-        Environment = [ "HEX_APPLICATION_SUPPORT_DIR=${supportDir}" ];
+        Environment = [ "GOSPELL_APPLICATION_SUPPORT_DIR=${supportDir}" ];
         Restart = "on-failure";
         RestartSec = 60;
         UMask = "0077";

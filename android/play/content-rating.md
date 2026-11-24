@@ -1,6 +1,6 @@
 # Content rating answers
 
-IARC draft for Hex keyboard. Select **All other app types** (a keyboard utility). Use the publisher’s monitored ratings contact for IARC correspondence. Play and the regional authorities assign the rating.
+IARC draft for GoSpell keyboard. Select **All other app types** (a keyboard utility). Use the publisher’s monitored ratings contact for IARC correspondence. Play and the regional authorities assign the rating.
 
 | Questionnaire topic | Draft answer for this build |
 | --- | --- |
@@ -10,7 +10,7 @@ IARC draft for Hex keyboard. Select **All other app types** (a keyboard utility)
 | Drugs, alcohol or tobacco use depicted or promoted | No. |
 | Gambling, simulated gambling, contests, prizes or cash redemption | No. |
 | Hate content, discriminatory themes, criminal instructions | No authored content of this kind. |
-| Users communicate with each other or exchange user-generated content inside the app | No. Hex inserts the user’s own text into the app they choose. Hex has no messaging service, accounts, public profiles, uploads, feeds or moderation surface. |
+| Users communicate with each other or exchange user-generated content inside the app | No. GoSpell inserts the user’s own text into the app they choose. GoSpell has no messaging service, accounts, public profiles, uploads, feeds or moderation surface. |
 | Online content or unrestricted internet browsing | No browsable content, search engine or browser. The one post-install download is speech-model weights, not a user-facing content catalogue. |
 | Shares the user’s physical location | No. |
 | Digital purchases, subscriptions, randomized items or ads | No. |

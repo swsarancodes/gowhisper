@@ -45,7 +45,7 @@ impl Drop for RecognitionAudio {
     }
 }
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 use crate::capture_host::{CaptureAudio, CaptureSink, CaptureSinkClosed};
 
 pub enum DictationAudioEvent {
@@ -144,7 +144,7 @@ enum Command {
     Cancel {
         reply: SyncSender<()>,
     },
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     CancelSpoken {
         at: CaptureInstant,
         reply: SyncSender<Vec<f32>>,
@@ -164,13 +164,13 @@ enum Command {
     InvalidateRecognition {
         reply: SyncSender<u64>,
     },
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     OpenCaptureSink {
         sink: SyncSender<CaptureAudio>,
         since: CaptureInstant,
         reply: SyncSender<()>,
     },
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     CloseCaptureSink {
         through: CaptureInstant,
         reply: SyncSender<Option<CaptureSinkClosed>>,
@@ -212,7 +212,7 @@ struct Owner {
     stop_phrase: crate::dictation::stop_phrase::Detector,
     /// The `capture` experiment's sink. While set, the microphone stays open
     /// even with release-while-idle and switches only once it closes.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     capture_sink: Option<CaptureSink>,
 }
 
@@ -387,7 +387,7 @@ impl DictationAudio {
     }
 
     /// Counts the active capture as intentional now, without a hold: a
-    /// `hex dictation start` has no shortcut press to judge. True when the
+    /// `gospell dictation start` has no shortcut press to judge. True when the
     /// open capture just became intentional; a capture still waiting for the
     /// microphone becomes intentional when it opens and reports
     /// `ReadyIntentional`.
@@ -409,12 +409,12 @@ impl DictationAudio {
         self.call(|reply| Command::Cancel { reply })
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     pub fn cancel_spoken(&self, at: CaptureInstant) -> Result<Vec<f32>> {
         self.call(|reply| Command::CancelSpoken { at, reply })
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     /// Copies the timeline's audio from `since` into `sink`, replacing any
     /// sink already open. The sink is bounded: audio it has no room for is
     /// dropped and reported as a gap, never waited on.
@@ -426,7 +426,7 @@ impl DictationAudio {
         self.call(|reply| Command::OpenCaptureSink { sink, since, reply })
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     /// Closes the sink once audio through `through` arrived (bounded wait),
     /// dropping its sender. `None` when no sink was open.
     pub fn close_capture_sink(&self, through: CaptureInstant) -> Result<Option<CaptureSinkClosed>> {
@@ -648,7 +648,7 @@ impl Owner {
             stream_opened_at,
             discontinuity_at: None,
             stop_phrase: crate::dictation::stop_phrase::Detector::new(),
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             capture_sink: None,
         };
         let audio = DictationAudio {
@@ -800,7 +800,7 @@ impl Owner {
                     self.handle_input(event);
                 }
             }
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Command::CancelSpoken { at, reply } => {
                 let samples = match self.slot {
                     CaptureSlot::Pending(_) => {
@@ -851,7 +851,7 @@ impl Owner {
             Command::InvalidateRecognition { reply } => {
                 let _ = reply.send(self.next_recognition_generation());
             }
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Command::OpenCaptureSink { sink, since, reply } => {
                 self.capture_sink = Some(CaptureSink::new(sink, since));
                 if !self.input.is_active() {
@@ -859,7 +859,7 @@ impl Owner {
                 }
                 let _ = reply.send(());
             }
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Command::CloseCaptureSink { through, reply } => {
                 if self.capture_sink.is_some() && self.input.is_open() {
                     self.drain_through(through);
@@ -1014,9 +1014,9 @@ impl Owner {
     }
 
     fn capture_sink_open(&self) -> bool {
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         return self.capture_sink.is_some();
-        #[cfg(not(hex_capture))]
+        #[cfg(not(gospell_capture))]
         false
     }
 
@@ -1110,7 +1110,7 @@ impl Owner {
                         });
                     }
                 }
-                #[cfg(hex_capture)]
+                #[cfg(gospell_capture)]
                 {
                     let sample_rate = self.sample_rate();
                     if let Some(sink) = &mut self.capture_sink
@@ -1984,7 +1984,7 @@ pub(crate) mod tests {
 
     /// Drives synthetic device chunks through the real microphone timeline
     /// and the Hold shortcut's own Escape decision, without installing a tap.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     pub(crate) fn cancel_fixture(pcm: &[f32], writer: crate::recognition::cancelled_words::Writer) {
         use crate::{
             app_settings::{HotkeyModifiers, RuntimeHotkey},
@@ -2278,7 +2278,7 @@ pub(crate) mod tests {
 
     #[test]
     fn startup_microphone_failure_keeps_audio_owner_alive() {
-        let device = "Hex nonexistent microphone for startup recovery test";
+        let device = "GoSpell nonexistent microphone for startup recovery test";
         let input = DictationAudio::with_input(
             RecoveringAudioInput::failed_for_test(device),
             device.into(),
@@ -2855,7 +2855,7 @@ pub(crate) mod tests {
         );
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     fn chunk_at(owner: &mut Owner, through: CaptureInstant) {
         owner.handle_input(RecoveringAudioInputEvent::Chunk {
             samples: vec![0.25; 480],
@@ -2863,7 +2863,7 @@ pub(crate) mod tests {
         });
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     fn open_sink(
         owner: &mut Owner,
         capacity: usize,
@@ -2880,7 +2880,7 @@ pub(crate) mod tests {
 
     /// Drains the events; a hold reports readiness and nothing reads
     /// recognition here, but dictation must see no failure or gap.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     fn assert_no_capture_failure(input: &DictationAudio) {
         while let Some(event) = input.try_recv_event() {
             assert!(
@@ -2895,7 +2895,7 @@ pub(crate) mod tests {
         }
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     fn sample_frames(
         audio: &Receiver<CaptureAudio>,
     ) -> (usize, Vec<(CaptureInstant, CaptureInstant)>) {
@@ -2917,7 +2917,7 @@ pub(crate) mod tests {
         (frames, gaps)
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     #[test]
     fn capture_sink_keeps_every_frame_through_timestamp_jitter() {
         let since = capture_time();
@@ -2943,7 +2943,7 @@ pub(crate) mod tests {
         assert_eq!(closed.accounted_through, since + Duration::from_millis(40));
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     #[test]
     fn capture_sink_shares_the_timeline_with_dictation() {
         let (mut owner, input, _samples) = owner_for_test(true);
@@ -3000,7 +3000,7 @@ pub(crate) mod tests {
         );
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     #[test]
     fn a_full_capture_sink_drops_audio_as_a_gap_and_never_stalls_dictation() {
         let (mut owner, input, _samples) = owner_for_test(true);
@@ -3056,7 +3056,7 @@ pub(crate) mod tests {
         assert_no_capture_failure(&input);
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     #[test]
     fn capture_sink_records_microphone_gaps() {
         let (mut owner, _input, _samples) = owner_for_test(true);
@@ -3077,7 +3077,7 @@ pub(crate) mod tests {
         );
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     #[test]
     fn capture_sink_holds_a_released_microphone_open_until_it_closes() {
         let (mut owner, _input, _samples) = owner_for_test(true);
@@ -3106,7 +3106,7 @@ pub(crate) mod tests {
         assert!(!owner.input.is_active(), "released once the capture ends");
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     #[test]
     fn a_dropped_capture_receiver_closes_the_sink() {
         let (mut owner, _input, _samples) = owner_for_test(true);

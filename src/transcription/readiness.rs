@@ -62,7 +62,7 @@ pub fn vocabulary_use_for_architecture(architecture: &str) -> VocabularyUse {
     }
 }
 
-/// Wire label for [`VocabularyUse`] in `hex model list`.
+/// Wire label for [`VocabularyUse`] in `gospell model list`.
 pub fn vocabulary_use_label(use_kind: VocabularyUse) -> &'static str {
     match use_kind {
         VocabularyUse::Prompt => "prompt",
@@ -71,24 +71,24 @@ pub fn vocabulary_use_label(use_kind: VocabularyUse) -> &'static str {
     }
 }
 
-/// Where `model`'s file is or comes from, as `hex model list` and the local
-/// API say it: `found: owner/name@abcdef1`, `imported`, `hex`, or `download`.
+/// Where `model`'s file is or comes from, as `gospell model list` and the local
+/// API say it: `found: owner/name@abcdef1`, `imported`, `gospell`, or `download`.
 fn model_source_with(model: &ModelDefinition, installed: bool) -> String {
     let here = model_path(model)
         .ok()
         .filter(|_| installed)
         .and_then(|path| found_models::describe(&path));
     match (model.id.is_custom(), here) {
-        (true, Some(origin)) => format!("found: {origin} (not tested by Hex)"),
+        (true, Some(origin)) => format!("found: {origin} (not tested by GoSpell)"),
         (false, Some(origin)) => format!("found: {origin}"),
         (true, None) => "imported".into(),
-        (false, None) if installed => "hex".into(),
+        (false, None) if installed => "gospell".into(),
         (false, None) => "download".into(),
     }
 }
 
 /// Shared projection of one available catalog or imported model for
-/// `GET /models` and `hex model list`. Each surface serializes its own wire
+/// `GET /models` and `gospell model list`. Each surface serializes its own wire
 /// schema from these values so they cannot drift.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CatalogModelInfo {
@@ -154,7 +154,7 @@ mod tests {
             variant: Cow::Borrowed("fixture"),
         };
         let dir = std::env::temp_dir().join(format!(
-            "hex-readiness-{}-{:?}",
+            "gospell-readiness-{}-{:?}",
             std::process::id(),
             std::thread::current().id()
         ));

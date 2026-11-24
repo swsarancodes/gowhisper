@@ -420,7 +420,7 @@ pub(super) const THEMES: [Theme; 9] = [
             slack(
                 "review",
                 "Frank",
-                "#hex",
+                "#gospell",
                 "the PR is reviewing us now. I got changes requested",
             ),
             &Take {

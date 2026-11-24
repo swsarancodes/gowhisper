@@ -246,7 +246,7 @@ impl Meter {
     fn spawn(self) {
         let meter = self.clone();
         let handle = std::thread::Builder::new()
-            .name("hex-capsule-meter".into())
+            .name("gospell-capsule-meter".into())
             .spawn(move || {
                 let mut t = 0.0_f64;
                 let mut last = std::time::Instant::now();
@@ -470,7 +470,7 @@ pub(crate) struct CapsuleState {
     /// The notch the capsule hangs from on the pointer's display, when it
     /// could be measured.
     notch: Option<notch::Measured>,
-    /// The keys Hex's tap hands the capsule ([`Flow::keys`]): the overlay
+    /// The keys GoSpell's tap hands the capsule ([`Flow::keys`]): the overlay
     /// never takes focus.
     keys: Option<(
         crate::capture_host::CapsuleKeys,
@@ -487,7 +487,7 @@ pub(crate) struct CapsuleState {
     backdrop: bool,
     /// Plays the flow's cues; none in stills and tests, which stay silent.
     sound: Option<Arc<dyn Fn(Cue) + Send + Sync>>,
-    /// The playground's controls and fake host (`hex capsule-playground`).
+    /// The playground's controls and fake host (`gospell capsule-playground`).
     #[cfg(target_os = "macos")]
     playground: Option<Box<playground::Playground>>,
 }
@@ -997,7 +997,7 @@ fn measured_notch() -> Option<notch::Measured> {
     None
 }
 
-/// Takes, changes, or lets go of the keys the capsule wants from Hex's tap.
+/// Takes, changes, or lets go of the keys the capsule wants from GoSpell's tap.
 fn take_keys(s: &mut CapsuleState) {
     let wanted = s.flow.keys();
     match (wanted, &mut s.keys) {
@@ -1073,7 +1073,7 @@ impl CaptureCapsule {
             Align, DisplayTarget, OverlayInput, OverlayLevel, OverlayOptions, OverlayPlacement,
             OverlaySpec, ScreenEdge,
         };
-        let spec = OverlaySpec::new("Hex capture", (PANEL_W, PANEL_H), view)
+        let spec = OverlaySpec::new("GoSpell capture", (PANEL_W, PANEL_H), view)
             .options(OverlayOptions {
                 placement: Some(OverlayPlacement::Edge {
                     edge: ScreenEdge::Top,
@@ -1284,7 +1284,7 @@ pub(crate) fn trace_channels(rt: &mut Runtime<CapsuleState>) {
     }
 }
 
-/// Draws Rune's frame and, with `HEX_CAPSULE_TRACE=<file>` set when the
+/// Draws Rune's frame and, with `GOSPELL_CAPSULE_TRACE=<file>` set when the
 /// overlay starts, writes the motion-lint trace.
 #[derive(Default)]
 struct TraceFrames {
@@ -1295,11 +1295,11 @@ impl Compositor<CapsuleState> for TraceFrames {
     fn render(&mut self, f: &mut Frame<'_, CapsuleState>) {
         f.draw_ui();
         if !std::mem::replace(&mut self.started, true)
-            && let Some(path) = std::env::var_os("HEX_CAPSULE_TRACE")
+            && let Some(path) = std::env::var_os("GOSPELL_CAPSULE_TRACE")
             && let Ok(file) = std::fs::File::create(path)
         {
             let header = rune_motion::TraceHeader {
-                launch: "hex-capture-capsule".into(),
+                launch: "gospell-capture-capsule".into(),
                 width: PANEL_W,
                 height: PANEL_H,
                 hz: 120.0,

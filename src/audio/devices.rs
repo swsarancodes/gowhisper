@@ -8,7 +8,7 @@ use super::open::{InputTarget, current_route, default_input_of, input_devices_of
 use super::routes::watch_input_devices;
 use super::transport::{Transport, transport};
 
-/// The inputs Settings offers, without Hex Microphone, and what System
+/// The inputs Settings offers, without GoSpell Microphone, and what System
 /// default currently resolves to.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct InputDevices {
@@ -16,8 +16,8 @@ pub struct InputDevices {
     /// The input System default captures from. Linux's ALSA default has no
     /// useful name, so it is `None` there.
     pub system_default: Option<String>,
-    /// The OS default is Hex Microphone, so `system_default` stands in.
-    pub default_is_hex_microphone: bool,
+    /// The OS default is GoSpell Microphone, so `system_default` stands in.
+    pub default_is_gospell_microphone: bool,
     /// The internal microphone, listed but off because the lid is closed. A
     /// headphone-jack microphone stays usable and is never named here.
     pub off_with_lid_closed: Option<String>,
@@ -34,9 +34,9 @@ pub fn input_devices() -> Result<InputDevices> {
     let host = cpal::default_host();
     let (devices, listed) = input_devices_of(&host)?;
     let default = default_input_of(&host).map(|(_, name)| name);
-    let default_is_hex_microphone = default
+    let default_is_gospell_microphone = default
         .as_deref()
-        .is_some_and(crate::audio::hex_microphone::is_hex_virtual_device_name);
+        .is_some_and(crate::audio::gospell_microphone::is_gospell_virtual_device_name);
     let transports = devices.iter().map(transport).collect::<Vec<_>>();
     let route = current_route();
     let off_with_lid_closed = (0..devices.len())
@@ -81,14 +81,14 @@ pub fn input_devices() -> Result<InputDevices> {
     };
     let mut names = listed
         .into_iter()
-        .filter(|name| !crate::audio::hex_microphone::is_hex_virtual_device_name(name))
+        .filter(|name| !crate::audio::gospell_microphone::is_gospell_virtual_device_name(name))
         .collect::<Vec<_>>();
     names.sort_by_key(|name| name.to_lowercase());
     names.dedup();
     Ok(InputDevices {
         names,
         system_default,
-        default_is_hex_microphone,
+        default_is_gospell_microphone,
         off_with_lid_closed,
         default_is_off_with_lid_closed,
         bluetooth_default_passed_over,

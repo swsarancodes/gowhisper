@@ -4,7 +4,7 @@
 
 #include <stdlib.h>
 
-int32_t hex_voice_processing_guard(hex_voice_processing_guard_body body, char **error) {
+int32_t gospell_voice_processing_guard(gospell_voice_processing_guard_body body, char **error) {
     @try {
         body();
         return 0;

@@ -1,4 +1,4 @@
-//! `hex labs`: list the features, turn one on or off, and open its row.
+//! `gospell labs`: list the features, turn one on or off, and open its row.
 
 use clap::Subcommand;
 use color_eyre::Result;
@@ -26,12 +26,12 @@ pub enum LabsCommand {
     On { feature: String },
     /// Turn a Labs feature off.
     Off { feature: String },
-    /// Print the link that opens Hex's Labs page at a feature's row (macOS).
+    /// Print the link that opens GoSpell's Labs page at a feature's row (macOS).
     #[cfg(target_os = "macos")]
     Link { feature: String },
 }
 
-/// `hex labs`: edits `settings.json`; a running Hex applies most changes
+/// `gospell labs`: edits `settings.json`; a running GoSpell applies most changes
 /// when it next starts.
 pub fn run(command: Option<&LabsCommand>) -> Result<()> {
     #[cfg(target_os = "macos")]
@@ -45,7 +45,7 @@ pub fn run(command: Option<&LabsCommand>) -> Result<()> {
         );
         return Ok(());
     }
-    // Listing, or handing the change to a running Hex, never writes the file.
+    // Listing, or handing the change to a running GoSpell, never writes the file.
     let settings = AppSettings::read()?;
     let (name, on) = match command {
         None | Some(LabsCommand::List) => {
@@ -67,18 +67,18 @@ pub fn run(command: Option<&LabsCommand>) -> Result<()> {
     }
     if feature == Feature::VoiceFilter
         && !on
-        && crate::audio::hex_microphone::driver_bundle_installed()
+        && crate::audio::gospell_microphone::driver_bundle_installed()
     {
         return Err(eyre!(
-            "voice-filter stays on while the Hex Microphone driver is installed; uninstall the driver in its pane to turn it off"
+            "voice-filter stays on while the GoSpell Microphone driver is installed; uninstall the driver in its pane to turn it off"
         ));
     }
     if !on && let Some(why) = feature.off_refusal(&settings) {
         return Err(eyre!(why));
     }
     let state = if on { "on" } else { "off" };
-    // A running Hex saves and applies it at once, as its Labs row would.
-    if let Some(reply) = crate::control::cli::set_in_running_hex(
+    // A running GoSpell saves and applies it at once, as its Labs row would.
+    if let Some(reply) = crate::control::cli::set_in_running_gospell(
         feature.settings_key(),
         if on { "true" } else { "false" },
     ) {
@@ -118,7 +118,7 @@ fn announce_note(feature: Feature, on: bool) {
 }
 
 /// Why Labs › Live typing can't work here, on this Wayland compositor: it
-/// offers no input method Hex can use (GNOME). `None` when it can work, off
+/// offers no input method GoSpell can use (GNOME). `None` when it can work, off
 /// Wayland, and on every other OS.
 #[cfg(target_os = "linux")]
 fn live_typing_note() -> Option<&'static str> {
@@ -136,7 +136,7 @@ fn live_typing_note() -> Option<&'static str> {
 }
 
 /// The feature `name` names, if this OS has it and `reaches` admits it.
-/// Features that left Labs: `hex labs` still knows their names.
+/// Features that left Labs: `gospell labs` still knows their names.
 const GRADUATED: [(&str, &str); 24] = [
     (
         "custom-models",
@@ -148,7 +148,7 @@ const GRADUATED: [(&str, &str); 24] = [
     ),
     (
         "transcribe-files",
-        "transcribe-files graduated: hex transcribe <file> is always available now",
+        "transcribe-files graduated: gospell transcribe <file> is always available now",
     ),
     (
         "restore-shortcut-default",
@@ -160,7 +160,7 @@ const GRADUATED: [(&str, &str); 24] = [
     ),
     (
         "more-call-apps",
-        "more-call-apps graduated: Hex always offers to record calls in every call app and website it knows now",
+        "more-call-apps graduated: GoSpell always offers to record calls in every call app and website it knows now",
     ),
     (
         "meeting-notes-vocabulary",
@@ -172,7 +172,7 @@ const GRADUATED: [(&str, &str); 24] = [
     ),
     (
         "subtitle-export",
-        "subtitle-export graduated: hex meetings show --srt and --vtt are always available now",
+        "subtitle-export graduated: gospell meetings show --srt and --vtt are always available now",
     ),
     (
         "movable-meeting-capsules",
@@ -180,31 +180,31 @@ const GRADUATED: [(&str, &str); 24] = [
     ),
     (
         "expire-meeting-audio",
-        "expire-meeting-audio moved: set Keep audio in Meetings › Settings › After a meeting, or hex settings set meetings.audio_retention",
+        "expire-meeting-audio moved: set Keep audio in Meetings › Settings › After a meeting, or gospell settings set meetings.audio_retention",
     ),
     (
         "stop-when-call-ends",
-        "stop-when-call-ends moved: turn on Stop when the call ends in Meetings › Settings › Calls, or hex settings set meetings.stop_when_call_ends true",
+        "stop-when-call-ends moved: turn on Stop when the call ends in Meetings › Settings › Calls, or gospell settings set meetings.stop_when_call_ends true",
     ),
     (
         "meeting-descriptive-filenames",
-        "meeting-descriptive-filenames moved: turn on Descriptive meeting file names in Meetings › Settings › Export, or hex settings set meetings.export.descriptive_filenames true",
+        "meeting-descriptive-filenames moved: turn on Descriptive meeting file names in Meetings › Settings › Export, or gospell settings set meetings.export.descriptive_filenames true",
     ),
     (
         "meeting-notes-file",
-        "meeting-notes-file moved: turn on Separate notes file in Meetings › Settings › Export, or hex settings set meetings.export.notes_file true",
+        "meeting-notes-file moved: turn on Separate notes file in Meetings › Settings › Export, or gospell settings set meetings.export.notes_file true",
     ),
     (
         "yearly-stats",
-        "yearly-stats moved: turn on Dictation stats in Settings › Labs, or hex labs on history-stats (it includes the year heatmap and all-time totals now)",
+        "yearly-stats moved: turn on Dictation stats in Settings › Labs, or gospell labs on history-stats (it includes the year heatmap and all-time totals now)",
     ),
     (
         "shell-completions",
-        "shell-completions graduated: hex completions <shell> always prints a completion script",
+        "shell-completions graduated: gospell completions <shell> always prints a completion script",
     ),
     (
         "print-start",
-        "print-start graduated: hex dictation start --print works on macOS without a switch",
+        "print-start graduated: gospell dictation start --print works on macOS without a switch",
     ),
     (
         "vocabulary-biasing",
@@ -228,7 +228,7 @@ const GRADUATED: [(&str, &str); 24] = [
     ),
     (
         "quit-closes-window",
-        "quit-closes-window was removed: ⌘Q quits Hex",
+        "quit-closes-window was removed: ⌘Q quits GoSpell",
     ),
     (
         "api-browser-access",
@@ -244,7 +244,7 @@ pub(super) fn resolve(name: &str, reaches: impl Fn(Feature) -> bool + Copy) -> R
         .filter(|feature| feature.on_this_os() && reaches(*feature))
         .ok_or_else(|| {
             eyre!(
-                "unknown Labs feature {name:?}; this Hex has: {}",
+                "unknown Labs feature {name:?}; this GoSpell has: {}",
                 Feature::available_where(reaches)
                     .map(Feature::name)
                     .collect::<Vec<_>>()
@@ -262,14 +262,14 @@ fn list(settings: &AppSettings) -> String {
     for feature in Feature::available() {
         let on = feature.on(settings)
             || (feature == Feature::VoiceFilter
-                && crate::audio::hex_microphone::driver_bundle_installed());
+                && crate::audio::gospell_microphone::driver_bundle_installed());
         let note = (feature == Feature::LiveTyping && feature.managed().is_none())
             .then(live_typing_note)
             .flatten()
             .map(|note| format!(" ({note})"))
             .unwrap_or_default();
         out.push_str(&format!(
-            "{:<width$}  {:<7}  {:<8}  {}{note} (hex settings {})\n",
+            "{:<width$}  {:<7}  {:<8}  {}{note} (gospell settings {})\n",
             feature.name(),
             if feature.managed().is_some() {
                 "managed"
@@ -286,8 +286,8 @@ fn list(settings: &AppSettings) -> String {
     out
 }
 
-/// `hex experiments …`, from before Labs.
+/// `gospell experiments …`, from before Labs.
 pub fn run_retired_experiments() -> Result<()> {
-    println!("Experiments are now Labs: hex labs, hex labs on|off <feature>");
+    println!("Experiments are now Labs: gospell labs, gospell labs on|off <feature>");
     Ok(())
 }

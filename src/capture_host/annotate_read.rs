@@ -1,6 +1,6 @@
-//! `hex annotate inspect|zoom|frames`: reading a capture bundle for a coding
-//! agent, in the CLI process rather than the running Hex. These only read
-//! files and decode the bundle's video, so they work with Hex closed and on
+//! `gospell annotate inspect|zoom|frames`: reading a capture bundle for a coding
+//! agent, in the CLI process rather than the running GoSpell. These only read
+//! files and decode the bundle's video, so they work with GoSpell closed and on
 //! every OS; Labs › Agent tools for captures gates them.
 
 use scrawl_capture::model::parse_clock_ms;
@@ -10,7 +10,7 @@ use crate::control::ControlError;
 
 use super::library;
 
-/// `hex annotate inspect`: the agent summary, the marks, or the manifest.
+/// `gospell annotate inspect`: the agent summary, the marks, or the manifest.
 pub(crate) fn inspect(capture: &str, marks: bool, json: bool) -> Result<String, ControlError> {
     let dir = library::resolve(capture)?;
     let bundle = library::load(&dir).ok_or_else(|| library::unreadable(&dir))?;
@@ -54,7 +54,7 @@ pub(crate) fn inspect(capture: &str, marks: bool, json: bool) -> Result<String, 
     Ok(out)
 }
 
-/// `hex annotate zoom`: a dense sheet of frames around a moment or a mark,
+/// `gospell annotate zoom`: a dense sheet of frames around a moment or a mark,
 /// with the bundle's ink drawn in.
 pub(crate) fn zoom(
     capture: &str,
@@ -88,7 +88,7 @@ pub(crate) fn zoom(
     Ok(zoom_text(line.as_deref(), &sheet))
 }
 
-/// What `hex annotate zoom` prints: the mark it zoomed into, the sheet's
+/// What `gospell annotate zoom` prints: the mark it zoomed into, the sheet's
 /// path, each cell's time, and what was said over the window.
 fn zoom_text(mark: Option<&str>, sheet: &zoom::ZoomSheet) -> String {
     let mut out = String::new();
@@ -117,11 +117,11 @@ fn zoom_text(mark: Option<&str>, sheet: &zoom::ZoomSheet) -> String {
     out
 }
 
-/// The most PNGs one `hex annotate frames` writes: a dense look at a range,
+/// The most PNGs one `gospell annotate frames` writes: a dense look at a range,
 /// not a frame-by-frame dump of the whole recording.
 const MAX_FRAMES: u64 = 240;
 
-/// `hex annotate frames`: one PNG per frame across a time range.
+/// `gospell annotate frames`: one PNG per frame across a time range.
 pub(crate) fn frames(
     capture: &str,
     from: &str,
@@ -240,7 +240,7 @@ mod tests {
 
     fn temp_root(name: &str) -> PathBuf {
         let root = std::env::temp_dir().join(format!(
-            "hex-annotate-read-{name}-{}",
+            "gospell-annotate-read-{name}-{}",
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()
@@ -278,7 +278,7 @@ mod tests {
             r#"{"version":1,"id":"b","createdAtMs":1,"durationMs":1000,
             "target":{"mode":"display","displayId":0,
               "frame":{"x":0,"y":0,"width":1,"height":1,"scale":1}},
-            "transcript":{"source":"hex","text":"","segments":[],"words":[]},
+            "transcript":{"source":"gospell","text":"","segments":[],"words":[]},
             "strokes":[],"marks":[],"events":[],"keyframes":[],
             "contactSheet":"c.png","note":"hello"}"#,
         )

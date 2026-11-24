@@ -116,7 +116,7 @@ pub(super) fn attach(
 }
 
 /// The refusal for a request that asked for processing, or the slot its run
-/// holds. Checks that a processor exists before the lab, so `hex service`
+/// holds. Checks that a processor exists before the lab, so `gospell service`
 /// answers `processing-unavailable` even while the lab is off, and claims the
 /// one slot before any audio body is read or a stream finishes.
 pub(super) fn gate(wanted: bool, processing: &Processing) -> Result<Option<Guard>, HttpResponse> {
@@ -234,7 +234,7 @@ mod tests {
 
     fn start(processing: Processing) -> LocalApi {
         let directory = std::env::temp_dir().join(format!(
-            "hex-api-processing-{}-{}",
+            "gospell-api-processing-{}-{}",
             std::process::id(),
             NEXT_DIRECTORY.fetch_add(1, Ordering::Relaxed)
         ));
@@ -305,7 +305,7 @@ mod tests {
         send(
             api,
             &format!(
-                "POST /streams/{id}/finish{query} HTTP/1.1\r\nAuthorization: Bearer {}\r\nX-Hex-Stream-Token: {owner}\r\nContent-Length: 0\r\n\r\n",
+                "POST /streams/{id}/finish{query} HTTP/1.1\r\nAuthorization: Bearer {}\r\nX-GoSpell-Stream-Token: {owner}\r\nContent-Length: 0\r\n\r\n",
                 api.document.token,
             ),
             &[],
@@ -316,7 +316,7 @@ mod tests {
         let (status, body) = send(
             api,
             &format!(
-                "POST /streams/{id}/cancel HTTP/1.1\r\nAuthorization: Bearer {}\r\nX-Hex-Stream-Token: {owner}\r\nContent-Length: 0\r\n\r\n",
+                "POST /streams/{id}/cancel HTTP/1.1\r\nAuthorization: Bearer {}\r\nX-GoSpell-Stream-Token: {owner}\r\nContent-Length: 0\r\n\r\n",
                 api.document.token,
             ),
             &[],
@@ -346,7 +346,7 @@ mod tests {
         let (status, body) = send(
             api,
             &format!(
-                "POST /streams/{id}/audio HTTP/1.1\r\nAuthorization: Bearer {}\r\nX-Hex-Stream-Token: {owner}\r\nContent-Type: application/octet-stream\r\nContent-Length: {}\r\n\r\n",
+                "POST /streams/{id}/audio HTTP/1.1\r\nAuthorization: Bearer {}\r\nX-GoSpell-Stream-Token: {owner}\r\nContent-Type: application/octet-stream\r\nContent-Length: {}\r\n\r\n",
                 api.document.token,
                 samples.len(),
             ),
@@ -411,7 +411,7 @@ mod tests {
         let (status, _) = finish(&api, id, &owner, "");
         assert_eq!(status, 200);
 
-        // `hex service` is this state: no processor and the lab off. The
+        // `gospell service` is this state: no processor and the lab off. The
         // missing processor is named first, not `processing-disabled`.
         let api = start(Processing::gated(None, || false));
         assert_eq!(

@@ -1,8 +1,8 @@
 # Acknowledgements
 
-Part of [Hex for iPhone](../README.md).
+Part of [GoSpell for iPhone](../README.md).
 
-The app shows these under Settings › Acknowledgements (`HEXMobile/AcknowledgementsView.swift`).
+The app shows these under Settings › Acknowledgements (`GoSpellMobile/AcknowledgementsView.swift`).
 
 - **Google Books Ngram data:** Spatial autocorrect's word and word-pair frequencies,
   German's capitalisation shares and French's list of words outside its model come from the Google Books Ngram Viewer data, version 3
@@ -25,9 +25,9 @@ The app shows these under Settings › Acknowledgements (`HEXMobile/Acknowledgem
   (LDNOOBW), © 2012–2020 Shutterstock, Inc., and contributors: its English, Spanish,
   German and Norwegian lists, licensed under
   [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/).
-  Hex lowercased and classified the entries, omitted ordinary, medical and search-only
+  GoSpell lowercased and classified the entries, omitted ordinary, medical and search-only
   terms, and added common slurs, inflections and spelling variants.
-- **Parakeet V2:** Hex dictates English with NVIDIA's
+- **Parakeet V2:** GoSpell dictates English with NVIDIA's
   [Parakeet TDT 0.6B v2](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v2), licensed under
   [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/),
   downloaded as FluidInference's
@@ -46,7 +46,7 @@ The app shows these under Settings › Acknowledgements (`HEXMobile/Acknowledgem
   [Mozilla Public License 1.1](https://www.mozilla.org/en-US/MPL/1.1/)
   (<https://github.com/sbosio/rla-es>).
 
-Polish's three entries show while the keyboard bundles `pl.hextm`
+Polish's three entries show while the keyboard bundles `pl.gospelltm`
 (`AcknowledgementsView.polishEntries`):
 
 - **National Corpus of Polish n-grams:** Polish word and word-pair frequencies come from

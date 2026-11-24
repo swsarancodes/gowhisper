@@ -1,8 +1,8 @@
-//! GPUs that hung or failed while Hex transcribed on them (#856), remembered
+//! GPUs that hung or failed while GoSpell transcribed on them (#856), remembered
 //! per device and driver in `gpu-failures.json` in Application Support, so
 //! Auto keeps that GPU off and transcribes on the CPU (or another GPU) until
 //! the driver changes. A GPU context reset or device loss comes back from
-//! ggml as an error, never as something Hex could retry safely on the same
+//! ggml as an error, never as something GoSpell could retry safely on the same
 //! device: ggml keeps the lost Vulkan device for the process, and asking a
 //! hung driver again can hang the whole desktop's GPU again.
 
@@ -208,7 +208,7 @@ pub(crate) fn set_out_of_memory(fallback: Option<&Failure>) {
         Some(failure) => tracing::warn!(
             device = failure.device,
             reason = failure.reason,
-            "the GPU ran out of memory while transcribing; the dictation engine uses the CPU until a GPU load works or Hex restarts"
+            "the GPU ran out of memory while transcribing; the dictation engine uses the CPU until a GPU load works or GoSpell restarts"
         ),
         None if had => tracing::info!(
             "the dictation engine loaded the model on a GPU again; forgetting the out-of-memory fallback"
@@ -228,7 +228,7 @@ pub(crate) fn out_of_memory_fallback() -> Option<Failure> {
 
 /// This launch registered the CPU alone because the GPU crashed twice
 /// starting for transcription (Windows' `gpu-start.pending`, #662). Only that
-/// process knows: Settings and `hex status` read it here.
+/// process knows: Settings and `gospell status` read it here.
 static CRASH_FALLBACK: AtomicBool = AtomicBool::new(false);
 
 /// Records that this launch runs the CPU because the GPU crashed twice
@@ -280,7 +280,7 @@ pub(crate) fn device_error(error: &color_eyre::eyre::Report) -> bool {
 
 /// Whether `error` says the GPU ran out of memory. That is not a driver
 /// fault: another copy of a model (a model switch loading beside the running
-/// one, or a CLI check while Hex holds the model) can fill a small GPU, so
+/// one, or a CLI check while GoSpell holds the model) can fill a small GPU, so
 /// the GPU is not remembered as failed for it (#1165).
 pub(crate) fn out_of_memory(error: &color_eyre::eyre::Report) -> bool {
     error.chain().any(|cause| {
@@ -301,7 +301,7 @@ pub(crate) fn out_of_memory(error: &color_eyre::eyre::Report) -> bool {
 /// What a GPU's driver is now, so an update tries it again. Linux: the
 /// kernel (i915, xe, amdgpu, nouveau live there) and every installed Vulkan
 /// driver's library, by size and modification time (a Mesa or vendor
-/// update replaces them). Windows: this build of Hex.
+/// update replaces them). Windows: this build of GoSpell.
 pub(crate) fn driver() -> String {
     static DRIVER: std::sync::OnceLock<String> = std::sync::OnceLock::new();
     DRIVER.get_or_init(driver_now).clone()

@@ -49,7 +49,7 @@ pub struct ContextSnapshot {
 /// The page refresh one capture owes. A shortcut's press starts it
 /// provisionally: a chord discards it without reading the browser, and only
 /// a capture that becomes real asks for one page read, whose finish then
-/// waits on it. A `hex dictation start` has no hold to judge and asks at once.
+/// waits on it. A `gospell dictation start` has no hold to judge and asks at once.
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 #[derive(Debug, Default)]
 pub(crate) struct CaptureRefresh {
@@ -565,7 +565,7 @@ pub fn frontmost_bundle_id() -> Option<String> {
 
 /// The frontmost application's names, as [`application_names`] reads them,
 /// without reading a page or a window title: what a dictation mode's
-/// application matches (Labs › Switch model with app). `None` when Hex itself
+/// application matches (Labs › Switch model with app). `None` when GoSpell itself
 /// owns the frontmost application, since its own window names no mode, or
 /// when macOS reports none.
 #[cfg(target_os = "macos")]

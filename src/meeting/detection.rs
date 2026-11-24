@@ -50,7 +50,7 @@ const CALL_SITES: [(&str, MeetingSource); 7] = [
     ("teams.live.com", MeetingSource::Teams),
 ];
 
-/// The other call websites Hex names, with the label an offer's "…"
+/// The other call websites GoSpell names, with the label an offer's "…"
 /// saves as that site's provider. FaceTime pages have their own choice,
 /// shown apart from the app's name.
 const MORE_CALL_SITES: [(&str, MeetingSource, &str); 4] = [
@@ -381,7 +381,7 @@ pub const CALL_CHANGED_AFTER: Duration = Duration::from_secs(4);
 /// that call well within this even though its reads still name the ended one.
 const SWITCHED_CALL_MEMORY: Duration = Duration::from_secs(120);
 
-/// Stop when the call ends: the deadline at which a recording Hex
+/// Stop when the call ends: the deadline at which a recording GoSpell
 /// started on its own stops, armed when [`CallPresence`] reports the call
 /// ended (or [`CallSwitch`] reports another call's page) and dropped when the
 /// call app comes back or the user keeps recording.
@@ -704,7 +704,7 @@ pub fn candidate_from_microphone(
     Some(candidate)
 }
 
-/// The other call apps Hex knows, and the title each call gets.
+/// The other call apps GoSpell knows, and the title each call gets.
 fn more_call_app(canonical_bundle: &str) -> Option<(MeetingSource, &'static str)> {
     Some(match canonical_bundle {
         "org.whispersystems.signal-desktop" => (MeetingSource::Signal, "Signal call"),
@@ -2109,7 +2109,7 @@ mod tests {
         // The first call's recording stopped after its page named the second
         // while the browser never left the microphone; every read since still
         // names the ended call, and the call the page named before the stop is
-        // the one Hex starts.
+        // the one GoSpell starts.
         watch.switch_to(first.call.clone(), second.clone());
         let detected = watch
             .stable(&first, &[])
@@ -2770,7 +2770,7 @@ mod tests {
     }
 
     /// The default answers calls with none of their own; a call's own answer
-    /// still wins, and a browser page Hex can't name is offered rather than
+    /// still wins, and a browser page GoSpell can't name is offered rather than
     /// recorded, which would record every page.
     #[test]
     fn the_default_answers_calls_without_their_own() {
@@ -3071,21 +3071,21 @@ mod tests {
     }
 
     #[test]
-    fn the_site_is_resolved_while_hex_is_in_front() {
+    fn the_site_is_resolved_while_gospell_is_in_front() {
         let t0 = Instant::now();
         let mut memory = BrowserPageMemory::default();
-        let hex = context("Hex", None, "Hex");
+        let gospell = context("GoSpell", None, "GoSpell");
 
         // Nothing seen yet: the site is unknown.
-        let page = memory.recall(&brave(), hex.clone(), t0);
+        let page = memory.recall(&brave(), gospell.clone(), t0);
         assert_eq!(
             candidate_from_microphone(&brave(), &page).unwrap().source,
             MeetingSource::BrowserCall
         );
 
-        // Brave was in front on Banshee, then Hex came forward.
+        // Brave was in front on Banshee, then GoSpell came forward.
         memory.recall(&brave(), banshee_page(), t0);
-        let page = memory.recall(&brave(), hex, t0 + Duration::from_secs(30));
+        let page = memory.recall(&brave(), gospell, t0 + Duration::from_secs(30));
         let candidate = candidate_from_microphone(&brave(), &page).unwrap();
         assert_eq!(candidate.source, MeetingSource::Banshee);
         assert_eq!(candidate.site.as_deref(), Some("banshee.app"));
@@ -3095,10 +3095,10 @@ mod tests {
     fn a_page_seen_minutes_ago_no_longer_names_the_call() {
         let t0 = Instant::now();
         let mut memory = BrowserPageMemory::default();
-        let hex = context("Hex", None, "Hex");
+        let gospell = context("GoSpell", None, "GoSpell");
         memory.recall(&brave(), banshee_page(), t0);
-        let page = memory.recall(&brave(), hex.clone(), t0 + Duration::from_secs(61));
-        assert_eq!(page, hex);
+        let page = memory.recall(&brave(), gospell.clone(), t0 + Duration::from_secs(61));
+        assert_eq!(page, gospell);
         assert!(
             candidate_from_microphone(&brave(), &page)
                 .unwrap()
@@ -3111,7 +3111,7 @@ mod tests {
     fn a_remembered_page_belongs_to_its_browser_and_its_call() {
         let t0 = Instant::now();
         let mut memory = BrowserPageMemory::default();
-        let hex = context("Hex", None, "Hex");
+        let gospell = context("GoSpell", None, "GoSpell");
         memory.recall(&brave(), banshee_page(), t0);
 
         let chrome = ActiveMicrophoneApplication {
@@ -3119,18 +3119,18 @@ mod tests {
             bundle_id: "com.google.Chrome.helper".into(),
             name: "Google Chrome Helper".into(),
         };
-        assert_eq!(memory.recall(&chrome, hex.clone(), t0), hex);
+        assert_eq!(memory.recall(&chrome, gospell.clone(), t0), gospell);
 
         // The microphone is released: the next call starts fresh.
         memory.recall(&brave(), banshee_page(), t0);
         memory.forget();
-        assert_eq!(memory.recall(&brave(), hex.clone(), t0), hex);
+        assert_eq!(memory.recall(&brave(), gospell.clone(), t0), gospell);
 
         // A fresh page replaces the remembered one.
         memory.recall(&brave(), banshee_page(), t0);
         let other = context("Brave Browser", Some("https://example.com/"), "Example");
         assert_eq!(memory.recall(&brave(), other.clone(), t0), other);
-        assert_eq!(memory.recall(&brave(), hex, t0), other);
+        assert_eq!(memory.recall(&brave(), gospell, t0), other);
     }
 
     #[test]

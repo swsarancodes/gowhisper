@@ -6,7 +6,7 @@
 //! unchanged. Raw, printed, and API output are not signed.
 
 /// The signature a new install starts with.
-pub const DEFAULT_TEXT: &str = "Sent from Hex";
+pub const DEFAULT_TEXT: &str = "Sent from GoSpell";
 
 /// The longest signature a person may save, in characters.
 pub const MAX_CHARS: usize = 200;
@@ -30,7 +30,7 @@ pub fn append(text: &str, signature: &str, enabled: bool) -> Option<String> {
 /// Whether the text already carries the signature as a line of its own: it is
 /// only the signature, or the signature follows a line break with nothing but
 /// spaces or tabs in between. A signature that merely ends a line of prose,
-/// such as "Hex" in "I love Hex", does not make the line signed.
+/// such as "GoSpell" in "I love GoSpell", does not make the line signed.
 fn already_signed(text: &str, signature: &str) -> bool {
     text == signature
         || text
@@ -66,19 +66,19 @@ mod tests {
     fn the_signature_is_appended_once_on_its_own_line() {
         assert_eq!(
             append("we ship friday", DEFAULT_TEXT, true),
-            Some("we ship friday\nSent from Hex".to_owned())
+            Some("we ship friday\nSent from GoSpell".to_owned())
         );
         assert_eq!(
             append("we ship friday\n", DEFAULT_TEXT, true),
-            Some("we ship friday\n\nSent from Hex".to_owned())
+            Some("we ship friday\n\nSent from GoSpell".to_owned())
         );
     }
 
     #[test]
     fn a_saved_signature_is_trimmed_before_it_is_appended() {
         assert_eq!(
-            append("hi", "  Sent from Hex  ", true),
-            Some("hi\nSent from Hex".to_owned())
+            append("hi", "  Sent from GoSpell  ", true),
+            Some("hi\nSent from GoSpell".to_owned())
         );
     }
 
@@ -102,42 +102,42 @@ mod tests {
     #[test]
     fn text_that_already_ends_with_the_signature_is_left_alone() {
         assert_eq!(
-            append("we ship friday\nSent from Hex", DEFAULT_TEXT, true),
+            append("we ship friday\nSent from GoSpell", DEFAULT_TEXT, true),
             None
         );
-        assert_eq!(append("Sent from Hex", DEFAULT_TEXT, true), None);
+        assert_eq!(append("Sent from GoSpell", DEFAULT_TEXT, true), None);
         // A trailing space or newline after it still reads as signed.
         assert_eq!(
-            append("we ship friday\nSent from Hex\n", DEFAULT_TEXT, true),
+            append("we ship friday\nSent from GoSpell\n", DEFAULT_TEXT, true),
             None
         );
     }
 
     #[test]
     fn a_signature_that_ends_a_line_of_prose_is_still_appended() {
-        let signature = "Hex";
+        let signature = "GoSpell";
         assert_eq!(
-            append("I love Hex", signature, true),
-            Some("I love Hex\nHex".to_owned())
+            append("I love GoSpell", signature, true),
+            Some("I love GoSpell\nGoSpell".to_owned())
         );
         assert_eq!(
-            append("we ship friday, Hex", signature, true),
-            Some("we ship friday, Hex\nHex".to_owned())
+            append("we ship friday, GoSpell", signature, true),
+            Some("we ship friday, GoSpell\nGoSpell".to_owned())
         );
         assert_eq!(
-            append("Hex is the best", signature, true),
-            Some("Hex is the best\nHex".to_owned())
+            append("GoSpell is the best", signature, true),
+            Some("GoSpell is the best\nGoSpell".to_owned())
         );
     }
 
     #[test]
     fn a_signature_after_a_line_break_is_left_alone() {
         for text in [
-            "we ship friday\nSent from Hex",
-            "we ship friday\n  Sent from Hex",
-            "we ship friday\r\nSent from Hex",
-            "we ship friday\rSent from Hex",
-            "\nSent from Hex",
+            "we ship friday\nSent from GoSpell",
+            "we ship friday\n  Sent from GoSpell",
+            "we ship friday\r\nSent from GoSpell",
+            "we ship friday\rSent from GoSpell",
+            "\nSent from GoSpell",
         ] {
             assert_eq!(append(text, DEFAULT_TEXT, true), None, "{text:?}");
         }
@@ -146,7 +146,7 @@ mod tests {
     #[test]
     fn a_signature_must_be_one_line_of_at_most_the_limit() {
         assert_eq!(text_problem(""), None);
-        assert_eq!(text_problem("Sent from Hex"), None);
+        assert_eq!(text_problem("Sent from GoSpell"), None);
         assert_eq!(text_problem("two\nlines"), Some("Use one line"));
         assert_eq!(text_problem("two\r\nlines"), Some("Use one line"));
         assert_eq!(text_problem(&"x".repeat(MAX_CHARS)), None);

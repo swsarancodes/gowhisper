@@ -32,7 +32,7 @@ impl LinuxSession {
     }
 }
 
-/// Desktops whose window managers float every window, so Hex's window
+/// Desktops whose window managers float every window, so GoSpell's window
 /// opens at its own resizable size there.
 const FLOATING_DESKTOPS: &[&str] = &[
     "KDE",
@@ -63,7 +63,7 @@ fn floating(desktops: &str) -> bool {
     })
 }
 
-/// Whether Hex closes a restorable RemoteDesktop paste session once it has
+/// Whether GoSpell closes a restorable RemoteDesktop paste session once it has
 /// been idle. KDE notifies on every session start (#2508), so it keeps the
 /// session for the paster's lifetime; GNOME's indicator while one is open is
 /// why the close exists (#718).

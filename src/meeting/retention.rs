@@ -80,7 +80,7 @@ pub(super) fn readable(
 }
 
 /// Moves every expired meeting to the Trash: its folder, and its exported
-/// Markdown while that is still the copy Hex wrote. One that is recording,
+/// Markdown while that is still the copy GoSpell wrote. One that is recording,
 /// transcribing, writing notes, or waiting for its final transcript stays
 /// for a later pass. Returns how many moved.
 pub fn expire(chosen: Option<MeetingRetention>) -> Result<usize> {
@@ -143,7 +143,7 @@ pub(super) fn trash_expired(
         } else {
             tracing::info!(
                 meeting = manifest.id,
-                "kept the meeting's Markdown, which changed since Hex wrote it"
+                "kept the meeting's Markdown, which changed since GoSpell wrote it"
             );
         }
     }
@@ -155,7 +155,7 @@ pub(super) fn trash_expired(
         } else {
             tracing::info!(
                 meeting = manifest.id,
-                "kept the meeting's notes file, which changed since Hex wrote it"
+                "kept the meeting's notes file, which changed since GoSpell wrote it"
             );
         }
     }

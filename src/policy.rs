@@ -1,5 +1,5 @@
 //! Feature locks an organization sets through managed preferences (macOS
-//! configuration profiles) in the `anomaly.hex` domain: `DisableMeetings`,
+//! configuration profiles) in the `com.goml.gospell` domain: `DisableMeetings`,
 //! `DisableAnnotate`, `DisableOpenCodeProcessing`, `DisableTransforms`, and
 //! `DisableLabs`, plus `RestrictTransformsToLoopback`, which keeps
 //! transformations on but holds their `fetch` to this computer and runs no
@@ -21,13 +21,13 @@ use crate::app_settings::{AppSettings, MeetingSummaries};
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Lock {
     /// No new meeting recording or meeting processing; existing meetings stay
-    /// readable (`hex meetings`, `hex mcp`).
+    /// readable (`gospell meetings`, `gospell mcp`).
     Meetings,
     Annotate,
     /// No OpenCode generation: mode rewrites, meeting notes, and Annotate's
     /// sends to OpenCode sessions.
     OpenCodeProcessing,
-    /// No transformations at all, built in or from `hex.config.ts`.
+    /// No transformations at all, built in or from `gospell.config.ts`.
     Transforms,
     /// Every Labs feature off.
     Labs,
@@ -47,7 +47,7 @@ impl Lock {
         Self::LoopbackTransforms,
     ];
 
-    /// Its key in the `anomaly.hex` managed preferences.
+    /// Its key in the `com.goml.gospell` managed preferences.
     pub const fn key(self) -> &'static str {
         match self {
             Self::Meetings => "DisableMeetings",
@@ -149,7 +149,7 @@ impl Policy {
         self.locks(Lock::Labs).then_some(Lock::Labs)
     }
 
-    /// The lock on `hex settings` key `name`, if any.
+    /// The lock on `gospell settings` key `name`, if any.
     pub fn setting_lock(self, name: &str) -> Option<Lock> {
         if let Some(feature) = crate::labs::Feature::for_settings_key(name) {
             return self.labs_lock(feature);
@@ -172,7 +172,7 @@ impl Policy {
         if self.locks(Lock::Labs) {
             settings.labs.app_model_switching = false;
         }
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         if self.locks(Lock::Annotate) {
             settings.capture.enabled = false;
         }
@@ -195,7 +195,7 @@ impl Policy {
         if self.locks(Lock::Labs) {
             settings.labs.app_model_switching = saved.labs.app_model_switching;
         }
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         if self.locks(Lock::Annotate) {
             settings.capture.enabled = saved.capture.enabled;
         }
@@ -233,7 +233,7 @@ mod platform {
         CFPreferencesAppValueIsForced, CFPreferencesGetAppBooleanValue, CFString,
     };
 
-    const DOMAIN: &str = "anomaly.hex";
+    const DOMAIN: &str = "com.goml.gospell";
 
     /// Whether a configuration profile forces `key` to true.
     pub fn forced(key: &str) -> bool {
@@ -357,7 +357,7 @@ mod tests {
                 feature.name()
             );
         }
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         assert!(!loaded.capture.enabled);
 
         let mut written = loaded.clone();
@@ -369,12 +369,12 @@ mod tests {
                 feature.name()
             );
         }
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         assert_eq!(written.capture.enabled, saved.capture.enabled);
     }
 
     /// An organization's DisableAnnotate lock reaches the agent tools lab: the
-    /// card reads managed, `hex labs on` and `hex settings set` refuse, the
+    /// card reads managed, `gospell labs on` and `gospell settings set` refuse, the
     /// gate reads off, and the saved switch is never rewritten.
     #[test]
     fn the_annotate_lock_holds_agent_tools_off_and_keeps_its_switch_saved() {
@@ -512,7 +512,7 @@ mod tests {
         assert_eq!(labs.setting_lock("meetings.enabled"), Some(Lock::Labs));
         assert_eq!(labs.setting_lock("pause_browser_media"), Some(Lock::Labs));
         assert_eq!(labs.setting_lock("sound_effects"), None);
-        // A choice that is only partly locked: `hex settings` refuses
+        // A choice that is only partly locked: `gospell settings` refuses
         // `opencode` itself.
         let opencode = Policy::default().with(Lock::OpenCodeProcessing);
         assert_eq!(opencode.setting_lock("meetings.summaries"), None);

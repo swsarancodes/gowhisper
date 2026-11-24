@@ -1,6 +1,6 @@
-//! `hex annotate inspect|zoom|frames|skill`: reading a capture bundle for a
+//! `gospell annotate inspect|zoom|frames|skill`: reading a capture bundle for a
 //! coding agent. These run in this process on every OS — they only read files
-//! and decode the bundle's video — instead of over the running Hex's control
+//! and decode the bundle's video — instead of over the running GoSpell's control
 //! socket, and Labs › Agent tools for captures gates them.
 
 use clap::Args;
@@ -8,11 +8,11 @@ use clap::Args;
 use super::fail;
 
 /// Why these commands refuse while the Labs feature is off, naming its switch.
-const LAB_OFF: &str = "Agent tools for captures is a Labs feature and is off. Turn it on with `hex labs on annotate-agent-tools` or in Settings › Labs.";
+const LAB_OFF: &str = "Agent tools for captures is a Labs feature and is off. Turn it on with `gospell labs on annotate-agent-tools` or in Settings › Labs.";
 
-/// What `hex annotate skill` prints, and what the Annotate pane's Agents
+/// What `gospell annotate skill` prints, and what the Annotate pane's Agents
 /// section writes into an agent's folder: the skill an agent installs.
-pub(crate) const SKILL: &str = include_str!("../../../skills/hex-annotate/SKILL.md");
+pub(crate) const SKILL: &str = include_str!("../../../skills/gospell-annotate/SKILL.md");
 
 #[derive(Args, Debug)]
 pub(crate) struct Inspect {
@@ -68,22 +68,22 @@ pub(crate) struct Frames {
     fps: u32,
 }
 
-/// `hex annotate inspect`.
+/// `gospell annotate inspect`.
 pub(super) fn inspect(args: Inspect) -> u8 {
     print_text(require_lab().and_then(|()| inspect_capture(&args)))
 }
 
-/// `hex annotate zoom`.
+/// `gospell annotate zoom`.
 pub(super) fn zoom(args: Zoom) -> u8 {
     print_text(require_lab().and_then(|()| zoom_capture(&args)))
 }
 
-/// `hex annotate frames`.
+/// `gospell annotate frames`.
 pub(super) fn frames(args: Frames) -> u8 {
     print_text(require_lab().and_then(|()| frames_capture(&args)))
 }
 
-/// `hex annotate skill`: the guide this Hex ships (`skills/hex-annotate`).
+/// `gospell annotate skill`: the guide this GoSpell ships (`skills/gospell-annotate`).
 pub(super) fn skill() -> u8 {
     print_text(require_lab().map(|()| SKILL.to_owned()))
 }
@@ -111,18 +111,18 @@ fn print_text(result: Result<String, String>) -> u8 {
     }
 }
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 fn inspect_capture(args: &Inspect) -> Result<String, String> {
     crate::capture_host::annotate_read::inspect(&args.capture, args.marks, args.json)
         .map_err(|error| error.message)
 }
 
-#[cfg(not(hex_capture))]
+#[cfg(not(gospell_capture))]
 fn inspect_capture(_: &Inspect) -> Result<String, String> {
     Err(unsupported())
 }
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 fn zoom_capture(args: &Zoom) -> Result<String, String> {
     crate::capture_host::annotate_read::zoom(
         &args.capture,
@@ -136,24 +136,24 @@ fn zoom_capture(args: &Zoom) -> Result<String, String> {
     .map_err(|error| error.message)
 }
 
-#[cfg(not(hex_capture))]
+#[cfg(not(gospell_capture))]
 fn zoom_capture(_: &Zoom) -> Result<String, String> {
     Err(unsupported())
 }
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 fn frames_capture(args: &Frames) -> Result<String, String> {
     crate::capture_host::annotate_read::frames(&args.capture, &args.from, &args.to, args.fps)
         .map_err(|error| error.message)
 }
 
-#[cfg(not(hex_capture))]
+#[cfg(not(gospell_capture))]
 fn frames_capture(_: &Frames) -> Result<String, String> {
     Err(unsupported())
 }
 
 /// A build without the capture engine has nothing to read.
-#[cfg_attr(hex_capture, allow(dead_code))]
+#[cfg_attr(gospell_capture, allow(dead_code))]
 fn unsupported() -> String {
     "Annotate isn't available on this OS yet".into()
 }
@@ -165,7 +165,7 @@ mod tests {
     use super::*;
     use crate::control::cli::{CaptureCommand, ControlCli};
 
-    /// The shared command tree every OS's `hex` flattens; the top-level `Cli`
+    /// The shared command tree every OS's `gospell` flattens; the top-level `Cli`
     /// is macOS's own, so tests parse beside it as `transcript_cli_tests` does.
     #[derive(Parser)]
     struct Cli {
@@ -175,7 +175,7 @@ mod tests {
 
     fn parse(arguments: &[&str]) -> Result<Cli, clap::Error> {
         Cli::try_parse_from(
-            ["hex", "annotate"]
+            ["gospell", "annotate"]
                 .into_iter()
                 .chain(arguments.iter().copied()),
         )
@@ -255,7 +255,7 @@ mod tests {
     fn the_off_message_names_its_switch() {
         assert!(lab_check(true).is_ok());
         assert_eq!(lab_check(false), Err(LAB_OFF.into()));
-        assert!(LAB_OFF.contains("hex labs on annotate-agent-tools"));
+        assert!(LAB_OFF.contains("gospell labs on annotate-agent-tools"));
         assert!(LAB_OFF.contains("Settings › Labs"));
     }
 
@@ -264,8 +264,8 @@ mod tests {
         // A Windows checkout writes the guide with CRLF; its content is the
         // same either way.
         let skill = SKILL.replace("\r\n", "\n");
-        assert!(skill.starts_with("---\nname: hex-annotate\n"));
-        assert!(skill.contains("npx skills add anomalyco/hex --skill hex-annotate"));
+        assert!(skill.starts_with("---\nname: gospell-annotate\n"));
+        assert!(skill.contains("npx skills add goml/gospell --skill gospell-annotate"));
         assert!(skill.contains("labs.annotate_agent_tools"));
     }
 }

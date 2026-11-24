@@ -1,5 +1,5 @@
-#ifndef HEX_VOICE_PROCESSING_GUARD_H
-#define HEX_VOICE_PROCESSING_GUARD_H
+#ifndef GOSPELL_VOICE_PROCESSING_GUARD_H
+#define GOSPELL_VOICE_PROCESSING_GUARD_H
 
 #include <stdint.h>
 
@@ -7,7 +7,7 @@
 /// raises for a refused graph or a failed tap becomes an error Swift can fall
 /// back from. Answers 0, or 1 with an owned message in `error` (free it with
 /// free()).
-typedef void (^hex_voice_processing_guard_body)(void);
-int32_t hex_voice_processing_guard(hex_voice_processing_guard_body body, char **error);
+typedef void (^gospell_voice_processing_guard_body)(void);
+int32_t gospell_voice_processing_guard(gospell_voice_processing_guard_body body, char **error);
 
 #endif

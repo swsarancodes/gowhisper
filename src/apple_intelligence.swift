@@ -206,8 +206,8 @@ private func writeError(
 
 /// 0 available, 1 device not eligible, 2 Apple Intelligence off,
 /// 3 model not ready, 4 unsupported macOS, 5 unknown reason.
-@_cdecl("hex_apple_intelligence_availability")
-public func hexAppleIntelligenceAvailability() -> Int32 {
+@_cdecl("gospell_apple_intelligence_availability")
+public func gospellAppleIntelligenceAvailability() -> Int32 {
     #if canImport(FoundationModels)
     guard #available(macOS 26.0, *) else { return 4 }
     switch SystemLanguageModel.default.availability {
@@ -227,8 +227,8 @@ public func hexAppleIntelligenceAvailability() -> Int32 {
     #endif
 }
 
-@_cdecl("hex_apple_intelligence_context_size")
-public func hexAppleIntelligenceContextSize() -> Int {
+@_cdecl("gospell_apple_intelligence_context_size")
+public func gospellAppleIntelligenceContextSize() -> Int {
     #if canImport(FoundationModels)
     // `contextSize` arrived with the macOS 26.4 SDK (Swift 6.3). An older
     // Xcode then builds without it and reports no context size, and the Rust
@@ -246,8 +246,8 @@ public func hexAppleIntelligenceContextSize() -> Int {
     #endif
 }
 
-@_cdecl("hex_apple_intelligence_notes")
-public func hexAppleIntelligenceNotes(
+@_cdecl("gospell_apple_intelligence_notes")
+public func gospellAppleIntelligenceNotes(
     _ instructions: UnsafePointer<CChar>?,
     _ prompt: UnsafePointer<CChar>?,
     _ titleOnly: Bool,
@@ -315,8 +315,8 @@ private func bridgeCall<Value: Encodable & Sendable>(
     }
 }
 
-@_cdecl("hex_apple_intelligence_chapter")
-public func hexAppleIntelligenceChapter(
+@_cdecl("gospell_apple_intelligence_chapter")
+public func gospellAppleIntelligenceChapter(
     _ instructions: UnsafePointer<CChar>?,
     _ prompt: UnsafePointer<CChar>?,
     _ timeoutMs: UInt64,
@@ -346,8 +346,8 @@ public func hexAppleIntelligenceChapter(
     #endif
 }
 
-@_cdecl("hex_apple_intelligence_chapter_lines")
-public func hexAppleIntelligenceChapterLines(
+@_cdecl("gospell_apple_intelligence_chapter_lines")
+public func gospellAppleIntelligenceChapterLines(
     _ instructions: UnsafePointer<CChar>?,
     _ prompt: UnsafePointer<CChar>?,
     _ timeoutMs: UInt64,
@@ -373,8 +373,8 @@ public func hexAppleIntelligenceChapterLines(
     #endif
 }
 
-@_cdecl("hex_apple_intelligence_text")
-public func hexAppleIntelligenceText(
+@_cdecl("gospell_apple_intelligence_text")
+public func gospellAppleIntelligenceText(
     _ instructions: UnsafePointer<CChar>?,
     _ prompt: UnsafePointer<CChar>?,
     _ temperature: Double,
@@ -401,7 +401,7 @@ public func hexAppleIntelligenceText(
     #endif
 }
 
-@_cdecl("hex_apple_intelligence_free_string")
-public func hexAppleIntelligenceFreeString(_ string: UnsafeMutablePointer<CChar>?) {
+@_cdecl("gospell_apple_intelligence_free_string")
+public func gospellAppleIntelligenceFreeString(_ string: UnsafeMutablePointer<CChar>?) {
     free(string)
 }

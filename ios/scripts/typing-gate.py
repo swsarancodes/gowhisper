@@ -13,9 +13,9 @@ simulator and writes OUT/output-<lang>.json. `run` does all three, one xcodebuil
 fresh process each, so one language's UITextChecker state never meets another's).
 
 Inputs, as quality-gate.py builds them:
-- noisy: the 2,000 sentences' hit keys and taps, moved onto Hex's layout key by key from the
+- noisy: the 2,000 sentences' hit keys and taps, moved onto GoSpell's layout key by key from the
   synthetic layout they were made on (402 pt wide, rows at y 66.5 / 122.5 / 178.5, space bar
-  64.76…303.1 x 212…257); a tap Hex's keys don't take as a letter or space (outside them, or on
+  64.76…303.1 x 212…257); a tap GoSpell's keys don't take as a letter or space (outside them, or on
   123, shift or delete) goes to the nearest letter or space bar;
 - clean: each reference typed right at the key centres, a letter without a key of its own picked
   from its key's long-press menu, an apostrophe without a key from the 123 page;
@@ -44,7 +44,7 @@ import unicodedata
 
 IOS = Path(__file__).resolve().parents[1]
 BENCH = IOS.parent / 'android/benchmark/typing'
-MODELS = IOS / 'HEXKeyboard/TypingModel'
+MODELS = IOS / 'GoSpellKeyboard/TypingModel'
 ANDROID_MODELS = IOS.parent / 'android/app/src/main/assets/typing'
 LANGUAGES = ['en', 'es', 'de', 'fr', 'it', 'nb', 'pl']
 ROW_Y, SPACE = [66.5, 122.5, 178.5], [64.76, 212.0, 238.34, 45.0]
@@ -196,7 +196,7 @@ def score(out, langs):
     for lang in langs:
         outputs = json.loads((out / f'output-{lang}.json').read_text(encoding='utf-8'))
         lists = lists_dir(lang)
-        scored = model_words(lists / (lang + '.hextm'))
+        scored = model_words(lists / (lang + '.gospelltm'))
         lexicon = scored | {line.split('\t')[0] for line in (lists / (lang + '.valid')).read_text(encoding='utf-8').splitlines()}
         subs = {c: s['substitute'] if isinstance(s, dict) else s for c, s in maps[lang].items()}
         table = str.maketrans(subs)
@@ -287,11 +287,11 @@ def score(out, langs):
 def run(out, langs, destination):
     prepare(out, langs)
     for lang in langs:
-        env = dict(os.environ, TEST_RUNNER_HEX_TYPING_GATE=str(out), TEST_RUNNER_HEX_TYPING_GATE_LANGUAGE=lang)
+        env = dict(os.environ, TEST_RUNNER_GOSPELL_TYPING_GATE=str(out), TEST_RUNNER_GOSPELL_TYPING_GATE_LANGUAGE=lang)
         log = out / f'xcodebuild-{lang}.log'
         with log.open('w') as f:
-            code = subprocess.call(['xcodebuild', 'test', '-project', str(IOS / 'HEXMobile.xcodeproj'), '-scheme', 'HEXMobile',
-                                    '-destination', destination, '-only-testing:HEXMobileTests/TypingGateReplayTests',
+            code = subprocess.call(['xcodebuild', 'test', '-project', str(IOS / 'GoSpellMobile.xcodeproj'), '-scheme', 'GoSpellMobile',
+                                    '-destination', destination, '-only-testing:GoSpellMobileTests/TypingGateReplayTests',
                                     '-parallel-testing-enabled', 'NO', 'SWIFT_OPTIMIZATION_LEVEL=-O'],
                                    cwd=IOS, env=env, stdout=f, stderr=subprocess.STDOUT)
         if code or not (out / f'output-{lang}.json').exists():

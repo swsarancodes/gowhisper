@@ -1,5 +1,5 @@
 //! A model downloaded and loaded through a local API's
-//! `POST /models/{id}/prepare`: the running Hex's or an owned embedded
+//! `POST /models/{id}/prepare`: the running GoSpell's or an owned embedded
 //! service's, with the download shown on a terminal's stderr.
 
 use std::io::{BufRead as _, IsTerminal as _, Write as _};
@@ -108,7 +108,7 @@ pub(super) fn prepare(
             Some(Err(code)) => Err(failed(name, &code)),
             None => Err(ControlReply::error(
                 "failed",
-                format!("Hex stopped preparing {name} before it finished; try again"),
+                format!("GoSpell stopped preparing {name} before it finished; try again"),
             )),
         },
         Ok((status, body)) => {
@@ -116,12 +116,12 @@ pub(super) fn prepare(
             Err(match code.as_str() {
                 "prepare-busy" => ControlReply::error(
                     "busy",
-                    "Hex is already preparing a model; try again once it finishes",
+                    "GoSpell is already preparing a model; try again once it finishes",
                 ),
                 "unknown-model" => ControlReply::error(
                     "unknown-model",
                     format!(
-                        "Hex doesn't know `{}`; run `hex model list`",
+                        "GoSpell doesn't know `{}`; run `gospell model list`",
                         selection.model.as_str()
                     ),
                 ),
@@ -129,9 +129,10 @@ pub(super) fn prepare(
                     "model-unavailable",
                     format!("{name} doesn't support `{}`", selection.language),
                 ),
-                _ => {
-                    ControlReply::error("failed", format!("Hex refused to prepare {name} ({code})"))
-                }
+                _ => ControlReply::error(
+                    "failed",
+                    format!("GoSpell refused to prepare {name} ({code})"),
+                ),
             })
         }
         Err(error) => Err(ControlReply::error("transport", format!("{error:#}"))),
@@ -146,7 +147,7 @@ fn failed(name: &str, code: &str) -> ControlReply {
         "cancelled" => "stopped preparing",
         _ => "couldn't prepare",
     };
-    ControlReply::error("failed", format!("Hex {what} {name}; try again"))
+    ControlReply::error("failed", format!("GoSpell {what} {name}; try again"))
 }
 
 #[cfg(test)]

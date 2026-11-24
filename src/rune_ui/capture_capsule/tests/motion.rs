@@ -168,7 +168,7 @@ fn scripts() -> Vec<Script> {
             ],
             end: 5.4,
         },
-        // Every flow's whole path (`HEX_CAPSULE_FLOW`): a recording that
+        // Every flow's whole path (`GOSPELL_CAPSULE_FLOW`): a recording that
         // ⌥⇧S stops (the host's stages), the guesses come, one is picked (the toast's ⇥ then ⏎,
         // the rest a digit), Sent with Undo, gone; then a saved rule sends
         // on its own and leaves by itself.
@@ -447,7 +447,7 @@ fn settle(rt: &mut Runtime<CapsuleState>) {
 }
 
 /// Clicks the middle of the live element keyed `key` as a Mac delivers it:
-/// the pointer gets there, Hex's session tap hears the press first and
+/// the pointer gets there, GoSpell's session tap hears the press first and
 /// tells the capsule it may be a click away (`CapsuleKey::Press`), and only
 /// then does the overlay get the press and the release.
 fn click_on(rt: &mut Runtime<CapsuleState>, key: &str, nth: usize) {
@@ -496,7 +496,7 @@ fn point_at(rt: &mut Runtime<CapsuleState>, key: &str) {
     settle(rt);
 }
 
-/// `input` from Hex's tap, as a key reaches the live capsule.
+/// `input` from GoSpell's tap, as a key reaches the live capsule.
 fn tap(rt: &mut Runtime<CapsuleState>, input: Input) {
     rt.update(move |s, tx| {
         s.inbox.push(input);
@@ -505,12 +505,12 @@ fn tap(rt: &mut Runtime<CapsuleState>, input: Input) {
     settle(rt);
 }
 
-/// `HEX_CAPSULE_HOVER_SNAPS=<folder>` writes the live capsule with the
+/// `GOSPELL_CAPSULE_HOVER_SNAPS=<folder>` writes the live capsule with the
 /// pointer resting on RUNE, the fourth row, and Shift down, over the
 /// suggestions and over the search, light and dark.
 #[test]
 fn capture_capsule_hover_snapshots() {
-    let Some(folder) = std::env::var_os("HEX_CAPSULE_HOVER_SNAPS") else {
+    let Some(folder) = std::env::var_os("GOSPELL_CAPSULE_HOVER_SNAPS") else {
         return;
     };
     let Ok(gpu) = rune::render::Gpu::try_new(rune::render::Gpu::instance(), None) else {
@@ -617,12 +617,12 @@ fn clicks_on_the_capsule_do_what_they_say() {
         tap(&mut rt, Input::Move(1));
         tap(&mut rt, Input::Send { always: false });
         tap(&mut rt, Input::Send { always: false });
-        assert_eq!(*actions.lock().unwrap(), [send("HEX")]);
+        assert_eq!(*actions.lock().unwrap(), [send("GOSPELL")]);
 
         // A suggestion in the list under the capsule.
         let (mut rt, actions) = live(routed(guess()));
-        click_on(&mut rt, "row-HEX", 0);
-        assert_eq!(*actions.lock().unwrap(), vec![send("HEX")]);
+        click_on(&mut rt, "row-GOSPELL", 0);
+        assert_eq!(*actions.lock().unwrap(), vec![send("GOSPELL")]);
 
         // A search result, opened over the suggestions.
         let mut inputs = routed(guess());
@@ -665,7 +665,7 @@ fn clicks_on_the_capsule_do_what_they_say() {
         tuning::with_flow(flow, || {
             let (mut rt, actions) = live(routed(guess()));
             click_on(&mut rt, "pick", 1);
-            assert_eq!(*actions.lock().unwrap(), vec![send("HEX")], "{flow:?}");
+            assert_eq!(*actions.lock().unwrap(), vec![send("GOSPELL")], "{flow:?}");
         });
     }
 }
@@ -719,19 +719,19 @@ fn processing_input() -> Input {
     Input::Stage(Stage::Transcribing)
 }
 
-/// `HEX_CAPSULE_MOTION=<folder>` plays every script, light and dark, calm
+/// `GOSPELL_CAPSULE_MOTION=<folder>` plays every script, light and dark, calm
 /// and under Reduce Motion: motion-lint traces in
 /// `<folder>/runs/<script>-<variant>/trace.jsonl` (`motion-lint analyze
-/// <folder>`), and with `HEX_CAPSULE_FRAMES=1` each frame as a PNG in
-/// `<folder>/frames/<script>-<variant>-<theme>/`. `HEX_CAPSULE_SCRIPTS`
-/// picks scripts by name, and `HEX_CAPSULE_FLOW` the flow they play.
+/// <folder>`), and with `GOSPELL_CAPSULE_FRAMES=1` each frame as a PNG in
+/// `<folder>/frames/<script>-<variant>-<theme>/`. `GOSPELL_CAPSULE_SCRIPTS`
+/// picks scripts by name, and `GOSPELL_CAPSULE_FLOW` the flow they play.
 #[test]
 fn capture_capsule_motion() {
-    let Some(folder) = std::env::var_os("HEX_CAPSULE_MOTION") else {
+    let Some(folder) = std::env::var_os("GOSPELL_CAPSULE_MOTION") else {
         return;
     };
     let folder = std::path::PathBuf::from(folder);
-    let frames = std::env::var_os("HEX_CAPSULE_FRAMES").is_some();
+    let frames = std::env::var_os("GOSPELL_CAPSULE_FRAMES").is_some();
     let gpu = if frames {
         rune::render::Gpu::try_new(rune::render::Gpu::instance(), None).ok()
     } else {
@@ -744,9 +744,9 @@ fn capture_capsule_motion() {
             crate::rune_ui::offscreen::target(&gpu.device, w, h),
         )
     });
-    let only = std::env::var("HEX_CAPSULE_SCRIPTS").ok();
-    // `HEX_CAPSULE_FRAMES=all` writes Reduce Motion's frames too.
-    let reduced_frames = std::env::var("HEX_CAPSULE_FRAMES").is_ok_and(|v| v == "all");
+    let only = std::env::var("GOSPELL_CAPSULE_SCRIPTS").ok();
+    // `GOSPELL_CAPSULE_FRAMES=all` writes Reduce Motion's frames too.
+    let reduced_frames = std::env::var("GOSPELL_CAPSULE_FRAMES").is_ok_and(|v| v == "all");
     top_line_from_env();
     let mut report = Vec::new();
     for script in scripts() {
@@ -762,9 +762,9 @@ fn capture_capsule_motion() {
             let frames = frames && (reduced_frames || matches!(variant, Variant::Calm));
             for dark in [true, false] {
                 let theme = if dark { "dark" } else { "light" };
-                // `HEX_CAPSULE_THEME=light|dark` writes one theme's frames.
+                // `GOSPELL_CAPSULE_THEME=light|dark` writes one theme's frames.
                 let frames = frames
-                    && std::env::var("HEX_CAPSULE_THEME")
+                    && std::env::var("GOSPELL_CAPSULE_THEME")
                         .ok()
                         .is_none_or(|t| t == theme);
                 // One trace per script and variant: the motion is the same
@@ -899,14 +899,14 @@ fn ink_at(now: u64) -> super::ink::Scene {
     super::ink::Scene::at(&snapshot, now, tip)
 }
 
-/// `HEX_CAPSULE_SNAPS=<folder>` writes the ink overlay's moments as stills,
-/// and with `HEX_CAPSULE_FRAMES=1` and `HEX_CAPSULE_MOTION=<folder>` the
+/// `GOSPELL_CAPSULE_SNAPS=<folder>` writes the ink overlay's moments as stills,
+/// and with `GOSPELL_CAPSULE_FRAMES=1` and `GOSPELL_CAPSULE_MOTION=<folder>` the
 /// whole capture as frames in `<folder>/frames/ink-<theme>/`.
 #[test]
 fn ink_overlay_stills_and_frames() {
-    let snaps = std::env::var_os("HEX_CAPSULE_SNAPS").map(std::path::PathBuf::from);
-    let motion = std::env::var_os("HEX_CAPSULE_MOTION")
-        .filter(|_| std::env::var_os("HEX_CAPSULE_FRAMES").is_some())
+    let snaps = std::env::var_os("GOSPELL_CAPSULE_SNAPS").map(std::path::PathBuf::from);
+    let motion = std::env::var_os("GOSPELL_CAPSULE_MOTION")
+        .filter(|_| std::env::var_os("GOSPELL_CAPSULE_FRAMES").is_some())
         .map(std::path::PathBuf::from);
     if snaps.is_none() && motion.is_none() {
         return;
@@ -1380,19 +1380,19 @@ fn a_pick_that_goes_nowhere_brings_the_picker_back() {
     assert_eq!(rt.state.aim().unwrap().mode, Mode::Area);
 }
 
-/// `HEX_CAPSULE_SNAPS=<folder>` writes the picker's stills, light and dark;
-/// `HEX_CAPSULE_MOTION=<folder>` its motion-lint traces in
-/// `<folder>/runs/<script>-<variant>/`, and with `HEX_CAPSULE_FRAMES=1` its
+/// `GOSPELL_CAPSULE_SNAPS=<folder>` writes the picker's stills, light and dark;
+/// `GOSPELL_CAPSULE_MOTION=<folder>` its motion-lint traces in
+/// `<folder>/runs/<script>-<variant>/`, and with `GOSPELL_CAPSULE_FRAMES=1` its
 /// calm frames in `<folder>/frames/<script>-calm-<theme>/`.
 #[test]
 fn picker_stills_and_motion() {
     recording_dim_stills();
-    let snaps = std::env::var_os("HEX_CAPSULE_SNAPS").map(std::path::PathBuf::from);
-    let motion = std::env::var_os("HEX_CAPSULE_MOTION").map(std::path::PathBuf::from);
+    let snaps = std::env::var_os("GOSPELL_CAPSULE_SNAPS").map(std::path::PathBuf::from);
+    let motion = std::env::var_os("GOSPELL_CAPSULE_MOTION").map(std::path::PathBuf::from);
     if snaps.is_none() && motion.is_none() {
         return;
     }
-    let frames = std::env::var_os("HEX_CAPSULE_FRAMES").is_some();
+    let frames = std::env::var_os("GOSPELL_CAPSULE_FRAMES").is_some();
     let gpu = rune::render::Gpu::try_new(rune::render::Gpu::instance(), None).ok();
     let (w, h) = ((DISPLAY[0] * 2.0) as u32, (DISPLAY[1] * 2.0) as u32);
     let mut parts = gpu.as_ref().map(|gpu| {
@@ -1499,13 +1499,13 @@ fn picker_stills_and_motion() {
     std::fs::write(folder.join("onscreen-report.txt"), report.join("\n") + "\n").unwrap();
 }
 
-/// `HEX_CAPSULE_SNAPS=<folder>` also writes the recording dim over the
+/// `GOSPELL_CAPSULE_SNAPS=<folder>` also writes the recording dim over the
 /// picker's desktop, as an area and a window record, light and dark: the
 /// picker's own dim and outline, untinted.
 #[cfg(target_os = "macos")]
 fn recording_dim_stills() {
     use super::recording_dim::{self, DimState};
-    let Some(folder) = std::env::var_os("HEX_CAPSULE_SNAPS").map(std::path::PathBuf::from) else {
+    let Some(folder) = std::env::var_os("GOSPELL_CAPSULE_SNAPS").map(std::path::PathBuf::from) else {
         return;
     };
     let Ok(gpu) = rune::render::Gpu::try_new(rune::render::Gpu::instance(), None) else {

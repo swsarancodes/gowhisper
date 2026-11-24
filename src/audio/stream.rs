@@ -59,7 +59,7 @@ pub struct AudioInput {
     pub(super) stream_errors: Receiver<StreamError>,
     pub(super) watch_service_restarts: bool,
     pub(super) restart_generation: u64,
-    pub(super) hex_microphone: crate::audio::hex_microphone::CaptureFeedSwitch,
+    pub(super) gospell_microphone: crate::audio::gospell_microphone::CaptureFeedSwitch,
     /// How long the stream may go without delivering audio before it counts
     /// as failed; `None` for test inputs fed by hand.
     pub(super) stall_after: Option<Duration>,
@@ -171,7 +171,7 @@ impl AudioInput {
                 voice_path: VoicePath::Raw,
                 watch_service_restarts: false,
                 restart_generation: audio_service_restart_generation(),
-                hex_microphone: crate::audio::hex_microphone::capture_feed(48_000).1,
+                gospell_microphone: crate::audio::gospell_microphone::capture_feed(48_000).1,
                 stall_after: None,
                 last_delivery: Mutex::new(Instant::now()),
                 reported_period: AtomicBool::new(false),
@@ -205,7 +205,7 @@ impl AudioInput {
     }
 
     /// The OS's default input, or a real one standing in when the default is
-    /// Hex Microphone or missing.
+    /// GoSpell Microphone or missing.
     #[cfg(target_os = "windows")]
     pub fn open_system_default() -> Result<Self> {
         match open_configured_input(&OpenRequest {
@@ -324,18 +324,18 @@ impl AudioInput {
             stream_errors: started.stream_errors,
             watch_service_restarts: true,
             restart_generation,
-            hex_microphone: started.hex_microphone,
+            gospell_microphone: started.gospell_microphone,
             stall_after: Some(STREAM_STALL_TIMEOUT),
             last_delivery: Mutex::new(Instant::now()),
             reported_period: AtomicBool::new(false),
         })
     }
 
-    /// Whether this stream's audio feeds Hex Microphone. Only the dictation
+    /// Whether this stream's audio feeds GoSpell Microphone. Only the dictation
     /// listener's current input does; a meeting's second stream on the same
     /// microphone must not.
-    pub fn feed_hex_microphone(&self, on: bool) {
-        self.hex_microphone.set(on);
+    pub fn feed_gospell_microphone(&self, on: bool) {
+        self.gospell_microphone.set(on);
     }
 
     pub fn recv_timeout(&self, timeout: Duration) -> AudioInputEvent {
@@ -454,7 +454,7 @@ pub(super) struct StreamErrorReporter {
 impl StreamErrorReporter {
     fn report(&self, error: cpal::Error) {
         // WASAPI reports a default-input change as invalidation, yet the
-        // stream keeps capturing the old device. Hex switches once capture is
+        // stream keeps capturing the old device. GoSpell switches once capture is
         // idle rather than failing a recording.
         #[cfg(target_os = "windows")]
         if error.kind() == cpal::ErrorKind::StreamInvalidated
@@ -496,7 +496,7 @@ pub(super) fn build_stream<T: SizedSample>(
     channels: usize,
     sender: Sender<(Vec<f32>, CaptureInstant)>,
     reporter: StreamErrorReporter,
-    mut feed: crate::audio::hex_microphone::CaptureFeed,
+    mut feed: crate::audio::gospell_microphone::CaptureFeed,
     convert: impl Fn(T) -> f32 + Send + 'static,
 ) -> Result<Stream> {
     let sample_rate = config.sample_rate;

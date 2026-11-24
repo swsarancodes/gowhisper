@@ -55,7 +55,7 @@ pub(crate) fn contains_speech(samples: &[f32]) -> Option<bool> {
 }
 
 /// Recovery never starts a download, and fails closed without a detector.
-#[cfg(all(target_os = "macos", hex_capture))]
+#[cfg(all(target_os = "macos", gospell_capture))]
 pub(crate) fn installed_speech(samples: &[f32]) -> bool {
     #[cfg(test)]
     {
@@ -146,7 +146,7 @@ pub(crate) fn prewarm() {
     #[cfg(not(test))]
     if transcription_models::speech_detector_installed() {
         let _ = std::thread::Builder::new()
-            .name("hex-speech-detector".into())
+            .name("gospell-speech-detector".into())
             .spawn(|| {
                 let _ = loaded_session(&mut lock_state());
             });
@@ -196,7 +196,7 @@ fn start_download_once() {
         return;
     }
     let _ = std::thread::Builder::new()
-        .name("hex-speech-detector-download".into())
+        .name("gospell-speech-detector-download".into())
         .spawn(|| {
             if let Err(error) =
                 transcription_models::download_speech_detector(&AtomicBool::new(false))
@@ -329,7 +329,7 @@ mod tests {
     #[test]
     fn a_corrupt_detector_file_is_not_loaded() {
         let path = std::env::temp_dir().join(format!(
-            "hex-corrupt-speech-detector-{}.gguf",
+            "gospell-corrupt-speech-detector-{}.gguf",
             std::process::id()
         ));
         std::fs::write(&path, b"not a gguf file").unwrap();
@@ -339,9 +339,9 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "requires HEX_VAD_MODEL (Silero VAD GGUF)"]
+    #[ignore = "requires GOSPELL_VAD_MODEL (Silero VAD GGUF)"]
     fn real_detector_rejects_silence_and_noise() {
-        let mut session = load(Path::new(&std::env::var("HEX_VAD_MODEL").unwrap())).unwrap();
+        let mut session = load(Path::new(&std::env::var("GOSPELL_VAD_MODEL").unwrap())).unwrap();
         assert!(!detect(&mut session, &[0.0; 32_000]).unwrap());
         // -60 dBFS white noise from a fixed linear congruential generator.
         let mut seed = 0x2545_f491_u32;
@@ -361,16 +361,16 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "requires HEX_VAD_MODEL and HEX_VAD_SPEECH_WAV (16 kHz mono float speech)"]
+    #[ignore = "requires GOSPELL_VAD_MODEL and GOSPELL_VAD_SPEECH_WAV (16 kHz mono float speech)"]
     fn real_detector_hears_speech() {
-        let mut session = load(Path::new(&std::env::var("HEX_VAD_MODEL").unwrap())).unwrap();
-        assert!(detect(&mut session, &clip("HEX_VAD_SPEECH_WAV")).unwrap());
+        let mut session = load(Path::new(&std::env::var("GOSPELL_VAD_MODEL").unwrap())).unwrap();
+        assert!(detect(&mut session, &clip("GOSPELL_VAD_SPEECH_WAV")).unwrap());
     }
 
     #[test]
-    #[ignore = "requires HEX_VAD_MODEL and HEX_VAD_WHISPER_WAV (16 kHz mono float whisper at about -43 dBFS)"]
+    #[ignore = "requires GOSPELL_VAD_MODEL and GOSPELL_VAD_WHISPER_WAV (16 kHz mono float whisper at about -43 dBFS)"]
     fn real_detector_hears_quiet_whispers() {
-        let mut session = load(Path::new(&std::env::var("HEX_VAD_MODEL").unwrap())).unwrap();
-        assert!(detect(&mut session, &clip("HEX_VAD_WHISPER_WAV")).unwrap());
+        let mut session = load(Path::new(&std::env::var("GOSPELL_VAD_MODEL").unwrap())).unwrap();
+        assert!(detect(&mut session, &clip("GOSPELL_VAD_WHISPER_WAV")).unwrap());
     }
 }

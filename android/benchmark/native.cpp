@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
         SherpaOnnxDestroyOfflineRecognizerResult(result);SherpaOnnxDestroyOfflineStream(stream);
 #else
         auto p=whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
-        if (getenv("HEX_SHORT_WINDOW") && audio.size() <= 8*16000) p.audio_ctx=512;
+        if (getenv("GOSPELL_SHORT_WINDOW") && audio.size() <= 8*16000) p.audio_ctx=512;
         p.n_threads=threads;p.language=lang.c_str();p.no_context=true;p.no_timestamps=true;p.suppress_nst=true;
         p.print_progress=p.print_special=p.print_timestamps=p.print_realtime=false;
         if (whisper_full(ctx,p,audio.data(),audio.size())!=0) return 6;

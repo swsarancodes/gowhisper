@@ -1,7 +1,7 @@
-name: HEXMobile
+name: GoSpellMobile
 options:
   minimumXcodeGenVersion: 2.46.0
-  bundleIdPrefix: anomaly.hex
+  bundleIdPrefix: com.goml.gospell
   deploymentTarget:
     iOS: "18.0"
   xcodeVersion: "2660"
@@ -17,35 +17,35 @@ settings:
     SWIFT_EMIT_LOC_STRINGS: YES
     LOCALIZATION_PREFERS_STRING_CATALOGS: YES
 targets:
-  HEXMobile:
+  GoSpellMobile:
     type: application
     platform: iOS
     sources:
-      - HEXMobile
-      - HEXShared
-      - HEXActivity
+      - GoSpellMobile
+      - GoSpellShared
+      - GoSpellActivity
       - path: ../app/AppIcon.icon
         buildPhase: resources
     dependencies:
       - package: FluidAudio
-      - target: HEXKeyboard
+      - target: GoSpellKeyboard
         embed: true
-      - target: HEXWidgets
+      - target: GoSpellWidgets
         embed: true
     info:
-      path: HEXMobile/Info.plist
+      path: GoSpellMobile/Info.plist
       properties:
-        CFBundleDisplayName: Hex
+        CFBundleDisplayName: GoSpell
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CADisableMinimumFrameDurationOnPhone: true
         CFBundleURLTypes:
           - CFBundleTypeRole: Editor
-            CFBundleURLName: anomaly.hex.mobile.keyboard-session
+            CFBundleURLName: com.goml.gospell.mobile.keyboard-session
             CFBundleURLSchemes:
-              - hex-dictation
-        NSMicrophoneUsageDescription: Hex turns what you say into text on this iPhone. Audio never leaves it and is deleted once it's transcribed.
-        NSSpeechRecognitionUsageDescription: Hex uses Apple's on-device speech recognition to turn what you say into text. Nothing you say is sent to a server.
+              - gospell-dictation
+        NSMicrophoneUsageDescription: GoSpell turns what you say into text on this iPhone. Audio never leaves it and is deleted once it's transcribed.
+        NSSpeechRecognitionUsageDescription: GoSpell uses Apple's on-device speech recognition to turn what you say into text. Nothing you say is sent to a server.
         NSSupportsLiveActivities: true
         ITSAppUsesNonExemptEncryption: false
         UIBackgroundModes:
@@ -66,37 +66,37 @@ targets:
         ASSETCATALOG_COMPILER_ACCENT_COLOR_NAME: AccentColor
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_STYLE: Automatic
-        CODE_SIGN_ENTITLEMENTS: HEXMobile/HEXMobile.entitlements
+        CODE_SIGN_ENTITLEMENTS: GoSpellMobile/GoSpellMobile.entitlements
         CURRENT_PROJECT_VERSION: 1
         GENERATE_INFOPLIST_FILE: NO
         MARKETING_VERSION: 9.0.0
         TARGETED_DEVICE_FAMILY: "1"
         OTHER_LDFLAGS: $(inherited) -weak_framework FoundationModels
         OTHER_SWIFT_FLAGS: $(inherited) -Xfrontend -disable-autolink-framework -Xfrontend FoundationModels
-        PRODUCT_BUNDLE_IDENTIFIER: anomaly.hex.mobile
-        PRODUCT_NAME: HEX
+        PRODUCT_BUNDLE_IDENTIFIER: com.goml.gospell.mobile
+        PRODUCT_NAME: GOSPELL
     scheme:
       gatherCoverageData: false
       testTargets:
-        - HEXMobileTests
-  HEXKeyboard:
+        - GoSpellMobileTests
+  GoSpellKeyboard:
     type: app-extension
     platform: iOS
     sources:
-      - HEXKeyboard
-      - HEXShared
-      # The app's String Catalog, so the keyboard's words (the Hex key menu first) follow
-      # the iPhone's language where Hex is translated.
-      - HEXMobile/Localizable.xcstrings
+      - GoSpellKeyboard
+      - GoSpellShared
+      # The app's String Catalog, so the keyboard's words (the GoSpell key menu first) follow
+      # the iPhone's language where GoSpell is translated.
+      - GoSpellMobile/Localizable.xcstrings
     dependencies:
       # Experiments › Speech model in keyboard: Parakeet in the keyboard (KeyboardParakeet).
       - package: FluidAudio
     info:
-      path: HEXKeyboard/Info.plist
+      path: GoSpellKeyboard/Info.plist
       properties:
-        CFBundleDisplayName: Hex Keyboard
-        NSMicrophoneUsageDescription: Hex turns what you say into text on this iPhone. Audio never leaves it and is deleted once it's transcribed.
-        NSSpeechRecognitionUsageDescription: Hex uses Apple's on-device speech recognition to turn what you say into text. Nothing you say is sent to a server.
+        CFBundleDisplayName: GoSpell Keyboard
+        NSMicrophoneUsageDescription: GoSpell turns what you say into text on this iPhone. Audio never leaves it and is deleted once it's transcribed.
+        NSSpeechRecognitionUsageDescription: GoSpell uses Apple's on-device speech recognition to turn what you say into text. Nothing you say is sent to a server.
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
@@ -110,27 +110,27 @@ targets:
     settings:
       base:
         APPLICATION_EXTENSION_API_ONLY: YES
-        CODE_SIGN_ENTITLEMENTS: HEXKeyboard/HEXKeyboard.entitlements
+        CODE_SIGN_ENTITLEMENTS: GoSpellKeyboard/GoSpellKeyboard.entitlements
         COREML_CODEGEN_LANGUAGE: None
         CODE_SIGN_STYLE: Automatic
         CURRENT_PROJECT_VERSION: 1
         GENERATE_INFOPLIST_FILE: NO
         MARKETING_VERSION: 9.0.0
         TARGETED_DEVICE_FAMILY: "1"
-        PRODUCT_BUNDLE_IDENTIFIER: anomaly.hex.mobile.keyboard
-        PRODUCT_NAME: HEXKeyboard
+        PRODUCT_BUNDLE_IDENTIFIER: com.goml.gospell.mobile.keyboard
+        PRODUCT_NAME: GoSpellKeyboard
         SKIP_INSTALL: YES
-  HEXWidgets:
+  GoSpellWidgets:
     type: app-extension
     platform: iOS
     sources:
-      - HEXWidgets
-      - HEXActivity
-      - HEXShared/HexTheme.swift
+      - GoSpellWidgets
+      - GoSpellActivity
+      - GoSpellShared/GoSpellTheme.swift
     info:
-      path: HEXWidgets/Info.plist
+      path: GoSpellWidgets/Info.plist
       properties:
-        CFBundleDisplayName: Hex
+        CFBundleDisplayName: GoSpell
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
@@ -143,22 +143,22 @@ targets:
         GENERATE_INFOPLIST_FILE: NO
         MARKETING_VERSION: 9.0.0
         TARGETED_DEVICE_FAMILY: "1"
-        PRODUCT_BUNDLE_IDENTIFIER: anomaly.hex.mobile.widgets
-        PRODUCT_NAME: HEXWidgets
+        PRODUCT_BUNDLE_IDENTIFIER: com.goml.gospell.mobile.widgets
+        PRODUCT_NAME: GoSpellWidgets
         SKIP_INSTALL: YES
-  HEXMobileTests:
+  GoSpellMobileTests:
     type: bundle.unit-test
     platform: iOS
     sources:
-      - HEXMobileTests
-      - path: ../tests/fixtures/vocabulary/audio/term-hex-1.wav
+      - GoSpellMobileTests
+      - path: ../tests/fixtures/vocabulary/audio/term-gospell-1.wav
         buildPhase: resources
     dependencies:
-      - target: HEXMobile
+      - target: GoSpellMobile
     settings:
       base:
         BUNDLE_LOADER: $(TEST_HOST)
         CODE_SIGN_STYLE: Automatic
         GENERATE_INFOPLIST_FILE: YES
-        PRODUCT_BUNDLE_IDENTIFIER: anomaly.hex.mobile.tests
-        TEST_HOST: $(BUILT_PRODUCTS_DIR)/HEX.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/HEX
+        PRODUCT_BUNDLE_IDENTIFIER: com.goml.gospell.mobile.tests
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/GOSPELL.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GOSPELL

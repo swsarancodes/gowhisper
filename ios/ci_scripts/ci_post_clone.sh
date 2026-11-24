@@ -22,8 +22,8 @@ case "${CI_TAG:-}" in
 esac
 scripts/fetch-cleanup-model.sh
 xcodegen generate
-pins=HEXMobile.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
+pins=GoSpellMobile.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
 mkdir -p "$pins"
 cp Package.resolved "$pins/Package.resolved"
-xcodebuild -resolvePackageDependencies -project HEXMobile.xcodeproj -scheme HEXMobile \
+xcodebuild -resolvePackageDependencies -project GoSpellMobile.xcodeproj -scheme GoSpellMobile \
   -disableAutomaticPackageResolution -onlyUsePackageVersionsFromResolvedFile

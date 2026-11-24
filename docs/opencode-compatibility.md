@@ -18,12 +18,12 @@ the already-running server `0.0.0-dev-18329`, without creating a session or
 restarting the service.
 
 This is a dated validation snapshot, not a claim about the newest CLI available
-today. The integration contract below describes Hex's current implementation;
+today. The integration contract below describes GoSpell's current implementation;
 new provider-backed validation must record its own CLI and server versions.
 
 ## Integration Contract
 
-Hex never runs an OpenCode executable, never starts or restarts the service,
+GoSpell never runs an OpenCode executable, never starts or restarts the service,
 and never searches for or probes an installed CLI. It only talks to an already
 running service (`src/desktop/opencode_service.rs`):
 
@@ -78,12 +78,12 @@ running service (`src/desktop/opencode_service.rs`):
   cancellation. Credentials never reach diagnostics.
 
 When no service answers, features report "OpenCode isn't running" and link to
-the OpenCode docs; Hex starts nothing.
+the OpenCode docs; GoSpell starts nothing.
 
-Hex reads `/api/model` and `/api/model/default` through authenticated HTTP, avoiding
+GoSpell reads `/api/model` and `/api/model/default` through authenticated HTTP, avoiding
 large piped CLI responses. It supplies `x-opencode-directory` for its Application
 Support workspace; a service found in WSL gets a Linux workspace instead
-(`<home>/.local/share/hex/opencode`), because a Windows path is relative to a
+(`<home>/.local/share/gospell/opencode`), because a Windows path is relative to a
 Linux server. Model selections use the catalog's `id`, not the upstream
 provider's `modelID`. Available text-output models remain selectable regardless
 of release status, including alpha and beta. Selecting a thinking variant for the
@@ -91,12 +91,12 @@ floating default saves the resolved catalog model alongside it; existing explici
 model selections are preserved.
 
 One-shot generation accepts a prompt and optional model reference and returns
-`data.text`. Current OpenCode serves it at `/api/experimental/generate`; Hex
+`data.text`. Current OpenCode serves it at `/api/experimental/generate`; GoSpell
 falls back to the older `/api/generate` only when the server answers the new
 route with HTTP 404, within the same generation deadline. It is stateless and uses the server's base configuration, not the
 catalog request's directory header. Existing saved selections whose catalog and
 upstream IDs match need no migration. Previously broken alias selections can be
-fixed by reselecting the model; Hex does not guess an ID migration.
+fixed by reselecting the model; GoSpell does not guess an ID migration.
 
 ## Updating The Baseline
 

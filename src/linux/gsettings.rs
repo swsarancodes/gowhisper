@@ -68,17 +68,20 @@ mod tests {
     #[test]
     fn gsettings_string_lists_round_trip() {
         assert_eq!(
-            string_list("['hex', 'anomaly.hex']"),
-            ["hex", "anomaly.hex"]
+            string_list("['gospell', 'com.goml.gospell']"),
+            ["gospell", "com.goml.gospell"]
         );
         assert!(string_list("@as []").is_empty());
-        assert_eq!(string_list_text(&["anomaly.hex"]), "['anomaly.hex']");
+        assert_eq!(
+            string_list_text(&["com.goml.gospell"]),
+            "['com.goml.gospell']"
+        );
         assert_eq!(string_list_text(&[]), "@as []");
     }
 
     #[test]
     fn strings_quote_for_gsettings() {
-        assert_eq!(string_text("Hex"), "'Hex'");
+        assert_eq!(string_text("GoSpell"), "'GoSpell'");
         assert_eq!(string_text("it's \\ ok"), "'it\\'s \\\\ ok'");
     }
 }

@@ -356,8 +356,8 @@ private func authorization() async -> SFSpeechRecognizerAuthorizationStatus {
     }
 }
 
-@_cdecl("hex_apple_speech_ready")
-public func hexAppleSpeechReady(_ identifier: UnsafePointer<CChar>?) -> Int32 {
+@_cdecl("gospell_apple_speech_ready")
+public func gospellAppleSpeechReady(_ identifier: UnsafePointer<CChar>?) -> Int32 {
     guard #available(macOS 26.0, *),
           SpeechTranscriber.isAvailable,
           SFSpeechRecognizer.authorizationStatus() == .authorized,
@@ -377,8 +377,8 @@ public func hexAppleSpeechReady(_ identifier: UnsafePointer<CChar>?) -> Int32 {
     }
 }
 
-@_cdecl("hex_apple_speech_prepare")
-public func hexAppleSpeechPrepare(
+@_cdecl("gospell_apple_speech_prepare")
+public func gospellAppleSpeechPrepare(
     _ identifier: UnsafePointer<CChar>?,
     _ error: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
 ) -> UnsafeMutableRawPointer? {
@@ -413,8 +413,8 @@ public func hexAppleSpeechPrepare(
     }
 }
 
-@_cdecl("hex_apple_speech_transcribe")
-public func hexAppleSpeechTranscribe(
+@_cdecl("gospell_apple_speech_transcribe")
+public func gospellAppleSpeechTranscribe(
     _ opaque: UnsafeMutableRawPointer?,
     _ samples: UnsafePointer<Float>?,
     _ count: Int,
@@ -447,8 +447,8 @@ public func hexAppleSpeechTranscribe(
     }
 }
 
-@_cdecl("hex_apple_speech_release")
-public func hexAppleSpeechRelease(_ opaque: UnsafeMutableRawPointer?) {
+@_cdecl("gospell_apple_speech_release")
+public func gospellAppleSpeechRelease(_ opaque: UnsafeMutableRawPointer?) {
     guard #available(macOS 26.0, *), let opaque else { return }
     let session = Unmanaged<AppleSpeechSession>.fromOpaque(opaque).takeUnretainedValue()
     _ = blocking(timeout: releaseTimeout, operationName: "Apple Speech cleanup") {
@@ -457,7 +457,7 @@ public func hexAppleSpeechRelease(_ opaque: UnsafeMutableRawPointer?) {
     Unmanaged<AppleSpeechSession>.fromOpaque(opaque).release()
 }
 
-@_cdecl("hex_apple_speech_free_string")
-public func hexAppleSpeechFreeString(_ string: UnsafeMutablePointer<CChar>?) {
+@_cdecl("gospell_apple_speech_free_string")
+public func gospellAppleSpeechFreeString(_ string: UnsafeMutablePointer<CChar>?) {
     free(string)
 }

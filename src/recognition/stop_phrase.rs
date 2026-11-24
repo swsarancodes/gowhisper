@@ -37,7 +37,7 @@ pub(super) fn finish(
     let Some((shortcut, action)) = hotkeys.finish_hands_free() else {
         return Ok(());
     };
-    // A `hex dictation start --print` capture answers its command, as its
+    // A `gospell dictation start --print` capture answers its command, as its
     // press would.
     let (raw, print) = hotkeys.resolve_action(shortcut, action);
     tracing::info!(

@@ -131,7 +131,7 @@ mod tests {
 
     fn start(timestamps: Timestamps) -> LocalApi {
         let directory = std::env::temp_dir().join(format!(
-            "hex-api-timestamps-{}-{}",
+            "gospell-api-timestamps-{}-{}",
             std::process::id(),
             NEXT_DIRECTORY.fetch_add(1, Ordering::Relaxed)
         ));

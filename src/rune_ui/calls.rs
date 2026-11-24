@@ -1,7 +1,7 @@
 //! Calls: Meetings › Settings' Calls row and the sheet it opens. The row
 //! names the answer every call gets and stacks the icons of the apps and
 //! websites with their own; the sheet chooses that answer and lists every
-//! app and website Hex has seen a call in, plus any with a saved answer,
+//! app and website GoSpell has seen a call in, plus any with a saved answer,
 //! newest first, each with its own menu.
 //!
 //! The meeting watcher writes the seen list (`meeting::seen_calls`); the
@@ -41,7 +41,7 @@ const RELOAD_EVERY: f64 = 5.0;
 
 #[derive(Default)]
 pub(super) struct Calls {
-    /// The apps and websites Hex has seen a call in, newest first.
+    /// The apps and websites GoSpell has seen a call in, newest first.
     seen: Vec<SeenCall>,
     loader: Option<Receiver<Vec<SeenCall>>>,
     /// The poll clock at the last read.
@@ -73,7 +73,7 @@ impl CallRow {
 }
 
 /// Every app and website seen, newest first, then those with a saved
-/// answer Hex hasn't seen a call in since it began keeping the list.
+/// answer GoSpell hasn't seen a call in since it began keeping the list.
 fn rows(ui: &Ui) -> Vec<CallRow> {
     let mut rows: Vec<CallRow> = ui
         .calls
@@ -311,7 +311,7 @@ fn outcome(policy: MeetingPolicy, mac: bool) -> &'static str {
         }
         (MeetingPolicy::AlwaysRecord, false) => tr("Recording starts with the call"),
         (MeetingPolicy::NeverOffer, true) => tr("Start recordings yourself from the menu bar"),
-        (MeetingPolicy::NeverOffer, false) => tr("Start recordings yourself from Hex"),
+        (MeetingPolicy::NeverOffer, false) => tr("Start recordings yourself from GoSpell"),
     }
 }
 
@@ -388,7 +388,7 @@ fn answers(ui: &Ui, p: Paint) -> Vec<CardRow> {
     answers
 }
 
-/// One app or website: its icon, name, when Hex last saw a call in it, and
+/// One app or website: its icon, name, when GoSpell last saw a call in it, and
 /// its answer, dimmed while it follows the default.
 fn call_row(
     ui: &Ui,
@@ -493,7 +493,7 @@ pub(super) fn modal(ui: &Ui, p: Paint) -> Vec<El> {
     let list = if table.is_empty() {
         note(
             "calls-empty",
-            tr("Apps and websites show up here after Hex sees a call in them."),
+            tr("Apps and websites show up here after GoSpell sees a call in them."),
             p.muted(),
         )
         .mx(METRICS.row_px)

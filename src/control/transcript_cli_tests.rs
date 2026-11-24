@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 const NOW: u64 = 1_792_700_000_000;
 
-/// The shared command tree every OS's `hex` flattens.
+/// The shared command tree every OS's `gospell` flattens.
 #[derive(Parser)]
 struct Cli {
     #[command(subcommand)]
@@ -16,8 +16,12 @@ use crate::control::cli::ControlCli;
 const FIXTURE: &str = include_str!("../../tests/fixtures/history.json");
 
 fn args(extra: &[&str]) -> HistoryArgs {
-    let cli =
-        Cli::try_parse_from(["hex", "history"].into_iter().chain(extra.iter().copied())).unwrap();
+    let cli = Cli::try_parse_from(
+        ["gospell", "history"]
+            .into_iter()
+            .chain(extra.iter().copied()),
+    )
+    .unwrap();
     match cli.command.unwrap() {
         ControlCli::History(args) => args,
         _ => panic!("expected history"),
@@ -26,7 +30,7 @@ fn args(extra: &[&str]) -> HistoryArgs {
 
 fn temp() -> PathBuf {
     let root = std::env::temp_dir().join(format!(
-        "hex-transcript-cli-{}-{}",
+        "gospell-transcript-cli-{}-{}",
         std::process::id(),
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -188,7 +192,7 @@ fn history_stats_parse_sum_retained_entries_and_need_the_labs_toggle() {
     assert!(require_history_stats(true).is_ok());
 }
 
-/// The rollup follows Dictation stats now: `hex history stats` refuses before
+/// The rollup follows Dictation stats now: `gospell history stats` refuses before
 /// reading anything while the lab is off, so the JSON always includes it.
 #[test]
 fn history_stats_json_includes_the_yearly_rollup_with_dictation_stats() {
@@ -277,7 +281,9 @@ fn history_search_ranks_fuzzy_stemmed_matches_within_retention() {
         )
         .is_err()
     );
-    assert!(Cli::try_parse_from(["hex", "history", "--search", "x", "--oldest-first"]).is_err());
+    assert!(
+        Cli::try_parse_from(["gospell", "history", "--search", "x", "--oldest-first"]).is_err()
+    );
 }
 
 #[test]
@@ -569,7 +575,7 @@ fn meeting_show_ranges_filter_json_entries_and_markdown() {
 
     assert!(OffsetRange::parse(Some("0:14"), Some("0:06")).is_err());
     assert!(OffsetRange::parse(Some("0:06"), Some("0:06")).is_err());
-    let cli = Cli::try_parse_from(["hex", "meetings", "show", "latest", "--to", "0"]).unwrap();
+    let cli = Cli::try_parse_from(["gospell", "meetings", "show", "latest", "--to", "0"]).unwrap();
     let Some(ControlCli::Meetings {
         command: MeetingsCommand::Show { from, to, .. },
     }) = cli.command
@@ -583,7 +589,7 @@ fn meeting_show_ranges_filter_json_entries_and_markdown() {
         "The range start 00:00 must be earlier than its end 00:00."
     );
     let cli = Cli::try_parse_from([
-        "hex", "meetings", "show", "latest", "--from", "1:53:03", "--to", "120:43", "--json",
+        "gospell", "meetings", "show", "latest", "--from", "1:53:03", "--to", "120:43", "--json",
     ])
     .unwrap();
     let Some(ControlCli::Meetings {
@@ -763,10 +769,10 @@ fn subtitles_follow_the_range_and_need_the_labs_toggle() {
         SubtitleFormat::from_flags(false, true),
         Some(SubtitleFormat::Vtt)
     );
-    assert!(Cli::try_parse_from(["hex", "meetings", "show", "latest", "--srt"]).is_ok());
+    assert!(Cli::try_parse_from(["gospell", "meetings", "show", "latest", "--srt"]).is_ok());
     assert!(
         Cli::try_parse_from([
-            "hex",
+            "gospell",
             "meetings",
             "show",
             "latest",
@@ -777,7 +783,7 @@ fn subtitles_follow_the_range_and_need_the_labs_toggle() {
         .is_ok()
     );
     for conflict in [["--srt", "--vtt"], ["--srt", "--json"], ["--vtt", "--md"]] {
-        let command = ["hex", "meetings", "show", "latest"]
+        let command = ["gospell", "meetings", "show", "latest"]
             .into_iter()
             .chain(conflict);
         assert!(Cli::try_parse_from(command).is_err(), "{conflict:?}");
@@ -787,13 +793,13 @@ fn subtitles_follow_the_range_and_need_the_labs_toggle() {
 #[test]
 fn parses_release_commands_and_rejects_invalid_limits_and_times() {
     for command in [
-        vec!["hex", "history"],
-        vec!["hex", "meetings", "list", "--json"],
-        vec!["hex", "meetings", "show", "latest", "--md"],
-        vec!["hex", "meetings", "search", "problems"],
-        vec!["hex", "meetings", "chapters", "latest", "--json"],
+        vec!["gospell", "history"],
+        vec!["gospell", "meetings", "list", "--json"],
+        vec!["gospell", "meetings", "show", "latest", "--md"],
+        vec!["gospell", "meetings", "search", "problems"],
+        vec!["gospell", "meetings", "chapters", "latest", "--json"],
         vec![
-            "hex",
+            "gospell",
             "meetings",
             "show",
             "latest",
@@ -805,11 +811,11 @@ fn parses_release_commands_and_rejects_invalid_limits_and_times() {
         assert!(Cli::try_parse_from(command).is_ok());
     }
     for command in [
-        vec!["hex", "history", "--limit", "0"],
-        vec!["hex", "history", "--limit", "10001"],
-        vec!["hex", "meetings", "show", "latest", "--md", "--json"],
+        vec!["gospell", "history", "--limit", "0"],
+        vec!["gospell", "history", "--limit", "10001"],
+        vec!["gospell", "meetings", "show", "latest", "--md", "--json"],
         vec![
-            "hex",
+            "gospell",
             "meetings",
             "show",
             "latest",
@@ -818,7 +824,7 @@ fn parses_release_commands_and_rejects_invalid_limits_and_times() {
             "--from",
             "1:00",
         ],
-        vec!["hex", "meetings", "show", "latest", "--chapter", "two"],
+        vec!["gospell", "meetings", "show", "latest", "--chapter", "two"],
     ] {
         assert!(Cli::try_parse_from(command).is_err());
     }

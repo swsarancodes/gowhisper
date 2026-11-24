@@ -12,7 +12,7 @@ pub(super) const SCENES: &[Scene] = &[
     // (`--snap`): waits for its first snapshot instead of drawing
     // "Connecting…" at virtual time zero.
     ("live", |ui| {
-        // Reads the saved settings and the running Hex; writes neither.
+        // Reads the saved settings and the running GoSpell; writes neither.
         let settings = AppSettings::read().unwrap_or_default();
         crate::desktop::i18n::apply(settings.ui_language.as_deref());
         *ui = Ui::with(settings, Service::Fixture(Vec::new()));
@@ -68,7 +68,7 @@ pub(super) const SCENES: &[Scene] = &[
         ui.microphones = Ok(crate::audio::InputDevices {
             names: vec!["Built-in Audio Analog Stereo".into(), "Shure MV7".into()],
             system_default: Some("Shure MV7".into()),
-            default_is_hex_microphone: false,
+            default_is_gospell_microphone: false,
             ..Default::default()
         });
     }),
@@ -122,14 +122,14 @@ pub(super) const SCENES: &[Scene] = &[
     }),
     // Labs › Screenshots' Captures: a shot, a recording with its words, and
     // an older shot; and before any.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     ("captures", |ui| {
         *ui = portal_fixture();
         ui.settings.labs.screenshots = true;
         ui.captures = captures::CapturesPane::fixture();
         ui.pane = Pane::Captures;
     }),
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     ("captures-empty", |ui| {
         *ui = portal_fixture();
         ui.settings.labs.screenshots = true;
@@ -145,25 +145,25 @@ pub(super) const SCENES: &[Scene] = &[
     // and recordings in one History, with its type filter, its search, and
     // its empty states. The unified pane has no golden: it exists only in
     // macOS builds, and goldens render on Linux.
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     ("mac-history", |ui| {
         unified_history(ui);
         // The words a deliberate cancel kept: History-only, never pasted.
         ui.history.entries[2].cancelled = true;
     }),
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     ("mac-history-filtered", |ui| {
         unified_history(ui);
         ui.history
             .unified
             .set_filter(history::unified::Filter::Annotations);
     }),
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     ("mac-history-types", |ui| {
         unified_history(ui);
         ui.open = Some(Menu::Pick("history-type"));
     }),
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     ("mac-history-capture", |ui| {
         unified_history(ui);
         ui.history.selected = None;
@@ -175,13 +175,13 @@ pub(super) const SCENES: &[Scene] = &[
     // The Paste Last picker a held Paste Last opens, centred over the
     // window as it is over the display: a capture, a cancelled dictation,
     // and the newest dictation selected.
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     ("mac-paste-picker", |ui| {
         *ui = mac_fixture();
         ui.settings.labs.paste_last_picker = true;
         ui.paste_preview = true;
     }),
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     ("mac-history-empty", |ui| {
         unified_history(ui);
         ui.history.entries.clear();
@@ -189,7 +189,7 @@ pub(super) const SCENES: &[Scene] = &[
     }),
     // A search with matches, as the store and the captures' own words
     // answer it.
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     ("mac-history-search", |ui| {
         unified_history(ui);
         ui.history.search = rune::TextEdit::new("deploy".to_string());
@@ -201,7 +201,7 @@ pub(super) const SCENES: &[Scene] = &[
     }),
     // A search with nothing to show: the list keeps its field and says so,
     // and no card stays open.
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     ("mac-history-search-empty", |ui| {
         unified_history(ui);
         ui.history.search = rune::TextEdit::new("quarterly budget".to_string());
@@ -356,9 +356,9 @@ pub(super) const SCENES: &[Scene] = &[
             },
         );
     }),
-    // The first run on Linux (Windows is the same window): setting up Hex
+    // The first run on Linux (Windows is the same window): setting up GoSpell
     // with nothing found, the model step with models found here, the demo,
-    // waiting for the model, the practice game, and Hex is ready.
+    // waiting for the model, the practice game, and GoSpell is ready.
     ("onboarding", |ui| {
         first_run(ui, FirstRun::Fresh, Page::Download)
     }),
@@ -642,7 +642,7 @@ pub(super) const SCENES: &[Scene] = &[
         calls_fixture(ui, false);
     }),
     // The Calls sheet: Ask each time for every call, Slack huddles
-    // recording automatically, a website not offered, and the calls Hex
+    // recording automatically, a website not offered, and the calls GoSpell
     // has seen, newest first.
     ("meetings-calls", |ui| {
         *ui = mac_fixture();
@@ -650,7 +650,7 @@ pub(super) const SCENES: &[Scene] = &[
         ui.pane = Pane::Meetings;
         calls_fixture(ui, true);
     }),
-    // Before Hex has seen a call or saved an answer.
+    // Before GoSpell has seen a call or saved an answer.
     ("meetings-calls-empty", |ui| {
         *ui = mac_fixture();
         ui.meetings.view = meetings::View::Settings;
@@ -744,19 +744,19 @@ pub(super) const SCENES: &[Scene] = &[
         ui.meetings = meetings::MeetingsPane::default();
         ui.pane = Pane::Meetings;
     }),
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     ("mac-scrawl-off", |ui| scrawl_fixture(ui, false, |_| {})),
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     ("mac-scrawl", |ui| scrawl_fixture(ui, true, |_| {})),
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     ("mac-scrawl-running", |ui| {
         scrawl_fixture(ui, true, |view| view.scrawl_running = true)
     }),
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     ("mac-scrawl-permission", |ui| {
         scrawl_fixture(ui, true, |view| view.screen_recording = false)
     }),
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     ("mac-scrawl-restart", |ui| {
         scrawl_fixture(ui, true, |view| {
             view.screen_recording = false;
@@ -765,7 +765,7 @@ pub(super) const SCENES: &[Scene] = &[
     }),
     // Labs › Install agent skill from Annotate: every agent state, the
     // copyable skills command, and the Command-line tool.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     ("mac-scrawl-agents", |ui| {
         scrawl_fixture(ui, true, |_| {});
         ui.settings.labs.annotate_agent_install = true;
@@ -780,7 +780,7 @@ pub(super) const SCENES: &[Scene] = &[
         ui.platform.tuning.mode = crate::audio::voice_filter::VoiceFilterMode::Muted;
         ui.platform.demo = Some(fun::preview_demo(
             false,
-            Some(crate::audio::hex_microphone::DemoPlaybackTrack::Effect(
+            Some(crate::audio::gospell_microphone::DemoPlaybackTrack::Effect(
                 crate::audio::voice_filter::VoiceFilterMode::Robot,
             )),
         ));
@@ -788,7 +788,7 @@ pub(super) const SCENES: &[Scene] = &[
     }),
     ("mac-voice-filter-driver-missing", |ui| {
         *ui = mac_fixture();
-        if let Some(driver) = &mut ui.platform.hex_microphone {
+        if let Some(driver) = &mut ui.platform.gospell_microphone {
             driver.driver_bundle_installed = false;
             driver.driver_loaded = false;
             driver.mic_in_use = false;
@@ -805,20 +805,20 @@ pub(super) const SCENES: &[Scene] = &[
         *ui = fixture(DesktopShortcuts::Commands);
         ui.platform = platform::PlatformState::preview(platform::Capabilities::LINUX);
         ui.host = platform::PlatformHost::Fixture(Vec::new());
-        ui.settings.experimental.hex_microphone = true;
+        ui.settings.experimental.gospell_microphone = true;
         ui.pane = Pane::VoiceFilter;
     }),
     ("voice-filter-unavailable", |ui| {
         *ui = fixture(DesktopShortcuts::Commands);
         ui.platform = platform::PlatformState::preview(platform::Capabilities::LINUX);
         ui.host = platform::PlatformHost::Fixture(Vec::new());
-        if let Some(source) = &mut ui.platform.hex_microphone {
+        if let Some(source) = &mut ui.platform.gospell_microphone {
             source.driver_loaded = false;
-            source.action_state = crate::audio::hex_microphone::DriverActionState::Failed(
-                "pw-cat was not found; Hex Microphone needs PipeWire".into(),
+            source.action_state = crate::audio::gospell_microphone::DriverActionState::Failed(
+                "pw-cat was not found; GoSpell Microphone needs PipeWire".into(),
             );
         }
-        ui.settings.experimental.hex_microphone = true;
+        ui.settings.experimental.gospell_microphone = true;
         ui.pane = Pane::VoiceFilter;
     }),
     ("mac-hud-lab", |ui| {
@@ -827,7 +827,7 @@ pub(super) const SCENES: &[Scene] = &[
         ui.pane = Pane::HudLab;
     }),
     ("mac-labs", labs_with_some_on),
-    // Where hex://labs/live-text lands: its group's chip.
+    // Where gospell://labs/live-text lands: its group's chip.
     ("mac-labs-link", |ui| {
         *ui = mac_fixture();
         ui.labs_open = true;
@@ -877,7 +877,7 @@ pub(super) const SCENES: &[Scene] = &[
         ui.modes.picker_target = modes::PickerTarget::YoloMode;
         ui.modes.application_picker_open = true;
     }),
-    // Labs › Transcribe dropped audio: a file Hex reads held over the window,
+    // Labs › Transcribe dropped audio: a file GoSpell reads held over the window,
     // and one file at 42% with two behind it.
     ("drop-hover", |ui| {
         *ui = portal_fixture();
@@ -946,8 +946,8 @@ pub(super) const SCENES: &[Scene] = &[
             key: None,
         };
     }),
-    // The first run on macOS: setting up Hex, each permission state, the
-    // practice game, and Hex is ready.
+    // The first run on macOS: setting up GoSpell, each permission state, the
+    // practice game, and GoSpell is ready.
     ("mac-onboarding", |ui| {
         mac_first_run(ui, onboarding::MacStep::Setup, Page::Download)
     }),
@@ -990,7 +990,7 @@ pub(super) const SCENES: &[Scene] = &[
 
 /// The Annotate pane with captures `enabled`, a 3-day video retention, and
 /// `adjust` applied to what the host shows.
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 fn scrawl_fixture(ui: &mut Ui, enabled: bool, adjust: fn(&mut platform::ScrawlView)) {
     *ui = mac_fixture();
     ui.settings.capture.enabled = enabled;
@@ -1003,7 +1003,7 @@ fn scrawl_fixture(ui: &mut Ui, enabled: bool, adjust: fn(&mut platform::ScrawlVi
 
 /// Labs › Paste Last picker (macOS): the mixed History over fixture
 /// dictations and captures, as the pane draws it.
-#[cfg(all(target_os = "macos", hex_capture))]
+#[cfg(all(target_os = "macos", gospell_capture))]
 fn unified_history(ui: &mut Ui) {
     *ui = mac_fixture();
     ui.settings.capture.enabled = true;
@@ -1019,7 +1019,7 @@ fn unified_history(ui: &mut Ui) {
 /// Saturday, 21 November 2026, 12:00 UTC: the Calls fixtures' now.
 const CALLS_NOW_MS: i64 = 1_795_262_400_000;
 
-/// Calls Hex saw: Slack and Zoom with their catalog icons, Google Meet's
+/// Calls GoSpell saw: Slack and Zoom with their catalog icons, Google Meet's
 /// website, and one other website.
 fn calls_fixture(ui: &mut Ui, open: bool) {
     use crate::meeting::seen_calls::SeenCall;
@@ -1069,7 +1069,7 @@ pub(super) fn mac_fixture() -> Ui {
             policy: crate::app_settings::MeetingPolicy::NeverOffer,
         },
     ];
-    ui.settings.experimental.hex_microphone = true;
+    ui.settings.experimental.gospell_microphone = true;
     ui.microphones = Ok(crate::audio::InputDevices {
         names: vec![
             "Alex Pods".into(),
@@ -1077,7 +1077,7 @@ pub(super) fn mac_fixture() -> Ui {
             "Studio Display Microphone".into(),
         ],
         system_default: Some("Alex Pods".into()),
-        default_is_hex_microphone: false,
+        default_is_gospell_microphone: false,
         ..Default::default()
     });
     ui.meetings = meetings::MeetingsPane::fixture();
@@ -1134,7 +1134,7 @@ pub(super) fn portal_fixture() -> Ui {
 /// desktop with the shortcuts portal.
 pub(super) fn fixture(shortcuts: DesktopShortcuts) -> Ui {
     // English, unless a render names another language to check its copy in.
-    let language = std::env::var("HEX_RENDER_LANGUAGE").unwrap_or_else(|_| "en".into());
+    let language = std::env::var("GOSPELL_RENDER_LANGUAGE").unwrap_or_else(|_| "en".into());
     crate::desktop::i18n::apply(Some(&language));
     let settings = AppSettings {
         dictation_hotkey: HotkeyBinding {
@@ -1191,7 +1191,7 @@ fn labs_with_some_on(ui: &mut Ui) {
     ] {
         feature.set(&mut ui.settings, true);
     }
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     {
         ui.platform.scrawl = Some(platform::ScrawlView::preview());
     }

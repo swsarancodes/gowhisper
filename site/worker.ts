@@ -1,10 +1,10 @@
-// One Worker serves Hex under /hex on its host: the site, /hex/files (the
+// One Worker serves GoSpell under /gospell on its host: the site, /gospell/files (the
 // installers and appcast built with the site, the dev notes, and the frozen
 // 2.3.1 feeds and artifacts in the read-only files bucket), and
-// /hex/download/dev, the latest dev channel Mac download, /hex/dev, the dev
+// /gospell/download/dev, the latest dev channel Mac download, /gospell/dev, the dev
 // builds' changelog, and
-// /hex/download/<target>, the release every download button names, and /hex/ios,
-// Hex for iPhone on the App Store. Other hosts and
+// /gospell/download/<target>, the release every download button names, and /gospell/ios,
+// GoSpell for iPhone on the App Store. Other hosts and
 // plain HTTP redirect to the canonical host. `cf dev` with ANY_HOST set turns
 // the redirect off for local testing.
 import { BASE_PATH, DEV_DOWNLOAD_PATH, DEV_NOTES_PATH, DEV_NOTES_URL, DOWNLOAD_PATH, FILES_PATH, RELEASE_SERVICE, stripBase, withBase } from "./src/base"
@@ -63,9 +63,9 @@ export default {
   },
 }
 
-// /hex/ios, the short link to Hex for iPhone on the App Store.
+// /gospell/ios, the short link to GoSpell for iPhone on the App Store.
 const IOS_PATH = withBase("/ios")
-const APP_STORE_URL = "https://apps.apple.com/us/app/hex-voice-dictation-keyboard/id6836837368"
+const APP_STORE_URL = "https://apps.apple.com/us/app/gospell-voice-dictation-keyboard/id6836837368"
 
 const DOCS = new Map([
   ["/docs/transforms", "/docs/transforms.md"],
@@ -94,9 +94,9 @@ const DOWNLOAD_TARGETS = new Set([
   "windows-arm64",
 ])
 
-// Redirects /hex/download/<target> to the release service's alias for
+// Redirects /gospell/download/<target> to the release service's alias for
 // <target> on the stable channel (the dev channel while there is no stable
-// release, decided per request), and /hex/download/dev/<target> to the dev
+// release, decided per request), and /gospell/download/dev/<target> to the dev
 // channel's.
 async function download(request: Request, path: string): Promise<Response> {
   if (request.method !== "GET" && request.method !== "HEAD") {
@@ -108,13 +108,13 @@ async function download(request: Request, path: string): Promise<Response> {
   let channel = "dev"
   if (!dev) {
     try {
-      const stable = await fetch(`${RELEASE_SERVICE}/hex/desktop/stable.json`, { headers: { "User-Agent": "hex-site" }, cache: "no-store" })
+      const stable = await fetch(`${RELEASE_SERVICE}/gospell/desktop/stable.json`, { headers: { "User-Agent": "gospell-site" }, cache: "no-store" })
       if (stable.ok) channel = "stable"
     } catch {
       // The service is unreachable: the dev alias fails the same way, visibly.
     }
   }
-  const headers = new Headers({ Location: `${RELEASE_SERVICE}/hex/desktop/${channel}/${target}`, "Cache-Control": "no-store" })
+  const headers = new Headers({ Location: `${RELEASE_SERVICE}/gospell/desktop/${channel}/${target}`, "Cache-Control": "no-store" })
   secure(headers)
   return new Response(null, { status: 302, headers })
 }
@@ -127,7 +127,7 @@ async function devDownload(request: Request): Promise<Response> {
   if (request.method !== "GET" && request.method !== "HEAD") {
     return new Response("Method not allowed", { status: 405, headers: { Allow: "GET, HEAD" } })
   }
-  const manifestUrl = `${RELEASE_SERVICE}/hex/desktop/dev.json`
+  const manifestUrl = `${RELEASE_SERVICE}/gospell/desktop/dev.json`
   const text = (body: string, status: number) => {
     const headers = new Headers({ "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" })
     secure(headers)
@@ -135,35 +135,35 @@ async function devDownload(request: Request): Promise<Response> {
   }
   let response: Response
   try {
-    response = await fetch(manifestUrl, { headers: { "User-Agent": "hex-site" }, cache: "no-store" })
+    response = await fetch(manifestUrl, { headers: { "User-Agent": "gospell-site" }, cache: "no-store" })
   } catch {
-    return text("Hex's release service did not answer. Try again in a minute.", 502)
+    return text("GoSpell's release service did not answer. Try again in a minute.", 502)
   }
-  if (response.status === 404) return text("No dev build of Hex has been published yet.", 404)
-  if (!response.ok) return text(`Hex's release service answered ${response.status}. Try again in a minute.`, 502)
+  if (response.status === 404) return text("No dev build of GoSpell has been published yet.", 404)
+  if (!response.ok) return text(`GoSpell's release service answered ${response.status}. Try again in a minute.`, 502)
   type Manifest = { app?: string; artifact?: string; channel?: string; release?: { version?: string; targets?: Record<string, { url?: string }> } }
   let manifest: Manifest
   try {
     manifest = (await response.json()) as Manifest
   } catch {
-    return text("Hex's dev release manifest is not valid JSON.", 502)
+    return text("GoSpell's dev release manifest is not valid JSON.", 502)
   }
-  if (manifest.app !== "hex" || manifest.artifact !== "desktop" || manifest.channel !== "dev") {
-    return text("Hex's dev release manifest names another release.", 502)
+  if (manifest.app !== "gospell" || manifest.artifact !== "desktop" || manifest.channel !== "dev") {
+    return text("GoSpell's dev release manifest names another release.", 502)
   }
   const version = manifest.release?.version ?? "unknown"
   const dmg = manifest.release?.targets?.["macos-arm64-dmg"]?.url
-  if (!dmg) return text(`The latest dev build of Hex (${version}) has no Mac download.`, 404)
+  if (!dmg) return text(`The latest dev build of GoSpell (${version}) has no Mac download.`, 404)
   // Target URLs resolve against the manifest's URL (anomalyco/release docs/protocol.md).
   // Only redirect to the service's own files, never to another origin.
   let location: URL
   try {
     location = new URL(dmg, manifestUrl)
   } catch {
-    return text("Hex's dev release manifest has an invalid Mac download URL.", 502)
+    return text("GoSpell's dev release manifest has an invalid Mac download URL.", 502)
   }
-  if (location.origin !== new URL(manifestUrl).origin || !location.pathname.startsWith("/release/hex/files/")) {
-    return text("Hex's dev release manifest points the Mac download outside the release service.", 502)
+  if (location.origin !== new URL(manifestUrl).origin || !location.pathname.startsWith("/release/gospell/files/")) {
+    return text("GoSpell's dev release manifest points the Mac download outside the release service.", 502)
   }
   const headers = new Headers({ Location: location.toString(), "Cache-Control": "no-store" })
   secure(headers)
@@ -181,7 +181,7 @@ const DEV_NOTES_KEY = "dev-notes.json"
 async function devNotesResponse(env: Env): Promise<Response | undefined> {
   try {
     const response = await fetch(DEV_NOTES_URL, {
-      headers: { "User-Agent": "hex-site" },
+      headers: { "User-Agent": "gospell-site" },
       cf: { cacheTtl: 60, cacheEverything: true },
     })
     if (response.ok) return response

@@ -1,13 +1,13 @@
-# Hex for iPhone
+# GoSpell for iPhone
 
-**Status:** Internal TestFlight app (`HEXMobile`), custom keyboard extension
-(`HEXKeyboard`), and Live Activity + Control Center widget extension
-(`HEXWidgets`). Dictation runs on the iPhone: Apple Speech on iOS 26+
+**Status:** Internal TestFlight app (`GoSpellMobile`), custom keyboard extension
+(`GoSpellKeyboard`), and Live Activity + Control Center widget extension
+(`GoSpellWidgets`). Dictation runs on the iPhone: Apple Speech on iOS 26+
 (`SpeechTranscriber`, or `DictationTranscriber` for the languages it lacks),
 FluidAudio Parakeet V2 (iOS 18+, English), and `SFSpeechRecognizer` before
 iOS 26. The keyboard dictates by itself on iOS 26+ (in-keyboard dictation), or
-over the shared App Group (`group.anomaly.hex.mobile`) in a warm session.
-Audio never leaves the iPhone, and Hex removes each capture's file after
+over the shared App Group (`group.com.goml.gospell.mobile`) in a warm session.
+Audio never leaves the iPhone, and GoSpell removes each capture's file after
 inference, cancellation, or failure.
 
 This README is the map. Each area's detail lives in `docs/`, and the doc for
@@ -17,8 +17,8 @@ the area you touch is the spec for it.
 
 | Doc | What it covers |
 | --- | --- |
-| [`docs/onboarding-and-setup.md`](docs/onboarding-and-setup.md) | First run, the setup sheet, Full Access, opening Hex from the keyboard, cold start and the handoff |
-| [`docs/keyboard.md`](docs/keyboard.md) | The full keyboard and dictation bar: the Hex key, auto-start, push to talk, autocorrect and the typing models, Learn how I type, Adaptive touch, swipe typing, languages and layouts, size and touch targets, iPhone Duo and iPad, emoji, the Dot Scope |
+| [`docs/onboarding-and-setup.md`](docs/onboarding-and-setup.md) | First run, the setup sheet, Full Access, opening GoSpell from the keyboard, cold start and the handoff |
+| [`docs/keyboard.md`](docs/keyboard.md) | The full keyboard and dictation bar: the GoSpell key, auto-start, push to talk, autocorrect and the typing models, Learn how I type, Adaptive touch, swipe typing, languages and layouts, size and touch targets, iPhone Duo and iPad, emoji, the Dot Scope |
 | [`docs/dictation.md`](docs/dictation.md) | Engines and speech models, warm sessions, styles and cleanup, dictation language, translation, live dictation (Live words), capture and audio, Action Button and Live Activity |
 | [`docs/settings-and-home.md`](docs/settings-and-home.md) | Home's screen, the four Settings pages, the experiments list, and every `--snap-state` scene |
 | [`docs/build-and-test.md`](docs/build-and-test.md) | Prerequisites, generating the project, the cleanup tagger's model, the emoji index, replaying real typing |
@@ -31,11 +31,11 @@ the area you touch is the spec for it.
 
 | Path | What's there |
 | --- | --- |
-| `HEXMobile/` | The containing app: Home, onboarding, Settings, the dictation controller |
-| `HEXKeyboard/` | The keyboard extension, its dictation bar and in-keyboard dictation |
-| `HEXShared/` | Shared by both: the full keyboard engine, layouts, typing models, cleanup, Dot Scope |
-| `HEXActivity/`, `HEXWidgets/` | ActivityKit attributes and intents, the Live Activity and Control Center widgets |
-| `HEXMobileTests/` | Unit tests, run with `xcodebuild test` |
+| `GoSpellMobile/` | The containing app: Home, onboarding, Settings, the dictation controller |
+| `GoSpellKeyboard/` | The keyboard extension, its dictation bar and in-keyboard dictation |
+| `GoSpellShared/` | Shared by both: the full keyboard engine, layouts, typing models, cleanup, Dot Scope |
+| `GoSpellActivity/`, `GoSpellWidgets/` | ActivityKit attributes and intents, the Live Activity and Control Center widgets |
+| `GoSpellMobileTests/` | Unit tests, run with `xcodebuild test` |
 | `benchmark/`, `scripts/` | Typing replays; build-time helpers for the cleanup model, emoji index and typing models |
 | `ci_scripts/` | Xcode Cloud's post-clone step |
 
@@ -47,7 +47,7 @@ Prerequisites: Xcode 26+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen) 2
 cd ios
 scripts/fetch-cleanup-model.sh   # the cleanup tagger's Core ML model, kept out of git
 xcodegen generate
-xcodebuild test -project HEXMobile.xcodeproj -scheme HEXMobile -destination "id=<SIM_UDID>"
+xcodebuild test -project GoSpellMobile.xcodeproj -scheme GoSpellMobile -destination "id=<SIM_UDID>"
 ```
 
 No CI job compiles or tests the iOS targets, so these checks run only in a local

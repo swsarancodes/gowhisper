@@ -1,6 +1,6 @@
 # Onboarding scenes
 
-Each `.scene` file is one "Without Hex" disaster and its "With Hex" payoff.
+Each `.scene` file is one "Without GoSpell" disaster and its "With GoSpell" payoff.
 One command per line; `#` starts a comment. Times are seconds, measured from
 the previous line, so you rarely have to time anything by hand. A `[…]` at the
 end of a line holds options. `scripts/check onboarding` parses every scene and
@@ -14,7 +14,7 @@ reports errors with their line numbers.
 - `pill Jay is presenting`: the red status pill at the right of the header, level with the title (optional).
 - `lead Investors are waiting. One quick reply by hand.`: the line under the title.
 
-**Without Hex.** Lines before `start` are already in the thread when the scene opens. `end` is the last line.
+**Without GoSpell.** Lines before `start` are already in the thread when the scene opens. `end` is the last line.
 - `Jay: text [0.4]`: someone's message. Without a number, the scene holds for its reading time. `[#desk]` names the line for a later `tap`.
 - `cut 0.5 Jay: text`: lands 0.5 s from now, while you go on typing.
 - `type text [panic 0.2-0.9]`: you type by hand, typos and all. Panic (0 calm, 1 frantic) sets the pace and how hard the keys hit; without it, panic stays where it was.
@@ -26,13 +26,13 @@ reports errors with their line numbers.
 - `tap ❤ 👍 1.1 ‼`: tapbacks on the line just above (`tap @desk …` for a named one), even if a later line lands first. Each lands 0.2 s after the last unless you give it a time. Glyphs: `❤ 👍 👎 ‼ ? haha`.
 - `end removed`, `end left`, `end blocked` or `end undelivered` cuts you off mid-word with that system line ("Jay removed you from “Launch Room”", "Jay left the conversation", "Jay blocked you", "Message not delivered"). `end removed: custom text` changes the wording.
 
-**With Hex** (after `with`): your one spoken sentence, then an out-of-proportion triumph. Aim for about 8 s.
-- `hex Yes, we're ready. Everything's tested, go ahead.`: the sentence, spoken in about 1.5 s.
+**With GoSpell** (after `with`): your one spoken sentence, then an out-of-proportion triumph. Aim for about 8 s.
+- `gospell Yes, we're ready. Everything's tested, go ahead.`: the sentence, spoken in about 1.5 s.
 - Then `tap` rains on it, and replies land fast (0.35 s apart unless given a time). Build the escalation in threes.
 - `status Jay made you CEO`: a celebratory system pill. `rename Bow Before You` renames the thread with a pill. You can use more than one of each.
 - `pill You're presenting`: changes the red pill as the line before it lands (`pill off` hides it). It needs a `pill` at the top.
 - `effect confetti` or `effect fireworks` (both are allowed).
-- `score {hex}, no typos, one company.` and `typed Typing: {secs}, {typos}, and one job.`: the score. `{hex}` becomes "1.5 seconds", and `{secs}` and `{typos}` are filled in from the run ("27 seconds", "5 typos").
+- `score {gospell}, no typos, one company.` and `typed Typing: {secs}, {typos}, and one job.`: the score. `{gospell}` becomes "1.5 seconds", and `{secs}` and `{typos}` are filled in from the run ("27 seconds", "5 typos").
 
 ```
 title  Dinner with Sam          # one-on-one: no `group`
@@ -47,32 +47,32 @@ read
 tap    ? 0.6
 end    blocked
 with
-hex    Yes, on my way. Two minutes out, order the wine.
+gospell    Yes, on my way. Two minutes out, order the wine.
 tap    ❤ ❤ ‼
 Sam:   wow. a full sentence
 Sam:   my mom says marry you
 status Sam pinned your message
 effect confetti
-score  {hex}, no typos, one wedding.
+score  {gospell}, no typos, one wedding.
 typed  Typing: {secs}, {typos}, and one date.
 ```
 
 ## Sketches
 
 `sketch-*.scene` files are what "Watch another one" plays while the speech
-model downloads: a "Without Hex" part only, no `with`, `score` or `typed`,
+model downloads: a "Without GoSpell" part only, no `with`, `score` or `typed`,
 ending at `end`. Each runs 15–18 s, and the first run cuts one short only
 after a reply has gone out, so give it a few replies. They are listed in
 `sketches.rs`, in the order they play.
 
 ## Limits and checking
 
-A scene holds at most 18 lines in "Without Hex" (counting yours and the
-ending) and 8 in "With Hex", one `autocorrect`, one `elbow`, and 4
-tapbacks per line. "Without Hex" runs 26–36 s and "With Hex" finishes
+A scene holds at most 18 lines in "Without GoSpell" (counting yours and the
+ending) and 8 in "With GoSpell", one `autocorrect`, one `elbow`, and 4
+tapbacks per line. "Without GoSpell" runs 26–36 s and "With GoSpell" finishes
 within 8 s of the shortcut. Check a folder of scenes, with every mistake
 reported by line:
 
 ```sh
-HEX_VALIDATE_SCENES=/path/to/scenes cargo test --bin hex validate_scene_folder -- --nocapture
+GOSPELL_VALIDATE_SCENES=/path/to/scenes cargo test --bin gospell validate_scene_folder -- --nocapture
 ```

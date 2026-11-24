@@ -8,7 +8,7 @@ use crate::desktop::i18n::{tr, tr_named};
 /// Why Restart to update waits while a meeting is active: relaunching would
 /// cut the recording or launch recovery short.
 pub(crate) const MEETING_RESTART_HOLD: &str =
-    "Hex is finishing a meeting; restart to update when it's done";
+    "GoSpell is finishing a meeting; restart to update when it's done";
 
 /// An actionable update offer derived once from [`DesktopUpdateStatus`].
 #[derive(Clone, Debug, Eq, PartialEq)]

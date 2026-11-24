@@ -351,7 +351,7 @@ mod tests {
 
     fn start(stream_engine: Option<crate::transcription::stream::EngineSource>) -> LocalApi {
         let directory = std::env::temp_dir().join(format!(
-            "hex-streams-{}-{}",
+            "gospell-streams-{}-{}",
             std::process::id(),
             NEXT_DIRECTORY.fetch_add(1, Ordering::Relaxed)
         ));
@@ -409,7 +409,7 @@ mod tests {
         send(
             api,
             &format!(
-                "{method} {path} HTTP/1.1\r\nAuthorization: Bearer {}\r\nX-Hex-Stream-Token: {owner}\r\n{extra}Content-Length: {}\r\n\r\n",
+                "{method} {path} HTTP/1.1\r\nAuthorization: Bearer {}\r\nX-GoSpell-Stream-Token: {owner}\r\n{extra}Content-Length: {}\r\n\r\n",
                 api.document.token,
                 body.len()
             ),
@@ -429,7 +429,7 @@ mod tests {
         send(
             api,
             &format!(
-                "POST /streams/{id}/audio HTTP/1.1\r\nAuthorization: Bearer {}\r\nX-Hex-Stream-Token: {owner}\r\n{extra}Content-Length: {length}\r\n\r\n",
+                "POST /streams/{id}/audio HTTP/1.1\r\nAuthorization: Bearer {}\r\nX-GoSpell-Stream-Token: {owner}\r\n{extra}Content-Length: {length}\r\n\r\n",
                 api.document.token,
             ),
             &[],
@@ -534,7 +534,7 @@ mod tests {
             .flat_map(|sample| sample.to_le_bytes())
             .collect::<Vec<_>>();
         let octets = "Content-Type: application/octet-stream\r\n";
-        assert_eq!(refused_audio(&api, id, "hex_wrong", octets, 4).0, 404);
+        assert_eq!(refused_audio(&api, id, "gospell_wrong", octets, 4).0, 404);
         assert_eq!(refused_audio(&api, id + 1, &owner, octets, 4).0, 404);
         assert_eq!(
             refused_audio(&api, id, &owner, "Content-Type: audio/wav\r\n", 4).0,

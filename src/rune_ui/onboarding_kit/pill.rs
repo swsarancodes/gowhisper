@@ -1,8 +1,8 @@
 //! The download pill and the inline language capsule button.
 //!
 //! [`pill`] carries [`PILL`] as a shared element, so the centerpiece loader on
-//! `"Setting up Hex"` flies smoothly up to the top bar during the demo and
-//! permissions, then back to centre stage for `"Hex is ready"`.
+//! `"Setting up GoSpell"` flies smoothly up to the top bar during the demo and
+//! permissions, then back to centre stage for `"GoSpell is ready"`.
 
 use crate::desktop::i18n::{tr, tr_named};
 use rune::{Align, El, Spring, Transition, el, icon, row, text};
@@ -11,12 +11,12 @@ use std::sync::Mutex;
 
 use super::super::controls::Paint;
 use super::fixture::{Download, Language};
-use super::hex_meter::hex_meter;
+use super::gospell_meter::gospell_meter;
 use super::stories::{Flow, Onboard, Step};
 
-/// Shared-element id carried by the thin single-hexagon mark from the top-bar
+/// Shared-element id carried by the thin GoML ring from the top-bar
 /// pill to the Ready landing.
-pub(crate) const PILL: &str = "hex-mark";
+pub(crate) const PILL: &str = "gospell-mark";
 /// Shared-element id of the download capsule itself, so the centred progress
 /// capsule and the top-bar pill are one shape that moves and widens.
 pub(crate) const CAPSULE: &str = "download-capsule";
@@ -111,7 +111,7 @@ pub(crate) fn language_label(language: Language) -> String {
 
 /// Top-bar download capsule. The shell carries [`CAPSULE`], so the centred
 /// progress capsule travels up into it as one shape, width leading; the
-/// `16 pt` hexagon mark carries [`PILL`] on to the Ready landing.
+/// `16 pt` GoML ring carries [`PILL`] on to the Ready landing.
 pub(crate) fn pill(p: Paint, download: Download, closed: f32) -> El {
     let k = p.k;
     let done = download.done();
@@ -158,7 +158,7 @@ pub(crate) fn pill(p: Paint, download: Download, closed: f32) -> El {
                 .size(16.0, 16.0)
                 .matched(PILL)
                 .motion(FLY)
-                .child(hex_meter(p, "meter", 16.0, download.fraction(), closed)),
+                .child(gospell_meter(p, "meter", 16.0, download.fraction(), closed)),
         )
         .child(
             text(language_label(download.language))

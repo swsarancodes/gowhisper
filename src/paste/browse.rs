@@ -207,7 +207,7 @@ pub(crate) struct Key {
     pub trigger: bool,
     /// Paste Last's key, whatever modifiers are down (V once ⌥⇧ are up).
     pub trigger_key: bool,
-    /// Another of Hex's shortcuts.
+    /// Another of GoSpell's shortcuts.
     pub other_shortcut: bool,
 }
 

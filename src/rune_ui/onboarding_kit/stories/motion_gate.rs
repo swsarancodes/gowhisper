@@ -57,7 +57,7 @@ const ALLOW: &[AllowRow] = &[
     .max(3),
     AllowRow::new(
         "appear-then-jump",
-        "thread/hex-bubble",
+        "thread/gospell-bubble",
         "words",
         "a sent line arrives whole and the thread makes room",
     )
@@ -156,7 +156,7 @@ fn record(w: &Window, dark: bool, reduced: bool) -> Recording {
     r.rec
 }
 
-/// The window opening on `"Setting up Hex"`: the story as it opens, then
+/// The window opening on `"Setting up GoSpell"`: the story as it opens, then
 /// Play.
 fn entrance(dark: bool, reduced: bool) -> Recording {
     let mut r = runtime_at(opened(), dark, reduced);
@@ -216,7 +216,10 @@ fn windows() -> Vec<(&'static str, Window)> {
                 2.5,
             ),
         ),
-        ("with-hex", beat(|s| s.step() == Step::YourTurn, 0.5, 3.0)),
+        (
+            "with-gospell",
+            beat(|s| s.step() == Step::YourTurn, 0.5, 3.0),
+        ),
         ("words", beat(|s| s.step() == Step::Hearing, 0.2, 4.0)),
         (
             "almost-ready",
@@ -297,14 +300,14 @@ fn luma(rgba: &[u8], width: u32, [x, y, w, h]: [u32; 4]) -> f32 {
 /// pixels of the conversation's empty middle while the Launch Room's row
 /// grows into it, in both appearances. Its surface must never blink, as it
 /// did when the plate it grew on handed over to the card's own surface and
-/// that faded in. `HEX_ONBOARDING_FRAMES=<folder>` also writes the frames.
+/// that faded in. `GOSPELL_ONBOARDING_FRAMES=<folder>` also writes the frames.
 #[test]
 fn the_conversation_opens_without_a_blink() {
     let Ok(gpu) = Gpu::try_new(Gpu::instance(), None) else {
         eprintln!("skipping: no GPU adapter");
         return;
     };
-    let folder = std::env::var_os("HEX_ONBOARDING_FRAMES").map(std::path::PathBuf::from);
+    let folder = std::env::var_os("GOSPELL_ONBOARDING_FRAMES").map(std::path::PathBuf::from);
     let (width, height) = (
         crate::rune_ui::WINDOW_SIZE.0 as u32,
         crate::rune_ui::WINDOW_SIZE.1 as u32,

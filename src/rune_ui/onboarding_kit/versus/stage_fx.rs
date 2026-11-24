@@ -1,6 +1,6 @@
 //! What happens to the whole stage at once: the camera pushing in and
 //! shaking on autocorrect's hit, the autocorrect title slamming on, and the
-//! `"Voice-first mode"` call as `"With Hex"` takes over.
+//! `"Voice-first mode"` call as `"With GoSpell"` takes over.
 
 use rune::icon;
 use rune_kit::glyphs;
@@ -167,13 +167,13 @@ const INTO_HUD: f64 = 0.24;
 const _: () = assert!(VOICE_CALL_AT + CALL_IN < HUD_RISES);
 const _: () = assert!(VOICE_CALL_AT + VOICE_CALL_HOLD < BEFORE_KEY);
 
-/// `"Voice-first mode"` blooming in across the keyboard as `"With Hex"`
-/// rewinds, then shrinking into the HUD. `"Without Hex"` has no call: the
+/// `"Voice-first mode"` blooming in across the keyboard as `"With GoSpell"`
+/// rewinds, then shrinking into the HUD. `"Without GoSpell"` has no call: the
 /// heading's chip already names the keyboard. Reduce Motion fades it in and
 /// out where it sits.
 pub(super) fn mode_call(p: Paint, s: &Onboard) -> Option<El> {
     let reduced = s.reduced.get();
-    let since = hex_time(s)? - VOICE_CALL_AT;
+    let since = gospell_time(s)? - VOICE_CALL_AT;
     if !(0.0..VOICE_CALL_HOLD).contains(&since) {
         return None;
     }
@@ -227,7 +227,7 @@ pub(super) fn mode_call(p: Paint, s: &Onboard) -> Option<El> {
 }
 
 /// The mode the heading names beside its title: the keyboard while
-/// `"Without Hex"` plays, the voice once `"With Hex"` takes over.
+/// `"Without GoSpell"` plays, the voice once `"With GoSpell"` takes over.
 pub(super) fn mode_chip(p: Paint, voice: bool) -> El {
     let k = p.k;
     let (glyph, copy, fill, ink) = if voice {

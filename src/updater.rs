@@ -1,4 +1,4 @@
-//! Hex's in-app updater on every OS, a client of the Anomaly release service
+//! GoSpell's in-app updater on every OS, a client of the GoML release service
 //! (`docs/plans/release-service.md`). One worker polls the channel's manifest
 //! 10 seconds after launch, then hourly or on "Check for updates", decides with the
 //! protocol's client rules, and for a direct install downloads the target,
@@ -7,7 +7,7 @@
 //! release replaces it, and Restart to update checks once more before it
 //! switches over. Versions are display text and never compared: whenever the
 //! channel's current release is not the running build (its target SHA-256,
-//! else its exact version), Hex takes it, and switching channels does so
+//! else its exact version), GoSpell takes it, and switching channels does so
 //! after the user confirms. Package-managed installs only learn the command to run;
 //! source builds, test builds, and installs whose administrator set
 //! `DisableUpdates` never check. Manifests are not signed: HTTPS, the
@@ -45,9 +45,9 @@ pub(crate) use presentation::menu_title;
 #[cfg_attr(target_os = "macos", allow(unused_imports))]
 pub(crate) use presentation::{UpdateOffer, offer, offer_hold};
 
-const APP: &str = "hex";
+const APP: &str = "gospell";
 const ARTIFACT: &str = "desktop";
-const ORIGIN: &str = "https://anoma.ly/release";
+const ORIGIN: &str = "https://goml.io/release";
 const STARTUP_DELAY: Duration = Duration::from_secs(10);
 const CHECK_INTERVAL: Duration = Duration::from_secs(60 * 60);
 /// Dev builds land on every push to dev, so the Dev channel checks often.
@@ -66,14 +66,14 @@ const RESTART_MANIFEST_TIMEOUT: Duration = Duration::from_secs(15);
 /// How this install receives updates, which decides what the updater does.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Method {
-    /// Our installer's receipt (or, on macOS, a writable `Hex.app`): Hex
+    /// Our installer's receipt (or, on macOS, a writable `GoSpell.app`): GoSpell
     /// downloads and stages updates itself on this channel.
     Direct { channel: String },
-    /// A direct install Hex cannot replace (macOS: a read-only or translocated
+    /// A direct install GoSpell cannot replace (macOS: a read-only or translocated
     /// location); updates link to the download.
     DownloadOnly,
     /// A package manager (`aur`, `deb-x64`, `rpm-arm64`, `nix`, `brew`, …) updates
-    /// it; Hex shows its command once it serves a newer version.
+    /// it; GoSpell shows its command once it serves a newer version.
     #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
     Package(&'static str),
     /// Built from a checkout, which updates it.
@@ -101,8 +101,8 @@ impl Method {
 }
 
 /// The channel the Release workflow published this build on, stamped at
-/// build time beside its version (`HEX_BUILD_CHANNEL`).
-const BUILD_CHANNEL: Option<&str> = option_env!("HEX_BUILD_CHANNEL");
+/// build time beside its version (`GOSPELL_BUILD_CHANNEL`).
+const BUILD_CHANNEL: Option<&str> = option_env!("GOSPELL_BUILD_CHANNEL");
 
 /// The channel this build belongs to: the one it was published on, else
 /// (builds from before the stamp) `dev` for a dev version, else the
@@ -237,7 +237,7 @@ impl Core {
             {
                 DesktopUpdateStatus::ReadyToRestart
             }
-            // A package manager updates Hex: its own checks only look for
+            // A package manager updates GoSpell: its own checks only look for
             // the manager's command, so they show nothing of their own.
             Phase::Checking { .. } | Phase::Idle | Phase::Error if packaged => {
                 DesktopUpdateStatus::PackageManager
@@ -388,7 +388,7 @@ impl Core {
     }
 
     /// Switches to the newest staged update once Restart to update's final
-    /// check has run, whatever its result. True when Hex now quits. A meeting
+    /// check has run, whatever its result. True when GoSpell now quits. A meeting
     /// that started recording since the click keeps the update staged and the
     /// restart waiting, and a quit that began during the check never swaps: the
     /// drain installs the update itself.
@@ -453,7 +453,7 @@ impl Core {
 struct Shared {
     core: Mutex<Core>,
     signal: Condvar,
-    /// A package manager installed Hex, so "up to date" is its to say.
+    /// A package manager installed GoSpell, so "up to date" is its to say.
     packaged: bool,
     /// Why this install can't update itself (Windows), shown with Download
     /// update.
@@ -500,17 +500,17 @@ pub struct Updater {
 impl Updater {
     pub fn start() -> Self {
         let method = platform::method();
-        let disabled = if option_env!("HEX_TEST_BUILD") == Some("1") || updates_off_by_env() {
+        let disabled = if option_env!("GOSPELL_TEST_BUILD") == Some("1") || updates_off_by_env() {
             Some(DesktopUpdateStatus::Unavailable)
         } else if crate::app_paths::is_local_build() {
             Some(DesktopUpdateStatus::SourceBuild)
         } else if managed_by_policy() {
             Some(DesktopUpdateStatus::Managed)
-        // An `HEX_X86_BASELINE=ivybridge` source build targets an older processor
+        // An `GOSPELL_X86_BASELINE=ivybridge` source build targets an older processor
         // than every published artifact, so it never takes one: installing it
-        // would leave a Hex that can't start. A source build never checks,
+        // would leave a GoSpell that can't start. A source build never checks,
         // downloads, or installs, and its footer says so.
-        } else if method == Method::Source || cfg!(hex_x86_ivybridge) {
+        } else if method == Method::Source || cfg!(gospell_x86_ivybridge) {
             Some(DesktopUpdateStatus::SourceBuild)
         } else {
             None
@@ -617,7 +617,7 @@ impl Updater {
 
     /// Carries out an update control: check now, open the download, or
     /// restart into the staged update. A restart finishes on the worker;
-    /// [`Self::take_restart`] says when Hex must quit.
+    /// [`Self::take_restart`] says when GoSpell must quit.
     pub fn act(&self, action: &DesktopAction) -> Result<()> {
         match action {
             DesktopAction::CheckForUpdates => self.check_now(),
@@ -643,7 +643,7 @@ impl Updater {
     }
 
     /// The outcome of Restart to update, once: `Ok` when the update starts
-    /// as soon as Hex quits, which the caller must now do.
+    /// as soon as GoSpell quits, which the caller must now do.
     pub fn take_restart(&self) -> Option<Result<()>> {
         lock(&self.shared.core).take_restart()
     }
@@ -670,7 +670,7 @@ impl Updater {
             _ => return,
         };
         if let Err(error) = crate::desktop::opencode_catalog::open_url(&url) {
-            tracing::warn!(%error, "could not open the Hex download");
+            tracing::warn!(%error, "could not open the GoSpell download");
         }
     }
 
@@ -682,11 +682,11 @@ impl Updater {
     }
 }
 
-/// `HEX_DISABLE_UPDATES=1` turns this launch's updater off, as a test build
-/// has it: no checks, no network, nothing offered. For copies of Hex that
+/// `GOSPELL_DISABLE_UPDATES=1` turns this launch's updater off, as a test build
+/// has it: no checks, no network, nothing offered. For copies of GoSpell that
 /// must stay quiet, such as benchmarks (docs/perf.md).
 fn updates_off_by_env() -> bool {
-    std::env::var_os("HEX_DISABLE_UPDATES").is_some_and(|value| value == "1")
+    std::env::var_os("GOSPELL_DISABLE_UPDATES").is_some_and(|value| value == "1")
 }
 
 /// Whether an administrator turned updates off (`DisableUpdates`), read
@@ -807,7 +807,7 @@ fn check(
     confirmed_switch: Option<&str>,
 ) -> Result<Phase> {
     let updates = updates_dir()?;
-    // Read each check, so a change from the window or `hex settings` applies
+    // Read each check, so a change from the window or `gospell settings` applies
     // at the next one.
     let setting = AppSettings::saved_update_channel();
     let home = home_channel(method, BUILD_CHANNEL, crate::VERSION);
@@ -855,7 +855,7 @@ fn check(
                 let installed = download_console(&manifest, &manifest_url, &user_agent, &updates)
                     .and_then(|file| file.map_or(Ok(()), |file| platform::install_console(&file)));
                 if let Err(error) = installed {
-                    tracing::warn!(error = %format!("{error:#}"), "could not add hex.com to this install");
+                    tracing::warn!(error = %format!("{error:#}"), "could not add gospell.com to this install");
                 }
             }
             Ok(Phase::Idle)
@@ -865,7 +865,7 @@ fn check(
         } => Ok(Phase::Available(match command {
             Some(command) => Available::Command { command },
             None => Available::Download {
-                url: notes_url.unwrap_or_else(|| "https://anoma.ly/hex".into()),
+                url: notes_url.unwrap_or_else(|| "https://gospell.goml.io".into()),
             },
         })),
         Decision::Install {
@@ -893,7 +893,7 @@ fn check(
                             .and_then(|target| protocol::resolve_url(&manifest_url, &target.url))
                             .or(manifest.release.notes_url)
                     })
-                    .unwrap_or_else(|| "https://anoma.ly/hex".into());
+                    .unwrap_or_else(|| "https://gospell.goml.io".into());
                 return Ok(Phase::Available(Available::Download { url }));
             }
             let url = protocol::resolve_url(&manifest_url, &target.url)
@@ -910,7 +910,7 @@ fn check(
                 .and_then(|console| platform::stage(&file, console.as_deref(), &version));
             #[cfg(not(target_os = "windows"))]
             let staged = platform::stage(&file, &version);
-            let staged = staged.wrap_err_with(|| format!("could not stage Hex {version}"))?;
+            let staged = staged.wrap_err_with(|| format!("could not stage GoSpell {version}"))?;
             // A quit installs the staged update itself (`install_on_quit`)
             // under the same lock, so a release that lands afterwards is
             // discarded instead of replacing the installed one.
@@ -960,7 +960,7 @@ fn fetch_notes(shared: &Shared, channel: &str, user_agent: &str, updates: &Path,
     }
 }
 
-/// Checks the manifest's `<target>-sig` file: Anomaly's release key signing
+/// Checks the manifest's `<target>-sig` file: GoML's release key signing
 /// the SHA-256 the executable is downloaded against. Without it, whoever
 /// controls the manifest could name any executable.
 #[cfg(target_os = "linux")]
@@ -986,7 +986,7 @@ fn verify_linux_signature(
     platform::verify_signature(&target.sha256, &std::fs::read(file)?)
 }
 
-/// The release's `hex.com` (`<target>-cli`), checked against the manifest's
+/// The release's `gospell.com` (`<target>-cli`), checked against the manifest's
 /// size and SHA-256; none when the release has no console entry point.
 #[cfg(target_os = "windows")]
 fn download_console(
@@ -1002,7 +1002,7 @@ fn download_console(
         return Ok(None);
     };
     let url = protocol::resolve_url(manifest_url, &target.url)
-        .ok_or_else(|| eyre!("the hex.com URL {} is not usable", target.url))?;
+        .ok_or_else(|| eyre!("the gospell.com URL {} is not usable", target.url))?;
     transport::download(&url, user_agent, target, updates).map(Some)
 }
 
@@ -1020,11 +1020,11 @@ fn replaces_staged(decision: &Decision, staged_sha256: &str) -> bool {
     )
 }
 
-/// `HEX_RELEASE_BASE_URL` (HTTPS only) points a build at another service
+/// `GOSPELL_RELEASE_BASE_URL` (HTTPS only) points a build at another service
 /// origin, for local tests against a fixture service. Nothing defaults to the
 /// service's dev stage, which only tests the service itself.
 fn manifest_url(channel: &str) -> String {
-    let origin = std::env::var("HEX_RELEASE_BASE_URL")
+    let origin = std::env::var("GOSPELL_RELEASE_BASE_URL")
         .ok()
         .filter(|origin| origin.starts_with("https://"));
     format!(
@@ -1103,7 +1103,8 @@ mod tests {
     use super::*;
 
     fn temporary(name: &str) -> PathBuf {
-        let path = std::env::temp_dir().join(format!("hex-updater-{name}-{}", std::process::id()));
+        let path =
+            std::env::temp_dir().join(format!("gospell-updater-{name}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&path);
         std::fs::create_dir_all(&path).unwrap();
         path
@@ -1126,7 +1127,7 @@ mod tests {
         let write = |value: serde_json::Value| {
             std::fs::write(root.join("install.json"), value.to_string()).unwrap()
         };
-        let receipt = |channel: &str, root_path: &Path| serde_json::json!({"app":"hex","artifact":"desktop","channel":channel,"method":"direct","root":root_path});
+        let receipt = |channel: &str, root_path: &Path| serde_json::json!({"app":"gospell","artifact":"desktop","channel":channel,"method":"direct","root":root_path});
         assert_eq!(receipt_channel(&root), None);
         write(receipt("stable", &root));
         assert_eq!(receipt_channel(&root).as_deref(), Some("stable"));
@@ -1225,7 +1226,7 @@ mod tests {
     }
 
     #[test]
-    fn the_setting_picks_the_channel_unless_a_package_manager_updates_hex() {
+    fn the_setting_picks_the_channel_unless_a_package_manager_updates_gospell() {
         let direct = Method::Direct {
             channel: "stable".into(),
         };
@@ -1249,7 +1250,7 @@ mod tests {
         let sha = sha.to_string().repeat(64);
         serde_json::json!({
             "schema": 1,
-            "app": "hex",
+            "app": "gospell",
             "artifact": "desktop",
             "channel": channel,
             "sequence": 1,
@@ -1261,7 +1262,7 @@ mod tests {
                 "distributions": [{ "kind": "direct" }],
                 "targets": {
                     "linux-x64": {
-                        "url": format!("/release/hex/files/{sha}/hex"),
+                        "url": format!("/release/gospell/files/{sha}/gospell"),
                         "sha256": sha,
                         "size": 1
                     }
@@ -1477,7 +1478,7 @@ mod tests {
             core.restart = Restart::Requested;
             assert!(
                 core.finish_restart(Phase::Staged, None, false),
-                "the quit already installed the update; Hex still quits"
+                "the quit already installed the update; GoSpell still quits"
             );
             assert!(matches!(core.restart, Restart::Done(Ok(()))));
             assert!(matches!(core.phase, Phase::Applied));
@@ -1585,7 +1586,7 @@ mod tests {
 
     #[test]
     fn a_release_that_finishes_staging_after_a_quit_installed_one_is_discarded() {
-        // Hex is still running: the release becomes the staged update.
+        // GoSpell is still running: the release becomes the staged update.
         for phase in [
             Phase::Staged,
             Phase::Checking {
@@ -1706,7 +1707,7 @@ mod tests {
     fn the_manifest_url_names_app_artifact_and_channel() {
         assert_eq!(
             manifest_url("stable"),
-            "https://anoma.ly/release/hex/desktop/stable.json"
+            "https://goml.io/release/gospell/desktop/stable.json"
         );
     }
 }

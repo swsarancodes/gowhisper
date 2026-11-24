@@ -613,7 +613,7 @@ impl Editor {
         let words = self.words.trim().to_owned();
         let overlay = self.overlay.clone();
         let spawned = std::thread::Builder::new()
-            .name("hex-screenshot-export".into())
+            .name("gospell-screenshot-export".into())
             .spawn(move || {
                 let result = job.png().and_then(|png| deliver(&out, &png, &words));
                 let Some(overlay) = overlay else {
@@ -673,7 +673,7 @@ impl Editor {
         let overlay = self.overlay.clone();
         let generation = self.generation;
         let spawned = std::thread::Builder::new()
-            .name("hex-recording-export".into())
+            .name("gospell-recording-export".into())
             .spawn(move || {
                 let mut shown = 0u8;
                 let mut progress = |share: f64| {
@@ -784,7 +784,7 @@ fn unsaved_name(folder: &std::path::Path) -> String {
     #[cfg(target_os = "macos")]
     let path = crate::screenshots::save::free_path(folder, crate::screenshots::save::Stamp::now());
     #[cfg(not(target_os = "macos"))]
-    let path = folder.join("Hex Screenshot.png");
+    let path = folder.join("GoSpell Screenshot.png");
     path.file_name()
         .map_or_else(String::new, |name| name.to_string_lossy().into_owned())
 }
@@ -973,7 +973,7 @@ pub(crate) fn install<S: 'static>(app: &mut rune::App<S>) {
     use rune::{
         DisplayTarget, KeyPolicy, OverlayInput, OverlayOptions, OverlayPlacement, OverlaySpec,
     };
-    let spec = OverlaySpec::new("Hex screenshot editor", (1440.0, 900.0), view::view)
+    let spec = OverlaySpec::new("GoSpell screenshot editor", (1440.0, 900.0), view::view)
         .options(OverlayOptions {
             placement: Some(OverlayPlacement::FullScreen),
             display: DisplayTarget::UnderPointer,
@@ -1007,7 +1007,7 @@ pub(crate) fn open_recording_from(movie: PathBuf, words: Vec<clip::Word>, from: 
         return;
     };
     let spawned = std::thread::Builder::new()
-        .name("hex-recording-editor".into())
+        .name("gospell-recording-editor".into())
         .spawn(move || {
             let clip = match clip::load(movie.clone(), words) {
                 Ok(clip) => clip,
@@ -1056,7 +1056,7 @@ pub(crate) fn open_from(path: PathBuf, words: String, from: Option<From>) {
         return;
     };
     let spawned = std::thread::Builder::new()
-        .name("hex-screenshot-editor".into())
+        .name("gospell-screenshot-editor".into())
         .spawn(move || {
             let shot = match export::decode(&path) {
                 Ok(shot) => shot,

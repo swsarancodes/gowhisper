@@ -1,8 +1,8 @@
-# HEX TypeScript Client
+# GOSPELL TypeScript Client
 
-`@kitlangton/hex` provides local transcription through a native HEX helper, with
+`@goml/gospell` provides local transcription through a native GOSPELL helper, with
 Promise and optional Effect APIs. The host application owns recording, microphone
-permission, settings, and what happens to the resulting text. HEX owns model
+permission, settings, and what happens to the resulting text. GOSPELL owns model
 preparation and inference.
 
 The package is ESM-only and requires Node.js `>=20.3.0` or a compatible host
@@ -10,18 +10,18 @@ runtime.
 
 **Distribution status:** a bundled native helper is not published yet. Embedded
 consumers must currently supply an explicit native command. The examples below
-use the HEX executable's `service --embedded` mode; users do not need to launch
-the HEX desktop app. This package alone is not yet a turnkey native distribution.
+use the GOSPELL executable's `service --embedded` mode; users do not need to launch
+the GOSPELL desktop app. This package alone is not yet a turnkey native distribution.
 
 ## Promise API
 
 Pass a model to `create()` to get a ready-to-use transcriber:
 
 ```ts
-import * as Hex from "@kitlangton/hex"
+import * as GoSpell from "@goml/gospell"
 
-const transcriber = await Hex.create({
-  command: ["/path/to/hex-service", "service", "--embedded"],
+const transcriber = await GoSpell.create({
+  command: ["/path/to/gospell-service", "service", "--embedded"],
   model: "parakeet_unified_en",
   language: "en",
   onProgress: console.log,
@@ -77,11 +77,11 @@ can adapt the Promise API to their own framework/runtime version.
 
 ```ts
 import { Effect } from "effect"
-import * as Hex from "@kitlangton/hex/effect"
+import * as GoSpell from "@goml/gospell/effect"
 
 const program = Effect.scoped(Effect.gen(function* () {
-  const transcriber = yield* Hex.create({
-    command: ["/path/to/hex-service", "service", "--embedded"],
+  const transcriber = yield* GoSpell.create({
+    command: ["/path/to/gospell-service", "service", "--embedded"],
     model: "parakeet_unified_en",
     language: "en",
     onProgress: console.log,
@@ -108,8 +108,8 @@ in the Promise API and a scoped `{ pid, client }` in the Effect API. This is use
 for catalog browsing and explicit model management:
 
 ```ts
-const host = await Hex.create({
-  command: ["/path/to/hex-service", "service", "--embedded"],
+const host = await GoSpell.create({
+  command: ["/path/to/gospell-service", "service", "--embedded"],
 })
 try {
   const models = await host.client.models.list()
@@ -129,13 +129,13 @@ try {
 
 The low-level client retains request-only cancellation; callers own helper
 shutdown if native work must stop. Effect's low-level `client.models.prepare()`
-remains a progress `Stream`. `Hex.layer(options)` still supplies the low-level
-`Hex.Service` and owns its helper for the layer scope.
+remains a progress `Stream`. `GoSpell.layer(options)` still supplies the low-level
+`GoSpell.Service` and owns its helper for the layer scope.
 
 On the running desktop app, `client.transcribe({ ..., process: "global" })`
 also asks for the text after your Global mode's output processing (Labs ›
 Process API transcripts) and returns it as `processed`. An embedded
-`hex-service` installs no processor and answers `processing-unavailable`;
+`gospell-service` installs no processor and answers `processing-unavailable`;
 without `process`, results are raw transcripts as before. `capabilities()`
 reports `outputProcessing` when the host supports it; older hosts omit it.
 
@@ -167,20 +167,20 @@ Use `models.list()` to discover available models rather than treating the export
 is currently unavailable in the native catalog. The optional `language` argument
 to `models.list()` affects readiness metadata, not language filtering; inspect
 each model's `languages` and `supportsLanguageDetection` fields. `source` says
-where the file comes from: `download`, `hex`, `imported`, or
+where the file comes from: `download`, `gospell`, `imported`, or
 `found: owner/name@abcdef1` for a model another app downloaded to the Hugging Face
-cache, which Hex uses where it is.
+cache, which GoSpell uses where it is.
 
-## Connect to HEX Desktop
+## Connect to GOSPELL Desktop
 
-Alternatively, reuse the microphone and engine owned by the running HEX desktop
+Alternatively, reuse the microphone and engine owned by the running GOSPELL desktop
 app through the Promise entrypoint:
 
 ```ts
-import { connect } from "@kitlangton/hex"
+import { connect } from "@goml/gospell"
 
-const hex = await connect()
-const recording = await hex.dictation.start({ source: "my-app" })
+const gospell = await connect()
+const recording = await gospell.dictation.start({ source: "my-app" })
 
 void (async () => {
   for await (const { rmsDb, peakDb } of recording.levels) {
@@ -191,14 +191,14 @@ void (async () => {
 const { transcript, durationMs } = await recording.finish()
 ```
 
-`connect()` finds the running Hex on macOS, Linux, and Windows. Desktop capture
-(`hex.dictation`) works on all three while Hex is listening, with the
-microphone the user chose in Hex. A recording never ends the user's shortcut
+`connect()` finds the running GoSpell on macOS, Linux, and Windows. Desktop capture
+(`gospell.dictation`) works on all three while GoSpell is listening, with the
+microphone the user chose in GoSpell. A recording never ends the user's shortcut
 dictation: starting one while the shortcut records is refused with
 `dictation-busy`, and the
 shortcut does nothing while yours records. Outside macOS there is no
-packaged helper yet; pass `command: ["hex", "service", "--embedded"]` to
-`create()` to run an installed Hex as the direct child.
+packaged helper yet; pass `command: ["gospell", "service", "--embedded"]` to
+`create()` to run an installed GoSpell as the direct child.
 
 Call `recording.cancel()` to discard; Escape doesn't cancel a recording, so the
 key stays with your app. If the microphone fails mid-recording, `finish()` on
@@ -219,13 +219,13 @@ observations automatically.
   only narrow, validated recording/model operations across the renderer bridge.
 - The direct-child helper does not capture microphone audio. Permissions,
   `NSMicrophoneUsageDescription`, the recording indicator, and recording consent
-  belong to the host application. Desktop `connect()` instead uses HEX's capture.
+  belong to the host application. Desktop `connect()` instead uses GOSPELL's capture.
 - Encode PCM WAV in the host. Do not send compressed recordings such as M4A or
   WebM and label them as WAV. The service accepts 8-192 kHz audio with 1-8 channels,
   subject to a 64 MiB upload limit and separate source-frame and normalized-audio
-  budgets. See the [service spec](https://github.com/anomalyco/hex/blob/dev/docs/specs/local-transcription-service.md#wire-protocol-api-2)
+  budgets. See the [service spec](https://github.com/goml/gospell/blob/dev/docs/specs/local-transcription-service.md#wire-protocol-api-2)
   for the exact limits; there is no promise of unlimited clip length.
-- Persist the host's model selection in the host, not in HEX desktop preferences.
+- Persist the host's model selection in the host, not in GOSPELL desktop preferences.
 - Spawn the signed helper directly. Do not use LaunchServices, `open`, or
   `NSWorkspace`. Validate native packaging/signing in the final consuming app.
 - Never expose the startup bearer token to renderer or web content. Credentials

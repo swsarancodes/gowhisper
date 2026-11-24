@@ -190,8 +190,8 @@ fn is_downloaded(ui: &Ui, model: &ModelDefinition, language: &str) -> bool {
     ui.picker.installed(model, model.language_for(language))
 }
 
-/// The bytes the downloaded `models` take in Hex's own models folder: files
-/// another app downloaded, or added where they are, aren't Hex's.
+/// The bytes the downloaded `models` take in GoSpell's own models folder: files
+/// another app downloaded, or added where they are, aren't GoSpell's.
 fn downloaded_total(
     models: &[PickerModel],
     downloaded: impl Fn(&ModelDefinition) -> bool,
@@ -204,8 +204,8 @@ fn downloaded_total(
         .sum()
 }
 
-/// Whether Hex keeps `model`'s file in its own models folder.
-fn owned_by_hex(model: &ModelDefinition) -> bool {
+/// Whether GoSpell keeps `model`'s file in its own models folder.
+fn owned_by_gospell(model: &ModelDefinition) -> bool {
     if model.id.is_custom() {
         return !crate::transcription::custom_models::imported()
             .iter()
@@ -698,7 +698,7 @@ fn downloaded_row(ui: &Ui, p: Paint, language: &str) -> El {
     let total = downloaded_total(
         &transcription_models::picker_models(language),
         |model| is_downloaded(ui, model, language),
-        owned_by_hex,
+        owned_by_gospell,
     );
     let label = tr("Only downloaded models");
     let toggle = pressable_row(
@@ -1067,7 +1067,7 @@ mod tests {
     }
 
     #[test]
-    fn the_downloaded_total_adds_up_hexs_own_files() {
+    fn the_downloaded_total_adds_up_gospells_own_files() {
         let models = transcription_models::picker_models("en");
         let installed = [
             TranscriptionModelId::ParakeetUnifiedEnglish,

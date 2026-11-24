@@ -1,4 +1,4 @@
-"""Build synthetic files for a disposable Mac receiver run. Never start Hex or
+"""Build synthetic files for a disposable Mac receiver run. Never start GoSpell or
 read a user's folders. Copy the result to /Users/admin/lab in the guest."""
 
 import json
@@ -29,10 +29,10 @@ save(root / "history.json", {"version": 1, "next_id": 2, "entries": [
     {"id": 1, "timestamp_ms": now-60000, "kind": "dictation", "raw_text": words, "final_text": words}]})
 save(bundle / "scrawl.json", {"version": 1, "id": "125000", "createdAtMs": now, "durationMs": 4000,
      "target": {"mode": "display", "displayId": 1, "frame": {"x": 0, "y": 0, "width": 240, "height": 160, "scale": 1}},
-     "transcript": {"source": "hex", "text": note, "segments": [], "words": []}, "strokes": [], "marks": [], "events": [],
+     "transcript": {"source": "gospell", "text": note, "segments": [], "words": []}, "strokes": [], "marks": [], "events": [],
      "keyframes": [{"index": 1, "t": 0, "reason": "initial", "file": "frames/frame-01.png", "event": "Chart", "said": note}],
      "contactSheet": "contact-sheet.png"})
-save(bundle / ".hex-annotate-v1", {"generation": list(os.urandom(16)), "ready_at": now})
+save(bundle / ".gospell-annotate-v1", {"generation": list(os.urandom(16)), "ready_at": now})
 
 
 def chunk(kind, data):

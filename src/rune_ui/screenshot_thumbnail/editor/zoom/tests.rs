@@ -156,7 +156,7 @@ impl Area {
     fn card(&self) -> (CardShot, rune::Image) {
         let (w, h, small) = half(self.width, self.height, &self.rgba);
         let shot = CardShot {
-            path: PathBuf::from("/tmp/Hex Screenshot.png"),
+            path: PathBuf::from("/tmp/GoSpell Screenshot.png"),
             image: image(w, h, small),
             size: [self.width, self.height],
             recording: None,
@@ -512,7 +512,7 @@ impl Sides for Rendered {
     }
 }
 
-/// `HEX_SCREENSHOT_MOTION=<folder>` writes the scene (an area shot flying
+/// `GOSPELL_SCREENSHOT_MOTION=<folder>` writes the scene (an area shot flying
 /// into its card, the card zooming up into the editor, and the editor
 /// closing back into it) over a desktop, dark, at 2×, encoded by
 /// `ffmpeg`: `<folder>/1x/clip.mp4` at 60 frames a second and
@@ -521,7 +521,7 @@ impl Sides for Rendered {
 /// or a GPU adapter it does nothing.
 #[test]
 fn zoom_frames() {
-    let Some(folder) = std::env::var_os("HEX_SCREENSHOT_MOTION") else {
+    let Some(folder) = std::env::var_os("GOSPELL_SCREENSHOT_MOTION") else {
         return;
     };
     let Ok(gpu) = rune::render::Gpu::try_new(rune::render::Gpu::instance(), None) else {

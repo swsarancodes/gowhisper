@@ -1,6 +1,6 @@
-//! The capsule's states at rest (goldens, and `HEX_CAPSULE_SNAPS` stills)
+//! The capsule's states at rest (goldens, and `GOSPELL_CAPSULE_SNAPS` stills)
 //! and its changes played frame by frame (motion checks, and with
-//! `HEX_CAPSULE_MOTION` the frames and motion-lint traces).
+//! `GOSPELL_CAPSULE_MOTION` the frames and motion-lint traces).
 
 use std::sync::Arc;
 #[cfg(target_os = "macos")]
@@ -23,7 +23,7 @@ fn guess() -> Route {
     Route::Guess {
         suggested: vec![
             Dest::new("SEER", "same page"),
-            Dest::new("HEX", "last sent"),
+            Dest::new("GOSPELL", "last sent"),
         ],
         recent: vec![
             Dest::new("HOME", "yesterday"),
@@ -53,7 +53,7 @@ fn guess_five() -> Route {
     Route::Guess {
         suggested: [
             ("SEER", "you were just in it"),
-            ("HEX", "same page"),
+            ("GOSPELL", "same page"),
             ("HOME", "mentioned"),
             ("OPENCODE IOS", "2 min ago"),
             ("RUNE", "an hour ago"),
@@ -69,7 +69,7 @@ fn no_answer() -> Route {
     Route::NoAnswer {
         recent: vec![
             Dest::new("HOME", "yesterday"),
-            Dest::new("HEX", "2 days ago"),
+            Dest::new("GOSPELL", "2 days ago"),
         ],
     }
 }
@@ -207,7 +207,7 @@ fn stills() -> Vec<(&'static str, Pres)> {
             flow.pres(undo_s() + 1.0)
         }),
         ("guess", after(&routed(guess()))),
-        // Shift down with the pointer on HEX: that row is where it goes.
+        // Shift down with the pointer on GOSPELL: that row is where it goes.
         ("shift", {
             let mut beats = routed(guess());
             beats.push(Point(1));
@@ -227,7 +227,7 @@ fn stills() -> Vec<(&'static str, Pres)> {
             after(&routed(Route::Guess {
                 suggested: [
                     "OPENCODE IOS RELEASE",
-                    "SCRAWL IN HEX BUILDER",
+                    "SCRAWL IN GOSPELL BUILDER",
                     "CAPTURE CAPSULE",
                     "HOME",
                 ]
@@ -782,13 +782,13 @@ fn the_capsule_draws_keycaps_only_on_search_and_hints() {
     }
 }
 
-/// `HEX_CAPSULE_RENDERS=<folder>` draws a recording that shows its
+/// `GOSPELL_CAPSULE_RENDERS=<folder>` draws a recording that shows its
 /// microphone's level, quiet and speaking, light and dark. No golden checks
 /// it; the plain recording's golden covers the capsule without one.
 #[test]
 #[ignore = "writes stills only when asked"]
 fn renders_the_recording_level() {
-    let Some(folder) = std::env::var_os("HEX_CAPSULE_RENDERS") else {
+    let Some(folder) = std::env::var_os("GOSPELL_CAPSULE_RENDERS") else {
         return;
     };
     let folder = std::path::PathBuf::from(folder);
@@ -915,7 +915,7 @@ const GOLDENS: &[&str] = &[
 const GOLDENS: &[&str] = &["guess", "saved"];
 
 /// States against `tests/golden/capture-capsule-*.png`;
-/// `HEX_UPDATE_GOLDENS=1` rewrites them. Without a GPU adapter they skip.
+/// `GOSPELL_UPDATE_GOLDENS=1` rewrites them. Without a GPU adapter they skip.
 #[test]
 fn capture_capsule_goldens() {
     super::surface::FIXTURE_SHORTCUT.set(true);
@@ -932,7 +932,7 @@ fn capture_capsule_goldens() {
             let theme = if dark { "dark" } else { "light" };
             let path = folder.join(format!("capture-capsule-{name}-{theme}.png"));
             let (w, h, pixels) = render(&gpu, pres.clone(), dark);
-            if std::env::var_os("HEX_UPDATE_GOLDENS").is_some() {
+            if std::env::var_os("GOSPELL_UPDATE_GOLDENS").is_some() {
                 rune::render::write_png(&path, w, h, &pixels).unwrap();
                 continue;
             }
@@ -975,26 +975,26 @@ fn capture_capsule_goldens() {
     assert!(misses.is_empty(), "{}", misses.join("\n"));
 }
 
-/// `HEX_CAPSULE_TOP_LINE=quiet|icons` draws the finished capsule's top
-/// line that way and `HEX_CAPSULE_FOOTER=band|well` the list's footer, to
+/// `GOSPELL_CAPSULE_TOP_LINE=quiet|icons` draws the finished capsule's top
+/// line that way and `GOSPELL_CAPSULE_FOOTER=band|well` the list's footer, to
 /// compare them.
 fn top_line_from_env() {
     let mut tuning = super::tuning::DEFAULT;
-    if let Ok(name) = std::env::var("HEX_CAPSULE_TOP_LINE") {
+    if let Ok(name) = std::env::var("GOSPELL_CAPSULE_TOP_LINE") {
         tuning.top_line = super::tuning::TopLine::ALL
             .into_iter()
             .find(|m| format!("{m:?}").eq_ignore_ascii_case(&name))
-            .expect("HEX_CAPSULE_TOP_LINE is quiet or icons");
+            .expect("GOSPELL_CAPSULE_TOP_LINE is quiet or icons");
     }
-    if let Ok(name) = std::env::var("HEX_CAPSULE_FOOTER") {
+    if let Ok(name) = std::env::var("GOSPELL_CAPSULE_FOOTER") {
         tuning.list_footer = super::tuning::ListFooter::ALL
             .into_iter()
             .find(|m| format!("{m:?}").eq_ignore_ascii_case(&name))
-            .expect("HEX_CAPSULE_FOOTER is band or well");
+            .expect("GOSPELL_CAPSULE_FOOTER is band or well");
     }
-    // `HEX_CAPSULE_FLOW=list|toast|menu_bar|cursor|notch` plays that flow,
-    // and `HEX_CAPSULE_UNDO_S` shortens Undo's window for a short clip.
-    if let Ok(name) = std::env::var("HEX_CAPSULE_FLOW") {
+    // `GOSPELL_CAPSULE_FLOW=list|toast|menu_bar|cursor|notch` plays that flow,
+    // and `GOSPELL_CAPSULE_UNDO_S` shortens Undo's window for a short clip.
+    if let Ok(name) = std::env::var("GOSPELL_CAPSULE_FLOW") {
         tuning.flow = super::tuning::CapsuleFlow::ALL
             .into_iter()
             .find(|f| {
@@ -1002,26 +1002,26 @@ fn top_line_from_env() {
                     .replace('_', "")
                     .eq_ignore_ascii_case(&name.replace('_', ""))
             })
-            .expect("HEX_CAPSULE_FLOW is list, toast, menu_bar, cursor or notch");
+            .expect("GOSPELL_CAPSULE_FLOW is list, toast, menu_bar, cursor or notch");
     }
-    if let Ok(secs) = std::env::var("HEX_CAPSULE_UNDO_S") {
-        tuning.undo_s = secs.parse().expect("HEX_CAPSULE_UNDO_S is seconds");
+    if let Ok(secs) = std::env::var("GOSPELL_CAPSULE_UNDO_S") {
+        tuning.undo_s = secs.parse().expect("GOSPELL_CAPSULE_UNDO_S is seconds");
     }
     if tuning != super::tuning::DEFAULT {
         super::tuning::set(tuning);
     }
 }
 
-/// `HEX_CAPSULE_SNAPS=<folder>` writes every state, light and dark;
-/// `HEX_CAPSULE_LANGUAGE=de` (any interface language code) in that language.
+/// `GOSPELL_CAPSULE_SNAPS=<folder>` writes every state, light and dark;
+/// `GOSPELL_CAPSULE_LANGUAGE=de` (any interface language code) in that language.
 #[test]
 fn capture_capsule_snapshots() {
     super::surface::FIXTURE_SHORTCUT.set(true);
-    let Some(folder) = std::env::var_os("HEX_CAPSULE_SNAPS") else {
+    let Some(folder) = std::env::var_os("GOSPELL_CAPSULE_SNAPS") else {
         return;
     };
     top_line_from_env();
-    if let Ok(language) = std::env::var("HEX_CAPSULE_LANGUAGE") {
+    if let Ok(language) = std::env::var("GOSPELL_CAPSULE_LANGUAGE") {
         crate::desktop::i18n::apply(Some(&language));
     }
     let Ok(gpu) = rune::render::Gpu::try_new(rune::render::Gpu::instance(), None) else {

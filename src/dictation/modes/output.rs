@@ -50,7 +50,7 @@ pub enum OutputTarget {
     /// Programmatic `/dictations` API capture: no processing, no signature, no
     /// insertion, no Paste Last, no History.
     Service,
-    /// `hex dictation stop --print`: processed as a paste, then handed to the
+    /// `gospell dictation stop --print`: processed as a paste, then handed to the
     /// waiting command instead of pasted. Paste Last skips it.
     Print,
     /// A printing stop of a raw dictation: the transcript as heard.
@@ -94,7 +94,7 @@ impl OutputTarget {
         matches!(self, Self::CopyOnlyPaste | Self::RawCopyOnlyPaste)
     }
 
-    /// Whether this target belongs to `hex dictation stop --print`.
+    /// Whether this target belongs to `gospell dictation stop --print`.
     pub const fn is_print(self) -> bool {
         matches!(self, Self::Print | Self::RawPrint)
     }
@@ -459,8 +459,10 @@ mod tests {
     }
 
     fn temp_history(tag: &str) -> (History, std::path::PathBuf) {
-        let dir =
-            std::env::temp_dir().join(format!("hex-output-policy-{tag}-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!(
+            "gospell-output-policy-{tag}-{}",
+            std::process::id()
+        ));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let history = History::new(crate::history::HistoryStore::open(
@@ -606,7 +608,7 @@ mod tests {
             input(OutputTarget::Paste, "   \t "),
             None,
             &mut adapter,
-            "Sent from Hex",
+            "Sent from GoSpell",
             true,
             false,
             |_, _| true,
@@ -630,7 +632,7 @@ mod tests {
             req,
             Some(&history),
             &mut adapter,
-            "Sent from Hex",
+            "Sent from GoSpell",
             true,
             false,
             |_, _| true,
@@ -650,7 +652,7 @@ mod tests {
         for (target, expected_text, expected_signed, expected_plan) in [
             (
                 OutputTarget::Paste,
-                "ship it\nSent from Hex",
+                "ship it\nSent from GoSpell",
                 true,
                 Some(InsertPlan::Paste {
                     send: false,
@@ -659,7 +661,7 @@ mod tests {
             ),
             (
                 OutputTarget::CopyOnlyPaste,
-                "ship it\nSent from Hex",
+                "ship it\nSent from GoSpell",
                 true,
                 Some(InsertPlan::CopyOnly),
             ),
@@ -679,7 +681,7 @@ mod tests {
                 input(target, "ship it"),
                 None,
                 &mut adapter,
-                "Sent from Hex",
+                "Sent from GoSpell",
                 true,
                 false,
                 |_, _| false,
@@ -725,7 +727,7 @@ mod tests {
             input(OutputTarget::Paste, "keep this"),
             Some(&history),
             &mut adapter,
-            "Sent from Hex",
+            "Sent from GoSpell",
             true,
             false,
             |_, _| false,
@@ -736,7 +738,7 @@ mod tests {
         assert_eq!(
             adapter.remembered,
             vec![(
-                LastDictation::new("keep this\nSent from Hex".into(), true),
+                LastDictation::new("keep this\nSent from GoSpell".into(), true),
                 false
             )]
         );

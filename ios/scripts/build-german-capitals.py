@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Builds the German capitalization sidecar (HEXKeyboard/TypingModel/de.capitals) for the
-lowercase-only German typing model (de.hextm), from the same Google Books Ngram v3 German
+"""Builds the German capitalization sidecar (GoSpellKeyboard/TypingModel/de.capitals) for the
+lowercase-only German typing model (de.gospelltm), from the same Google Books Ngram v3 German
 unigram shards (2020-02-17, CC BY 3.0) that model was counted from.
 
-    python3 scripts/build-german-capitals.py HEXKeyboard/TypingModel/de.hextm \
-        HEXKeyboard/TypingModel/de.capitals
+    python3 scripts/build-german-capitals.py GoSpellKeyboard/TypingModel/de.gospelltm \
+        GoSpellKeyboard/TypingModel/de.capitals
 
 For every word in the model it sums the 1980-2019 counts of that exact all-lowercase token
 and of the token with only its first letter uppercased (ä, ö and ü included; a word that

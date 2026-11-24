@@ -2,18 +2,18 @@
 //! x86-64-v3 (AVX2, BMI2, FMA, F16C; `.github/release/check-x86-baseline.sh`),
 //! so on an older processor the first transcription would die with an
 //! illegal instruction (issue #592). `main` calls [`require`] first, before
-//! anything that could reach ggml; Hex's own Rust is compiled for the
+//! anything that could reach ggml; GoSpell's own Rust is compiled for the
 //! baseline x86-64, so this check itself runs anywhere.
 //!
 //! An opt-in source build can target Ivy Bridge (2012: SSE4.2, AVX, F16C)
-//! instead of x86-64-v3, with `HEX_X86_BASELINE=ivybridge` and the matching
-//! `TRANSCRIBE_CMAKE_ARGS` (`build.rs` refuses `HEX_X86_BASELINE=ivybridge`
+//! instead of x86-64-v3, with `GOSPELL_X86_BASELINE=ivybridge` and the matching
+//! `TRANSCRIBE_CMAKE_ARGS` (`build.rs` refuses `GOSPELL_X86_BASELINE=ivybridge`
 //! unless `TRANSCRIBE_CMAKE_ARGS` carries the matching flags; docs/linux.md
 //! and docs/windows.md). Such a build is not an official release, is slower on
 //! newer CPUs, and never self-updates.
 //!
 //! `--version` and `--help` stay available on any CPU: installers and the
-//! updater run `hex --version` to check what they install.
+//! updater run `gospell --version` to check what they install.
 
 /// One build's CPU floor: the ggml features it requires and the message a
 /// processor below it shows.
@@ -25,18 +25,18 @@ struct Floor {
 /// The official Linux and Windows x64 release floor, x86-64-v3.
 const V3: Floor = Floor {
     features: &["avx2", "bmi2", "fma", "f16c"],
-    message: "Hex needs a 2013 or newer processor (Intel Haswell / AMD Excavator or later) with AVX2. This PC's processor isn't supported.",
+    message: "GoSpell needs a 2013 or newer processor (Intel Haswell / AMD Excavator or later) with AVX2. This PC's processor isn't supported.",
 };
 
-/// `HEX_X86_BASELINE=ivybridge`: Ivy Bridge (2012) and newer, with AVX and F16C.
+/// `GOSPELL_X86_BASELINE=ivybridge`: Ivy Bridge (2012) and newer, with AVX and F16C.
 const IVYBRIDGE: Floor = Floor {
     features: &["sse4.2", "avx", "f16c"],
-    message: "Hex needs a 2012 or newer processor (Intel Ivy Bridge / AMD Piledriver or later) with AVX and F16C. This PC's processor isn't supported.",
+    message: "GoSpell needs a 2012 or newer processor (Intel Ivy Bridge / AMD Piledriver or later) with AVX and F16C. This PC's processor isn't supported.",
 };
 
 /// The floor this build detects, both lists stay visible to the test below.
 const fn floor() -> &'static Floor {
-    if cfg!(hex_x86_ivybridge) {
+    if cfg!(gospell_x86_ivybridge) {
         &IVYBRIDGE
     } else {
         &V3
@@ -76,7 +76,7 @@ pub fn require() {
         return;
     }
     eprintln!("{MESSAGE}");
-    // `hex service` never opens windows; its stderr reaches the journal.
+    // `gospell service` never opens windows; its stderr reaches the journal.
     if arguments
         .get(1)
         .is_none_or(|argument| argument != "service")
@@ -90,7 +90,7 @@ pub fn require() {
 fn show() {
     use windows_sys::Win32::UI::WindowsAndMessaging::{MB_ICONERROR, MB_OK, MessageBoxW};
     let wide = |text: &str| text.encode_utf16().chain([0]).collect::<Vec<u16>>();
-    let (text, title) = (wide(MESSAGE), wide("Hex"));
+    let (text, title) = (wide(MESSAGE), wide("GoSpell"));
     // Both strings are NUL-terminated UTF-16 that outlive the call.
     unsafe {
         MessageBoxW(
@@ -102,10 +102,10 @@ fn show() {
     };
 }
 
-/// For Hex opened from the launcher, where nobody sees stderr: a desktop
+/// For GoSpell opened from the launcher, where nobody sees stderr: a desktop
 /// dialog when one of these tools is installed and a display is up. A
 /// terminal already shows stderr, and a unit under a service manager
-/// (hex.service sets NOTIFY_SOCKET) must not block on a dialog that its
+/// (gospell.service sets NOTIFY_SOCKET) must not block on a dialog that its
 /// restarts would repeat.
 #[cfg(target_os = "linux")]
 fn show() {
@@ -118,9 +118,9 @@ fn show() {
         return;
     }
     let attempts: [(&str, &[&str]); 3] = [
-        ("zenity", &["--error", "--title=Hex", "--text", MESSAGE]),
-        ("kdialog", &["--title", "Hex", "--error", MESSAGE]),
-        ("notify-send", &["--urgency=critical", "Hex", MESSAGE]),
+        ("zenity", &["--error", "--title=GoSpell", "--text", MESSAGE]),
+        ("kdialog", &["--title", "GoSpell", "--error", MESSAGE]),
+        ("notify-send", &["--urgency=critical", "GoSpell", MESSAGE]),
     ];
     for (program, arguments) in attempts {
         let shown = Command::new(program)
@@ -147,9 +147,9 @@ mod tests {
         assert!(V3.message.contains("AVX2"));
         assert!(IVYBRIDGE.message.contains("F16C"));
         assert_ne!(V3.message, IVYBRIDGE.message);
-        #[cfg(hex_x86_ivybridge)]
+        #[cfg(gospell_x86_ivybridge)]
         assert_eq!(floor().features, IVYBRIDGE.features);
-        #[cfg(not(hex_x86_ivybridge))]
+        #[cfg(not(gospell_x86_ivybridge))]
         assert_eq!(floor().features, V3.features);
     }
 
@@ -160,10 +160,10 @@ mod tests {
                 .map(std::ffi::OsString::from)
                 .collect::<Vec<_>>()
         };
-        assert!(exempt(&args(&["hex", "--version"])));
-        assert!(exempt(&args(&["hex", "--help"])));
-        assert!(!exempt(&args(&["hex"])));
-        assert!(!exempt(&args(&["hex", "--version", "app"])));
-        assert!(!exempt(&args(&["hex", "transcribe", "a.wav"])));
+        assert!(exempt(&args(&["gospell", "--version"])));
+        assert!(exempt(&args(&["gospell", "--help"])));
+        assert!(!exempt(&args(&["gospell"])));
+        assert!(!exempt(&args(&["gospell", "--version", "app"])));
+        assert!(!exempt(&args(&["gospell", "transcribe", "a.wav"])));
     }
 }

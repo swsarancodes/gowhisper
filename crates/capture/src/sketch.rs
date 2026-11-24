@@ -771,7 +771,7 @@ pub fn summary_markdown_with(
         }
     }
     let mut out = format!(
-        "[hex-annotate {} · {target} · {}]\n",
+        "[gospell-annotate {} · {target} · {}]\n",
         format_clock(bundle.duration_ms),
         bundle_dir.display()
     );
@@ -2123,7 +2123,7 @@ mod tests {
         assert!(tl.contains("— frame #1"));
 
         let summary = summary_markdown(&bundle, std::path::Path::new("/recordings/test"));
-        assert!(summary.starts_with("[hex-annotate 0:14 · App “Window” · /recordings/test]"));
+        assert!(summary.starts_with("[gospell-annotate 0:14 · App “Window” · /recordings/test]"));
         assert!(summary.contains("Note: Simplify it."));
         assert!(summary.contains("- #1 (0:05) “This row is too dense.”"));
         assert!(!summary.contains("No transcript"));
@@ -2142,9 +2142,9 @@ mod tests {
         // No screen recorded: the summary says why and asks for no images.
         let mut blind = bundle.clone();
         blind.keyframes.clear();
-        blind.no_screen = Some("Screen Recording is off for Hex".into());
+        blind.no_screen = Some("Screen Recording is off for GoSpell".into());
         let summary = summary_markdown(&blind, std::path::Path::new("/recordings/test"));
-        assert!(summary.contains("No screen: Screen Recording is off for Hex."));
+        assert!(summary.contains("No screen: Screen Recording is off for GoSpell."));
         assert!(!summary.contains(LOOK_AT_IMAGES));
 
         // A phone bundle: device header, a flagged keyframe, and app events under the keyframe
@@ -2201,7 +2201,7 @@ mod tests {
         assert_eq!(
             summary,
             format!(
-                "[hex-annotate 0:14 · iPhone · dev.example.App (42) · /recordings/phone]\n\
+                "[gospell-annotate 0:14 · iPhone · dev.example.App (42) · /recordings/phone]\n\
                  {LOOK_AT_IMAGES}\n\
                  \x20 · 0:01 app: launched\n\
                  - #1 (0:05) “This row is too dense.”\n\
@@ -2353,7 +2353,7 @@ mod tests {
         assert_eq!(
             summary,
             format!(
-                "[hex-annotate 0:25 · iPhone · OpenCode 1.4 (354) · /recordings/phone]\n\
+                "[gospell-annotate 0:25 · iPhone · OpenCode 1.4 (354) · /recordings/phone]\n\
                  {LOOK_AT_IMAGES}\n\
                  Screen: Sessions · server: studio · session: {session}\n\
                  - #1 (0:01) “So here.”\n\
@@ -2371,7 +2371,7 @@ mod tests {
         bundle.device.as_mut().unwrap().app_short_version = None;
         let summary = summary_markdown(&bundle, std::path::Path::new("/recordings/phone"));
         assert!(summary.starts_with(&format!(
-            "[hex-annotate 0:25 · iPhone · OpenCode (354) · /recordings/phone]\n{LOOK_AT_IMAGES}\n- #1 (0:01) “So here.”\n"
+            "[gospell-annotate 0:25 · iPhone · OpenCode (354) · /recordings/phone]\n{LOOK_AT_IMAGES}\n- #1 (0:01) “So here.”\n"
         )));
     }
 }

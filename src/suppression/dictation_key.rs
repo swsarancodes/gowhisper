@@ -3,15 +3,15 @@
 //!
 //! macOS sends the key as a normal keyDown/keyUp for virtual key code 176 with
 //! SecondaryFn set, but its own Dictation shortcut is a symbolic hot key the
-//! window server matches before the app and before Hex's annotated-session key
+//! window server matches before the app and before GoSpell's annotated-session key
 //! tap. This tap sits at the session boundary, where the press still exists,
 //! and exists only while the lab is on.
 //!
-//! It passes the key through untouched unless it is one of Hex's shortcuts
+//! It passes the key through untouched unless it is one of GoSpell's shortcuts
 //! (`RuntimeHotkey::matches_key_press`, so modifiers count) or the window is
 //! recording a shortcut. Then it consumes the press *and its release* while
 //! this tap is still there, and hands the press to the listener or to the
-//! recorder. The app never sees a press Hex took, and no second tap can deliver
+//! recorder. The app never sees a press GoSpell took, and no second tap can deliver
 //! it twice. Whether macOS's own Dictation still opens is unobserved on
 //! hardware; blocking the key here is what handy-keys does to keep it shut.
 
@@ -106,11 +106,11 @@ fn capture(key: CapturedMicrophoneKey) {
     }
 }
 
-/// Whether one of Hex's shortcuts matches this press, with the same matcher
+/// Whether one of GoSpell's shortcuts matches this press, with the same matcher
 /// and the same flags the annotated-session tap uses. The cancel shortcut is
 /// not among `RuntimeHotkeys::all`, so it is read beside them like the
 /// listener's own suppression does.
-fn is_hexs_press(context: &EventTapContext, code: u16, flags: u64) -> bool {
+fn is_gospells_press(context: &EventTapContext, code: u16, flags: u64) -> bool {
     let mut hotkeys = crate::app_settings::runtime_hotkeys();
     hotkeys.cancel = context
         .policy
@@ -187,7 +187,7 @@ pub(super) unsafe extern "C" fn dictation_key_callback(
             crate::labs::microphone_key(),
             crate::shortcut_pause::suspended(),
             crate::app_settings::hotkey_capture_active(),
-            is_hexs_press(context, code, flags),
+            is_gospells_press(context, code, flags),
         );
     match decision {
         crate::app_settings::MicrophoneKeyTap::Pass => event,
@@ -199,7 +199,7 @@ pub(super) unsafe extern "C" fn dictation_key_callback(
             if send_input(context, InputEvent::Key { code, down, flags }, at) {
                 ptr::null_mut()
             } else {
-                // The listener is gone, so the press is not Hex's after all:
+                // The listener is gone, so the press is not GoSpell's after all:
                 // forget it and let the event, and its release, through.
                 context
                     .microphone_key

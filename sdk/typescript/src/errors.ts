@@ -1,4 +1,4 @@
-export type HexErrorCode =
+export type GoSpellErrorCode =
   | "startup-failed"
   | "startup-timeout"
   | "invalid-handshake"
@@ -10,14 +10,14 @@ export type HexErrorCode =
   | "model-prepare-failed"
   | "shutdown-failed"
 
-export class HexError extends Error {
-  readonly code: HexErrorCode
+export class GoSpellError extends Error {
+  readonly code: GoSpellErrorCode
   readonly status: number | undefined
   readonly remoteCode: string | undefined
   override readonly cause: unknown
 
   constructor(
-    code: HexErrorCode,
+    code: GoSpellErrorCode,
     message: string,
     options?: {
       readonly cause?: unknown
@@ -26,7 +26,7 @@ export class HexError extends Error {
     },
   ) {
     super(message)
-    this.name = "HexError"
+    this.name = "GoSpellError"
     this.code = code
     this.status = options?.status
     this.remoteCode = options?.remoteCode
@@ -34,4 +34,4 @@ export class HexError extends Error {
   }
 }
 
-export const isHexError = (value: unknown): value is HexError => value instanceof HexError
+export const isGoSpellError = (value: unknown): value is GoSpellError => value instanceof GoSpellError

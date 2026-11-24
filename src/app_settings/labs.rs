@@ -119,7 +119,7 @@ pub struct LabsSettings {
     /// Names and terms shown in the focused window become temporary
     /// vocabulary for each dictation (macOS).
     pub screen_vocabulary: bool,
-    /// A name fixed in text Hex just pasted is added to Vocabulary, read
+    /// A name fixed in text GoSpell just pasted is added to Vocabulary, read
     /// from that field alone for a few minutes after the paste (macOS).
     pub learn_from_corrections: bool,
     /// The mode's OpenCode rewrite reads the text around the cursor as
@@ -192,7 +192,7 @@ pub struct LabsSettings {
     /// The picker's "Use model file where it is…" adds a GGUF file without copying it (issue 941).
     pub model_in_place: bool,
     /// An import may use Q6_K, Q5_K, or Q4_K weights, which Metal runs and
-    /// Hex hasn't verified (macOS).
+    /// GoSpell hasn't verified (macOS).
     pub k_quant_models: bool,
     /// The picker's All speech models view offers "Only downloaded models" (issue 1018).
     pub picker_downloaded: bool,
@@ -209,7 +209,7 @@ pub struct LabsSettings {
     pub copy_dictation_audio: bool,
     pub hide_menu_bar_icon: bool,
     /// A Caps Lock press starts and stops dictation, and its light follows
-    /// Hex's recording and processing (macOS).
+    /// GoSpell's recording and processing (macOS).
     pub caps_lock_dictation: bool,
     /// Whether that light stays solid or blinks slowly while recording
     /// (macOS).
@@ -272,11 +272,11 @@ pub struct LabsSettings {
     /// The Vocabulary sheet imports terms from a CSV file and exports the
     /// list as one (Labs › Vocabulary files).
     pub vocabulary_files: bool,
-    /// `hex annotate inspect`, `zoom`, `frames`, and `skill` read a capture
+    /// `gospell annotate inspect`, `zoom`, `frames`, and `skill` read a capture
     /// bundle for a coding agent (Labs › Agent tools for captures).
     pub annotate_agent_tools: bool,
-    /// The Annotate pane's Agents section writes the hex-annotate skill into
-    /// coding agents' own folders and, on macOS, links `hex` onto PATH
+    /// The Annotate pane's Agents section writes the gospell-annotate skill into
+    /// coding agents' own folders and, on macOS, links `gospell` onto PATH
     /// (Labs › Install agent skill from Annotate).
     pub annotate_agent_install: bool,
     /// While an Annotate capture records, the dictation shortcut dictates
@@ -302,7 +302,7 @@ pub struct LabsSettings {
     /// the Calendars row, so every calendar is included or left out at once
     /// (macOS).
     pub calendar_bulk_select: bool,
-    /// The menu bar offers Pause Hex, which makes every capture shortcut
+    /// The menu bar offers Pause GoSpell, which makes every capture shortcut
     /// inert until Resume (macOS).
     pub pause_menu: bool,
     /// A spoken trigger phrase inside a dictation hands the mode's OpenCode

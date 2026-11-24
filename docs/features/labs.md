@@ -5,12 +5,12 @@ for that we built**: they land in Labs, off by default, instead of shipping
 on. Each feature's settings field, CLI name, **group**, **audience**, OSes, and
 join date live in one descriptor table in `src/labs/feature.rs`. Its
 **audience** (`labs::Feature::audience`) is either `Everyone` (ships in every
-build) or `Dev` (`dev_build::is_dev_build`: debug, local `HEX_LOCAL_BUILD`,
-test `HEX_TEST_BUILD`, and dev-channel `HEX_BUILD_CHANNEL=dev` builds). A
-stable build never lists, accepts (`hex labs on`, `hex settings set`), or
+build) or `Dev` (`dev_build::is_dev_build`: debug, local `GOSPELL_LOCAL_BUILD`,
+test `GOSPELL_TEST_BUILD`, and dev-channel `GOSPELL_BUILD_CHANNEL=dev` builds). A
+stable build never lists, accepts (`gospell labs on`, `gospell settings set`), or
 runs a Dev feature: `available()` drops it, its gate reads false even when
 `settings.json` says on, and the saved setting is kept untouched. In dev
-builds a Dev row carries a quiet "Dev" tag, and `hex labs` prints each
+builds a Dev row carries a quiet "Dev" tag, and `gospell labs` prints each
 feature's audience. Every feature below is `Everyone` today unless marked
 `(Dev)`. Its **group** (`labs::Feature::group`) is one of Dictation, Output (paste, formatting,
 spoken punctuation), History, Meetings, Annotate, Shortcuts, or Models. There
@@ -26,21 +26,21 @@ window, and its OSes `labs::Feature::oses`.
 matter once Annotate is on: Screenshots, Annotate last 15 seconds, Record the
 screen under the pointer, Copy a capture as one file, Agent tools for captures,
 Dictate while annotating)
-has a page at `anoma.ly/hex/labs/<id>` (`dev.anoma.ly` for
-the dev site), listed newest first at `/hex/labs`, with a 1200 × 630 social
+has a page at `gospell.goml.io/labs/<id>` (`dev.goml.io` for
+the dev site), listed newest first at `/gospell/labs`, with a 1200 × 630 social
 card. The pages come from `site/src/labs.json`, which only the registry
 writes:
 
 ```ts
 Add or change a lab
-├── HEX_UPDATE_LABS_JSON=1 scripts/check labs::web -> rewrites site/src/labs.json from Feature::ALL
+├── GOSPELL_UPDATE_LABS_JSON=1 scripts/check labs::web -> rewrites site/src/labs.json from Feature::ALL
 ├── commit it               -> labs::web's test fails while the JSON is stale
 └── push to dev (site/**)   -> the dev site's build writes labs/<id>.html, labs/<id>.png, labs.html, and the sitemap entries
 Page
-├── Open in Hex             -> hex://labs/<id> (Mac labs only: only the Mac app registers hex://)
-├── Get Hex                 -> the home page when the stable release's src/labs.rs names the lab,
-│                              else Get Hex Dev (/hex/download/dev, and dev links for its other OSes)
-└── hex labs on <id>        -> the same switch from a terminal, every OS
+├── Open in GoSpell             -> gospell://labs/<id> (Mac labs only: only the Mac app registers gospell://)
+├── Get GoSpell                 -> the home page when the stable release's src/labs.rs names the lab,
+│                              else Get GoSpell Dev (/gospell/download/dev, and dev links for its other OSes)
+└── gospell labs on <id>        -> the same switch from a terminal, every OS
 ```
 
 Checks: `labs::web` (Rust, the JSON and which labs it leaves out),
@@ -49,14 +49,14 @@ Checks: `labs::web` (Rust, the JSON and which labs it leaves out),
 not on pull requests; the live page is unverified until a deploy.
 
 ```ts
-Feature             Pane  Toggle (settings.json, hex settings)   On: what it does
+Feature             Pane  Toggle (settings.json, gospell settings)   On: what it does
 ├── Meetings (beta) yes   meetings.enabled                       Meetings joins the sidebar: call detection, recording, transcripts
-├── Voice Filter (Dev) yes experimental.hex_microphone (macOS, Linux) Voice Filter joins the sidebar; feeds the Hex Microphone (macOS driver, Linux PipeWire source)
+├── Voice Filter (Dev) yes experimental.gospell_microphone (macOS, Linux) Voice Filter joins the sidebar; feeds the GoSpell Microphone (macOS driver, Linux PipeWire source)
 │                                        a stable build never feeds it; with the macOS driver installed it keeps the pane with Uninstall alone
 ├── Playground (Dev) yes  labs.playground                        a Playground sidebar item and ⇧⌘D open the story browser
 ├── Modes editor    yes   labs.modes_editor                      Modes joins the sidebar right after Output, with every mode's
 │                                        applications, corrections, OpenCode rewrite, and transformations, as the old editor
-│                                        did before Output replaced it; off, `hex window show --pane modes` opens Output
+│                                        did before Output replaced it; off, `gospell window show --pane modes` opens Output
 │                                        // checks: the_modes_editor_lab_brings_modes_back_to_the_sidebar (rune_ui/tests.rs)
 ├── Live text       no    labs.live_text                         provisional words beside the HUD while dictating; its card says when the selected speech model can't stream (Linux: or Speech engine is CPU), so no words would show
 ├── Faster live text no    labs.faster_live_text                 live words sooner, and the final text from the same shorter
@@ -68,7 +68,7 @@ Feature             Pane  Toggle (settings.json, hex settings)   On: what it doe
 │                                        shortcut were pressed again, and the phrase never reaches the pasted text;
 │                                        needs a speech model that streams on a GPU, as Live text does
 ├── Failure notices no    labs.failure_notices                   when a dictation fails, its explanation sits beside the HUD for about 6 s, or until the next capture starts
-├── Live typing     no    labs.live_typing                       (Linux Wayland) provisional words as an underlined input-method preedit in the focused field; the final text is committed there instead of pasted; on a compositor that offers no input method (GNOME) its card is disabled with a note and `hex labs` says so
+├── Live typing     no    labs.live_typing                       (Linux Wayland) provisional words as an underlined input-method preedit in the focused field; the final text is committed there instead of pasted; on a compositor that offers no input method (GNOME) its card is disabled with a note and `gospell labs` says so
 ├── Appearance      no    labs.appearance + labs.appearance_theme (system/light/dark, default system)  the main window is forced light or dark instead of following the system; the dictation HUD (including its onboarding and Sounds previews) and meeting recording pill remain dark. Other overlays follow the OS. On Windows the title bar follows too, through its background and light/dark mode; Windows 10 has no caption colour, so DWM keeps its own light or dark caption background (builds before 19041 keep the OS caption) while its text and buttons follow
 ├── Live chapters   no    labs.live_chapters                     chapters a meeting while it records, boundary pass after Stop
 ├── Words on screen no labs.screen_vocabulary         (macOS)   names and terms in the focused window become temporary vocabulary for each dictation; read locally through Accessibility, never saved, password fields skipped
@@ -93,9 +93,9 @@ Feature             Pane  Toggle (settings.json, hex settings)   On: what it doe
 │                                        until the lab is toggled or the resolved microphone changes
 │                                        // checks: voice_isolation_is_its_own_bit_and_off_by_default (labs.rs);
 │                                        // a_voice_isolation_change_reopens_only_while_capture_is_idle (audio/recovering/tests.rs);
-│                                        // not run on a Mac, and no hardware confirmed Control Center offers the mode for Hex
+│                                        // not run on a Mac, and no hardware confirmed Control Center offers the mode for GoSpell
 ├── Keep dictation on clipboard no labs.keep_on_clipboard (every OS) a pasted dictation stays on the clipboard; the previous one is not restored (#200)
-├── Signature       no    labs.signature + labs.signature_text ("Sent from Hex", every OS)
+├── Signature       no    labs.signature + labs.signature_text ("Sent from GoSpell", every OS)
 │                                        every normal dictation pastes with the signature on its own line at the end, and
 │                                        History and Paste Last keep that same text; not added to an empty transcript, one
 │                                        that already ends with it as its own line, raw, printed, or API output
@@ -155,18 +155,18 @@ Feature             Pane  Toggle (settings.json, hex settings)   On: what it doe
 ├── Special keys alone no labs.standalone_special_keys (Linux, Windows) Linux: Menu, Pause, Scroll Lock may be a shortcut's key, alone or with modifiers (#767); Windows: Insert, Home, End, Page Up, Page Down may stand alone (#794)
 ├── § key alone no  labs.section_key_alone       (Linux, macOS) the key left of 1 on ISO keyboards, § or a dead key such as ^, may be a shortcut with no modifier (#1050)
 ├── Microphone key alone no labs.microphone_key        (macOS) the microphone (dictation) key in a laptop keyboard's top row, always reported as Fn with key code 176, may be a shortcut with no modifier (#181)
-├── Dictation stats no    labs.history_stats           History's Stats button opens a summary of retained dictations, with headline tiles, a typing-speed slider and time saved, the busiest-hour strip, a daily chart, app and Output bars, and Output time; an owner-only daily rollup (counts only, no text or app names) outlives retention, so the dialog also charts a 53-week heatmap and its headline totals cover all time; Clear all history deletes the rollup even with no entries; hex history stats prints it (#790)
+├── Dictation stats no    labs.history_stats           History's Stats button opens a summary of retained dictations, with headline tiles, a typing-speed slider and time saved, the busiest-hour strip, a daily chart, app and Output bars, and Output time; an owner-only daily rollup (counts only, no text or app names) outlives retention, so the dialog also charts a 53-week heatmap and its headline totals cover all time; Clear all history deletes the rollup even with no entries; gospell history stats prints it (#790)
 ├── Stats on History no  labs.history_stats_strip    History draws the Dictation stats dialog's six headline numbers (dictations, words, time saved, words per minute, daily streak, busiest hour) as one compact strip above its list; needs Dictation stats and changes nothing else
 ├── Copy recent dictations no labs.recent_dictations (macOS) the menu bar's Copy Recent Dictation submenu copies one of the last five dictations (#877)
 ├── Skip long pauses no    labs.skip_pauses             (Linux, Windows) a whole-clip dictation run hears only the head and tail of each long pause (#899)
 ├── Fix results in Output no labs.output_fixes           Output's Try card offers Vocabulary and Fix this, which copies an agent prompt naming the wrong result (#989)
-├── Process API transcripts no labs.api_processing       (every OS) apps using Hex's local API can add process=global to
+├── Process API transcripts no labs.api_processing       (every OS) apps using GoSpell's local API can add process=global to
 │                                        POST /transcriptions and POST /streams/{id}/finish to get the text after Global
 │                                        mode's replacements, corrections, rewrite, and transformations; off, responses
 │                                        stay raw transcripts as before
 │                                        // checks: local_api::processing route tests (409, 403, 400, 429, processed, absent);
 │                                        // not observed on macOS or Windows, and no /transcriptions success without a model
-├── Timestamps in API transcripts no labs.api_timestamps (every OS) apps using Hex's local API can add
+├── Timestamps in API transcripts no labs.api_timestamps (every OS) apps using GoSpell's local API can add
 │                                        timestamps=segment|word to POST /transcriptions for the speech model's own
 │                                        segment or word times (startMs, endMs); off, a timed request answers 403
 │                                        timestamps-disabled and responses stay as before
@@ -179,16 +179,16 @@ Feature             Pane  Toggle (settings.json, hex settings)   On: what it doe
 │                                        // k_quant_tensors_are_measured_in_their_ggml_block_sizes (gguf_header);
 │                                        // a_k_quant_import_needs_the_lab_and_falls_back_without_it (custom_models);
 │                                        // smaller_model_files_is_its_own_switch_and_macos_only (labs.rs); not observed on Metal
-├── Downloaded models only no labs.picker_downloaded   the picker's All speech models view can show only downloaded models, with the space Hex's copies take (#1018)
+├── Downloaded models only no labs.picker_downloaded   the picker's All speech models view can show only downloaded models, with the space GoSpell's copies take (#1018)
 ├── Transcribe dropped audio no labs.drop_transcribe   (every OS) a WAV, MP3, AAC, M4A, MP4, MOV, AIFF,
 │                                        CAF, FLAC, OGG, Opus, WebM, or MKV file dropped anywhere on
-│                                        Hex's window queues
+│                                        GoSpell's window queues
 │                                        behind any file already being transcribed, one at a time, each with the
 │                                        dictation model and language in use;
 │                                        it is read in ≤30 s pieces in this process and saved as `<stem>.txt` beside
 │                                        it. A taken name gets " 2", " 3", and so on; a file in the OS temp folder,
-│                                        or one whose folder Hex can't write, has its transcript saved in Downloads
-│                                        instead. A drag with no file Hex reads says what it reads in one list on
+│                                        or one whose folder GoSpell can't write, has its transcript saved in Downloads
+│                                        instead. A drag with no file GoSpell reads says what it reads in one list on
 │                                        every OS; Cancel stops the running file and clears the queue, and the
 │                                        file's toast says Cancelling… until its worker answers, so nothing else
 │                                        starts meanwhile; the toast names the file and its progress, and says Saved
@@ -204,7 +204,7 @@ Feature             Pane  Toggle (settings.json, hex settings)   On: what it doe
 │                                        // turning_the_lab_off_cancels_the_running_file_and_waits_for_it,
 │                                        // a_cancel_after_the_last_check_still_says_saved,
 │                                        // a_file_of_unknown_length_says_transcribing_without_a_percentage,
-│                                        // a_file_hex_cannot_read_is_refused,
+│                                        // a_file_gospell_cannot_read_is_refused,
 │                                        // a_saved_transcript_says_where_it_is_and_dismisses,
 │                                        // the_labs_card_offers_a_file_choice_only_with_its_lab_on (rune_ui/tests/drop_transcribe.rs);
 │                                        // the_first_free_name_numbering_counts_up, a_transcript_never_overwrites_an_earlier_one,
@@ -227,8 +227,8 @@ Feature             Pane  Toggle (settings.json, hex settings)   On: what it doe
 │                                        // transcribed a dropped file, and nothing ran on Wayland (no file drags)
 ├── Keep recordings no    labs.keep_recordings         History entries keep their dictation audio; Play hears it, and Transcribe again runs it through another installed model (#1032)
 ├── Copy dictation audio no labs.copy_dictation_audio  History entries with a kept recording gain Copy audio, and the menu bar or tray gains Copy last dictation audio: one WAV file on the clipboard, ready to attach. Needs Keep recordings and stores no audio itself
-├── Hide menu bar icon no labs.hide_menu_bar_icon      (macOS) the menu-bar icon hides while no meeting is under way; shortcuts keep working, reopening Hex shows Settings (#1064)
-├── Pause from menu bar no labs.pause_menu             (macOS) the menu bar's action block offers Pause Hex; while paused every capture shortcut and the secure-input hotkeys are inert, the event tap passes keys through, and Resume waits for a neutral keyboard (#82)
+├── Hide menu bar icon no labs.hide_menu_bar_icon      (macOS) the menu-bar icon hides while no meeting is under way; shortcuts keep working, reopening GoSpell shows Settings (#1064)
+├── Pause from menu bar no labs.pause_menu             (macOS) the menu bar's action block offers Pause GoSpell; while paused every capture shortcut and the secure-input hotkeys are inert, the event tap passes keys through, and Resume waits for a neutral keyboard (#82)
 ├── Upcoming meetings in menu bar no labs.calendar_menu (macOS, with Meetings on and a calendar connected) the status menu starts
 │                                        with an Upcoming section: up to five meetings from the reminder poll's own filtered list, soonest
 │                                        first, each a local start–end time and title, "Now · " while in progress, "Tomorrow " or the
@@ -277,7 +277,7 @@ Feature             Pane  Toggle (settings.json, hex settings)   On: what it doe
 ├── Restore clipboard on GNOME no labs.gnome_clipboard_restore (Linux) on a Wayland desktop without data-control (GNOME), a paste snapshots and restores
 │                                        the clipboard through XWayland, only while this user's Xwayland already runs; never starts it (#1111)
 ├── Transform typed text no labs.typed_text + typed_text_hotkey (Linux) Settings › Output shows a Typed text section whose shortcut is unbound by
-│                                        default; the shortcut or `hex typed-text` takes the clipboard (adopting a paste's pending restore), clears it,
+│                                        default; the shortcut or `gospell typed-text` takes the clipboard (adopting a paste's pending restore), clears it,
 │                                        sends Ctrl+A then Ctrl+C, runs the focused app's Output steps on the copied text (skipping spoken
 │                                        formatting, spoken symbols, and filler words), clears and re-copies to confirm the selection still holds
 │                                        that text, then pastes the result over it and restores the clipboard 500 ms later unless a newer copy
@@ -321,7 +321,7 @@ Feature             Pane  Toggle (settings.json, hex settings)   On: what it doe
 │                                        the shortcut picks an area (Space: a window); the PNG goes on the clipboard, into the folder (Desktop), and into a corner thumbnail;
 │                                        while the Lab is on, the record shortcut and Annotate's capture shortcuts never share a key
 ├── Annotate last 15 seconds no labs.annotate_replay + capture.replay_hotkey (macOS 27+)
-│                                        keeps a rolling 15 s SCClipBufferingOutput screen buffer for hex capture replay and the replay shortcut;
+│                                        keeps a rolling 15 s SCClipBufferingOutput screen buffer for gospell capture replay and the replay shortcut;
 │                                        macOS keeps its screen-recording dot lit the whole time it is on
 ├── Copy a capture as one file no labs.copy_capture_zip (macOS, Linux, Windows)
 │                                        a finished Annotate capture goes on the clipboard as one file, <stem>.scrawl.slim.zip, written
@@ -340,13 +340,13 @@ Feature             Pane  Toggle (settings.json, hex settings)   On: what it doe
 │                                        // copy_capture_zip_is_its_own_switch_and_everywhere (labs.rs); not observed pasting the
 │                                        // zip into a real chat or agent app, and the Windows clipboard write is cross-compiled only
 ├── Agent tools for captures no labs.annotate_agent_tools (every OS)
-│                                        `hex annotate inspect [<capture>] [--marks] [--json]`,
+│                                        `gospell annotate inspect [<capture>] [--marks] [--json]`,
 │                                        `zoom [<capture>] (--at <M:SS|secs|phrase> | --mark <n|id> [--frame N]) [--span secs]`,
 │                                        `frames [<capture>] --from --to [--fps N]`, and `skill` read a .scrawl bundle in the
-│                                        CLI process, with Hex closed: summary.md, the marks, or scrawl.json; a dense sheet around a
+│                                        CLI process, with GoSpell closed: summary.md, the marks, or scrawl.json; a dense sheet around a
 │                                        moment or a mark with each cell's time and what was said; PNGs across a range; or the
-│                                        hex-annotate skill an agent installs with npx skills add. zoom and frames write only into
-│                                        <bundle>/zoom/. Off, the four commands refuse naming hex labs on annotate-agent-tools
+│                                        gospell-annotate skill an agent installs with npx skills add. zoom and frames write only into
+│                                        <bundle>/zoom/. Off, the four commands refuse naming gospell labs on annotate-agent-tools
 │                                        // checks: capture_host::annotate_read (mark lines, both JSON shapes, a sheet's printed
 │                                        // lines, every refusal), control::cli::annotate_read's clap conflicts, and
 │                                        // agent_tools_for_captures_is_its_own_switch_and_everywhere (labs.rs); the video decode
@@ -362,15 +362,15 @@ Feature             Pane  Toggle (settings.json, hex settings)   On: what it doe
 │                                        // not observed with a real Mac, Linux session, or Windows PC recording while dictating
 ├── Install agent skill from Annotate no labs.annotate_agent_install (every OS)
 │                                        Annotate gains an Agents section: one row per coding agent writes the
-│                                        hex-annotate skill into its own skills folder (Claude Code, OpenCode; Codex and
+│                                        gospell-annotate skill into its own skills folder (Claude Code, OpenCode; Codex and
 │                                        Pi use the shared ~/.agents/skills), a row copies npx skills add
-│                                        anomalyco/hex --skill hex-annotate, and on macOS Command-line tool links hex
+│                                        goml/gospell --skill gospell-annotate, and on macOS Command-line tool links gospell
 │                                        onto PATH (/opt/homebrew/bin, /usr/local/bin, else ~/.local/bin), never
-│                                        replacing another program's hex and never linking an App Translocation copy.
+│                                        replacing another program's gospell and never linking an App Translocation copy.
 │                                        Off, the pane is exactly as before
 │                                        // checks: agent_install's unit tests (finding, installing, an outdated file,
-│                                        // other files left alone, the shared copy, a symlinked skill, a dangling Hex
-│                                        // link, App Translocation, a foreign hex, the link folder); rune_ui::scrawl's
+│                                        // other files left alone, the shared copy, a symlinked skill, a dangling GoSpell
+│                                        // link, App Translocation, a foreign gospell, the link folder); rune_ui::scrawl's
 │                                        // the_agents_section_needs_its_lab, installing_writes_each_checked_agents_skill,
 │                                        // an_agents_row_checks_only_that_agent, a_linked_skill_has_no_switch; not run on
 │                                        // a real Mac, and no agent read a capture after this installed the skill
@@ -411,7 +411,7 @@ Feature             Pane  Toggle (settings.json, hex settings)   On: what it doe
 └── Only on speakers no   labs.speakers_only            (every OS) While dictating (Mute, Lower audio, Pause
                                          media) applies only while the default output is speakers; wired or Bluetooth
                                          headphones leave the output and media alone for that recording or capture, and
-                                         anything Hex can't classify counts as speakers
+                                         anything GoSpell can't classify counts as speakers
                                          // checks: bluetooth_outputs_are_headphones,
                                          // a_built_in_output_on_its_headphone_jack_is_headphones,
                                          // apples_wired_headphone_device_is_headphones, everything_else_is_speakers,
@@ -431,7 +431,7 @@ Settings › Labs                          // labs.page, a store (labs/store.rs)
 ├── Discover, no chip or search -> New in Labs: the two newest labs, then every other lab
 │   under its group's header; a lab added on the newest date among those shown carries New
 ├── Group header (key group-<id>) -> name, card count, chevron; a group with no card here hides
-│   ├── Press -> folds or unfolds it, saved at once in labs.groups (settings.json, not a hex settings key)
+│   ├── Press -> folds or unfolds it, saved at once in labs.groups (settings.json, not a gospell settings key)
 │   ├── Never pressed -> open while it holds a lab that's on, folded otherwise
 │   └── Turning off a group's last lab -> the group stays open (it is saved open first)
 ├── A chip, a search (name, description, group), or Turned on -> only the matching cards,
@@ -463,25 +463,25 @@ Settings › Labs                          // labs.page, a store (labs/store.rs)
 │   // checks: unload_when_idle_shows_its_minutes_on_its_card_while_on,
 │   // keep_microphone_open_shows_its_window_on_its_card_while_on (its control stays inside its card, its last choice reachable),
 │   // appearance_shows_its_theme_on_its_card_while_on; scenes mac-labs-settings, mac-labs-screenshots
-├── Opened by a link (macOS) -> hex://labs opens this page; ?tab=on, ?category=<group id> and ?search=<text>
-│   set the store; hex://labs/<lab> also selects that lab's group chip (unless ?category names one), scrolls to its card,
+├── Opened by a link (macOS) -> gospell://labs opens this page; ?tab=on, ?category=<group id> and ?search=<text>
+│   set the store; gospell://labs/<lab> also selects that lab's group chip (unless ?category names one), scrolls to its card,
 │   and gives the card a focus border for 1.5 s (Store::flash). It never turns a lab on. An unknown
-│   or absent name -> the page opens and process.log notes it. hex://settings/<pane>
+│   or absent name -> the page opens and process.log notes it. gospell://settings/<pane>
 │   (general, output, modes — only while Labs › Modes editor shows it — history,
-│   meetings, voice-filter) opens a main pane; one Hex doesn't show -> General.
-│   Links over 2048 bytes are ignored; a test build's scheme is hex-test://
-├── Annotate is listed as a lab (Annotate group) wherever Hex has the Annotate pane; its switch flips capture.enabled
+│   meetings, voice-filter) opens a main pane; one GoSpell doesn't show -> General.
+│   Links over 2048 bytes are ignored; a test build's scheme is gospell-test://
+├── Annotate is listed as a lab (Annotate group) wherever GoSpell has the Annotate pane; its switch flips capture.enabled
 └── Footer -> "Unfinished features. They may change or break.", Run setup again (replays the onboarding,
-    below), Send feedback -> https://github.com/anomalyco/hex/issues/new
+    below), Send feedback -> https://github.com/goml/gospell/issues/new
 
-hex labs                                 // labs.cli; edits settings.json, no running Hex
-├── (list) -> every feature this build has: name, on/off, audience, description, its hex settings key
-├── link <feature> -> macOS: prints hex://labs/<feature> (hex-test:// in a test build), which opens Labs on its group and card
-├── on <feature> | off <feature> -> a running Hex saves and applies it (hex settings set); otherwise settings.json
+gospell labs                                 // labs.cli; edits settings.json, no running GoSpell
+├── (list) -> every feature this build has: name, on/off, audience, description, its gospell settings key
+├── link <feature> -> macOS: prints gospell://labs/<feature> (gospell-test:// in a test build), which opens Labs on its group and card
+├── on <feature> | off <feature> -> a running GoSpell saves and applies it (gospell settings set); otherwise settings.json
 ├── off voice-filter with the driver installed -> refused: uninstall the driver (dev builds; stable has no voice-filter)
-└── hex experiments … -> points at hex labs
+└── gospell experiments … -> points at gospell labs
 
-hex settings set labs.live_text true     // macOS: through the running Hex
+gospell settings set labs.live_text true     // macOS: through the running GoSpell
 ```
 
 Checks: `rune_ui::deep_link` tests (parser, query, every feature's link reads
@@ -492,14 +492,14 @@ filters, ⌘F, a lone card's width, group folds and each OS's groups) and the
 the feed lists every new lab.
 Scenes: `mac-labs`, `mac-labs-on`, `mac-labs-category`, `mac-labs-search`,
 `mac-labs-settings`, `mac-labs-screenshots`, `mac-labs-link`, `windows-labs`, `linux-labs`. Not yet observed: the store in a running
-Hex.
+GoSpell.
 
 Settings saved before this model may carry `labs.enabled`; it is read and
-ignored, and every feature keeps its own toggle. `hex status` lists the
+ignored, and every feature keeps its own toggle. `gospell status` lists the
 features on (`Labs` line on macOS, `labs` array in the macOS and Linux JSON,
 `labs\t…` on Windows).
 
-Every toggle applies at once, from the window or `hex labs on|off` (issue
+Every toggle applies at once, from the window or `gospell labs on|off` (issue
 568, from @maharshi365): Live text is asked as each dictation starts and its
 plate is always installed (prewarmed on macOS whatever the setting, so a
 plate turned on after launch never flashes the last dictation's words,
@@ -510,7 +510,7 @@ the toggle is on. Live typing is read at the hold threshold (or the Toggle
 press). Live chapters are read when a recording starts. Nothing
 starts at launch for a feature that is off. Limit: the macOS window's fixed
 size is chosen when it is created, so it becomes resizable for the
-playground only after Hex restarts.
+playground only after GoSpell restarts.
 
 Gate a Labs feature where its work starts (the worker, thread, or capture),
 not only where its UI appears: `labs::live_text()`, `labs::live_chapters()`,
@@ -518,9 +518,9 @@ not only where its UI appears: `labs::live_text()`, `labs::live_chapters()`,
 `labs::learn_from_corrections()`, `labs::microphone_linger()`,
 `labs::voice_prompt()`, `labs::stop_phrase()`,
 `app_settings::meetings_enabled()`, or
-`app_settings::hex_microphone_enabled()`.
+`app_settings::gospell_microphone_enabled()`.
 Add a new feature to `labs::Feature` (name, settings key, description, audience), give
-it a row in `rune_ui/labs.rs` and a `hex settings` key, and default it off.
+it a row in `rune_ui/labs.rs` and a `gospell settings` key, and default it off.
 When a feature graduates, remove it from Labs.
 
 Words on screen (`screen-vocabulary`, macOS): while on, each dictation
@@ -532,7 +532,7 @@ soft 150 ms deadline checked between elements, with the existing 0.25 s
 messaging timeout; each value is capped at 4 KB, and a text value over that
 reads only its `AXVisibleCharacterRange` (or is skipped when the app names
 none), so a document or a terminal's scrollback never fills the budget.
-`AXSecureTextField` elements and their subtrees are skipped, and Hex's own
+`AXSecureTextField` elements and their subtrees are skipped, and GoSpell's own
 process is never read (`accessibility::focused_window_text`).
 `dictation::screen_vocabulary` extracts at most 24 names or technical terms:
 mixed-case and CamelCase words, letters with digits, 2–6 letter acronyms, and
@@ -563,15 +563,15 @@ stoplist and log levels, hashes, ordinals, times, units, random tokens, the
 [dictation/screen_vocabulary.rs](../../src/dictation/screen_vocabulary.rs),
 `screen_vocabulary_is_its_own_switch_and_macos_only` in
 [labs.rs](../../src/labs.rs), and `a_missing_attribute_is_none` and
-`hex_never_reads_its_own_accessibility_tree` in
+`gospell_never_reads_its_own_accessibility_tree` in
 [accessibility.rs](../../src/accessibility.rs). Not observed: a real Mac
 reading a real window, or a dictated word corrected by what was on screen.
 
 Learn from corrections (`learn-from-corrections`, macOS): while on, after a
-dictation is pasted, Hex watches only the field it pasted into, reading it
+dictation is pasted, GoSpell watches only the field it pasted into, reading it
 about every 100 ms for up to 5 minutes. The first read retries for up to a
 second until the app shows the pasted text, since the app handles ⌘V after
-Hex's paste returns. What it compares is what Hex actually inserted (the
+GoSpell's paste returns. What it compares is what GoSpell actually inserted (the
 continuation join's capitalization and leading space, or smart spacing,
 included), never the transcript. It stops on a focus change, an empty or
 vanished field, a newer paste, or the timeout; the lab turned off stops it
@@ -587,10 +587,10 @@ fields over 20,000 characters (a field whose app names its character count is
 measured before its value is read), text over 400 words, rewrites (more than
 3 inserted words, and over 60% of them, changed), plain lowercase words, and
 terms already in Vocabulary. Only a Paste that left text in a field is
-watched: a copy, a Service or Print output, a YOLO send, and Hex's own window
+watched: a copy, a Service or Print output, a YOLO send, and GoSpell's own window
 never start one, while every other paste into an app (Paste Last, a meeting
 turn, a capture's sheet and summary) moves the paste generation the watch
-reads. Each learned term is saved the way `hex vocabulary add` saves one
+reads. Each learned term is saved the way `gospell vocabulary add` saves one
 (`vocabulary::add` on the saved list, then one `AppSettings::update` that
 writes `settings.json` and applies the list to the running app), and an open
 window adopts it. The one event it logs holds the number of terms only, never
@@ -600,7 +600,7 @@ the field or a term. Nothing leaves the Mac. Checks:
 `a_reading_a_newer_paste_overtook_is_discarded`,
 `only_the_lab_turning_off_discards_a_correction`,
 `only_a_paste_the_person_can_still_fix_is_watched`,
-`learned_terms_join_the_list_the_way_hex_vocabulary_add_does`, and
+`learned_terms_join_the_list_the_way_gospell_vocabulary_add_does`, and
 `a_full_list_keeps_its_terms_and_takes_no_more` in
 [correction_watch.rs](../../src/dictation/correction_watch.rs), plus
 [correction_terms.rs](../../src/dictation/correction_terms.rs)'s
@@ -617,7 +617,7 @@ each dictation reads the focused text element once, on a background thread, at
 the same moment as the screen vocabulary read (a hold past its threshold, a
 control start, or a released microphone opening), and only for the mode's
 OpenCode rewrite. It reads `AXFocusedUIElement` through the existing 0.25 s
-messaging timeout, never Hex's own process, and returns nothing for an
+messaging timeout, never GoSpell's own process, and returns nothing for an
 `AXSecureTextField` (role or subrole), so a password never leaves the app. It
 reads `AXSelectedTextRange`, then `AXStringForRange` for up to 1,000 UTF-16
 units before the selection, the selection itself (up to 2,000 units; a longer
@@ -661,14 +661,14 @@ and the Labs card tests in `rune_ui/tests/panes.rs`. Not observed: a real Mac
 reading a real text field, or a dictated word corrected by the text around the
 cursor; the Accessibility function itself has no host test here.
 
-Mouse shortcuts off: the recorder ignores mouse buttons, `hex settings`
+Mouse shortcuts off: the recorder ignores mouse buttons, `gospell settings`
 refuses one, and a saved mouse-button shortcut goes back to its default when
 settings load (macOS), with a one-time note in General
 (`mouse_shortcut_notice`). Check:
 `mouse_shortcuts_go_back_to_their_default_while_their_labs_toggle_is_off` in
 [app_settings.rs](../../src/app_settings.rs).
 
-Clicks and drags reach Hex's filtering (event-consuming) session tap only
+Clicks and drags reach GoSpell's filtering (event-consuming) session tap only
 while some shortcut is a mouse button; otherwise they go to the listen-only
 tap, as chord evidence only. A filtering tap on mouse events, even one that
 passes every event through, broke dragging windows between displays and
@@ -677,7 +677,7 @@ shortcut is bound or cleared, so for up to 5 s after that a newly bound button
 still reaches the app. Check:
 `mouse_events_reach_the_filtering_tap_only_while_a_mouse_shortcut_is_bound` in
 [suppression/tests.rs](../../src/suppression/tests.rs) (macOS only). Not yet
-observed: a real two-display Mac dragging windows with Hex running.
+observed: a real two-display Mac dragging windows with GoSpell running.
 
 Free memory when idle (`unload-idle`, issue 442 from @theoneand33): while
 on, its card shows "Unload after" (5, 15, 30, or 60 minutes; default 15).
@@ -766,10 +766,10 @@ Mac, Windows PC, or Linux desktop: no capture has been run with the lab on.
 
 Voice isolation (`voice-isolation`, macOS only): while on, dictation's warm
 microphone opens through Apple's voice processing instead of cpal's raw
-input stream, so Control Center's Mic Mode can offer Voice Isolation for Hex
+input stream, so Control Center's Mic Mode can offer Voice Isolation for GoSpell
 and background noise is reduced. The voice-processed microphone stays open
 while dictation is idle, exactly like the raw warm microphone, so macOS's
-ducking applies whenever Hex is listening and not only while a dictation
+ducking applies whenever GoSpell is listening and not only while a dictation
 records; with General's Release microphone while idle on, it closes after a
 capture and the ducking ends with it. `OpenRequest` gains
 `voice_processing` (true only from `RecoveringAudioInput` while
@@ -786,7 +786,7 @@ enables `setVoiceProcessingEnabled(true)`, connects the input through a
 silent main mixer to the output (voice processing is duplex), and taps
 channel 0 at the bus rate in a standard Float32 non-interleaved format with
 `AVAudioTime.hostTime`; Rust converts the Mach ticks with
-`CaptureInstant::from_mach_ticks` and feeds the same chunk and Hex
+`CaptureInstant::from_mach_ticks` and feeds the same chunk and GoSpell
 Microphone channels a cpal stream does. The bridge reads
 `kAudioOutputUnitProperty_CurrentDevice` back after start. It observes
 `AVAudioEngineConfigurationChange` only once start has returned, and reports
@@ -810,7 +810,7 @@ byte-for-byte the existing cpal path. macOS may lower other audio while the
 duplex unit runs: advanced ducking lowers it only while speech is heard,
 and `.min` is the least ducking macOS offers. A Bluetooth headset may
 switch to its call profile. Not verified on hardware: no Mac has run this
-path; Control Center's Mic Mode offering Voice Isolation for Hex; the tap's
+path; Control Center's Mic Mode offering Voice Isolation for GoSpell; the tap's
 latency against the 200 ms release tail; and a meeting sharing the
 microphone while dictation's voice-processed stream is open. Checks:
 `voice_isolation_is_its_own_bit_and_off_by_default` in
@@ -822,7 +822,7 @@ Labs goldens were regenerated for the new card.
 Restore shortcut default (`restore-shortcut-default`, issue 613) graduated:
 Paste last dictation's row always offers Reset when its shortcut isn't the
 default (see [dictation.md](dictation.md)). `labs.restore_shortcut_default`
-is read and ignored, and `hex labs on restore-shortcut-default` says it
+is read and ignored, and `gospell labs on restore-shortcut-default` says it
 graduated.
 
 Settings search graduated to the [window’s Find popover](README.md#find-a-setting-or-lab).
@@ -855,7 +855,7 @@ exactly as before. Only the one main window is resolved; the onboarding HUD
 preview and the Sounds sheet's HUD replay inside the window, and every
 overlay (the HUD, meeting capsules, live text, capture capsule, screenshots,
 and playgrounds), keep following the OS. On Windows the native title bar
-follows the window's background and light/dark mode: Hex sets
+follows the window's background and light/dark mode: GoSpell sets
 `DWMWA_CAPTION_COLOR` and `DWMWA_USE_IMMERSIVE_DARK_MODE`, and a window
 subclass re-applies that caption after a `WM_SETTINGCHANGE` while Appearance
 forces a theme different from the OS, because winit repaints the frame from
@@ -884,7 +884,7 @@ transcript without the nspasteboard.org transient markers (so clipboard
 managers may record it), schedules no 500 ms restore, and drops any earlier
 snapshot and pending restore (`ClipboardRestore::keep`), so a later restoring
 paste never brings back an older clipboard. Into Chromium 155/156 or Windows
-App, where Hex types the text instead of pasting, it also writes the
+App, where GoSpell types the text instead of pasting, it also writes the
 transcript to the clipboard after typing. On Windows,
 `windows::paste::WindowsPaster` reads the
 same gate as each paste commits: it writes an ordinary clipboard entry (not
@@ -915,7 +915,7 @@ toggle on.
 
 Copy dictation only (`copy-only`, issue 629, macOS and Windows): while on, a
 finished dictation (on macOS the dictation shortcut, Dictate without
-processing, or `hex dictation` without `--print`; on Windows any dictation
+processing, or `gospell dictation` without `--print`; on Windows any dictation
 job) is put on the clipboard and nothing is
 sent to the focused app: no ⌘V or Ctrl+V, no typed text (Chromium 155/156
 included), and no 500 ms restore, so selected text is never replaced. The
@@ -948,7 +948,7 @@ dictation on a Mac or Windows PC with the toggle on.
 YOLO mode (`yolo-mode`, every OS): while on, a
 dictation started by a dictation shortcut (hold, double-tap lock, Toggle, a
 second or extra shortcut, Caps Lock dictation on macOS) presses Return once
-after Hex pastes its nonempty final text. A one-second “yep” sends just like
+after GoSpell pastes its nonempty final text. A one-second “yep” sends just like
 a longer message. The ordinary 300 ms hold threshold still discards short
 taps. Silence, cancellation, empty output, and a failed insertion never
 press Return. Old saved durations are ignored. The card's Only in row
@@ -960,7 +960,7 @@ applications are (`ContextSnapshot::application_is`) against the frontmost
 app captured with the dictation, under its own name or, on macOS, the name
 Finder shows for its bundle (`Rex Beta.app` runs as `Rex`); with apps chosen, a dictation whose app is
 unknown (Wayland without foreign-toplevel) never sends. It never applies to Dictate
-without processing, `hex dictation` or local API captures, printing stops,
+without processing, `gospell dictation` or local API captures, printing stops,
 Live typing's input-method commits, meetings, Annotate
 captures, or Paste last dictation. It wins over Copy dictation only (macOS
 and Windows): a dictation it sends is pasted rather than only copied. Each OS decides as the output commits
@@ -980,7 +980,7 @@ dictation. Pastes usually land 0.25–0.5 s after submission and Return went
 `DictationOutput::deliver` follows it with `LinuxPaster::press_return`
 (`Chord::Return`: XTest on X11, `wtype -k Return` or the RemoteDesktop
 portal on Wayland), with no Escape window. A sent dictation's History entry is kind Send. On Linux
-a desktop keybinding that runs `hex dictation toggle` (Wayland without the
+a desktop keybinding that runs `gospell dictation toggle` (Wayland without the
 GlobalShortcuts portal, GNOME custom shortcuts) is a command, so it never
 sends. Checks: `yolo_sends_yep_only_after_a_successful_paste`,
 `chosen_apps_limit_where_it_sends`, `escape_after_submission_closes_the_gate`,
@@ -993,10 +993,10 @@ observed: a real dictation sending a message on any OS.
 
 Return to app (`return-to-app`, macOS): while on, a dictation pastes into the
 app its capture started in. `handle_hotkey_action`'s Start (shared by the
-dictation shortcuts, Caps Lock dictation, and `hex dictation start`) records
+dictation shortcuts, Caps Lock dictation, and `gospell dictation start`) records
 the frontmost application's pid once the capture starts
 (`paste::return_to_app::capture_start`, which reads `labs::return_to_app()`
-and never Hex's own pid), and the job carries it through inference and
+and never GoSpell's own pid), and the job carries it through inference and
 processing to `parakeet::finish_output`. Right before a Paste or RawPaste
 dictation commits, `paste::return_to_app::bring_to_front` compares that pid
 with the app in front now: the same app pastes as usual, and a different one
@@ -1043,7 +1043,7 @@ Dictate "we ship friday. rewrite this, make it formal."   // labs.voice_prompt +
 
 The one request replaces the mode's normal rewrite, including while the mode's
 rewrite switch is off, and uses that mode's model, variant, and deadline; no
-model means Hex's ranked default list. With the mode's rewrite on and a prompt
+model means GoSpell's ranked default list. With the mode's rewrite on and a prompt
 saved, its prompt rides along as background instructions that the spoken one
 overrides. The vocabulary (the mode's terms before the shared list) and the
 foreground application and browser host are the same ones the rewrite carries,
@@ -1053,7 +1053,7 @@ was dictated with; with no such text it pastes the whole corrected transcript.
 
 An organization's DisableOpenCodeProcessing lock reads as off: the card shows it
 managed, the phrase is not split, that mode processes as usual, and
-`hex settings set labs.voice_prompt_phrase` is refused as managed. The browser
+`gospell settings set labs.voice_prompt_phrase` is refused as managed. The browser
 host is read for every voice prompt: on Linux and Windows `ModeRuntime::reads_page`
 turns the page on while the lab is on even when no mode rule or rewrite would,
 and macOS's `reads_browser` does the same, which can bring up the Automation
@@ -1077,7 +1077,7 @@ outcome also drops the mode's transformations, so one can't turn the empty
 result into text.
 
 The phrase is `labs.voice_prompt_phrase` ("rewrite this" by default), also
-`hex settings set labs.voice_prompt_phrase "<phrase>"`. It needs at least two
+`gospell settings set labs.voice_prompt_phrase "<phrase>"`. It needs at least two
 words and at least six letters counted after normalization, so one common word
 can't start it. An invalid value is an `invalid-value` error; settings load
 falls back to the default without changing the saved file. While the lab is on,
@@ -1085,7 +1085,7 @@ its card shows Phrase: a draft that fails validation stays in the field with the
 reason under it in danger color, and the saved phrase keeps working; a valid
 draft saves once typing pauses, like the window's other text fields. A phrase
 saved elsewhere updates the field without resetting its focus, and an invalid
-draft leaves when the lab is turned off, whether from its card or `hex settings`.
+draft leaves when the lab is turned off, whether from its card or `gospell settings`.
 Off, processing is byte-for-byte unchanged. Checks:
 `the_phrase_matches_whole_words_in_any_case`,
 `write_this_and_overwrite_this_never_match`,
@@ -1123,7 +1123,7 @@ shortcut were pressed again (the Toggle press, or the press that ends a locked
 Hold capture), and the phrase never reaches the pasted text. Only hands-free
 captures listen: Toggle mode, or a Hold capture locked by the double-tap. An
 ordinary Hold capture, where letting go is the end, is unaffected, and so are
-meetings and the local API's `/dictations`. A `hex dictation start` capture,
+meetings and the local API's `/dictations`. A `gospell dictation start` capture,
 printing or not, is hands-free too, so the phrase ends it like any locked one,
 and a printing start answers its command with the words minus the phrase.
 
@@ -1167,7 +1167,7 @@ own final `.?!` stays. A capture that is only the phrase leaves an empty
 string, which pastes nothing.
 
 The phrase is `labs.stop_phrase_text` ("stop dictation" by default), also
-`hex settings set labs.stop_phrase_text "<phrase>"`. It follows the voice
+`gospell settings set labs.stop_phrase_text "<phrase>"`. It follows the voice
 prompt's rules: at least two words and at least six letters counted after
 normalization, so one common word can't finish a dictation. An invalid value is
 an `invalid-value` error; settings load falls back to the default without
@@ -1247,7 +1247,7 @@ is on, the text is not empty after trimming, the saved signature is not empty
 after trimming, and the text does not already carry it on a line of its own.
 That means the text is the signature, or the signature follows a line break
 with nothing but spaces or tabs in between; a signature that merely ends a line
-of prose, like "Hex" in "I love Hex", is appended. The saved signature is
+of prose, like "GoSpell" in "I love GoSpell", is appended. The saved signature is
 trimmed, so its own edges add no blank line. A saved value must be one line of
 at most 200 characters with no control characters; another value is an
 `invalid-value` error, and settings load falls back to the default without
@@ -1272,7 +1272,7 @@ ordinary paste path carries the same signed text.
 ```ts
 Dictate "we ship friday"                  // labs.signature + labs.signature_text
 ├── Off -> pasted and kept exactly as before
-├── On, "Sent from Hex" -> pasted "we ship friday\nSent from Hex"
+├── On, "Sent from GoSpell" -> pasted "we ship friday\nSent from GoSpell"
 │   -> History and Paste Last hold the same two lines
 ├── Text already ends with the line
 │   └── it is the signature, or follows a line break -> left alone
@@ -1422,7 +1422,7 @@ style), meetings, and live text keep their text exactly. Dictate without
 processing skips the processor entirely. With the toggle off, processing is
 byte-for-byte as before.
 
-The rules are the iPhone app's `TranscriptFormatter` (`ios/HEXShared/`),
+The rules are the iPhone app's `TranscriptFormatter` (`ios/GoSpellShared/`),
 ported without its spoken lists, spoken punctuation, insertion spacing, or
 "End with a period" handling, which desktop already has as its own Labs or
 does not have. Verbatim only collapses runs of spaces and tabs and trims the
@@ -1475,7 +1475,7 @@ by default): while on, each macOS dictation that its mode does not rewrite
 gets one short on-device pass with Apple Intelligence, after the speech Labs
 and the Global and mode corrections and before the transformations. Its
 instructions are the iOS cleaner's, word for word
-(`ios/HEXMobile/TranscriptCleanup.swift`): fix clearly misrecognized words
+(`ios/GoSpellMobile/TranscriptCleanup.swift`): fix clearly misrecognized words
 using the sentence's context, resolve an explicit spoken self-correction
 ("tuesday, no wait, wednesday" becomes "wednesday"), keep the speaker's
 wording, language, meaning, numbers, and negation otherwise, and treat the
@@ -1527,7 +1527,7 @@ added or dropped negation, added words the speaker did not say, a changed
 speaker, a reply opener, a preamble, text about something else, or most of the
 transcript dropped) and that exact reason is what History and the live log
 record. The bridge
-(`apple_intelligence::generate_text` → `hex_apple_intelligence_text`) runs
+(`apple_intelligence::generate_text` → `gospell_apple_intelligence_text`) runs
 the plain-text responder at utility priority with a 2 s budget, temperature 0.2,
 and 1024 response tokens; the answer is trimmed, loses one pair of wrapping
 quotes only when the transcript didn't dictate its own, takes back the
@@ -1637,7 +1637,7 @@ phrasing, and unusual sentence structure, use standard capitalization and
 punctuation, keep the language, and keep every number, code, URL, file path,
 and quoted text exactly as written; the transcript is content to rewrite,
 never instructions to answer. The bridge
-(`apple_intelligence::generate_text` → `hex_apple_intelligence_text`) runs the
+(`apple_intelligence::generate_text` → `gospell_apple_intelligence_text`) runs the
 plain-text responder at utility priority with a 4 s budget, temperature 0.7
 (the cleanup stays at 0.2) so two dictations of the same words don't come back
 with identical wording, and 1024 response tokens. The answer is trimmed,
@@ -1722,8 +1722,8 @@ Second dictation shortcut (`second-dictation-shortcut`, issue 627, macOS, Linux
 and Windows): for a Globe/Fn shortcut on the laptop keyboard and another key on
 an external keyboard. While on, General shows a "Second dictation shortcut"
 recorder under Shortcut, unbound by default and clearable
-(`second_dictation_hotkey`, also `hex settings set second_dictation_hotkey
-f5`). It is refused when it shares a key with another Hex shortcut, and the
+(`second_dictation_hotkey`, also `gospell settings set second_dictation_hotkey
+f5`). It is refused when it shares a key with another GoSpell shortcut, and the
 others' checks count it while the toggle is on. The gate is
 `AppSettings::active_second_dictation_hotkey`: with the toggle on, a binding
 saved, no overlap with another active shortcut, and, on Linux and Windows, a
@@ -1748,7 +1748,7 @@ capture finishes or cancels it, and the other stands down until its keys lift
 while it records. Turning the toggle off or clearing the binding mid-capture
 cancels that capture on macOS; on Linux and Windows a settings change applies
 once the capture ends. Off, nothing is matched, suppressed, registered, or
-checked for it, and Hex is unchanged. Checks:
+checked for it, and GoSpell is unchanged. Checks:
 `the_second_dictation_shortcut_needs_its_lab_and_its_own_keys` in
 [app_settings.rs](../../src/app_settings.rs),
 `the_shortcut_that_starts_a_capture_owns_it` in
@@ -1773,7 +1773,7 @@ exactly as it is for the main shortcut), and
 a Remove button that drops the row. An Add shortcut row appears while fewer
 than four rows exist, and a new row starts unbound. The rows persist as
 `extra_dictation_hotkeys`, an array of `{"binding": ..., "mode": ...}` rows
-in `settings.json` (also `hex settings set extra_dictation_hotkeys …`),
+in `settings.json` (also `gospell settings set extra_dictation_hotkeys …`),
 capped at four: loading keeps the first four and folds each row's mode to
 one its binding can trigger. The gate is
 `AppSettings::active_extra_dictation_hotkey`: only on macOS, with the toggle
@@ -1817,7 +1817,7 @@ Checks:
 `an_extra_mode_sets_its_trigger_switches` in
 [suppression/tests.rs](../../src/suppression/tests.rs) (macOS only).
 `extra_dictation_hotkeys_takes_up_to_four_checked_rows` covers
-`hex settings set` in
+`gospell settings set` in
 [control/settings.rs](../../src/control/settings.rs). Not yet observed on a
 real Mac: the recorder rows, the mode select, Add shortcut and Remove, each
 row's own mode, and the Labs card (macOS builds only; no golden).
@@ -1827,14 +1827,14 @@ another dictation shortcut whose paste is always Ctrl+Shift+V, for a terminal
 window that needs it, while the main dictation shortcut keeps following the
 global Terminal paste setting. While on, General shows a "Terminal paste
 shortcut" recorder under Shortcut, unbound by default and clearable
-(`terminal_paste_hotkey`, also `hex settings set terminal_paste_hotkey
-ctrl+shift+t`). It is refused when it shares a key with another Hex shortcut,
+(`terminal_paste_hotkey`, also `gospell settings set terminal_paste_hotkey
+ctrl+shift+t`). It is refused when it shares a key with another GoSpell shortcut,
 and the others' checks count it while the toggle is on. The gate is
 `AppSettings::active_terminal_paste_hotkey`: only on Windows and Linux, with
 the toggle on, a binding saved, and no overlap is it handed to the listener,
 so X11 grabs or the shortcuts portal register it (id `terminal-paste`), and
-the Windows hook matches it. Linux has no `hex` command for it, unlike
-Dictate without processing's `hex dictation start|toggle --raw`, so without
+the Windows hook matches it. Linux has no `gospell` command for it, unlike
+Dictate without processing's `gospell dictation start|toggle --raw`, so without
 X11 grabs or the portal it stays unregistered. Off, nothing is registered,
 matched, or checked for it, and the saved binding stays. A capture it starts
 is a normal dictation in every other way: the same Hold/Toggle and double-tap
@@ -1868,7 +1868,7 @@ mid-capture cancels that capture.
 
 Caps Lock never changes typing: every press also resets the system Caps Lock
 state off through `IOHIDSetModifierLockState`, so the next keys stay
-lowercase. The key's light follows Hex's dictation state through the
+lowercase. The key's light follows GoSpell's dictation state through the
 keyboard's HID LED output element (usage page 0x08, usage 0x02). It comes on
 only after the capture's microphone delivers its first audio, so a press whose
 microphone is still opening (with Release microphone while idle, or a device
@@ -1880,7 +1880,7 @@ meter once and feeds both the HUD (when one exists) and the light, so the light
 never depends on a HUD; an Annotate capture feeds the light alone. The
 recording light is steady by default; its Recording light option, Slow blink,
 blinks at 700 ms on and off while recording, while transcribing keeps its
-350 ms blink. Turning the lab off or quitting Hex clears the light and stops
+350 ms blink. Turning the lab off or quitting GoSpell clears the light and stops
 forcing the lock off, so Caps Lock behaves normally again.
 
 ```ts
@@ -1895,7 +1895,7 @@ Labs › Caps Lock dictation on                        // labs.caps_lock_dictati
 ├── Recording light -> steady (default) solid recording, or slow blink at 700 ms on/off; transcribing always blinks at 350 ms
 ├── light -> off done/cancelled/failed
 ├── Labs off mid-capture -> cancels it, light off, normal Caps Lock returns
-└── Hex quits -> light off, lock released
+└── GoSpell quits -> light off, lock released
 ```
 
 The gate is `labs::caps_lock_dictation()` in the listener
@@ -1905,7 +1905,7 @@ the raw HID tracker records Caps Lock usage 0x39 with its press timestamp
 ([suppression/physical_keys.rs](../../src/suppression/physical_keys.rs)), and
 the event tap confirms it with an AlphaShift change edge within 300 ms
 ([suppression.rs](../../src/suppression.rs)). A key remapped to Control or
-Escape never changes AlphaShift, so it never toggles dictation. Hex's own
+Escape never changes AlphaShift, so it never toggles dictation. GoSpell's own
 lock-reset edge is marked and dropped before the press gate. A Caps Lock activation
 delay configured above 300 ms would make those presses invisible; the default
 has no delay. Without Input Monitoring the HID tracker is inactive, so an AlphaShift on edge is the
@@ -1917,10 +1917,10 @@ every IOKit call, re-enumerates keyboards on a bounded refresh, and runs the
 blink timer. No IOKit work runs on the event-tap or audio threads. The pure
 press gate, press decision, and light model live in
 [caps_lock_dictation.rs](../../src/caps_lock_dictation.rs). The LED needs
-Input Monitoring, which Hex already asks for; without it, dictation still
+Input Monitoring, which GoSpell already asks for; without it, dictation still
 works and the light stays under macOS's control. Some keyboards, built-in ones
 included, may not expose a Caps Lock LED output element, and macOS's own light
-update after a reset can race Hex's write; neither changes dictation or the
+update after a reset can race GoSpell's write; neither changes dictation or the
 lock reset. Checks:
 `an_older_jobs_stage_event_never_interrupts_a_newer_capture`,
 `a_stage_event_for_an_unknown_job_changes_nothing`,
@@ -1975,7 +1975,7 @@ whitespace, opening punctuation, straight quotes, or symbols such as `@ $ # /
 -`, and never before text that starts with whitespace or closing punctuation.
 Selected text, a cursor at the start, or an app that doesn't expose its
 cursor leaves the text unchanged, and both the clipboard paste and the
-Chromium 155/156 typing path use the adjusted text. Hex's own window is
+Chromium 155/156 typing path use the adjusted text. GoSpell's own window is
 never asked: its tree belongs to the main thread that updates it (#1402).
 Lowercasing the first letter is not done. Off, pasting is exactly as before.
 Checks:
@@ -1994,7 +1994,7 @@ pressed on, so Right ⌘ + Right ⌥ saves as `right-option+right-command` and
 the tray shows R⌥ R⌘; only those keys press it, and the left keys don't.
 The gate is the recorder: `labs::sided_modifier_chords()` is read once when
 a recording starts. Matching, the conflict checks, and saved shortcuts are
-unchanged (chords already store and match sides; `hex settings set` could
+unchanged (chords already store and match sides; `gospell settings set` could
 always save one), a chord with a non-modifier key still records its
 modifiers from either side, and the side picker stays for one-modifier
 shortcuts only. Off, a chord such as ⌥⌘ records from either side exactly as
@@ -2027,7 +2027,7 @@ finishes its capture, with the usual release tail; a sooner release locks as
 Toggle does. The desktop's key repeats of a held press don't move its start,
 and a release the desktop drops leaves the capture recording until the next
 press finishes it, as before. It applies to the dictation shortcut and
-Dictate without processing, each for the capture it started; `hex dictation`
+Dictate without processing, each for the capture it started; `gospell dictation`
 commands are unchanged. X11 counts a release after its 50 ms auto-repeat
 grace. Windows doesn't have it.
 
@@ -2070,8 +2070,8 @@ mode (the primary shortcut, Dictate without processing, the second dictation
 shortcut, and each Labs › More dictation shortcuts row). Off, the persisted
 normalization clears `double_tap_only` for a shortcut without a key exactly
 as a fresh load does, Double-tap is dimmed in the Shortcut mode modal, and
-`hex settings set double_tap_only on` refuses it. Windows and Linux have no
-such path for this lab: their runtime gates and `hex settings` validation are
+`gospell settings set double_tap_only on` refuses it. Windows and Linux have no
+such path for this lab: their runtime gates and `gospell settings` validation are
 exactly as before, and both keep the key requirement.
 
 Checks: `double_tap_only_with_the_lab_starts_from_a_lone_modifier` (Option
@@ -2172,11 +2172,11 @@ test records (945 utterances, batch 8, no timestamps, source revision
 7045d1c; run IDs and scoring or artifact revisions unknown); the catalog's
 7.64 and 10.11 stay as the alternate legacy figures the picker shows with the
 toggle off. QwenCleo-ASR 1.7B names its author's 3,699-utterance Egyptian
-Arabic test. ivrit.ai Whisper large-v3-turbo carries Hex's own run of
+Arabic test. ivrit.ai Whisper large-v3-turbo carries GoSpell's own run of
 transcribe.cpp's WER harness on the FLEURS Hebrew test (18.45% WER, 792
 utterances, batch 1, no timestamps, Radeon 8060S over Vulkan, source revision
-7045d1c), NB-Whisper Medium Hex's run on the FLEURS Norwegian test (6.68%
-WER, 357 utterances, same conditions), and Granite Speech 5.0 Hex's run on
+7045d1c), NB-Whisper Medium GoSpell's run on the FLEURS Norwegian test (6.68%
+WER, 357 utterances, same conditions), and Granite Speech 5.0 GoSpell's run on
 the FLEURS English test (4.77% WER, 647 utterances, same conditions);
 KB-Whisper Medium names KBLab's model card for the FLEURS Swedish test
 (6.6% WER, its default checkpoint, with utterances, batch, hardware, and
@@ -2197,7 +2197,7 @@ page goldens need regenerating on Linux with the new row.
 
 Use your own speech model (`custom-models`) graduated: adding a model file
 and models found on this computer are always on now
-([own-models.md](own-models.md)). `hex labs on|off custom-models` still
+([own-models.md](own-models.md)). `gospell labs on|off custom-models` still
 answers with that and exits 0 (`labs::GRADUATED`); the saved
 `labs.custom_models` key is ignored.
 
@@ -2211,24 +2211,24 @@ Picker row -> "Parakeet Ultra" + Labs tag; 25 languages, offline, Token     // l
 ├── Download -> handy-computer/parakeet-ultra-gguf@a1539be1, parakeet-ultra-Q8_0.gguf,
 │   740,363,168 bytes, SHA-256 007a5976…0a59 (430 F32, 225 Q8_0, 48 F16 tensors)
 ├── Details -> languages; peak memory measured on apollo (~0.7 GB GPU, ~0.2 GB
-│   RAM, Radeon 8060S over Vulkan; not measured elsewhere); "Experimental: Hex
+│   RAM, Radeon 8060S over Vulkan; not measured elsewhere); "Experimental: GoSpell
 │   has run it only on Linux (Vulkan) so far."; the credit word for word ("Parakeet
 │   Ultra by Moondream, based on NVIDIA Parakeet TDT 0.6B v3. GGUF conversion and
 │   quantization by handy-computer. Creative Commons Attribution 4.0 International
 │   (CC BY 4.0)."); the publisher's NOTICE; Source and License links
-├── "Published benchmarks; not measured in Hex" (folded) -> conditions
+├── "Published benchmarks; not measured in GoSpell" (folded) -> conditions
 │   (FLEURS test, Q8_0, CUDA, batch 8, each language's hint, no timestamps,
 │   transcribe.cpp 021aa17d; file digest, dataset revision, scorer unknown), then
 │   25 FLEURS WERs from transcribe.cpp 7045d1c's catalog/parakeet-ultra.json
 ├── Accuracy 98.2% / Labs › Model test details: LibriSpeech test-clean 1.80%
 │   WER, the same published source (2,620 utterances, batch 8, CUDA)
 └── Toggle off while Ultra is the dictation model -> refused (row locked,
-    `hex labs off`, `hex settings set`); a saved Ultra with the toggle off some
+    `gospell labs off`, `gospell settings set`); a saved Ultra with the toggle off some
     other way stays saved and the listener runs a downloaded fallback
 ```
 
 Observed on apollo (Linux, Radeon 8060S over Vulkan, 2026-11-01): the file
-matched its pinned size and SHA-256 (`hex model install` verified it); `hex
+matched its pinned size and SHA-256 (`gospell model install` verified it); `gospell
 model transcribe` with Ultra, passed and saved, transcribed FLEURS German and
 English and JFK correctly; Ultra ran a FLEURS English clip at 191x against
 Parakeet v3's 211x in transcribe-cli; turning the toggle off while Ultra was
@@ -2245,12 +2245,12 @@ to dictate on GNOME Wayland by remapping it to Menu (GNOME's "Caps Lock is
 also a Menu" keyboard option), or using Pause or Scroll Lock.
 
 ```ts
-hex settings set dictation_hotkey menu        // labs.special-keys
+gospell settings set dictation_hotkey menu        // labs.special-keys
 ├── Toggle on (Linux) -> saved; any shortcut may use menu, pause, scrolllock,
 │   alone like a function key or with modifiers (ctrl+pause)
 │   ├── X11 -> grabs keysym Menu 0xff67, Pause 0xff13, Scroll_Lock 0xff14
 │   └── Wayland portal -> preferred trigger Menu, Pause, Scroll_Lock
-├── Toggle off -> "menu needs Labs › Special keys alone: hex labs on special-keys"
+├── Toggle off -> "menu needs Labs › Special keys alone: gospell labs on special-keys"
 ├── Windows -> Menu, Pause, Scroll Lock always allowed, alone too; the toggle
 │   instead lets Insert, Home, End, Page Up, Page Down stand alone ("home alone
 │   needs Labs › Special keys alone" while off), and off puts a saved one back
@@ -2258,7 +2258,7 @@ hex settings set dictation_hotkey menu        // labs.special-keys
 ├── Window recorder (Linux) -> records them, alone too, while on (#1187);
 │   refuses them while off ("Add a modifier")
 │   Check: `recorder_takes_special_keys_alone` in `rune_ui/settings.rs`
-└── Toggle turned off (row, hex labs off, hex settings), or settings load with
+└── Toggle turned off (row, gospell labs off, gospell settings), or settings load with
     it off -> a Linux shortcut on one goes back to its default (Dictate without
     processing unbound), so the listener never registers it
 ```
@@ -2266,7 +2266,7 @@ hex settings set dictation_hotkey menu        // labs.special-keys
 The gates are `AppSettings::special_keys_allowed` in `control/settings.rs`'s
 `apply` and the window's `settings::validate`, and
 `AppSettings::repair_special_keys` (`app_settings/shortcut_repair.rs`) where
-settings load and where the toggle turns off. Off, Hex is unchanged: the
+settings load and where the toggle turns off. Off, GoSpell is unchanged: the
 added keysym names are reached only by a saved shortcut on one of these keys.
 Checks: `menu_alone_needs_its_labs_toggle` in
 [control/settings.rs](../../src/control/settings.rs) and
@@ -2288,25 +2288,25 @@ same key types `^`, and many layouts use `´` or `` ` ``.
 Settings › General › Shortcut, press the section key alone  // labs.section-key
 ├── Toggle off -> saving the recording is refused: "Add a modifier", as before
 ├── Toggle on  -> saved as § or the dead key's base character (^, ´, `)
-│   ├── Linux: hex settings also takes `section`; Settings shows §
+│   ├── Linux: gospell settings also takes `section`; Settings shows §
 │   │   ├── X11 -> grabs the keycode that types XK_section 0xa7
 │   │   └── Wayland portal -> preferred trigger `section`
-│   └── macOS: key code 10 (kVK_ISO_Section) alone; hex settings takes `^` on
+│   └── macOS: key code 10 (kVK_ISO_Section) alone; gospell settings takes `^` on
 │       a German layout and resolves it by scanning the layout's base labels
 ├── macOS recorder -> AppKit gives no characters for a dead key, so the key
 │   is named from the active layout with UCKeyTranslate and
 │   kUCKeyTranslateNoDeadKeysBit: key 10 is saved as {code: 10, label: "^"};
 │   the recorder takes it alone either way, and `settings::validate` refuses
 │   it while the toggle is off, as Linux's recorder does
-├── hex settings set dictation_hotkey §, off -> "section needs Labs › § key
-│   alone: hex labs on section-key"
-└── Toggle turned off (row, hex labs off, hex settings), or settings load with
+├── gospell settings set dictation_hotkey §, off -> "section needs Labs › § key
+│   alone: gospell labs on section-key"
+└── Toggle turned off (row, gospell labs off, gospell settings), or settings load with
     it off -> a Linux or macOS shortcut on the section key alone goes back to
     its default (Dictate without processing unbound), so the listener never
     registers it
 ```
 
-While bound, Hex takes the section key from every app (an X11 grab, a portal
+While bound, GoSpell takes the section key from every app (an X11 grab, a portal
 shortcut, or the macOS session tap holds its key), so typing it needs another
 key. The window's `settings::recorded_binding` (Linux; macOS uses
 `ChordCapture::key_down` in rune_ui/macos_host.rs) and `control/settings.rs`'s
@@ -2319,7 +2319,7 @@ code: `HotkeyKey::is_section` also accepts code 10 whatever its label, and
 `RuntimeHotkey::matches_key_press` compares `key_code` (saved from
 `HotkeyBinding::runtime()` with code 10 for a non-letter label), so
 `{code: 10, label: "^"}` with Option matches and the session tap swallows it
-like any keyed shortcut. Off, Hex is unchanged: a lone section key is refused
+like any keyed shortcut. Off, GoSpell is unchanged: a lone section key is refused
 everywhere, and the added `section` keysym names are reached only by a saved
 section-key shortcut (with a modifier it now also resolves on X11 and the
 portal, where it was refused as an unsupported key). Windows doesn't have it.
@@ -2349,13 +2349,13 @@ never match. The lab makes this one key alone a shortcut.
 ```ts
 Settings › General › Shortcut, press the microphone key  // labs.microphone_key
 ├── Toggle off -> saving a shortcut on it is refused: "Unsupported key", as before
-├── Toggle on  -> saved as {code: 176, label: "Mic"}; hex settings also takes
+├── Toggle on  -> saved as {code: 176, label: "Mic"}; gospell settings also takes
 │   `mic` or `microphone`
 ├── macOS recorder -> ChordCapture::key_down lets it stand alone like a
 │   function key; `settings::validate` refuses it with any modifiers while the
 │   toggle is off
 ├── macOS session tap (microphone-key tap, only while this lab is on)
-│   ├── Toggle on + a Hex shortcut on the key -> press and release are Hex's:
+│   ├── Toggle on + a GoSpell shortcut on the key -> press and release are GoSpell's:
 │   │   fed to the listener like any key and consumed at the session
 │   │   boundary, which is where handy-keys also blocks macOS's Dictation
 │   ├── Toggle on + the window records a shortcut -> press and release are
@@ -2363,11 +2363,11 @@ Settings › General › Shortcut, press the microphone key  // labs.microphone_
 │   │   recorder sees a key its own key events never get
 │   ├── Toggle on + the key is the screenshot shortcut -> refused: a shot
 │   │   reads its keys at the annotated session, after this tap
-│   └── Toggle off, Hex paused, or no shortcut on the key -> passed through:
+│   └── Toggle off, GoSpell paused, or no shortcut on the key -> passed through:
 │       macOS's Dictation and the app keep the key untouched
-├── hex settings set dictation_hotkey microphone, off -> "the mic key needs
-│   Labs › Microphone key alone: hex labs on microphone-key"
-└── Toggle turned off (row, hex labs off, hex settings), or settings load with
+├── gospell settings set dictation_hotkey microphone, off -> "the mic key needs
+│   Labs › Microphone key alone: gospell labs on microphone-key"
+└── Toggle turned off (row, gospell labs off, gospell settings), or settings load with
     it off -> any macOS shortcut on the microphone key, with or without a
     modifier (Dictation, Paste last, Cancel, Screenshots, capture, and the
     Labs rows), goes back to its default (optional ones unbound), so the
@@ -2385,17 +2385,17 @@ the window's `settings::validate` and in `control/settings.rs`'s `apply`
 ([app_settings/shortcut_repair.rs](../../src/app_settings/shortcut_repair.rs))
 where settings load and where the toggle turns off; it resets the cancel and
 screenshot shortcuts itself because `reset_shortcuts` doesn't own them. Off,
-Hex is unchanged: any shortcut on the microphone key is refused everywhere, a
+GoSpell is unchanged: any shortcut on the microphone key is refused everywhere, a
 saved one is repaired, as with the section key, and no tap is created.
 macOS matches its own Dictation shortcut (a symbolic hot key) before the app
-and before Hex's annotated-session key tap, so this one key is read at a
+and before GoSpell's annotated-session key tap, so this one key is read at a
 session tap ([suppression/dictation_key.rs](../../src/suppression/dictation_key.rs))
 that exists only while the lab is on: it takes a press and its release only
-while the key is one of Hex's shortcuts or a shortcut is being recorded, and
+while the key is one of GoSpell's shortcuts or a shortcut is being recorded, and
 hands the press to the listener or to the window's recorder through the same
 `ChordCapture`. Everything else passes through, so macOS's Dictation still
-works while the key is not Hex's. Whether macOS's own Dictation still opens on
-a press Hex takes is unobserved on hardware: if it does, change its shortcut in
+works while the key is not GoSpell's. Whether macOS's own Dictation still opens on
+a press GoSpell takes is unobserved on hardware: if it does, change its shortcut in
 System Settings › Keyboard › Dictation. The microphone key is refused for the
 Screenshots shortcuts, whose keys are read at the annotated session, after this
 tap has taken the press. The decision is `MicrophoneKey::take` in
@@ -2409,7 +2409,7 @@ Checks: `the_microphone_key_needs_its_labs_toggle` in
 [rune_ui/settings_microphone_key_tests.rs](../../src/rune_ui/settings_microphone_key_tests.rs),
 `a_microphone_key_shortcut_goes_back_to_its_default_while_its_labs_toggle_is_off`
 in [app_settings/shortcut_repair.rs](../../src/app_settings/shortcut_repair.rs),
-`the_microphone_key_is_hexs_only_while_its_lab_wants_it` and
+`the_microphone_key_is_gospells_only_while_its_lab_wants_it` and
 `a_recorded_press_keeps_its_release` in
 [app_settings/microphone_key.rs](../../src/app_settings/microphone_key.rs),
 `the_microphone_key_records_from_the_listener_tap` and
@@ -2451,7 +2451,7 @@ person's transformations are left out. A section with nothing to show is left
 out; the meter still reads 0%, and the body scrolls while the window is short
 so the title and Close stay put. The dialog is built in
 [rune_ui/history/stats.rs](../../src/rune_ui/history/stats.rs) with the big
-number as `controls::STATS_NUMBER`; `hex history stats [--since] [--until]
+number as `controls::STATS_NUMBER`; `gospell history stats [--since] [--until]
 [--json]` prints the same totals ([transcript-cli.md](../transcript-cli.md)),
 and its JSON adds the typing speed, time saved, hourly series and busiest
 hour, the daily series, per-mode Output time, and a `yearly` summary
@@ -2464,10 +2464,10 @@ notifications and per-replacement counts are not built. The gates are
 pane reloads (off, it reads nothing for stats, and sums again when the entries,
 the typing speed, or the toggle changes, or once when the dialog closes because
 the stats emptied), as each entry is recorded (the rollup's write), and where
-`hex history stats` starts (off, it fails naming
-`hex labs on history-stats` before History is read), and the window's own
+`gospell history stats` starts (off, it fails naming
+`gospell labs on history-stats` before History is read), and the window's own
 setting for the button and dialog. Closing the window, opening History again
-from the menu bar or `hex window show history`, turning the switch off,
+from the menu bar or `gospell window show history`, turning the switch off,
 emptying retained history and the rollup, or leaving History closes the
 dialog, and Command-1…9 pane shortcuts wait while it is open. Off, History is
 exactly as before. The rollup is `usage.json` beside `history.json` in the
@@ -2537,7 +2537,7 @@ yet observed in a real window.
 Copy recent dictations (`recent-dictations`, issue 877, macOS): while on,
 the menu-bar menu shows a Copy Recent Dictation submenu right under Paste
 Last Dictation. It lists the five newest History entries within retention,
-newest first, skipping printed (`hex dictation stop --print`) and empty ones
+newest first, skipping printed (`gospell dictation stop --print`) and empty ones
 as Paste Last does, each on one line (whitespace and line breaks collapsed,
 cut to 48 characters with "…"). Clicking one puts its full final text on the
 clipboard as an ordinary entry; nothing is pasted. The gate is the menu's
@@ -2580,7 +2580,7 @@ pause cut leaves the clip untouched. Checks:
 `with_skip_pauses_off_the_whole_clip_is_untouched` in
 [transcription/engine.rs](../../src/transcription/engine.rs);
 `skip_pauses_is_its_own_bit_and_off_by_default` in [labs.rs](../../src/labs.rs).
-Not yet observed: a real dictation with the toggle on in Hex (the reporter
+Not yet observed: a real dictation with the toggle on in GoSpell (the reporter
 measured their own branch on an i5-8259U); the Labs page goldens need
 regenerating on Linux with the new row.
 
@@ -2589,7 +2589,7 @@ result in Settings › Output that comes out wrong. While on, the Try card
 adds a row under the sentence with a Vocabulary button, which opens the same
 Vocabulary sheet as General's Vocabulary row, and, once a sentence is typed,
 Fix this, which copies Edit with agent's prompt ending `What I want: When I
-say "<sentence>", Hex pastes "<result>". It should paste: ` for the person to
+say "<sentence>", GoSpell pastes "<result>". It should paste: ` for the person to
 finish in their agent; it reads Copied until the sentence changes or the pane
 is left. The result is what the Try card shows (corrections and built-in
 steps; scripts and rewriting run only when dictating). Nothing is saved:
@@ -2614,8 +2614,8 @@ is `model_import::in_place_on`, read when the button draws and again when the
 dialog answers, before the worker starts. Off, the picker is exactly as
 before. Checks:
 `a_file_added_in_place_is_recorded_by_path_copied_nowhere_and_forgetting_leaves_it`,
-`hex_s_own_copy_chosen_through_another_path_is_never_deleted`, and
-`an_independent_identical_file_replaces_hex_s_copy`
+`gospell_s_own_copy_chosen_through_another_path_is_never_deleted`, and
+`an_independent_identical_file_replaces_gospell_s_copy`
 in [transcription/custom_models.rs](../../src/transcription/custom_models.rs);
 `every_feature_is_off_by_default_and_round_trips` in
 [labs.rs](../../src/labs.rs). Not yet observed: a real window or a second
@@ -2628,9 +2628,9 @@ where it is…" accept Q6_K, Q5_K, and Q4_K tensors too, through the one header
 check (`custom_models::profile`, given the types this build can run:
 `gguf_header::TensorTypes`). The import's manifest records `k_quants`, and a
 saved choice of one while the lab is off stays saved while the listener runs
-the default model, with `hex status` saying "its Labs toggle is off"
-(`FallbackReason::LabsOff`, the path Parakeet Ultra uses); `hex model use` on
-one is refused and names `hex labs on k-quant-models`. Off, the rule and its
+the default model, with `gospell status` saying "its Labs toggle is off"
+(`FallbackReason::LabsOff`, the path Parakeet Ultra uses); `gospell model use` on
+one is refused and names `gospell labs on k-quant-models`. Off, the rule and its
 message are exactly F32, F16, and Q8_0. Linux and Windows never run these
 files: their Vulkan builds embed shaders only for the catalog's types, so the
 lab is not listed there and the check refuses the file either way. The tensor
@@ -2650,7 +2650,7 @@ seeing which speech models take disk space and deleting unused ones. While
 on, the speech model picker's All speech models view shows one row under its
 header (below Sort and filter models' row when that Lab is on too): "Downloaded
 models take <size>", the sum of the pinned sizes of every downloaded catalog
-model and import whose file is in Hex's own models folder (files another app
+model and import whose file is in GoSpell's own models folder (files another app
 downloaded, and imports added where they are, aren't counted), and a switch,
 "Only downloaded models". The switch keeps only the rows the picker reads as
 downloaded (catalog models, imports, and found catalog models in use) and
@@ -2663,7 +2663,7 @@ the results names it with its progress and Cancel. The gate is the picker
 picker is exactly as before. Not built: a button that shows the models folder
 in the file manager, or choosing another folder for models. Checks:
 `only_downloaded_models_keeps_the_installed_ones`,
-`the_downloaded_total_adds_up_hexs_own_files`, and
+`the_downloaded_total_adds_up_gospells_own_files`, and
 `without_downloaded_models_only_the_picker_is_unchanged` in
 [picker.rs](../../src/rune_ui/picker.rs);
 `every_feature_is_off_by_default_and_round_trips` in
@@ -2712,9 +2712,9 @@ Labs › Keep recordings on                     // labs.keep-recordings
     audio stays until it expires or History is cleared
 ```
 
-`hex history --json` names each kept recording's absolute path in `recording`
+`gospell history --json` names each kept recording's absolute path in `recording`
 while the lab is on and the file is still there; every other row omits the
-field. `hex history` reads the saved `labs.keep_recordings` switch with
+field. `gospell history` reads the saved `labs.keep_recordings` switch with
 `AppSettings::read` instead of the process's runtime switches, which that
 read-only command never sets; a managed lock and the build's audience keep it
 off as `labs::encode` does. Turning the lab off, leaving the entry or History,
@@ -2794,8 +2794,8 @@ turning it on or off applies at once. A meeting starting, recording, or
 transcribing brings the icon back, so a recording stays visible and
 stoppable from the menu bar, and it hides again once the meeting ends; an
 Annotate capture keeps its own capsule and doesn't bring it back. With the
-Dock icon off too, a launch stays quiet, and opening Hex again from Finder
-or Spotlight (the reopen Apple event) opens Settings, which has Quit Hex.
+Dock icon off too, a launch stays quiet, and opening GoSpell again from Finder
+or Spotlight (the reopen Apple event) opens Settings, which has Quit GoSpell.
 Off, the icon is exactly as before. Checks:
 `a_hidden_icon_comes_back_while_a_meeting_is_under_way` in
 [macos_rune/status_item.rs](../../src/macos_rune/status_item.rs) (macOS
@@ -2889,9 +2889,9 @@ the button on a real Mac. The row renders only in macOS builds, and the lab is
 off by default, so no golden changes.
 
 Pause from menu bar (`pause-menu`, issue 82, macOS): for people whose game or
-another app collides with Hex's shortcuts and who don't want to quit. With the
-lab on, the menu bar's action block starts with Pause Hex; pressing it pauses
-Hex and the row reads Resume Hex. A pause is runtime-only and never saved, so a
+another app collides with GoSpell's shortcuts and who don't want to quit. With the
+lab on, the menu bar's action block starts with Pause GoSpell; pressing it pauses
+GoSpell and the row reads Resume GoSpell. A pause is runtime-only and never saved, so a
 restart starts unpaused. While paused every capture shortcut is inert:
 dictation (main, second, extra, Caps Lock, and raw), Paste Last Dictation,
 Annotate and Screenshots, and the Carbon hotkeys registered under
@@ -2907,19 +2907,19 @@ Screenshots recording already under way is not cancelled by a pause: it keeps
 recording and stops from its own capsule, while only its shortcuts go inert. A
 Caps Lock dictation ignores the key while shortcuts are suspended, so a pause
 neither starts a dictation nor forces Caps Lock off. Hiding the menu bar icon
-(Labs › Hide menu bar icon) leaves no Resume Hex row at all, so with the icon
+(Labs › Hide menu bar icon) leaves no Resume GoSpell row at all, so with the icon
 hidden turning the lab off is what resumes.
 
 ```ts
 Paused     -> every capture shortcut inert; tap passes keys through
            -> the listener cancels only the dictation capture it is recording
            -> Caps Lock starts nothing and the lock stays as it is
-Resume     -> the row still reads Resume Hex: shortcuts stay suspended until
+Resume     -> the row still reads Resume GoSpell: shortcuts stay suspended until
               no key or modifier reads as held for 100 ms -> live again
 Lab off    -> resumes at once and the row hides; a restart starts unpaused
 ```
 
-Choosing Resume Hex again while a resume already waits leaves it waiting; it is
+Choosing Resume GoSpell again while a resume already waits leaves it waiting; it is
 never re-paused or restarted.
 
 Resuming does not re-arm shortcuts on a held keyboard: the listener's
@@ -2935,21 +2935,21 @@ masked out because arrow-key metadata can leave SecondaryFn set after release
 (the pause has no modifier history to tell that apart from a held Fn, so it
 always ignores the bit), the same way `recover_stale_keys_with` drops it once
 its own history says Fn is up. Only a pending resume reads the keyboard and
-takes the pause machine's lock (once); a running or paused Hex reads a lock-free
+takes the pause machine's lock (once); a running or paused GoSpell reads a lock-free
 atomic mirror instead. A pending resume logs one warning naming the held key
 code after five seconds, and the pause, resume request, and live-again
 transitions log at info. The gate, `labs::pause_menu()`, is read when the status
 item refreshes (about twice a second) and as the menu opens; `labs::apply`
-resumes at once when the lab turns off. Explicit CLI commands (`hex dictation
+resumes at once when the lab turns off. Explicit CLI commands (`gospell dictation
 start`) and the menu's own actions are not keyboard shortcuts and keep working,
-though a capture `hex dictation start` begins during a pause can only be
-finished with `hex dictation stop`: its reply still offers the shortcut, which
+though a capture `gospell dictation start` begins during a pause can only be
+finished with `gospell dictation stop`: its reply still offers the shortcut, which
 is inert until Resume.
 Checks: `pause_suspends_and_resume_only_follows_a_neutral_keyboard`,
 `a_neutral_keyboard_past_the_window_resumes`,
 `choosing_resume_while_a_resume_waits_leaves_it_waiting`,
 `a_pending_resume_reports_how_long_it_has_waited`,
-`turning_the_lab_off_resumes_at_once`, `settling_leaves_a_running_hex_alone`, and
+`turning_the_lab_off_resumes_at_once`, `settling_leaves_a_running_gospell_alone`, and
 `a_resume_ignored_while_running_does_not_suspend` in
 [shortcut_pause.rs](../../src/shortcut_pause.rs);
 `a_pause_cancels_once_and_leaves_a_command_capture_alone` in
@@ -2998,7 +2998,7 @@ screen whose `NSScreen` reports a notch, at either visible Settings position:
 Top and Bottom both grow the island, while Hidden still hides the HUD. A flat
 external display keeps honoring Top and Bottom, and with the lab off HUD
 Lab's placement stands. Linux and Windows have no row,
-`hex labs on notch-indicator` doesn't know it there, and `hex settings set
+`gospell labs on notch-indicator` doesn't know it there, and `gospell settings set
 labs.notch_indicator` answers `unsupported` (as any `labs.` switch for
 another OS now does). Checks: `ears_widen_the_notch_sideways_only`,
 `the_ears_reach_the_menu_bars_bottom_edge`, and
@@ -3012,15 +3012,15 @@ in [rune_hud/hud_placement.rs](../../src/rune_hud/hud_placement.rs);
 [control/settings.rs](../../src/control/settings.rs);
 `notch_indicator_is_its_own_bit_and_off_by_default` in
 [labs.rs](../../src/labs.rs); its frames render through the real shaders
-with `HEX_HUD_EARS=1` and `rune_hud_frames`. Not yet observed: a real
-dictation through the ears on a Mac with the lab on (`hex dev hud` drives
+with `GOSPELL_HUD_EARS=1` and `rune_hud_frames`. Not yet observed: a real
+dictation through the ears on a Mac with the lab on (`gospell dev hud` drives
 them in a debug build), and the failure glyph, which no render covers yet; the
 row renders only in macOS builds, so no golden changes.
 
 HUD height (`hud-height`, macOS only): at the Bottom position, how far
 above `visibleFrame.y` (the Dock's top or the screen's edge) the plate
 sits. `labs.hud_bottom_gap` is 0–400 points with 24 by default, so
-`hex settings set labs.hud_bottom_gap 40` raises it and 0 puts it on the
+`gospell settings set labs.hud_bottom_gap 40` raises it and 0 puts it on the
 edge; the card's slider, `{} pt` readout, and one-point Lower and Raise
 buttons set the same value. The gate, `labs::hud_bottom_gap()`, is read
 each time the HUD is placed (`Hud::place_on_pointer_screen` in
@@ -3036,8 +3036,8 @@ Placement clamps the gap so the plate's top never passes the visible
 frame's top, below the menu bar or notch, and the window never crosses
 below the visible bottom. Top, Off, HUD Lab's menu bar and
 notch placements, and Linux and Windows are unchanged. Linux and Windows
-have no row, `hex labs on hud-height` doesn't know it there, and
-`hex settings set labs.hud_height` answers `unsupported` (as any
+have no row, `gospell labs on hud-height` doesn't know it there, and
+`gospell settings set labs.hud_height` answers `unsupported` (as any
 `labs.` switch for another OS now does). Checks:
 `the_default_bottom_gap_places_exactly_as_before`,
 `a_small_bottom_gap_sits_inside_the_window`,
@@ -3053,7 +3053,7 @@ raised gap on a Mac, and the card's controls with every language.
 
 Screenshots (`screenshots`, macOS only, group Annotate): for people who
 miss CleanShot's ⌘⇧4. While on, the shortcut (`screenshots.hotkey`,
-default ⌘⇧4; the card's recorder changes it and refuses one another Hex
+default ⌘⇧4; the card's recorder changes it and refuses one another GoSpell
 shortcut uses) opens a second copy of Annotate's capture picker
 (`PickerOverlay::install_as` in
 [capture_capsule/picker.rs](../../src/rune_ui/capture_capsule/picker.rs)):
@@ -3064,11 +3064,11 @@ shortcut uses) opens a second copy of Annotate's capture picker
 ├── Space      -> window mode: a camera replaces the pointer and the window under it highlights;
 │                 Space again -> area
 ├── Click      -> the whole display ("Full screen · Click to capture")
-├── Escape     -> closes it, nothing shot; Escape reaches no other app or Hex shortcut;
+├── Escape     -> closes it, nothing shot; Escape reaches no other app or GoSpell shortcut;
 │                 a permission reply for that opening cannot reopen it or change a later pick
-└── Release    -> shot at the display's own pixels (ScreenCaptureKit), Hex's overlays,
+└── Release    -> shot at the display's own pixels (ScreenCaptureKit), GoSpell's overlays,
                   the picker, and the pointer left out
-                  ├── PNG (pHYs at the display's scale) -> "Hex Screenshot 2026-11-04 at 14.03.22.png"
+                  ├── PNG (pHYs at the display's scale) -> "GoSpell Screenshot 2026-11-04 at 14.03.22.png"
                   │   in screenshots.folder (the Desktop when unset); a second shot that second gets " (2)"
                   ├── clipboard -> the PNG and the file's URL, one pasteboard item
                   └── a card bottom right, 16 pt in, its corner concentric with the display's
@@ -3083,7 +3083,7 @@ shortcut uses) opens a second copy of Annotate's capture picker
                       a dictation while cards show -> pastes as usual, being no shot's talk-over
                       a failure -> the error tone and, for a failed save, the folder and why
                                    on Labs › Screenshots' card; there is no success sound
-                                   (Hex has no shutter cue)
+                                   (GoSpell has no shutter cue)
 Another app holds Secure Event Input -> ⌘⇧4 and the record shortcut still open the picker
                   (Carbon hotkeys while it lasts; see dictation.md's Shortcuts Under Secure Input);
                   Space and Escape don't arrive, so window mode and Escape don't work then
@@ -3105,7 +3105,7 @@ the folder, or the last save failed ("Couldn't save to ~/…: <why>"). The
 note keeps the folder that failed with the error
 (`screenshots::save_error` is an `Option<(PathBuf, String)>`, bounded at
 300 characters per message), so a folder changed since through
-`hex settings` or `settings.json` never makes the note name the wrong one.
+`gospell settings` or `settings.json` never makes the note name the wrong one.
 `take` records a shot that can't be written, a recording's save records
 its own, and the editor's Save records a shot's PNG or a trimmed
 recording's movie the same way; any later save that works clears it,
@@ -3152,7 +3152,7 @@ cards
     └── Return     -> keeps it (it's saved) and closes the card
 ```
 
-CleanShot's ⌘S saves the capture; every Hex capture is already saved,
+CleanShot's ⌘S saves the capture; every GoSpell capture is already saved,
 so ⌘S shows it in Finder instead.
 
 Every shot and recording the Lab saves, and every annotation and replay
@@ -3202,7 +3202,7 @@ malformed index is kept aside as `index.json.corrupt`.
 
 Annotations come from the captures folder itself
 ([history/annotations.rs](../../src/history/annotations.rs)), never an
-index: while the pane shows, a `hex-captures-scan` thread lists the
+index: while the pane shows, a `gospell-captures-scan` thread lists the
 `*.scrawl` bundles at most every 5 s, skips any whose name dates it past 30
 days, and reads only the `scrawl.json` files that changed since the last
 scan. Annotate's replays are written as ordinary bundles, so they list as
@@ -3213,7 +3213,7 @@ the stack reaching the top) are kept in memory. The menu bar's Restore
 Last Capture, shown while the Lab is on and dimmed until a card was
 closed, brings back the newest of them, sliding in from the right edge
 into the corner; one whose file is gone is skipped, and Move to Trash
-keeps none. They don't outlast Hex: after a relaunch the Captures pane is
+keeps none. They don't outlast GoSpell: after a relaunch the Captures pane is
 the way back to a closed card's capture.
 
 The card's overlay is the whole display under the pointer, click-through
@@ -3232,7 +3232,7 @@ card has gone shrinks a little and fades where it is (Reduce Motion: a
 cross-fade). Its tools,
 ✕ and microphone are the kit's icon buttons (a picked tool filled, as a
 capsule's expanded one is) and Copy, Save and Send to… are the kit's
-buttons, so it reads as the rest of Hex. The shot
+buttons, so it reads as the rest of GoSpell. The shot
 shows at no more than its own points. It stays until Escape or ✕:
 
 ```ts
@@ -3253,7 +3253,7 @@ editor
 │                    with the words said over it as its text ("Screenshot" without any);
 │                    picked while a dictation goes, it waits for the words
 ├── dictation (the shortcut, or the microphone under the shot, which starts and finishes
-│   one like `hex dictation toggle`)
+│   one like `gospell dictation toggle`)
 │                 -> talks over the shot: the words show under it (3 lines, then "…"),
 │                    each dictation's added; never pasted; ✕ beside them clears them
 ├── a drag on the panel's edge or the toolbar's gap -> moves it, kept on the display
@@ -3268,7 +3268,7 @@ shortcut's own dictation, on the loaded model and through the mode's
 processing; only where its text lands changes. The listener asks at a
 dictation's start whether the shot's editor is open, and at its finish hands
 the transcript to that shot instead of pasting it, as
-`hex dictation stop --print` does. The corner card never takes words: while
+`gospell dictation stop --print` does. The corner card never takes words: while
 only it shows, a dictation pastes as usual. A short, silent, cancelled, or
 failed clip lands nothing. Dictation never takes Escape, so the editor's
 Escape cancels it through the listener.
@@ -3326,7 +3326,7 @@ record shortcut  -> the toolbar: ✕  [Area | Window | Full screen ▾]  [sound 
 ├── display      -> only with two or more displays: a chevron inside the chosen Full screen
 │                   segment, or a second click on it, lists their macOS names, the one under the
 │                   pointer first chosen; picking one moves the toolbar there. Not remembered
-├── sound ▾      -> Microphone: None, Same as dictation (default), or any input but Hex Microphone
+├── sound ▾      -> Microphone: None, Same as dictation (default), or any input but GoSpell Microphone
 │                   (screenshots.record_microphone: "none", "default", or the device's name);
 │                   Record computer audio (screenshots.record_system_audio, off). The button shows
 │                   a microphone (crossed out for None) and a waveform while computer audio is on;
@@ -3365,12 +3365,12 @@ recording capsule shows the same three bars after its timer
 recording's own input's); Annotate captures and None show none. Checks:
 `a_metered_recording_makes_room_for_its_level` (capture_capsule/surface.rs);
 the stills `renders_the_toolbar` and `renders_the_recording_level` are
-`#[ignore]`d and write only with `HEX_TOOLBAR_RENDERS` /
-`HEX_CAPSULE_RENDERS`. Not yet observed: the bars on a real display with
+`#[ignore]`d and write only with `GOSPELL_TOOLBAR_RENDERS` /
+`GOSPELL_CAPSULE_RENDERS`. Not yet observed: the bars on a real display with
 a live microphone.
 
 Computer audio is ScreenCaptureKit's
-own stream audio with Hex's own sounds left out, written beside the movie
+own stream audio with GoSpell's own sounds left out, written beside the movie
 as `system.m4a` under the Screen Recording grant the recording already
 has. When the movie saves, `scrawl-helper mux` mixes the microphone
 (`audio.wav`, 16 kHz mono, skipped when it is all silence) and computer
@@ -3388,7 +3388,7 @@ record shortcut  -> the toolbar (above); Area and Window use the same picker as 
 │                         as the movie does; click-through, never focused, left out of the
 │                         movie unless capture.show_overlays_in_recordings; Screen dims nothing
 ├── record shortcut again (or the capsule's stop) -> stops; the capsule folds unless it failed
-│                   ├── the movie saves itself: "Hex Recording 2026-11-04 at 14.03.22.mp4" in
+│                   ├── the movie saves itself: "GoSpell Recording 2026-11-04 at 14.03.22.mp4" in
 │                   │   screenshots.folder (the Desktop when unset), " (2)" on a clash, as a shot's
 │                   │   PNG does; a clone of Annotate's copy, so instant on one volume. A failed save
 │                   │   plays the error tone, the card shows Annotate's copy, and Labs › Screenshots'
@@ -3407,7 +3407,7 @@ record shortcut  -> the toolbar (above); Area and Window use the same picker as 
                     │               is remembered (screenshots.export_size) and saved off the UI thread
                     ├── Copy (⌘C) -> the movie FILE on the clipboard (pastes as an attachment in
                     │               Slack, Messages, Finder): the saved movie itself when nothing was
-                    │               cut at Original, else a copy in the temp folder's hex-screenshots
+                    │               cut at Original, else a copy in the temp folder's gospell-screenshots
                     ├── Export   -> the native save panel, above the editor, in the folder Export
                     │               last saved to (screenshots.export_folder; screenshots.folder at
                     │               first), offering the movie's own name, MPEG-4 only; Cancel
@@ -3464,8 +3464,8 @@ an Annotate capture's movie  -> 1280 px long edge (2560 for a display), system H
 // check: save_offers_the_recordings_own_name_and_a_cancel_changes_nothing, the_path_chosen_gets_the_recording (editor/tests.rs)
 // check: a_save_replaces_the_file_chosen_and_leaves_nothing_beside_it (screenshots/save.rs)
 // check: the_dim_waits_for_the_screen_and_ends_with_its_recording, only_an_area_or_a_window_is_dimmed (screenshots/dim.rs)
-// stills: HEX_CAPSULE_SNAPS writes recording-dim-{area,window}-{light,dark}.png (capture_capsule/tests/motion.rs);
-//         HEX_SCREENSHOT_SNAPS writes editor-recording-{saving,saved}-*.png (editor/tests.rs).
+// stills: GOSPELL_CAPSULE_SNAPS writes recording-dim-{area,window}-{light,dark}.png (capture_capsule/tests/motion.rs);
+//         GOSPELL_SCREENSHOT_SNAPS writes editor-recording-{saving,saved}-*.png (editor/tests.rs).
 //         Not observed on a real Mac: the save panel itself, and the dim over a real window being dragged
 // check: hevc_records_native_pixels_up_to_the_hardware_limit (crates/capture-core/src/plan.rs)
 // check: writes_a_tagged_hevc_movie_from_frames (crates/capture-core/src/video_writer.rs)
@@ -3498,40 +3498,40 @@ on a Mac, its card, trimming and saving a movie, and a session receiving
 a sent recording, or playback with sound. Left to do: no audio-only or GIF
 export, and the recording shows no countdown.
 
-The shortcut is taken in Hex's session tap (`screenshots::key`, called
+The shortcut is taken in GoSpell's session tap (`screenshots::key`, called
 from [suppression.rs](../../src/suppression.rs) before the listener's
 own handling), never by the listener, and its press and release stay with
 it. With the lab off the tap returns at once and nothing is made: no
 picker window, no thumbnail, no work. Screen Recording is Annotate's: a
 press without it shows the same permission helper instead of the picker.
-Restart relaunches Hex; when the grant arrives without a relaunch, the
+Restart relaunches GoSpell; when the grant arrives without a relaunch, the
 helper's Ready button reopens the Screenshots picker in the mode the
 shortcut asked for — a shot, or a recording — never Annotate's whole-screen
 recording. A record pick that starts a clip (`CaptureCommand::Clip`) reports
 the same way, and a clip that fails after starting keeps that picker origin
 for its helper. Annotate's own helper still records once it's ready.
 
-The picker is a non-key overlay, so Hex is usually not the frontmost app
-while it shows, and macOS ignores a background app's cursor. Hex builds
+The picker is a non-key overlay, so GoSpell is usually not the frontmost app
+while it shows, and macOS ignores a background app's cursor. GoSpell builds
 Rune with `macos-background-cursor`, which sets WindowServer's private
 `SetsCursorInBackground` property so the picker's crosshair (and Window
 mode's hidden arrow under the drawn camera) shows over any app. It is a
-private API, acceptable because Hex isn't sold through the App Store; if a
+private API, acceptable because GoSpell isn't sold through the App Store; if a
 macOS release drops the property, Rune skips it and the cursor shows only
-while Hex is frontmost. Checks: `the_badge_stays_on_the_display` in
+while GoSpell is frontmost. Checks: `the_badge_stays_on_the_display` in
 [capture_capsule/picker.rs](../../src/rune_ui/capture_capsule/picker.rs).
 Not yet observed: the cursor over another frontmost app on a real Mac.
 
 macOS matches its own screenshot shortcuts (Keyboard Shortcuts ›
 Screenshots, ⌘⇧4 among them) in the window server before any app's event
-tap, so while that system shortcut is on, Hex never sees the press. Hex
+tap, so while that system shortcut is on, GoSpell never sees the press. GoSpell
 reads `com.apple.symbolichotkeys` (`screenshots::system_shortcut`) and,
-when the system takes Hex's chord, the card says so with Open Keyboard
+when the system takes GoSpell's chord, the card says so with Open Keyboard
 Settings, which opens that pane; turning macOS's shortcut off, or
-choosing another chord, hands it to Hex.
+choosing another chord, hands it to GoSpell.
 
-`hex screenshot` shoots the whole display under the pointer and prints the
-file's path; `hex screenshot --pick` opens the picker instead
+`gospell screenshot` shoots the whole display under the pointer and prints the
+file's path; `gospell screenshot --pick` opens the picker instead
 ([cli.md](../cli.md)). With the lab off it answers `disabled`; Linux and
 Windows answer `unsupported`.
 
@@ -3565,7 +3565,7 @@ velocity) and the handoffs between card and editor in
 [screenshot_thumbnail/editor/zoom/tests.rs](../../src/rune_ui/screenshot_thumbnail/editor/zoom/tests.rs)
 (`the_shot_never_jumps_between_the_card_and_the_editor`, a close mid-zoom,
 a gone card, a new shot mid-zoom; `zoom_frames` renders the clips with
-`HEX_SCREENSHOT_MOTION=<dir>` and does nothing without it);
+`GOSPELL_SCREENSHOT_MOTION=<dir>` and does nothing without it);
 `screenshots_is_its_own_bit_and_off_by_default` in [labs.rs](../../src/labs.rs);
 the index's order, reopen, owner-only modes, search, window, caps, forgetting,
 words, and a malformed file in [history/captures.rs](../../src/history/captures.rs);
@@ -3574,7 +3574,7 @@ the annotation listing's window, order, expired movies, search, and rescan in
 the Captures pane (with an annotation row) as the `captures` golden (light and dark) and
 `--scene captures-empty`;
 its card renders as `--scene mac-labs-screenshots`; the card's entrance
-and the stack's motion are `thumbnail_frames` (`HEX_SCREENSHOT_FRAMES`
+and the stack's motion are `thumbnail_frames` (`GOSPELL_SCREENSHOT_FRAMES`
 writes them at 60 fps).
 Not yet observed: the card keys and right-click menu on a real Mac, the
 Captures pane over a real index (its thumbnails decoding, a drag out, Copy,
@@ -3596,7 +3596,7 @@ at run time through Objective-C, so macOS 26 and earlier neither link nor
 list it) while both `labs.annotate_replay` and `capture.enabled` are on and
 Screen Recording is granted. Because an active `SCStream` feeds `replayd`,
 macOS shows its purple screen-recording indicator the whole time the lab is
-on, which the Labs store card states plainly. `hex capture replay` (or a tap
+on, which the Labs store card states plainly. `gospell capture replay` (or a tap
 on `capture.replay_hotkey`, unbound by default and recordable in
 Settings › Annotate) exports the last 15 seconds into a normal
 `.scrawl` bundle; holding `capture.replay_hotkey` (≥ 300 ms) freezes the clip
@@ -3628,7 +3628,7 @@ best-effort: a failed stage keeps its input and the call still succeeds.
 
 An absent parameter leaves the response byte-for-byte as before. Any other
 value, or a repeated parameter, is `400 invalid-request`. A process with no
-installed processor, such as `hex service` or `--embedded`, answers `409
+installed processor, such as `gospell service` or `--embedded`, answers `409
 processing-unavailable` even while the lab is off; with a processor installed
 and the lab off, `process` answers `403 processing-disabled`. These are decided
 before `/transcriptions` reads the audio body and before `/finish` finishes
@@ -3638,9 +3638,9 @@ the slot answers `429 queue-full`; the slot is released when the run ends,
 fails, or is interrupted. `GET /capabilities` always includes `outputProcessing`,
 true only with the lab on and a processor installed. `API_VERSION` stays `2`.
 
-Processing stops at its next stage boundary when Hex quits: the API's shutdown
+Processing stops at its next stage boundary when GoSpell quits: the API's shutdown
 flag is passed through as the pipeline's cancellation flag. On macOS, custom
-transformations are skipped until Hex finishes setup and its listener starts,
+transformations are skipped until GoSpell finishes setup and its listener starts,
 because they use the recognition loop's transformation client; this is
 best-effort like every other processing stage, so the response still succeeds
 with the text the stages before them produced.
@@ -3654,7 +3654,7 @@ already update, so edits and the personal-commands approval gate apply
 without a restart, and processing keeps its existing deadlines. The seam is
 `Processing` in [local_api/processing.rs](../../src/local_api/processing.rs),
 passed through `LocalApiOptions` like `control` and `dictation_control`.
-`hex service` installs none. Checks: `local_api::processing` route tests cover
+`gospell service` installs none. Checks: `local_api::processing` route tests cover
 the 409 for a missing processor and the 403 before the body, invalid and
 repeated values, the aliases, `429 queue-full` while one run holds the slot,
 `processed` present with the existing fields unchanged, absent responses, and
@@ -3688,7 +3688,7 @@ speech as `500 transcription-failed`, with or without timings.
 An unknown value, or a repeated parameter, is `400 invalid-request`. With the
 lab off, `segment` and `word` answer `403 timestamps-disabled` before the
 audio body is read, and `none` is unaffected. The running app reads the switch
-live; a `hex service` process without the app reads the saved
+live; a `gospell service` process without the app reads the saved
 `labs.api_timestamps` once (the embedded helper as it starts), so a
 change reaches a running helper after it restarts.
 
@@ -3712,15 +3712,15 @@ offsets; `api_timestamps_is_its_own_bit_and_off_by_default` and
 [labs.rs](../../src/labs.rs) cover the switch. Not observed: a real model
 answering with times, on any OS, and the macOS `/transcriptions` path.
 
-Transcribe files (`transcribe-files`) graduated: `hex transcribe <file>`
+Transcribe files (`transcribe-files`) graduated: `gospell transcribe <file>`
 always works now, reads common audio and video formats, and starts its own
-embedded service when Hex isn't running ([control-cli.md](control-cli.md)).
-`hex labs on|off transcribe-files` still answers with that and exits 0
+embedded service when GoSpell isn't running ([control-cli.md](control-cli.md)).
+`gospell labs on|off transcribe-files` still answers with that and exits 0
 (`labs::GRADUATED`); the saved `labs.transcribe_files` key is ignored.
 
 Meeting platform icons (`meeting-platform-icons`, issue 1290) graduated:
 each recording in the Meetings list always shows its call service's icon, or
-a neutral one ([meetings.md](meetings.md)). `hex labs on|off
+a neutral one ([meetings.md](meetings.md)). `gospell labs on|off
 meeting-platform-icons` still answers with that and exits 0
 (`labs::GRADUATED`); the saved `labs.meeting_platform_icons` key is ignored.
 
@@ -3737,7 +3737,7 @@ Separate notes file (`meetings.export.descriptive_filenames`,
 `meetings.export.notes_file`), shown once Meetings is on. The one-time
 `meeting-labs-settings` migration copies each old switch into its setting and
 keeps a chosen audio window only where Expire meeting audio separately was on.
-`hex labs on|off` for any of the ten answers where it went and exits 0
+`gospell labs on|off` for any of the ten answers where it went and exits 0
 (`labs::GRADUATED`); the old `labs.*` keys are read and ignored.
 
 Normal features, not Labs: dictation, Annotate (every build; its own pane
@@ -3747,11 +3747,11 @@ vocabulary list itself (rewriting and search), and Linux's Terminal paste.
 
 ## Features
 
-- Agent tools for captures: `hex annotate inspect`, `zoom`, `frames`, and
+- Agent tools for captures: `gospell annotate inspect`, `zoom`, `frames`, and
   `skill` read a capture for a coding agent (every OS; off by default,
-  `labs.annotate_agent_tools`, in the Annotate group). They run in the `hex`
-  process itself, never over the running Hex's control socket, so they work
-  with Hex closed; they only read the bundle and decode its video, and write
+  `labs.annotate_agent_tools`, in the Annotate group). They run in the `gospell`
+  process itself, never over the running GoSpell's control socket, so they work
+  with GoSpell closed; they only read the bundle and decode its video, and write
   nothing but `<bundle>/zoom/`. `inspect [<capture>]` prints `summary.md`;
   `--marks` lists every mark as `#2 ✎② 0:09 circled · m2` (or `No marks`), and
   `--json` prints `scrawl.json` pretty (`--marks --json`: the marks as JSON).
@@ -3762,41 +3762,41 @@ vocabulary list itself (rewriting and search), and Linux's Terminal paste.
   the mark's line first. `frames [<capture>] --from <M:SS|secs> --to
   <M:SS|secs> [--fps 4]` writes one PNG per frame under
   `<bundle>/zoom/range-*/` and prints each path. `skill` prints the
-  `skills/hex-annotate/SKILL.md` guide this Hex ships, which an agent installs
-  with `npx skills add anomalyco/hex --skill hex-annotate`. Every command
-  resolves its capture as `hex capture list` does (bundle name, path, or
+  `skills/gospell-annotate/SKILL.md` guide this GoSpell ships, which an agent installs
+  with `npx skills add goml/gospell --skill gospell-annotate`. Every command
+  resolves its capture as `gospell capture list` does (bundle name, path, or
   `latest`, in `capture.folder`) and refuses an unknown one with
   `not-found`. While the lab is off all four print how to turn it on and exit
   1.
 - Install agent skill from Annotate: the Annotate pane gains an **Agents**
   section (every OS; off by default, `labs.annotate_agent_install`, in the
   Annotate group). Off, the pane is exactly as before. One row per coding
-  agent says whether its folder exists and whether it already has this Hex's
+  agent says whether its folder exists and whether it already has this GoSpell's
   skill: Claude Code at `$CLAUDE_CONFIG_DIR` or `~/.claude` plus
-  `skills/hex-annotate/SKILL.md`, Codex at
-  `~/.agents/skills/hex-annotate/SKILL.md` (found with `~/.codex` or
+  `skills/gospell-annotate/SKILL.md`, Codex at
+  `~/.agents/skills/gospell-annotate/SKILL.md` (found with `~/.codex` or
   `$CODEX_HOME`; `$CODEX_HOME/skills` is the legacy place),
   OpenCode at `$XDG_CONFIG_HOME` or `~/.config` plus
-  `opencode/skills/hex-annotate/SKILL.md`, and Pi at
-  `~/.pi/agent/skills/hex-annotate/SKILL.md` (`$PI_CODING_AGENT_DIR` or
+  `opencode/skills/gospell-annotate/SKILL.md`, and Pi at
+  `~/.pi/agent/skills/gospell-annotate/SKILL.md` (`$PI_CODING_AGENT_DIR` or
   `~/.pi`). `npx skills` writes Codex and Pi skills to
   `~/.agents/skills`, so a copy there counts for either: read by content,
   never duplicated, and an outdated shared copy is the one installing updates.
   A found agent without the skill reads Not installed and starts checked; a
   different file reads Update available. **Install** writes the same embedded
-  `skills/hex-annotate/SKILL.md` that `hex annotate skill` prints into each
+  `skills/gospell-annotate/SKILL.md` that `gospell annotate skill` prints into each
   checked agent's folder — directories created, a staging file renamed into
   place, no other file touched — and a not-found agent has no switch, is never
   checked, and gets no folder; Install is disabled while nothing is checked.
-  A symlinked `SKILL.md` or `hex-annotate` folder is managed elsewhere: the
+  A symlinked `SKILL.md` or `gospell-annotate` folder is managed elsewhere: the
   row says Managed elsewhere, it has no switch, and nothing is written through
-  the link. Beside it, `npx skills add anomalyco/hex --skill
-  hex-annotate` has Copy, for people who manage skills themselves. On macOS,
-  **Command-line tool** links `hex` (this app's executable) into
+  the link. Beside it, `npx skills add goml/gospell --skill
+  gospell-annotate` has Copy, for people who manage skills themselves. On macOS,
+  **Command-line tool** links `gospell` (this app's executable) into
   `/opt/homebrew/bin` or `/usr/local/bin` when one exists and is writable,
-  else `~/.local/bin`, and never replaces a `hex` another program owns; a
-  link whose target is gone counts only when it names a Hex app, a Hex running
-  from App Translocation refuses to link and says to move Hex to Applications
+  else `~/.local/bin`, and never replaces a `gospell` another program owns; a
+  link whose target is gone counts only when it names a GoSpell app, a GoSpell running
+  from App Translocation refuses to link and says to move GoSpell to Applications
   first, and a `~/.local/bin` link `$PATH` doesn't name says so. While Labs ›
   Agent tools for captures is off, a note names that switch for the skill's
   `zoom`/`inspect`/`frames` commands.
@@ -3824,7 +3824,7 @@ vocabulary list itself (rewriting and search), and Linux's Terminal paste.
   updated 2", "Updated 2 terms", "Added 3 terms, updated 2, skipped 1", "No
   new terms in that file" only when nothing changed at all, "No terms found
   in that file", or what failed.
-  Export opens a save dialog named `hex-vocabulary.csv` (starting in
+  Export opens a save dialog named `gospell-vocabulary.csv` (starting in
   Downloads), appends `.csv` only when the name has no extension and
   `<name>.csv` doesn't already exist, and writes the header plus one row per
   entry, its spellings joined by ", " and two empty cells, quoting what needs
@@ -3864,10 +3864,10 @@ vocabulary list itself (rewriting and search), and Linux's Terminal paste.
   `labs.live_chapters` (off by default). The gate,
   `labs::live_chapters()`, is where the work starts: the recorder's chapter worker, recording
   chapters in the manifest, and the boundary pass after Stop.
-- Run setup again (not a feature toggle; every build): replays Hex's one
+- Run setup again (not a feature toggle; every build): replays GoSpell's one
   onboarding, the first-run story every new install gets
   ([setup.tour](README.md)). Labs' **Run setup again** and
-  `hex onboarding reset` (macOS control socket, the Linux service socket,
+  `gospell onboarding reset` (macOS control socket, the Linux service socket,
   and a named event on Windows) forget that onboarding finished
   (`desktop::onboarding::reset_at`) and open it from the start without
   touching settings, history, models, or permissions; ready pages pass at
@@ -3886,7 +3886,7 @@ vocabulary list itself (rewriting and search), and Linux's Terminal paste.
   live stream no partial slot and never reads the model's text between
   feeds, and no host adds the line's overlay. Each dictation's `finished
   live stream` line in process.log counts its text changes (`partials`);
-  `RUST_LOG=hex=debug` adds a `live text` line per change with the audio
+  `RUST_LOG=gospell=debug` adds a `live text` line per change with the audio
   fed and the word counts, never the words. Under its description, its card
   adds a line when no words can show: the selected model's catalog
   `ModelDefinition::streams` is false (the line names the streaming models
@@ -3959,19 +3959,19 @@ vocabulary list itself (rewriting and search), and Linux's Terminal paste.
   (`linux::paste::wayland_offers("zwp_input_method_manager_v2")`); without
   that global (GNOME) it stays listed, disabled while off, with a line under
   its description that this desktop offers no input method it needs and
-  dictations paste normally, and `hex labs` prints the same note in its list
-  and after `hex labs on live-typing` (never refusing the toggle). An
+  dictations paste normally, and `gospell labs` prints the same note in its list
+  and after `gospell labs on live-typing` (never refusing the toggle). An
   organization's managed lock keeps its own note, and the CLI adds none. It is
   read at the hold threshold, or at the Toggle press, never for a Local API
   dictation, `/streams`, or Voice Action; the final text still goes through
   Output's processing, and History and Paste Last update as they do for a
-  paste. Hex creates the input method when the capture becomes intentional
+  paste. GoSpell creates the input method when the capture becomes intentional
   (the hold threshold, or at once in Toggle) and destroys it at Finish or
   Cancel, including post-release processing, so short taps and chords create
-  none and another input method keeps the seat while Hex is idle. A newer
+  none and another input method keeps the seat while GoSpell is idle. A newer
   capture's Begin takes over from an older job, which then pastes. A CPU
   engine or a model that cannot stream shows no provisional words while
-  speaking; the final text still commits through the input method. Hex's own
+  speaking; the final text still commits through the input method. GoSpell's own
   first-run practice field on Linux is an ordinary focused field, so it
   receives the preedit and commit too while Live typing is on. It falls back
   to today's paste when the compositor has no
@@ -3983,7 +3983,7 @@ vocabulary list itself (rewriting and search), and Linux's Terminal paste.
   pastes even if the compositor never answered, while a commit the owner
   already claimed is given up to 750 ms and is never pasted over. After an
   abandoned Finish, Live typing starts no new captures and pastes instead
-  until Hex restarts; a session that had already begun still finishes and
+  until GoSpell restarts; a session that had already begun still finishes and
   cancels. The claim is one atomic Pending → Committing or
   Pending → Abandoned change, so only one side wins. A residual Wayland race
   can still let a `done` event arrive after the serial is read; that
@@ -4036,7 +4036,7 @@ vocabulary list itself (rewriting and search), and Linux's Terminal paste.
   ```
 
   Every group starts folded; opening a story, from the list or a link,
-  unfolds the groups above it, and folds hold until Hex quits. The list
+  unfolds the groups above it, and folds hold until GoSpell quits. The list
   keeps only its own keys (arrows, Return, J/K, a story's trigger letters,
   Tab, Esc, `/` to filter) and ⇧⌘D; every other key, ⌘-chords and digits
   included, reaches the open story. Each
@@ -4045,7 +4045,7 @@ vocabulary list itself (rewriting and search), and Linux's Terminal paste.
   beside the playground's columns has room. Off, no shortcut, menu item,
   sidebar item, or link opens it.
   Headless renders take `--playground [story]` while it is on, e.g.
-  `hex app -- --snap out.png --playground "Window/General/Settings"`. Checks: `every_scene_but_live_has_a_path_under_a_group`,
+  `gospell app -- --snap out.png --playground "Window/General/Settings"`. Checks: `every_scene_but_live_has_a_path_under_a_group`,
   `the_playgrounds_keys_work_with_a_story_open`, and
   `a_scene_opened_from_the_list_hears_command_digits` in
   [playground.rs](../../src/rune_ui/playground.rs).
@@ -4069,9 +4069,9 @@ vocabulary list itself (rewriting and search), and Linux's Terminal paste.
   On macOS a story opens from a link or the CLI:
 
   ```ts
-  open 'hex://story/prototypes/hud/notch?variant=pulse-fail&play=1'   // hex-test:// in Hex Test.app
-  open 'hex://story/prototypes/capture-capsule/suggestions?variant=toast'
-  hex window story Prototypes/HUD/Processing [--variant 2] [--play]
+  open 'gospell://story/prototypes/hud/notch?variant=pulse-fail&play=1'   // gospell-test:// in GoSpell Test.app
+  open 'gospell://story/prototypes/capture-capsule/suggestions?variant=toast'
+  gospell window story Prototypes/HUD/Processing [--variant 2] [--play]
   ├── the window opens on the story: its path, name, or slug, `/` or `-` between groups and name
   ├── a link from before the groups nested (`hud/processing`, `General/mac-settings`, `mac-settings`) → that story now
   ├── variant=<n|name> → that variant
@@ -4088,14 +4088,14 @@ vocabulary list itself (rewriting and search), and Linux's Terminal paste.
   playground.rs open every HUD and capsule link headlessly. The URL
   handler and the replay have no automated end-to-end check.
 - Voice Filter: the Voice Filter pane (macOS and Linux), the only home of
-  the Hex Microphone (macOS's driver, Linux's PipeWire virtual source), its
+  the GoSpell Microphone (macOS's driver, Linux's PipeWire virtual source), its
   filter modes, and Try it
-  ([Hex Microphone](README.md#experimental-hex-microphone-and-voice-filter)).
-  Its toggle is `experimental.hex_microphone` (off by default). Off, the pane
-  is hidden and Hex neither reads the driver's status nor starts its sink
+  ([GoSpell Microphone](README.md#experimental-gospell-microphone-and-voice-filter)).
+  Its toggle is `experimental.gospell_microphone` (off by default). Off, the pane
+  is hidden and GoSpell neither reads the driver's status nor starts its sink
   supervisor. While the driver is installed the Voice Filter runs (apps using
-  the Hex Microphone keep their audio), its pane shows, and its Labs row is
-  on and disabled: "On while the Hex Microphone driver is installed.
+  the GoSpell Microphone keep their audio), its pane shows, and its Labs row is
+  on and disabled: "On while the GoSpell Microphone driver is installed.
   Uninstall the driver in Voice Filter to turn it off." Checks:
   `voice_filter_shows_only_while_its_labs_toggle_is_on` and
   `an_installed_driver_keeps_the_voice_filter_on` in
@@ -4149,10 +4149,10 @@ vocabulary list itself (rewriting and search), and Linux's Terminal paste.
   live stream's text, so the text arrives after release with a little more
   latency. Its read bounds and extraction are above, under "Words on
   screen".
-- Learn from corrections (macOS): after a dictation is pasted, Hex watches
+- Learn from corrections (macOS): after a dictation is pasted, GoSpell watches
   only the field it pasted into, about every 100 ms for up to 5 minutes. The
   first read retries for up to a second until the app shows the pasted text,
-  and the comparison uses what Hex actually inserted, not the transcript. It
+  and the comparison uses what GoSpell actually inserted, not the transcript. It
   stops on a focus change, an empty or vanished field, a newer paste, or the
   timeout; the lab turned off stops it too and learns nothing, and a read a
   newer paste overtook is discarded. It adds up to 5 name-like corrected
@@ -4164,7 +4164,7 @@ vocabulary list itself (rewriting and search), and Linux's Terminal paste.
   terms already in Vocabulary are skipped. Only a real Paste starts a watch
   (never a copy, a Service or Print output, or a YOLO send); other pastes
   into an app (Paste Last, a meeting turn, a capture's sheet) still move the
-  paste generation. Each learned term is saved as `hex vocabulary add` saves
+  paste generation. Each learned term is saved as `gospell vocabulary add` saves
   it, which an open window adopts. The one logged event holds the term count
   only. Nothing leaves the Mac. Off by default
   (`labs.learn_from_corrections`).
@@ -4178,7 +4178,7 @@ vocabulary list itself (rewriting and search), and Linux's Terminal paste.
   Annotate's capture sends use an OpenCode service running inside the default
   WSL distribution. With the lab on, a WSL service that answers is used ahead
   of a Windows one; the Windows service is used when WSL answers nothing. WSL2
-  forwards loopback, so Hex dials the registered URL as usual; what it cannot
+  forwards loopback, so GoSpell dials the registered URL as usual; what it cannot
   see without this lab is the registration, which lives in the distribution's
   home.
 
@@ -4194,8 +4194,8 @@ Settings › Labs › OpenCode in WSL on            // labs.opencode_in_wsl
 │   │   on older Windows 10 (at most 1 MiB) -> the line whose uid is DefaultUid -> its (one trailing / trimmed) home
 │   ├── only the default distribution is opened; opening it can start the WSL VM too
 │   ├── state dir -> <home>/.local/state/opencode; same service.json order, cap, loopback, /api/info, password
-│   ├── found -> Hex's workspace is created at <home>/.local/share/hex/opencode once, and every
-│   │   x-opencode-directory names the Linux path <home>/.local/share/hex/opencode
+│   ├── found -> GoSpell's workspace is created at <home>/.local/share/gospell/opencode once, and every
+│   │   x-opencode-directory names the Linux path <home>/.local/share/gospell/opencode
 │   └── the cache is dropped when its state dir can't be read, when the default distribution or
 │       uid changes, and on the next search that runs with the lab off
 ├── one lookup runs at a time on a shared helper thread, with its own WSL_LOOKUP_CAP (3 s) budget.
@@ -4214,7 +4214,7 @@ Settings › Labs › OpenCode in WSL on            // labs.opencode_in_wsl
 │       X:\a\b -> /mnt/x/a/b, following [automount] root = (one trailing /, else /mnt/);
 │       enabled = false, a UNC share, or a relative path leaves the Windows text. The
 │       summary header keeps the Windows path
-└── Labs off -> nothing reads the registry or any WSL path; Hex is exactly as before
+└── Labs off -> nothing reads the registry or any WSL path; GoSpell is exactly as before
 ```
 
 The pure parts (the passwd line for a uid, a Linux home to its UNC path, the
@@ -4228,7 +4228,7 @@ budget is refused before any registry or UNC read. A scoped request to a WSL
 service that fails (a transport error or 404) forgets the workspace, so the
 next request retries `create_dir_all`.
 
-Limits: `XDG_STATE_HOME` set inside WSL is ignored (Hex always reads
+Limits: `XDG_STATE_HOME` set inside WSL is ignored (GoSpell always reads
 `<home>/.local/state/opencode`); a home that isn't in `/etc/passwd`, such as
 one from LDAP or SSSD, isn't found; Annotate's recorded-at line maps only
 Windows drive paths, so a UNC or relative capture folder keeps its Windows
@@ -4316,15 +4316,15 @@ Bluetooth headphones and the lab on, and the Linux and Windows backends on a
 real desktop.
 
 Transcribe dropped audio (`drop-transcribe`, every OS): while on, a file
-dropped anywhere on Hex's window, or chosen with the lab card's "Transcribe a
+dropped anywhere on GoSpell's window, or chosen with the lab card's "Transcribe a
 file…", joins one queue the window runs one file at a time.
 
 The drop target is the window root
 ([rune_ui/drop_transcribe.rs](../../src/rune_ui/drop_transcribe.rs)):
 `on_drop_files` takes the files whose extension this build reads
 (`file_transcript::EXTENSIONS`), `on_drop_hover` shows the hint over the whole
-window while a file drag is on it, and a drag with nothing Hex reads says what
-it reads instead ("Hex can transcribe WAV, MP3, AAC, M4A, MP4, MOV, AIFF,
+window while a file drag is on it, and a drag with nothing GoSpell reads says what
+it reads instead ("GoSpell can transcribe WAV, MP3, AAC, M4A, MP4, MOV, AIFF,
 CAF, FLAC, OGG, Opus, WebM, or MKV files") through `on_drop_rejected_hover`,
 and again as a toast if it is dropped. With the lab off the window sets no
 drop handler at all, so nothing of this draws or runs. A file's toast shows
@@ -4339,7 +4339,7 @@ reveals its Markdown, so a preview or headless window records it instead of
 opening a file manager); a failure shows the `FileTranscriptError`'s own
 words. Both dismiss with their ✕, and the next file starts on its own.
 
-The queue runs on one named worker per file (`hex-transcribe-file`) with the
+The queue runs on one named worker per file (`gospell-transcribe-file`) with the
 dictation model and language in use when the file starts, so a drop never
 waits on the window; the window wakes on the worker's channel, as History's
 Transcribe again does. Files keep their order and exactly one worker runs at a
@@ -4360,7 +4360,7 @@ that worker, never the window thread. A file's kind is checked against this
 build's extensions before a model loads, and every container decodes through
 the shared pieces reader
 ([transcription/pieces.rs](../../src/transcription/pieces.rs)): a WAV is read
-whole once before the model loads, as `hex transcribe` does, so a truncated or
+whole once before the model loads, as `gospell transcribe` does, so a truncated or
 corrupt file is refused up front, and compressed audio decodes once, as it
 transcribes, with damage found later named where it is (`12:34` into the
 file). The drop target and the card's dialog offer the same common
@@ -4408,7 +4408,7 @@ Checks: `a_dropped_file_does_nothing_with_the_lab_off`,
 `turning_the_lab_off_cancels_the_running_file_and_waits_for_it`,
 `a_cancel_after_the_last_check_still_says_saved`,
 `a_file_of_unknown_length_says_transcribing_without_a_percentage`,
-`a_file_hex_cannot_read_is_refused`,
+`a_file_gospell_cannot_read_is_refused`,
 `a_saved_transcript_says_where_it_is_and_dismisses`,
 `the_labs_card_offers_a_file_choice_only_with_its_lab_on`, and
 `the_drop_surface_shows_nothing_at_rest` in

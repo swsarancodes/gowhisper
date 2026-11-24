@@ -1,6 +1,6 @@
 //! Rows only some OSes show, chosen by
 //! [`Capabilities`](super::platform::Capabilities): macOS's permission
-//! warnings, Meetings › Settings, Show Dock icon, and the Hex Microphone
+//! warnings, Meetings › Settings, Show Dock icon, and the GoSpell Microphone
 //! driver row Voice Filter shows; Launch at login on macOS and Windows. Their
 //! state is [`PlatformState`](super::platform::PlatformState)
 //! data and their actions are [`PlatformRequest`]s.
@@ -20,14 +20,14 @@ use crate::app_settings::{
     AppSettings, CALENDAR_LEAD_MINUTES, HotkeyBinding, MeetingRetention, MeetingSummaries,
     ModifierSide,
 };
-use crate::audio::hex_microphone::DriverActionState;
+use crate::audio::gospell_microphone::DriverActionState;
 use crate::calendar::{CalendarAccess, CallProvider};
 use crate::desktop::i18n::{tr, tr_fill, tr_named};
 use crate::desktop::onboarding::{PermissionAction, PermissionKind, PermissionWarning};
 use crate::labs::Feature;
 
 /// A permission's row key, its name as System Settings lists it, and what
-/// Hex cannot do without it.
+/// GoSpell cannot do without it.
 fn permission_copy(
     kind: PermissionKind,
     accessibility_renamed: bool,
@@ -36,12 +36,12 @@ fn permission_copy(
         PermissionKind::Microphone => (
             "permission-microphone",
             tr("Microphone"),
-            tr("Hex cannot record dictation until microphone access is restored."),
+            tr("GoSpell cannot record dictation until microphone access is restored."),
         ),
         PermissionKind::Accessibility => (
             "permission-accessibility",
             accessibility_name(accessibility_renamed),
-            tr("Hex cannot recognize the dictation shortcut or paste into other apps."),
+            tr("GoSpell cannot recognize the dictation shortcut or paste into other apps."),
         ),
         PermissionKind::SystemAudio => (
             "permission-system-audio",
@@ -95,11 +95,11 @@ pub(super) fn permissions_section(ui: &Ui, p: Paint) -> Option<El> {
                     p,
                     key,
                     name,
-                    Some(tr("Turns on when Hex restarts")),
+                    Some(tr("Turns on when GoSpell restarts")),
                     button(
                         p,
                         &format!("{key}-restart"),
-                        tr("Restart Hex"),
+                        tr("Restart GoSpell"),
                         ButtonKind::Secondary,
                         |ui: &mut Ui, _| {
                             ui.ask(PlatformRequest::Permission(PermissionAction::Restart))
@@ -110,7 +110,7 @@ pub(super) fn permissions_section(ui: &Ui, p: Paint) -> Option<El> {
             let stale =
                 warning.kind == PermissionKind::Accessibility && ui.platform.stale(warning.kind);
             let description = if stale {
-                tr("An older Hex entry can keep this off")
+                tr("An older GoSpell entry can keep this off")
             } else {
                 description
             };
@@ -140,9 +140,9 @@ fn paste_permission(ui: &Ui, p: Paint) -> Option<El> {
         .paste
         .filter(|paste| *paste != PasteAccess::Allowed)?;
     let description = if paste == PasteAccess::Declined {
-        tr("Without it, Hex copies your words and you press Ctrl+V.")
+        tr("Without it, GoSpell copies your words and you press Ctrl+V.")
     } else {
-        tr("Hex only sends the paste keystroke. It never sees your screen.")
+        tr("GoSpell only sends the paste keystroke. It never sees your screen.")
     };
     let control = permission_control(
         p,
@@ -165,7 +165,7 @@ fn paste_permission(ui: &Ui, p: Paint) -> Option<El> {
 }
 
 /// Records which untrusted permission rows are currently visible in the window
-/// so the macOS host clears retired Hex bundle IDs' stale TCC rows once in the
+/// so the macOS host clears retired GoSpell bundle IDs' stale TCC rows once in the
 /// background when a row appears.
 pub(super) fn update_shown_permissions(ui: &mut Ui) {
     use crate::desktop::onboarding::PermissionState;
@@ -190,7 +190,7 @@ pub(super) fn update_shown_permissions(ui: &mut Ui) {
             {
                 shown.push(PermissionKind::SystemAudio);
             }
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             if ui.pane == Pane::Annotate
                 && ui.settings.capture.enabled
                 && ui
@@ -456,7 +456,7 @@ pub(super) fn meetings_settings(ui: &Ui, p: Paint, layer: &mut Vec<El>) -> Vec<E
     let meetings = &ui.settings.meetings;
     let mut rows = vec![meetings_toggle(ui, p)];
     let mut more = Vec::new();
-    // Only macOS asks before Hex may hear the other participants.
+    // Only macOS asks before GoSpell may hear the other participants.
     if meetings.enabled && ui.platform.caps.permissions {
         let permitted = ui.platform.system_audio;
         let stale = !permitted && ui.platform.stale(PermissionKind::SystemAudio);
@@ -468,7 +468,7 @@ pub(super) fn meetings_settings(ui: &Ui, p: Paint, layer: &mut Vec<El>) -> Vec<E
             Some(if permitted {
                 tr("Captures the other participants' audio")
             } else if stale {
-                tr("An older Hex entry can keep this off")
+                tr("An older GoSpell entry can keep this off")
             } else {
                 tr("Required to hear the other participants.")
             }),
@@ -628,11 +628,11 @@ fn retention_row(ui: &Ui, p: Paint, layer: &mut Vec<El>) -> El {
         tr("Keep meetings"),
         match chosen {
             None => Some(tr(
-                "Audio, transcripts, notes, and Hex's Markdown copy move to the Trash. Meetings from before this setting stay until you choose",
+                "Audio, transcripts, notes, and GoSpell's Markdown copy move to the Trash. Meetings from before this setting stay until you choose",
             )),
             Some(MeetingRetention::Forever) => None,
             Some(_) => Some(tr(
-                "Audio, transcripts, notes, and Hex's Markdown copy move to the Trash",
+                "Audio, transcripts, notes, and GoSpell's Markdown copy move to the Trash",
             )),
         },
         control,
@@ -706,35 +706,35 @@ pub(super) fn summary_model_shown(ui: &Ui) -> bool {
 }
 
 /// What the summary model row says about a saved `provider/model` it can't
-/// use, such as one typed with `hex settings`; `None` when it can.
+/// use, such as one typed with `gospell settings`; `None` when it can.
 pub(super) fn summary_model_problem(saved: &str) -> Option<&'static str> {
     (!saved.trim().is_empty() && crate::meeting::generator::parse_model(saved).is_none()).then(|| {
-        tr("Write it as provider/model, such as openai/gpt-5.4-mini. Until then, Hex uses OpenCode's default model")
+        tr("Write it as provider/model, such as openai/gpt-5.4-mini. Until then, GoSpell uses OpenCode's default model")
     })
 }
 
 static ZOOM_ICON: Icon = Icon {
-    name: "hex-provider-zoom",
+    name: "gospell-provider-zoom",
     view: 16.0,
     body: include_str!("../../assets/icons/providers/zoom.svg"),
 };
 static MEET_ICON: Icon = Icon {
-    name: "hex-provider-meet",
+    name: "gospell-provider-meet",
     view: 16.0,
     body: include_str!("../../assets/icons/providers/meet.svg"),
 };
 static TEAMS_ICON: Icon = Icon {
-    name: "hex-provider-teams",
+    name: "gospell-provider-teams",
     view: 16.0,
     body: include_str!("../../assets/icons/providers/teams.svg"),
 };
 static SLACK_ICON: Icon = Icon {
-    name: "hex-provider-slack",
+    name: "gospell-provider-slack",
     view: 16.0,
     body: include_str!("../../assets/icons/providers/slack.svg"),
 };
 static WEBEX_ICON: Icon = Icon {
-    name: "hex-provider-webex",
+    name: "gospell-provider-webex",
     view: 16.0,
     body: include_str!("../../assets/icons/providers/webex.svg"),
 };
@@ -772,7 +772,7 @@ fn calendar_rows(ui: &Ui, p: Paint, layer: &mut Vec<El>, rows: &mut Vec<El>) {
             &icons::CALENDAR,
             tr("Calendar access is off"),
             Some(tr(
-                "Allow Hex under Privacy & Security › Calendars to get meeting reminders",
+                "Allow GoSpell under Privacy & Security › Calendars to get meeting reminders",
             )),
             button(
                 p,
@@ -1003,11 +1003,11 @@ fn bulk_select_on(ui: &Ui) -> bool {
 
 /// The virtual microphone driver's row: install, update, or uninstall it.
 pub(super) fn driver_row(ui: &Ui, p: Paint) -> El {
-    let title = tr("Hex Microphone");
-    let Some(status) = &ui.platform.hex_microphone else {
+    let title = tr("GoSpell Microphone");
+    let Some(status) = &ui.platform.gospell_microphone else {
         return setting_row(
             p,
-            "hex-mic-driver",
+            "gospell-mic-driver",
             title,
             Some(tr("Checking…")),
             row().key("none"),
@@ -1029,9 +1029,9 @@ pub(super) fn driver_row(ui: &Ui, p: Paint) -> El {
     } else if in_use {
         tr("In use").into()
     } else if status.driver_loaded {
-        tr("Select Hex Microphone as the input in your call app").into()
+        tr("Select GoSpell Microphone as the input in your call app").into()
     } else if status.driver_bundle_installed {
-        tr("Hex Microphone is installed but unavailable").into()
+        tr("GoSpell Microphone is installed but unavailable").into()
     } else {
         tr("Installation briefly restarts system audio").into()
     };
@@ -1058,24 +1058,24 @@ pub(super) fn driver_row(ui: &Ui, p: Paint) -> El {
                         } else {
                             tr("Retry")
                         },
-                        PlatformRequest::InstallHexMicrophone,
+                        PlatformRequest::InstallGoSpellMicrophone,
                     ));
                 }
                 controls = controls.child(action(
                     "uninstall",
                     tr("Uninstall"),
-                    PlatformRequest::UninstallHexMicrophone,
+                    PlatformRequest::UninstallGoSpellMicrophone,
                 ));
             } else {
                 controls = controls.child(action(
                     "install",
-                    tr("Install Hex Microphone"),
-                    PlatformRequest::InstallHexMicrophone,
+                    tr("Install GoSpell Microphone"),
+                    PlatformRequest::InstallGoSpellMicrophone,
                 ));
             }
         }
     }
-    setting_row(p, "hex-mic-driver", title, Some(&description), controls)
+    setting_row(p, "gospell-mic-driver", title, Some(&description), controls)
 }
 
 /// `target`'s modifier-only shortcut moved to `side`, unless that collides

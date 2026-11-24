@@ -254,7 +254,7 @@ impl Runtime {
         }
     }
 
-    /// Feeds one foreground read to the app switcher. Hex's own window and a
+    /// Feeds one foreground read to the app switcher. GoSpell's own window and a
     /// moment with no application in front carry no mode, so they leave the
     /// last match and any switch it scheduled alone. A dictation that records
     /// or transcribes holds a due switch until it finishes.
@@ -308,7 +308,7 @@ impl Runtime {
 
     pub(super) fn tick_at(&mut self, now: Instant) {
         self.switch_with_keyboard(now);
-        // Read the frontmost application only while the lab is on. Hex's own
+        // Read the frontmost application only while the lab is on. GoSpell's own
         // window names no mode and is ignored.
         let (application, bundle_name) = self
             .settings
@@ -328,7 +328,7 @@ impl Runtime {
             let automatic = self.automatic_preparation.take();
             let result = result.and_then(|selection| {
                 crate::transcription::models::validate(&selection).map_err(|e| e.to_string())?;
-                // Only a preparation that changes what Hex runs replaces the
+                // Only a preparation that changes what GoSpell runs replaces the
                 // saved choice: a check of that same model, or of a lost
                 // import's fallback, leaves the saved selection alone.
                 let effective =

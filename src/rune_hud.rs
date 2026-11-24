@@ -224,7 +224,7 @@ impl HudSender {
             drop(watch);
             // Rune only gives a shown overlay up when a frame it draws fades it
             // out, and a HUD that never presents draws nothing: it would stay
-            // shown until Hex restarts. Hide it at once instead (the immediate
+            // shown until GoSpell restarts. Hide it at once instead (the immediate
             // hide, not the exit fade), on the overlay's own thread through
             // `update`, so the HUD's shown state clears, Rune releases its
             // window and GPU surface (a zero idle on Windows), and a re-ask or
@@ -278,8 +278,8 @@ fn wants_frame(animating: bool, shown: bool) -> bool {
     animating && shown
 }
 
-/// What Hex last asked Rune for, together with the placement that only exists
-/// while the overlay is up. Rune can still hide the overlay underneath Hex
+/// What GoSpell last asked Rune for, together with the placement that only exists
+/// while the overlay is up. Rune can still hide the overlay underneath GoSpell
 /// (display unplug, GPU device loss), so each capture's start calls
 /// `overlay.show()` again (`Hud::reveal`) instead of trusting `Shown`.
 #[derive(Default)]
@@ -339,7 +339,7 @@ pub(crate) struct Hud {
     #[cfg(target_os = "windows")]
     watch: Arc<Mutex<Watch>>,
     /// When a frame last drew, or this recording's start opened the clock: a
-    /// show Rune declined or Hex hid gets one more ask (with `reshown`), and a
+    /// show Rune declined or GoSpell hid gets one more ask (with `reshown`), and a
     /// recovery hide restarts it (#1793). Windows' `poll` also arms its timer
     /// from it, so a show nothing draws stops asking.
     #[cfg(any(target_os = "windows", test))]
@@ -375,7 +375,7 @@ const RESHOW_AFTER: Duration = Duration::from_millis(250);
 /// Whether a recording's HUD should ask Rune for its show again: no frame has
 /// drawn for `RESHOW_AFTER`, and it has not asked already. Meters are a
 /// recording's own events, so this is the one chance to recover a show Rune
-/// dropped or Hex hid; a recovery hide re-arms it once, which keeps a HUD that
+/// dropped or GoSpell hid; a recovery hide re-arms it once, which keeps a HUD that
 /// can never show from rebuilding its window and surface on every meter.
 #[cfg(any(target_os = "windows", test))]
 fn reshow_due(since_frame: Option<Duration>, already: bool) -> bool {
@@ -484,7 +484,7 @@ impl Hud {
         // A recording's own events are meters (the listener sends `Started`
         // once, then one per chunk), so a HUD lost after its start has nothing
         // left that would ask for it again. Ask once, after its frames stop:
-        // that recovers a show that failed in setup or that Hex hid, and it
+        // that recovers a show that failed in setup or that GoSpell hid, and it
         // can't rebuild the window and surface on every meter for a HUD that
         // can never show (#1793).
         #[cfg(target_os = "windows")]
@@ -580,7 +580,7 @@ impl Hud {
 
     /// Asks Rune to show the overlay where the HUD belongs, unless Hidden or
     /// blocked on Windows. Calls `overlay.show()` unconditionally instead of
-    /// trusting `self.presence`: Rune can take the overlay away underneath Hex
+    /// trusting `self.presence`: Rune can take the overlay away underneath GoSpell
     /// (display unplug, GPU device loss, #1663, #1793), and Rune's own `show()`
     /// is a no-op when already shown and cancels an exit fade.
     fn reveal(&mut self, fresh_start: bool) {
@@ -678,7 +678,7 @@ const EXIT_FADE: Duration = Duration::from_millis(120);
 /// about 150 MB and the GPU driver's threads waking some 65 times a second.
 /// Windows gives it back, window included, once the HUD's exit fade ends: a hidden
 /// topmost window that presented with DXGI let NVIDIA's Instant Replay take
-/// Hex for the running game (#1308). The device itself waits five minutes for
+/// GoSpell for the running game (#1308). The device itself waits five minutes for
 /// the next show either way, so dictations reuse one device (#1268). The
 /// painter goes once Rune's parked device would also have gone, which is this
 /// plus the five minutes Rune parks a device (`PAINTER_IDLE`, #1431); macOS
@@ -753,7 +753,7 @@ pub(crate) fn install<S: 'static>(app: &mut rune::App<S>) -> HudSender {
     #[cfg(target_os = "windows")]
     let watch: Arc<Mutex<Watch>> = Arc::default();
     let configured = OverlaySpec {
-        name: "hex-hud",
+        name: "gospell-hud",
         size: WINDOW,
         edge: ScreenEdge::Top,
         margin: 0.0,
@@ -774,9 +774,9 @@ pub(crate) fn install<S: 'static>(app: &mut rune::App<S>) -> HudSender {
     // The shaders write display (sRGB-encoded) values.
     .srgb_blend(true)
     // On Linux a burst of dictations keeps the GPU surface, so each HUD
-    // shows at once; a Hex at rest gives the GPU device back.
+    // shows at once; a GoSpell at rest gives the GPU device back.
     .release_gpu_after(GPU_IDLE);
-    // Windows' overlay has no display link: Hex caps the HUD at ~60 Hz on top
+    // Windows' overlay has no display link: GoSpell caps the HUD at ~60 Hz on top
     // of Rune's swap-chain slot wait (`windows_pacing`).
     #[cfg(target_os = "windows")]
     let configured = configured.poll(windows_pacing::poll);
@@ -908,9 +908,15 @@ pub(crate) struct DotUniforms {
     /// The notch indicator's done and failed, 0 to 1, then how far right
     /// of the plate's middle the dots' middle sits, pt.
     ears: [f32; 4],
+    /// 1 for the Embers look, the embers' count, then the GoML mark's pop
+    /// scale and opacity.
+    embers: [f32; 4],
+    /// Embers' done: the flash, seconds since the ripple left (below 0 for
+    /// none), the mark's diameter, pt, and the embers' size scale.
+    finale: [f32; 4],
 }
 
-const _: () = assert!(std::mem::size_of::<DotUniforms>() == 208);
+const _: () = assert!(std::mem::size_of::<DotUniforms>() == 240);
 const DOT_UNIFORM_BYTES: u32 = std::mem::size_of::<DotUniforms>() as u32;
 const DOT_BYTES: u64 = (MAX_DOTS * 4) as u64;
 /// How `rune_hud.wgsl` declares `u` as a uniform buffer; with immediates it
@@ -920,8 +926,13 @@ const DOT_UNIFORM_BINDING: &str = "@group(0) @binding(0) var<uniform> u: DotUnif
 impl DotUniforms {
     fn new(frame: &DotFrame, layout: Layout, target: Target) -> Self {
         let pose = &frame.pose;
+        let embers = frame.tuning.look == dot_scope::Look::Embers;
         // The HUD is always a dark surface, including inside a light preview.
-        let mut colors = dot_scope::palette(true, pose, frame.tuning.saturation);
+        let mut colors = if embers {
+            dot_scope::ember_palette(pose, frame.tuning.saturation)
+        } else {
+            dot_scope::palette(true, pose, frame.tuning.saturation)
+        };
         if layout.island.is_some() {
             for color in [&mut colors.plate, &mut colors.rim, &mut colors.shadow] {
                 color[3] = 0.0;
@@ -969,6 +980,8 @@ impl DotUniforms {
                 _ => [field_radius(layout, pose), 0.0, 0.0, 0.0],
             },
             ears: [pose.done, pose.fail, pose.shift, 0.0],
+            embers: dot_scope::embers::look_terms(embers, frame.dots.len() / 2, pose.finale),
+            finale: dot_scope::embers::finale_terms(pose.finale, pose.height),
         }
     }
 }
@@ -1182,7 +1195,7 @@ impl Compositor<Hud> for HudCompositor {
         }
     }
 
-    /// The view is empty, so Rune's UI pass is skipped: Hex's own pass
+    /// The view is empty, so Rune's UI pass is skipped: GoSpell's own pass
     /// clears the target.
     fn render(&mut self, f: &mut Frame<'_, Hud>) {
         let reduce = f.rt.reduced_motion;
@@ -1285,7 +1298,7 @@ impl Painter {
             source.to_owned()
         };
         let module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("hex hud"),
+            label: Some("gospell hud"),
             source: wgpu::ShaderSource::Wgsl(source.into()),
         });
         let buffer = |label, size: u64| {
@@ -1297,8 +1310,8 @@ impl Painter {
             })
         };
         let dot_uniforms =
-            (!immediates).then(|| buffer("hex hud dot uniforms", u64::from(DOT_UNIFORM_BYTES)));
-        let dots = buffer("hex hud dots", DOT_BYTES);
+            (!immediates).then(|| buffer("gospell hud dot uniforms", u64::from(DOT_UNIFORM_BYTES)));
+        let dots = buffer("gospell hud dots", DOT_BYTES);
         let entry = |binding| wgpu::BindGroupLayoutEntry {
             binding,
             visibility: wgpu::ShaderStages::FRAGMENT,
@@ -1322,16 +1335,16 @@ impl Painter {
             });
         }
         let layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("hex hud"),
+            label: Some("gospell hud"),
             entries: &entries,
         });
         let bind = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("hex hud"),
+            label: Some("gospell hud"),
             layout: &layout,
             entries: &bindings,
         });
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("hex hud"),
+            label: Some("gospell hud"),
             bind_group_layouts: &[Some(&layout)],
             immediate_size: if immediates { DOT_UNIFORM_BYTES } else { 0 },
         });
@@ -1423,7 +1436,7 @@ impl Painter {
         uniforms: &DotUniforms,
     ) {
         let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-            label: Some("hex hud preview"),
+            label: Some("gospell hud preview"),
             color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                 view,
                 depth_slice: None,
@@ -1463,7 +1476,7 @@ fn clear_pass<'a>(
     view: &wgpu::TextureView,
 ) -> wgpu::RenderPass<'a> {
     encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-        label: Some("hex hud"),
+        label: Some("gospell hud"),
         color_attachments: &[Some(wgpu::RenderPassColorAttachment {
             view,
             depth_slice: None,

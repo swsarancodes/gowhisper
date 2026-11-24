@@ -26,7 +26,7 @@ pub(crate) fn install<S: 'static>(app: &mut rune::App<S>) {
     // Installed whatever the lab says, hidden until a picker opens, so turning
     // Labs › Paste Last picker on applies without a restart.
     let spec = OverlaySpec {
-        name: "Hex Paste Last",
+        name: "GoSpell Paste Last",
         size: (WIDTH, 560.),
         edge: ScreenEdge::Top,
         margin: 0.,

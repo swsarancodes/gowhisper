@@ -25,7 +25,7 @@ pub(super) fn default_wpm() -> u32 {
 }
 
 /// Clamps a saved typing speed as it loads, so every decode agrees with
-/// the window and `hex settings`.
+/// the window and `gospell settings`.
 pub(super) fn deserialize<'de, D>(deserializer: D) -> std::result::Result<u32, D::Error>
 where
     D: serde::Deserializer<'de>,

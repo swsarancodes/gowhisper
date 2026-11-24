@@ -1,12 +1,12 @@
 name: Deploy
 
-# Builds site/ and deploys its Worker (the site at /hex and the files at
-# /hex/files: built installers and appcast, the dev notes, and the frozen
+# Builds site/ and deploys its Worker (the site at /gospell and the files at
+# /gospell/files: built installers and appcast, the dev notes, and the frozen
 # 2.3.1 bucket). Pull requests run no site check (CI is minimal; the deploy
 # builds the site and checks every download link). A push (or a dispatch) on
-# dev deploys the dev site (https://dev.anoma.ly/hex); on production, which
+# dev deploys the dev site (https://dev.gospell.goml.io); on production, which
 # moves only by a fast-forward from dev, the production site
-# (https://anoma.ly/hex). The mode always follows the branch. Split like
+# (https://gospell.goml.io). The mode always follows the branch. Split like
 # Release (docs/releasing.md):
 #
 # - build runs repository code (bun install, site/scripts/build.ts) with no
@@ -15,7 +15,7 @@ name: Deploy
 # - deploy runs in the mode's environment (dev or production, each
 #   admitting only its own branch) and mints a
 #   short-lived Cloudflare token for that mode's Worker from the token issuer
-#   after assuming the environment's role, github/hex-<mode>
+#   after assuming the environment's role, github/gospell-<mode>
 #   (.github/release/cloudflare-token.sh). The AWS session is a step output
 #   given only to the token step, and the token only to the Deploy step. It
 #   checks out only .github/release/, verifies the artifact against that
@@ -67,7 +67,7 @@ jobs:
         run: |
           python3 -c 'import sys, xml.dom.minidom; xml.dom.minidom.parse(sys.argv[1])' ../packaging/macos/legacy-appcast.xml
           grep -Fq '<sparkle:informationalUpdate' ../packaging/macos/legacy-appcast.xml
-          grep -Fq 'https://anoma.ly/hex' ../packaging/macos/legacy-appcast.xml
+          grep -Fq 'https://gospell.goml.io' ../packaging/macos/legacy-appcast.xml
       - name: Test the installers
         run: |
           sh ../scripts/test-install-linux-release.sh
@@ -134,8 +134,8 @@ jobs:
         name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: arn:aws:iam::604439173067:role/github/hex-${{ env.MODE }}
-          role-session-name: hex-${{ github.run_id }}
+          role-to-assume: arn:aws:iam::604439173067:role/github/gospell-${{ env.MODE }}
+          role-session-name: gospell-${{ github.run_id }}
           role-duration-seconds: 900
           aws-region: us-east-1
           output-env-credentials: false
@@ -172,9 +172,9 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: Check the live site and every download link
         run: |
-          host=$([ "$MODE" = dev ] && echo dev.anoma.ly || echo anoma.ly)
+          host=$([ "$MODE" = dev ] && echo dev.goml.io || echo goml.io)
           for attempt in 1 2 3 4 5 6; do
-            status=$(curl --silent --output /dev/null --write-out '%{http_code}' "https://$host/hex/")
+            status=$(curl --silent --output /dev/null --write-out '%{http_code}' "https://$host/gospell/")
             [ "$status" = 200 ] && break
             sleep 10
           done
@@ -183,9 +183,9 @@ jobs:
           bun run check:downloads
       - name: Check the files the site serves
         run: |
-          host=$([ "$MODE" = dev ] && echo dev.anoma.ly || echo anoma.ly)
+          host=$([ "$MODE" = dev ] && echo dev.goml.io || echo goml.io)
           for name in install-linux.sh install-windows.ps1 appcast.xml; do
-            curl -fsS "https://$host/hex/files/$name?check=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/$name"
+            curl -fsS "https://$host/gospell/files/$name?check=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/$name"
           done
           cmp "$RUNNER_TEMP/install-linux.sh" ../.github/release/install-linux.sh
           cmp "$RUNNER_TEMP/install-windows.ps1" ../.github/release/install-windows.ps1

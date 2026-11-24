@@ -118,7 +118,7 @@ mod tests {
 
     #[test]
     fn mixed_tap_and_picker_revalidate_the_same_ready_item_without_promoting_it() {
-        let root = std::env::temp_dir().join(format!("hex-paste-model-{}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("gospell-paste-model-{}", std::process::id()));
         fs::create_dir(&root).unwrap();
         let mut history = HistoryStore::open(root.join("history.json"), HistoryRetention::Day, 10);
         history
@@ -141,11 +141,11 @@ mod tests {
         let history = History::new(history);
         let capture = root.join("12.scrawl");
         fs::create_dir(&capture).unwrap();
-        let manifest = r#"{"version":1,"id":"12","createdAtMs":12,"durationMs":1800,"target":{"mode":"display","displayId":1,"frame":{"x":0,"y":0,"width":40,"height":30,"scale":1}},"transcript":{"source":"hex","text":"move it down","segments":[],"words":[]},"strokes":[],"marks":[],"events":[],"keyframes":[],"contactSheet":"contact-sheet.png"}"#;
+        let manifest = r#"{"version":1,"id":"12","createdAtMs":12,"durationMs":1800,"target":{"mode":"display","displayId":1,"frame":{"x":0,"y":0,"width":40,"height":30,"scale":1}},"transcript":{"source":"gospell","text":"move it down","segments":[],"words":[]},"strokes":[],"marks":[],"events":[],"keyframes":[],"contactSheet":"contact-sheet.png"}"#;
         fs::write(capture.join("scrawl.json"), manifest).unwrap();
         let scope = Scope::new(&root, Some(7));
-        // A readable manifest, even with Hex as its speech source, is not
-        // proof it came from Hex Annotate (standalone Scrawl shares the root).
+        // A readable manifest, even with GoSpell as its speech source, is not
+        // proof it came from GoSpell Annotate (standalone Scrawl shares the root).
         assert_eq!(snapshot(&history, Some(&scope), 8, 20).len(), 1);
         captures::mark_ready(&capture, 13).unwrap();
         let failed = root.join("14.scrawl");

@@ -1,14 +1,14 @@
 # Third-Party Notices
 
-Hex's own source is covered by the root `LICENSE`. The following notices cover
-vendored icon assets and the speech models Hex downloads under their own
+GoSpell's own source is covered by the root `LICENSE`. The following notices cover
+vendored icon assets and the speech models GoSpell downloads under their own
 licences. Dependencies retain their respective upstream licenses.
 
 ## Parakeet Ultra
 
 Parakeet Ultra by Moondream, based on NVIDIA Parakeet TDT 0.6B v3. GGUF
 conversion and quantization by handy-computer. Creative Commons Attribution
-4.0 International (CC BY 4.0). Hex downloads `parakeet-ultra-Q8_0.gguf` from
+4.0 International (CC BY 4.0). GoSpell downloads `parakeet-ultra-Q8_0.gguf` from
 https://huggingface.co/handy-computer/parakeet-ultra-gguf/tree/a1539be1b849ea7463b88343e5277b373d0c4ea9
 only while Labs › Parakeet Ultra is on; it does not ship the weights.
 
@@ -29,7 +29,7 @@ The weights are provided as-is, without warranties, as the licence states.
 
 Orukeet by Oruk AI, based on NVIDIA Parakeet TDT 0.6B v3. GGUF conversion and
 quantization by handy-computer. Creative Commons Attribution-ShareAlike 4.0
-International (CC BY-SA 4.0). Hex downloads `orukeet-Q8_0.gguf` from
+International (CC BY-SA 4.0). GoSpell downloads `orukeet-Q8_0.gguf` from
 https://huggingface.co/handy-computer/orukeet-gguf/tree/c5511a3850fce1cbbfa5d94ef815966e1d99275f
 and does not ship the weights.
 
@@ -135,7 +135,7 @@ The weights are provided as-is, without warranties, as the licence states.
 
 Fluid Speech Pro by FluidVoice, based on NVIDIA Parakeet TDT 0.6B v3 and
 Moondream Parakeet Ultra. GGUF conversion and quantization by TalkMate.
-Creative Commons Attribution 4.0 International (CC BY 4.0). Hex downloads
+Creative Commons Attribution 4.0 International (CC BY 4.0). GoSpell downloads
 `fluid-speech-pro-Q8_0.gguf` from
 https://huggingface.co/TalkMate/fluid-speech-pro-gguf/tree/d59dc79f7e04715c5b0ba07f01106f71ebea97dc
 and does not ship the weights.

@@ -57,7 +57,7 @@ impl Hold {
     }
 
     #[cfg_attr(
-        not(any(hex_capture, not(target_os = "macos"), test)),
+        not(any(gospell_capture, not(target_os = "macos"), test)),
         allow(dead_code)
     )]
     pub(crate) const fn capture(audio: RecordingAudioBehavior) -> Self {

@@ -113,7 +113,7 @@ fn an_unavailable_shortcut_is_not_a_setting_hit() {
         ))));
 }
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 #[test]
 fn annotate_only_lists_when_the_store_has_its_card() {
     let mut rt = runtime("mac-scrawl");

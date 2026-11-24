@@ -1,8 +1,8 @@
-//! Hex's key shortcuts while another app holds Secure Event Input.
+//! GoSpell's key shortcuts while another app holds Secure Event Input.
 //!
 //! A password field, a terminal's Secure Keyboard Entry, or an app that
 //! never turned it off stops macOS from handing key presses to event taps,
-//! Hex's included; modifier changes still reach them. Carbon hotkeys
+//! GoSpell's included; modifier changes still reach them. Carbon hotkeys
 //! (`RegisterEventHotKey`) still fire then, so while secure input is on the
 //! key shortcuts that start something (Annotate and its replay, Paste last,
 //! and the Screenshots shortcuts) are registered as Carbon
@@ -24,7 +24,7 @@ use super::*;
 use crate::app_settings::ModifierSide;
 
 const POLL_SECONDS: f64 = 0.25;
-const SIGNATURE: u32 = u32::from_be_bytes(*b"Hex!");
+const SIGNATURE: u32 = u32::from_be_bytes(*b"GoSp");
 const EVENT_CLASS_KEYBOARD: u32 = u32::from_be_bytes(*b"keyb");
 const EVENT_HOT_KEY_PRESSED: u32 = 5;
 const EVENT_HOT_KEY_RELEASED: u32 = 6;
@@ -34,7 +34,7 @@ const CARBON_COMMAND: u32 = 1 << 8;
 const CARBON_SHIFT: u32 = 1 << 9;
 const CARBON_OPTION: u32 = 1 << 11;
 const CARBON_CONTROL: u32 = 1 << 12;
-/// Virtual key codes past this are Hex's mouse buttons or the Globe key.
+/// Virtual key codes past this are GoSpell's mouse buttons or the Globe key.
 const LAST_KEYBOARD_CODE: u16 = 127;
 
 #[repr(C)]
@@ -104,9 +104,9 @@ enum Target {
     Capture,
     CaptureReplay,
     PasteLast,
-    #[cfg_attr(not(hex_capture), allow(dead_code))]
+    #[cfg_attr(not(gospell_capture), allow(dead_code))]
     Screenshot,
-    #[cfg_attr(not(hex_capture), allow(dead_code))]
+    #[cfg_attr(not(gospell_capture), allow(dead_code))]
     ScreenshotRecord,
 }
 
@@ -433,7 +433,7 @@ fn poll() {
     }
 }
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 fn screenshot_hotkeys() -> [Option<RuntimeHotkey>; 2] {
     if crate::labs::screenshots() {
         [
@@ -445,7 +445,7 @@ fn screenshot_hotkeys() -> [Option<RuntimeHotkey>; 2] {
     }
 }
 
-#[cfg(not(hex_capture))]
+#[cfg(not(gospell_capture))]
 fn screenshot_hotkeys() -> [Option<RuntimeHotkey>; 2] {
     [None, None]
 }
@@ -512,7 +512,7 @@ fn deliver(chord: Chord, down: bool) {
         physical_keys::snapshot(),
     );
     match chord.target {
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         Target::Screenshot | Target::ScreenshotRecord => {
             crate::screenshots::key(crate::screenshots::Key {
                 code: chord.code,
@@ -769,7 +769,7 @@ mod tests {
         assert!(right.binding.matches_key_press(S, press_flags(right, real)));
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     #[test]
     fn an_annotate_press_still_records_when_its_modifiers_came_up_first() {
         use crate::capture_host::{CaptureShortcut, ShortcutAction, ShortcutActivity};

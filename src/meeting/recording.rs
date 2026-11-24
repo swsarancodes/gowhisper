@@ -16,7 +16,7 @@ pub fn recording() -> bool {
 
 /// Marks this process as busy with meeting audio until dropped. Overlapping
 /// holders in this process (a recording and a recovery pass) each hold their
-/// own; another Hex process has its own counter.
+/// own; another GoSpell process has its own counter.
 pub(super) struct Recording(());
 
 impl Recording {

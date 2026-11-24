@@ -22,8 +22,8 @@ use crate::transcription::pieces::{PieceError, Pieces};
 pub(super) struct ChosenTranscriber;
 
 impl ChosenTranscriber {
-    fn hex(&self) -> HexTranscriber {
-        HexTranscriber {
+    fn gospell(&self) -> GoSpellTranscriber {
+        GoSpellTranscriber {
             engine: DICTATION_ENGINE
                 .lock()
                 .unwrap_or_else(|error| error.into_inner())
@@ -35,14 +35,14 @@ impl ChosenTranscriber {
 impl Transcriber for ChosenTranscriber {
     fn transcribe(&self, audio: &RecordedAudio) -> anyhow::Result<Option<TranscriptData>> {
         match crate::app_settings::capture_settings().transcriber {
-            crate::app_settings::CaptureTranscriber::Parakeet => self.hex().transcribe(audio),
+            crate::app_settings::CaptureTranscriber::Parakeet => self.gospell().transcribe(audio),
             #[cfg(target_os = "macos")]
             crate::app_settings::CaptureTranscriber::Apple => {
                 AppleTranscriber::default().transcribe(audio)
             }
-            // Apple's SpeechAnalyzer is macOS's; elsewhere it is Hex's model.
+            // Apple's SpeechAnalyzer is macOS's; elsewhere it is GoSpell's model.
             #[cfg(not(target_os = "macos"))]
-            crate::app_settings::CaptureTranscriber::Apple => self.hex().transcribe(audio),
+            crate::app_settings::CaptureTranscriber::Apple => self.gospell().transcribe(audio),
         }
     }
 
@@ -53,7 +53,7 @@ impl Transcriber for ChosenTranscriber {
     ) -> anyhow::Result<Option<TranscriptData>> {
         match crate::app_settings::capture_settings().transcriber {
             crate::app_settings::CaptureTranscriber::Parakeet => {
-                self.hex().transcribe_wav(wav_path, duration_ms)
+                self.gospell().transcribe_wav(wav_path, duration_ms)
             }
             #[cfg(target_os = "macos")]
             crate::app_settings::CaptureTranscriber::Apple => {
@@ -61,7 +61,7 @@ impl Transcriber for ChosenTranscriber {
             }
             #[cfg(not(target_os = "macos"))]
             crate::app_settings::CaptureTranscriber::Apple => {
-                self.hex().transcribe_wav(wav_path, duration_ms)
+                self.gospell().transcribe_wav(wav_path, duration_ms)
             }
         }
     }
@@ -69,11 +69,11 @@ impl Transcriber for ChosenTranscriber {
 
 /// Word-timed transcription on the dictation engine's loaded model. It holds
 /// the engine weakly, so a capture still writing never keeps it alive.
-struct HexTranscriber {
+struct GoSpellTranscriber {
     engine: Option<Weak<TranscriptionEngine>>,
 }
 
-impl Transcriber for HexTranscriber {
+impl Transcriber for GoSpellTranscriber {
     /// Word times are milliseconds from `audio.samples[0]`; the engine moves
     /// them onto the capture's clock and builds the segments.
     fn transcribe(&self, audio: &RecordedAudio) -> anyhow::Result<Option<TranscriptData>> {
@@ -151,7 +151,7 @@ fn transcript(
     // A model that gives no word times (GigaAM v3 asks for none) still said
     // the text: `transcribe_pieces` spreads each untimed piece over its own
     // audio, and a clip held in memory is spread over the whole of it, as
-    // `hex` does out of process. Both are estimates, never the model's times.
+    // `gospell` does out of process. Both are estimates, never the model's times.
     let (words, estimated) = if !words.is_empty() {
         (corrected_words(words, word_lag(selection.model)), spread)
     } else if text.trim().is_empty() {
@@ -161,7 +161,7 @@ fn transcript(
         (whole, true)
     };
     TranscriptData {
-        source: "hex".into(),
+        source: "gospell".into(),
         model: Some(selection.model.as_str().into()),
         text,
         words,
@@ -304,7 +304,7 @@ mod tests {
 
     fn wav(name: &str, samples: &[f32]) -> std::path::PathBuf {
         let path = std::env::temp_dir().join(format!(
-            "hex-capture-words-{name}-{}.wav",
+            "gospell-capture-words-{name}-{}.wav",
             std::process::id()
         ));
         let mut writer = hound::WavWriter::create(

@@ -35,14 +35,14 @@ pub(super) fn capture_refusal(other_recording: bool, suspended: bool) -> Option<
     } else if suspended {
         Some(ControlReply::error(
             "busy",
-            "Hex is recording a shortcut in Settings or reopening the microphone; try again",
+            "GoSpell is recording a shortcut in Settings or reopening the microphone; try again",
         ))
     } else {
         None
     }
 }
 
-/// A `hex paste-last` (or the menu bar's Paste Last Dictation) waits for
+/// A `gospell paste-last` (or the menu bar's Paste Last Dictation) waits for
 /// every capture and shortcut gesture to end: pasting cancels the audio
 /// owner's capture, which would strand the machine that started it.
 pub(super) fn paste_last_refusal(capture_active: bool) -> Option<ControlReply> {

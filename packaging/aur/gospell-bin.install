@@ -1,0 +1,5 @@
+post_install() {
+  echo 'Open GoSpell from your launcher or run `gospell`; the first run downloads a speech model.'
+  echo 'Start GoSpell at login: systemctl --user enable gospell.service'
+  echo 'Updates come from pacman; GoSpell never replaces this package itself.'
+}

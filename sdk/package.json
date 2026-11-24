@@ -1,5 +1,5 @@
 {
-  "name": "hex-sdk-workspace",
+  "name": "gospell-sdk-workspace",
   "private": true,
   "workspaces": [
     "typescript",

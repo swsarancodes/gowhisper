@@ -1,7 +1,7 @@
-//! The Annotate pane (macOS and Linux): Scrawl's captures inside Hex. The opt-in, the capture shortcut,
+//! The Annotate pane (macOS and Linux): Scrawl's captures inside GoSpell. The opt-in, the capture shortcut,
 //! the send-to list's shortcut, Screen Recording, the transcriber, the captures folder and how long
 //! captures are kept, and Scrawl's own app, which keeps the shortcut while
-//! it runs until "Use Hex for annotations" asks it to quit.
+//! it runs until "Use GoSpell for annotations" asks it to quit.
 
 use rune::{El, row, text};
 use scrawl_capture::retention::{Policy, Preset};
@@ -24,7 +24,7 @@ fn description(enabled: bool) -> &'static str {
     if enabled {
         tr("Record your screen, draw on it, and talk over it with the shortcut below")
     } else {
-        tr("Off. Hex records nothing and keeps no shortcut until you turn this on.")
+        tr("Off. GoSpell records nothing and keeps no shortcut until you turn this on.")
     }
 }
 
@@ -71,7 +71,7 @@ pub(super) fn toggle(ui: &mut Ui) {
 fn transcriber_description(transcriber: CaptureTranscriber) -> &'static str {
     match transcriber {
         CaptureTranscriber::Parakeet => {
-            tr("The model Hex dictates with, with a time for every word")
+            tr("The model GoSpell dictates with, with a time for every word")
         }
         CaptureTranscriber::Apple => tr("Apple's speech recognizer, as Scrawl uses"),
     }
@@ -113,7 +113,7 @@ fn retention_description(policy: Policy) -> String {
 fn how_it_works(ui: &Ui, p: Paint) -> Vec<El> {
     let shortcut = ui.settings.capture.hotkey.keycaps();
     let keys = |key: &str, parts: &[String]| Some(super::controls::keycaps(p, key, parts));
-    // Wayland tells Hex nothing of Shift outside its own windows.
+    // Wayland tells GoSpell nothing of Shift outside its own windows.
     let draw_how = if cfg!(not(target_os = "linux")) {
         tr(
             "While it records, hold the shortcut and move the pointer; no click needed. Shift draws too",
@@ -177,7 +177,7 @@ fn scrawl_running(p: Paint, view: &ScrawlView) -> El {
     let description = if view.quitting_scrawl {
         tr("Waiting for Scrawl to quit…")
     } else {
-        tr("Hex leaves the Annotate shortcut to Scrawl until you switch")
+        tr("GoSpell leaves the Annotate shortcut to Scrawl until you switch")
     };
     card(
         p,
@@ -189,8 +189,8 @@ fn scrawl_running(p: Paint, view: &ScrawlView) -> El {
             Some(description),
             super::controls::button(
                 p,
-                "use-hex-for-captures",
-                tr("Use Hex for annotations"),
+                "use-gospell-for-captures",
+                tr("Use GoSpell for annotations"),
                 ButtonKind::Primary,
                 |ui: &mut Ui, _| scrawl_request(ui, ScrawlRequest::QuitScrawl),
             ),
@@ -216,7 +216,7 @@ fn shortcut_rows(ui: &Ui, p: Paint, view: &ScrawlView) -> Vec<El> {
                 "capture-command",
                 tr("Annotate"),
                 tr("Start and stop an annotation"),
-                &["hex annotate toggle"],
+                &["gospell annotate toggle"],
             ),
         ];
     }
@@ -271,11 +271,11 @@ fn shortcut_rows(ui: &Ui, p: Paint, view: &ScrawlView) -> Vec<El> {
             p,
             "screen-recording",
             tr("Screen Recording"),
-            Some(tr("Turns on when Hex restarts")),
+            Some(tr("Turns on when GoSpell restarts")),
             button(
                 p,
                 "screen-recording-restart",
-                tr("Restart Hex"),
+                tr("Restart GoSpell"),
                 ButtonKind::Secondary,
                 |ui: &mut Ui, _| ui.ask(PlatformRequest::Permission(PermissionAction::Restart)),
             ),
@@ -290,7 +290,7 @@ fn shortcut_rows(ui: &Ui, p: Paint, view: &ScrawlView) -> Vec<El> {
             Some(if view.screen_recording {
                 tr("Lets Annotate record your screen")
             } else if stale {
-                tr("An older Hex entry can keep this off")
+                tr("An older GoSpell entry can keep this off")
             } else {
                 tr("Required to record your screen. macOS asks the first time you annotate, or allow it here.")
             }),
@@ -315,14 +315,16 @@ fn shortcut_rows(ui: &Ui, p: Paint, view: &ScrawlView) -> Vec<El> {
     rows
 }
 
-/// Lets screen recordings, captures included, show Hex's overlays, for
+/// Lets screen recordings, captures included, show GoSpell's overlays, for
 /// showing someone how captures work.
 fn recordings_row(ui: &Ui, p: Paint) -> El {
     toggle_row(
         p,
         "capture-show-in-recordings",
         tr("Show in screen recordings"),
-        tr("Lets recordings, annotations included, show Hex's capsule, ink, and HUD, for demos"),
+        tr(
+            "Lets recordings, annotations included, show GoSpell's capsule, ink, and HUD, for demos",
+        ),
         ui.settings.capture.show_overlays_in_recordings,
         |ui: &mut Ui| {
             ui.update(|settings| {
@@ -433,10 +435,10 @@ fn storage_rows(ui: &Ui, p: Paint, view: &ScrawlView, layer: &mut Vec<El>) -> Ve
 }
 
 /// The command the copy row hands to people who manage skills themselves.
-const SKILLS_COMMAND: &str = "npx skills add anomalyco/hex --skill hex-annotate";
+const SKILLS_COMMAND: &str = "npx skills add goml/gospell --skill gospell-annotate";
 
 /// The Annotate pane's Agents section (Labs › Install agent skill from
-/// Annotate): each coding agent's skill folder and, on macOS, the hex link.
+/// Annotate): each coding agent's skill folder and, on macOS, the gospell link.
 /// The folders are read when the pane opens and after an install, never
 /// while drawing.
 #[derive(Default)]
@@ -453,8 +455,8 @@ pub(super) struct Agents {
 }
 
 impl Agents {
-    /// Reads every agent's folder and the hex link, and checks each found
-    /// agent that cannot read this Hex's skill.
+    /// Reads every agent's folder and the gospell link, and checks each found
+    /// agent that cannot read this GoSpell's skill.
     pub(super) fn refresh(&mut self) {
         self.paths = agent_install::Paths::current();
         self.read();
@@ -529,7 +531,7 @@ impl Agents {
         match agent_install::cli::install(&agent_install::cli::Environment::current()) {
             Ok(status) => self.cli = Some(status),
             Err(LinkError::Translocation) => {
-                self.cli_error = Some(tr("Move Hex to Applications first").to_string());
+                self.cli_error = Some(tr("Move GoSpell to Applications first").to_string());
             }
             Err(LinkError::Io(error)) => self.cli_error = Some(error),
         }
@@ -545,35 +547,35 @@ impl Agents {
                     agent: Agent::ClaudeCode,
                     found: true,
                     skill: SkillState::Missing,
-                    path: home.join(".claude/skills/hex-annotate/SKILL.md"),
+                    path: home.join(".claude/skills/gospell-annotate/SKILL.md"),
                     linked: false,
                 },
                 AgentStatus {
                     agent: Agent::Codex,
                     found: true,
                     skill: SkillState::Outdated,
-                    path: home.join(".agents/skills/hex-annotate/SKILL.md"),
+                    path: home.join(".agents/skills/gospell-annotate/SKILL.md"),
                     linked: false,
                 },
                 AgentStatus {
                     agent: Agent::OpenCode,
                     found: true,
                     skill: SkillState::Current,
-                    path: home.join(".config/opencode/skills/hex-annotate/SKILL.md"),
+                    path: home.join(".config/opencode/skills/gospell-annotate/SKILL.md"),
                     linked: false,
                 },
                 AgentStatus {
                     agent: Agent::Pi,
                     found: false,
                     skill: SkillState::Missing,
-                    path: home.join(".pi/agent/skills/hex-annotate/SKILL.md"),
+                    path: home.join(".pi/agent/skills/gospell-annotate/SKILL.md"),
                     linked: false,
                 },
             ],
             selected: vec![true, true, false, false],
             cli: Some(agent_install::cli::Status {
                 state: agent_install::cli::State::Installed,
-                path: std::path::PathBuf::from("/opt/homebrew/bin/hex"),
+                path: std::path::PathBuf::from("/opt/homebrew/bin/gospell"),
                 off_path: false,
             }),
             ..Self::default()
@@ -581,13 +583,13 @@ impl Agents {
     }
 }
 
-/// One agent's row: its name, whether it is found and has this Hex's skill,
+/// One agent's row: its name, whether it is found and has this GoSpell's skill,
 /// and a switch that checks it for Install. A not-found agent, and a skill
 /// someone else manages through a symlink, has no switch: it is read by
 /// content and never written here.
 fn agent_row(ui: &Ui, p: Paint, status: &AgentStatus) -> El {
     // A symlinked skill or folder is someone else's to update; the row says
-    // so rather than offering a state Hex can't change.
+    // so rather than offering a state GoSpell can't change.
     let label = if status.linked {
         tr("Managed elsewhere")
     } else {
@@ -708,7 +710,7 @@ fn cli_rows(ui: &Ui, p: Paint) -> Vec<El> {
 fn agents_section(ui: &Ui, p: Paint) -> El {
     let mut rows = vec![note(
         "agents-intro",
-        tr("Let coding agents read your captures with the hex-annotate skill"),
+        tr("Let coding agents read your captures with the gospell-annotate skill"),
         p.muted(),
     )];
     for status in &ui.agents.statuses {
@@ -795,7 +797,7 @@ pub(super) fn pane(ui: &Ui, p: Paint, layer: &mut Vec<El>) -> El {
     if enabled && ui.settings.labs.annotate_agent_install {
         content = content.child(agents_section(ui, p));
     }
-    // Apple's speech recognizer is macOS's; Linux transcribes with Hex's model.
+    // Apple's speech recognizer is macOS's; Linux transcribes with GoSpell's model.
     if enabled && cfg!(target_os = "macos") {
         content = content.child(section(
             p,
@@ -910,7 +912,7 @@ mod tests {
             static SEQUENCE: AtomicU32 = AtomicU32::new(0);
             let sequence = SEQUENCE.fetch_add(1, Ordering::Relaxed);
             let path = std::env::temp_dir().join(format!(
-                "hex-scrawl-agents-{}-{name}-{sequence}",
+                "gospell-scrawl-agents-{}-{name}-{sequence}",
                 std::process::id()
             ));
             let _ = std::fs::remove_dir_all(&path);
@@ -1013,7 +1015,7 @@ mod tests {
 
     #[cfg(target_os = "macos")]
     #[test]
-    fn a_grant_this_hex_cant_use_yet_offers_a_restart() {
+    fn a_grant_this_gospell_cant_use_yet_offers_a_restart() {
         let mut rt = pane("mac-scrawl-restart");
         assert!(
             rt.find(ALLOW).is_none(),
@@ -1081,10 +1083,8 @@ mod tests {
         assert!(off.find("agents").is_none());
         assert!(off.find("agents-install").is_none());
         assert!(
-            !texts(&off)
-                .iter()
-                .any(|text| text
-                    == "Let coding agents read your captures with the hex-annotate skill")
+            !texts(&off).iter().any(|text| text
+                == "Let coding agents read your captures with the gospell-annotate skill")
         );
 
         let on = pane("mac-scrawl-agents");
@@ -1116,7 +1116,7 @@ mod tests {
             assert!(
                 shown
                     .iter()
-                    .any(|text| text == "Installed at /opt/homebrew/bin/hex")
+                    .any(|text| text == "Installed at /opt/homebrew/bin/gospell")
             );
         }
     }
@@ -1137,16 +1137,16 @@ mod tests {
         );
         tap(&mut rt, "agents-install");
         assert_eq!(
-            std::fs::read(home.join(".claude/skills/hex-annotate/SKILL.md")).unwrap(),
+            std::fs::read(home.join(".claude/skills/gospell-annotate/SKILL.md")).unwrap(),
             agent_install::SKILL.as_bytes()
         );
         assert_eq!(
-            std::fs::read(home.join(".agents/skills/hex-annotate/SKILL.md")).unwrap(),
+            std::fs::read(home.join(".agents/skills/gospell-annotate/SKILL.md")).unwrap(),
             agent_install::SKILL.as_bytes(),
             "Codex reads the shared copy"
         );
         assert!(
-            std::fs::read(home.join(".pi/agent/skills/hex-annotate/SKILL.md")).is_err(),
+            std::fs::read(home.join(".pi/agent/skills/gospell-annotate/SKILL.md")).is_err(),
             "Pi was not found, so nothing was written for it"
         );
         assert_eq!(
@@ -1196,11 +1196,11 @@ mod tests {
         let home = temp.path().join("home");
         let outside = temp.path().join("outside");
         std::fs::create_dir_all(home.join(".claude/skills")).unwrap();
-        std::fs::create_dir_all(outside.join("hex-annotate")).unwrap();
-        std::fs::write(outside.join("hex-annotate/SKILL.md"), "an older skill").unwrap();
+        std::fs::create_dir_all(outside.join("gospell-annotate")).unwrap();
+        std::fs::write(outside.join("gospell-annotate/SKILL.md"), "an older skill").unwrap();
         std::os::unix::fs::symlink(
-            outside.join("hex-annotate"),
-            home.join(".claude/skills/hex-annotate"),
+            outside.join("gospell-annotate"),
+            home.join(".claude/skills/gospell-annotate"),
         )
         .unwrap();
         let mut rt = agents_pane(&home);
@@ -1220,7 +1220,7 @@ mod tests {
         assert_eq!(rt.state.agents.selected, vec![false; 4]);
         tap(&mut rt, "agents-install");
         assert_eq!(
-            std::fs::read_to_string(outside.join("hex-annotate/SKILL.md")).unwrap(),
+            std::fs::read_to_string(outside.join("gospell-annotate/SKILL.md")).unwrap(),
             "an older skill",
             "nothing was written through the link"
         );

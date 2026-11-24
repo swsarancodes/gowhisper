@@ -1,4 +1,4 @@
-//! Checks that the session's input still reaches Hex's low-level hooks.
+//! Checks that the session's input still reaches GoSpell's low-level hooks.
 //!
 //! Windows silently removes a low-level hook whose callback takes longer than
 //! `LowLevelHooksTimeout`, and an app that registers raw keyboard input can
@@ -109,7 +109,7 @@ impl Backoff {
         keyboard_generation: u32,
         session_last_ms: Option<u32>,
         hook_last_ms: u32,
-        hex_foreground: bool,
+        gospell_foreground: bool,
     ) -> Decision {
         if keyboard_generation != self.seen_keyboard_generation {
             self.seen_keyboard_generation = keyboard_generation;
@@ -129,7 +129,7 @@ impl Backoff {
             hook_last_ms,
             self.last_rearm_ms,
             self.wait_ms,
-            hex_foreground,
+            gospell_foreground,
         ) {
             return Decision::Idle;
         }
@@ -242,7 +242,7 @@ fn tick() {
             if rearm::rearm_after_silence() {
                 if first {
                     tracing::info!(
-                        "input was reaching the session but not Hex's low-level hooks; re-armed them"
+                        "input was reaching the session but not GoSpell's low-level hooks; re-armed them"
                     );
                 }
                 BACKOFF
@@ -252,7 +252,7 @@ fn tick() {
             }
         }
         Decision::StreakEnded { rearms } => {
-            tracing::info!(rearms, "input is reaching Hex's keyboard hook again");
+            tracing::info!(rearms, "input is reaching GoSpell's keyboard hook again");
         }
     }
     heal_stale_chord(now, keyboard_quiet_threshold());
@@ -303,7 +303,7 @@ fn session_last_input() -> Option<u32> {
 /// Whether input is reaching the session but not the hooks: the session saw
 /// input within `SESSION_INPUT_MS`, neither hook has stamped anything for
 /// `HOOK_SILENCE_MS`, and the back-off since the last silent re-arm
-/// (`last_rearm_ms` zero for none, `wait_ms` doubling) has passed. Hex in
+/// (`last_rearm_ms` zero for none, `wait_ms` doubling) has passed. GoSpell in
 /// front is skipped: re-arming over its own raw keyboard input would
 /// recreate the silence. Tick counts wrap every 49.7 days, so every distance
 /// is a wrapping subtraction; `hook_last_ms` of zero (nothing seen since the
@@ -314,9 +314,9 @@ fn should_rearm(
     hook_last_ms: u32,
     last_rearm_ms: u32,
     wait_ms: u32,
-    hex_foreground: bool,
+    gospell_foreground: bool,
 ) -> bool {
-    !hex_foreground
+    !gospell_foreground
         && now_ms.wrapping_sub(session_last_ms) <= SESSION_INPUT_MS
         && now_ms.wrapping_sub(hook_last_ms) >= HOOK_SILENCE_MS
         && (last_rearm_ms == 0 || now_ms.wrapping_sub(last_rearm_ms) >= wait_ms)
@@ -441,7 +441,7 @@ mod tests {
         assert!(should_rearm(now, now - 500, now - 3_000, 0, 3_000, false));
         // A slow callback gets the first tick.
         assert!(!should_rearm(now, now - 500, now - 2_000, 0, 3_000, false));
-        // Hex in front: re-arming would silence the app's own raw input.
+        // GoSpell in front: re-arming would silence the app's own raw input.
         assert!(!should_rearm(now, now - 500, now - 3_000, 0, 3_000, true));
     }
 

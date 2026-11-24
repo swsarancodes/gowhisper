@@ -69,7 +69,7 @@ unsafe extern "system" fn numpad_hook(code: i32, wparam: WPARAM, lparam: LPARAM)
         if is_down || matches!(message, WM_KEYUP | WM_SYSKEYUP) {
             // SAFETY: a keyboard hook's lparam is a KBDLLHOOKSTRUCT.
             let event = unsafe { &*(lparam as *const KBDLLHOOKSTRUCT) };
-            // The listener's hook runs only while Hex listens, and this one
+            // The listener's hook runs only while GoSpell listens, and this one
             // only while the window records, so both feed the shared state
             // the poll reads.
             note_left_control(LeftControl::of(event.vkCode, event.scanCode), is_down);

@@ -181,7 +181,10 @@ mod tests {
     use super::*;
 
     fn temp(name: &str) -> PathBuf {
-        std::env::temp_dir().join(format!("hex-capture-wav-{name}-{}.wav", std::process::id()))
+        std::env::temp_dir().join(format!(
+            "gospell-capture-wav-{name}-{}.wav",
+            std::process::id()
+        ))
     }
 
     #[test]

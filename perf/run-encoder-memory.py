@@ -20,11 +20,11 @@ assert pooled in ("0", "1")
 label = sys.argv[3] if len(sys.argv) > 3 else pooled
 out = (Path(".lab-output/headless-pipelines/encoder") / label).resolve()
 out.mkdir(parents=True, exist_ok=True)
-with tempfile.TemporaryDirectory(prefix="hex-encoder-memory-") as home:
+with tempfile.TemporaryDirectory(prefix="gospell-encoder-memory-") as home:
     env = {k: v for k, v in os.environ.items()
-           if not k.startswith(("HEX_", "OPENCODE_", "RUNE_", "OTEL_"))}
-    env.update(HOME=home, HEX_APPLICATION_SUPPORT_DIR=home + "/data",
-               HEX_DISABLE_UPDATES="1", HEX_MEMORY_OUT=str(out), HEX_MEMORY_POOL=pooled)
+           if not k.startswith(("GOSPELL_", "OPENCODE_", "RUNE_", "OTEL_"))}
+    env.update(HOME=home, GOSPELL_APPLICATION_SUPPORT_DIR=home + "/data",
+               GOSPELL_DISABLE_UPDATES="1", GOSPELL_MEMORY_OUT=str(out), GOSPELL_MEMORY_POOL=pooled)
     with (out / "test.log").open("w") as log:
         result = subprocess.run([binary, "--ignored", "--exact", test, "--nocapture"],
                                 env=env, stdout=log, stderr=log, timeout=600)

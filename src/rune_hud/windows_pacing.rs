@@ -6,7 +6,7 @@
 //! as a window's do, so frames in flight stay bounded. Before it, a HUD that
 //! drew, submitted and presented as fast as the loop turned grew the swap
 //! chain's queue of presented but unretired frames, and whatever each queued
-//! frame held (about 100 MB/s to 5+ GB, #1796). Hex still asks for one frame
+//! frame held (about 100 MB/s to 5+ GB, #1796). GoSpell still asks for one frame
 //! each `HUD_FRAME`, a fixed ~60 Hz timer rather than the display's refresh,
 //! and reports the HUD through `HudCompositor::animating` as not display-paced.
 
@@ -68,7 +68,7 @@ pub(super) fn meter_update(hud: &mut Hud, event: HudEvent) -> bool {
 
 /// Rune's poll for the Windows HUD: arm the next frame while the HUD is moving
 /// and drawing, and ask for nothing otherwise, so a show nothing draws never
-/// turns the loop at 60 Hz with Hex idle. The frame's own render follows this
+/// turns the loop at 60 Hz with GoSpell idle. The frame's own render follows this
 /// pass, so `last_drawn` is the previous drawn frame's (the one this poll's own
 /// frame drew lands after it); `polled_at` tells them apart. Nothing the view
 /// reads changed, so the frame needs no new commit.

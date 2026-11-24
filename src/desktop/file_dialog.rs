@@ -10,7 +10,7 @@ use std::sync::mpsc::{Receiver, SyncSender, TryRecvError, sync_channel};
 fn show(dialog: Dialog, reply: Reply) {
     // A failed spawn drops the reply, which answers "nothing chosen".
     let _ = std::thread::Builder::new()
-        .name("hex-file-dialog".into())
+        .name("gospell-file-dialog".into())
         .spawn(move || {
             let dialogs = rune::FileDialogs::native();
             let mut options = rune::FileDialogOptions {
@@ -79,7 +79,7 @@ pub(crate) fn open(dialog: Dialog, wake: impl Fn() + Send + 'static) -> Pending 
 /// [`open`] for a save dialog asked from an overlay, such as Labs ›
 /// Screenshots' editor. Rune's dialogs attach to a window and refuse
 /// overlays, so on macOS this is an `NSSavePanel` of its own, free-standing
-/// above every overlay, with Hex brought forward so the panel takes keys.
+/// above every overlay, with GoSpell brought forward so the panel takes keys.
 /// Off the main thread, for other targets, and elsewhere it is [`open`].
 pub(crate) fn open_over_overlays(dialog: Dialog, wake: impl Fn() + Send + 'static) -> Pending {
     let (reply, pending) = channel(wake);

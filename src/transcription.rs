@@ -59,7 +59,7 @@ pub use crate::transcription::transcript::{Transcript, TranscriptSegment};
 /// (issue 657: sentences lost their full stop or question mark).
 pub(crate) const UNIFIED_ENGLISH_TRAILING_SILENCE_SAMPLES: usize = 6_400;
 
-/// Where a loaded speech model runs, for `hex status` and Settings.
+/// Where a loaded speech model runs, for `gospell status` and Settings.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct SpeechBackend {
     /// The backend that runs it: `cpu`, `vulkan`, `cuda`, `rocm`, `metal`, or
@@ -111,7 +111,7 @@ impl Transcriber {
     }
 
     /// Brings an idle GGUF model's weights back before audio arrives (see
-    /// [`Parakeet::prewarm`]). Apple Speech has no weights of Hex's to warm.
+    /// [`Parakeet::prewarm`]). Apple Speech has no weights of GoSpell's to warm.
     pub fn prewarm(&mut self) -> Result<()> {
         match self {
             Self::Gguf(model) => model.prewarm(),
@@ -120,7 +120,7 @@ impl Transcriber {
     }
 
     /// Transcribe normalized 16 kHz audio. Backend padding is applied once here,
-    /// before GGUF chunking or any hex retranscription.
+    /// before GGUF chunking or any gospell retranscription.
     pub fn transcribe(&mut self, mut samples: Vec<f32>) -> Result<String> {
         match self {
             Self::Gguf(model) => {

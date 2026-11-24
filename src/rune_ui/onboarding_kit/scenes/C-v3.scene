@@ -1,5 +1,5 @@
 # C, the v3 control: the calmer scene approved before the arena, with the
-# plain "With Hex" ending.
+# plain "With GoSpell" ending.
 
 title   Launch Room
 group   Jay, you, and 3 investors
@@ -39,7 +39,7 @@ wait    0.12
 end     removed
 
 with
-hex     Yes, we're ready. Everything's tested, go ahead.
+gospell     Yes, we're ready. Everything's tested, go ahead.
 Jay:    perfect. they're actually clapping
-score   {hex}, no typos
+score   {gospell}, no typos
 typed   Typing: {secs}, {typos}, and one job.

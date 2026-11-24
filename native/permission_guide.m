@@ -6,17 +6,17 @@
 #import <QuartzCore/QuartzCore.h>
 #import <dlfcn.h>
 
-typedef NS_ENUM(NSInteger, HexPermission) {
-    HexPermissionAccessibility = 1,
-    HexPermissionMicrophone = 2,
-    HexPermissionSystemAudio = 3,
-    HexPermissionScreenRecording = 4,
+typedef NS_ENUM(NSInteger, GoSpellPermission) {
+    GoSpellPermissionAccessibility = 1,
+    GoSpellPermissionMicrophone = 2,
+    GoSpellPermissionSystemAudio = 3,
+    GoSpellPermissionScreenRecording = 4,
 };
 
 static NSPanel *guidePanel;
 static NSTimer *guideTimer;
 static BOOL sawSettingsWindow;
-static HexPermission activePermission;
+static GoSpellPermission activePermission;
 /// The pane the guide points at, opened again when Settings is closed under
 /// it, at most `guideReopenLimit` times before the guide gives up.
 static NSURL *guideSettingsURL;
@@ -24,7 +24,7 @@ static NSUInteger guideReopens;
 static const NSUInteger guideReopenLimit = 2;
 static NSView *guideTile;
 
-/// The tile flies on its own from the click in Hex's window to its place in
+/// The tile flies on its own from the click in GoSpell's window to its place in
 /// the guide, so the eye can follow it to System Settings.
 static NSPanel *flightPanel;
 static CALayer *flightLayer;
@@ -38,7 +38,7 @@ static const CFTimeInterval flightDuration = 0.62;
 /// Settings that has not opened by then gets no flight.
 static const CFTimeInterval flightPatience = 4;
 
-@interface HexDragView : NSView <NSDraggingSource>
+@interface GoSpellDragView : NSView <NSDraggingSource>
 @property(nonatomic, strong) NSURL *bundleURL;
 @property(nonatomic, strong) NSImage *appIcon;
 @property(nonatomic, copy) NSString *appName;
@@ -46,12 +46,12 @@ static const CFTimeInterval flightPatience = 4;
 @end
 
 /// The name System Settings lists the app under.
-static NSString *hexAppName(NSURL *bundleURL) {
+static NSString *gospellAppName(NSURL *bundleURL) {
     NSString *name = [[NSFileManager defaultManager] displayNameAtPath:bundleURL.path];
     if ([name.pathExtension.lowercaseString isEqualToString:@"app"]) {
         name = name.stringByDeletingPathExtension;
     }
-    return name.length > 0 ? name : @"Hex";
+    return name.length > 0 ? name : @"GoSpell";
 }
 
 /// macOS 27 renamed the Accessibility list.
@@ -61,15 +61,15 @@ static BOOL accessibilityRenamed(void) {
 }
 
 /// The name of the Privacy & Security list each permission lives in.
-const char *hex_permission_list_name(int permission) {
-    switch ((HexPermission)permission) {
-        case HexPermissionAccessibility:
+const char *gospell_permission_list_name(int permission) {
+    switch ((GoSpellPermission)permission) {
+        case GoSpellPermissionAccessibility:
             return accessibilityRenamed() ? "Device Control and Data Access" : "Accessibility";
-        case HexPermissionMicrophone:
+        case GoSpellPermissionMicrophone:
             return "Microphone";
-        case HexPermissionSystemAudio:
+        case GoSpellPermissionSystemAudio:
             return "System Audio Recording Only";
-        case HexPermissionScreenRecording:
+        case GoSpellPermissionScreenRecording:
             return "Screen & System Audio Recording";
     }
     return "Privacy & Security";
@@ -77,14 +77,14 @@ const char *hex_permission_list_name(int permission) {
 
 /// Asks macOS to register this running binary in Accessibility and show its
 /// prompt when untrusted.
-bool hex_prompt_accessibility_trust(void) {
+bool gospell_prompt_accessibility_trust(void) {
     NSDictionary *options = @{(__bridge NSString *)kAXTrustedCheckOptionPrompt: @YES};
     return AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)options);
 }
 
 /// Writes the running `.app` bundle's identifier as UTF-8 into `buf`,
 /// returning its byte length, or 0 outside a `.app` bundle.
-size_t hex_running_app_bundle_id(char *buf, size_t cap) {
+size_t gospell_running_app_bundle_id(char *buf, size_t cap) {
     if (buf == NULL || cap == 0) {
         return 0;
     }
@@ -132,7 +132,7 @@ static void drawTile(NSRect bounds, NSImage *icon, NSString *name, BOOL dark) {
     [name drawAtPoint:NSMakePoint(52, 14) withAttributes:attributes];
 }
 
-@implementation HexDragView
+@implementation GoSpellDragView
 
 - (instancetype)initWithFrame:(NSRect)frame bundleURL:(NSURL *)bundleURL {
     self = [super initWithFrame:frame];
@@ -140,7 +140,7 @@ static void drawTile(NSRect bounds, NSImage *icon, NSString *name, BOOL dark) {
         _bundleURL = bundleURL;
         _appIcon = [[NSWorkspace sharedWorkspace] iconForFile:bundleURL.path];
         _appIcon.size = NSMakeSize(32, 32);
-        _appName = hexAppName(bundleURL);
+        _appName = gospellAppName(bundleURL);
     }
     return self;
 }
@@ -257,8 +257,8 @@ static BOOL settingsHasWindow(void) {
 
 /// Bit 0: System Settings has an open window.
 /// Bit 1: System Settings is the frontmost application.
-/// Bit 2: Hex is the active application.
-int hex_permission_settings_state(void) {
+/// Bit 2: GoSpell is the active application.
+int gospell_permission_settings_state(void) {
     NSCAssert(NSThread.isMainThread, @"settings state must run on the main thread");
     BOOL open = settingsHasWindow();
     BOOL frontmost = settingsFrontmost();
@@ -301,7 +301,7 @@ static void openSettingsPaneMayQuit(NSURL *url, BOOL mayQuit) {
     BOOL cold = running.count == 0;
     NSUInteger request = ++settingsRequest;
     // A Settings window left on another Space would pull the whole screen
-    // there, away from Hex. Quit it so it opens fresh on this Space.
+    // there, away from GoSpell. Quit it so it opens fresh on this Space.
     if (mayQuit && !cold && !settingsHasWindow() && settingsWindowExists()) {
         NSRunningApplication *settings = running.firstObject;
         [settings terminate];
@@ -386,34 +386,34 @@ static BOOL systemAudioGranted(void) {
 
 /// Screen Recording, read from TCC: `CGPreflightScreenCaptureAccess` keeps
 /// the answer it read first for the life of the process, so a grant made in
-/// System Settings while Hex runs never reached the guide and it hung there
-/// until Hex restarted. TCC's preflight reads it now; the CoreGraphics one
+/// System Settings while GoSpell runs never reached the guide and it hung there
+/// until GoSpell restarted. TCC's preflight reads it now; the CoreGraphics one
 /// remains only for a system where that preflight is unavailable.
 static BOOL screenRecordingGranted(void) {
     int status = tccPreflight(CFSTR("kTCCServiceScreenCapture"));
     return status >= 0 ? status == 0 : CGPreflightScreenCaptureAccess();
 }
 
-/// AVFoundation keeps the microphone answer it read first until Hex itself
+/// AVFoundation keeps the microphone answer it read first until GoSpell itself
 /// asks, so a grant that came another way (macOS prompting when CoreAudio
 /// opened an input, or the switch in System Settings) reads from TCC.
-int hex_microphone_preflight(void) {
+int gospell_microphone_preflight(void) {
     return tccPreflight(CFSTR("kTCCServiceMicrophone"));
 }
 
 static BOOL permissionGranted(void) {
     switch (activePermission) {
         // What System Settings shows now: the preflights keep their launch
-        // answer until Hex restarts.
-        case HexPermissionAccessibility:
+        // answer until GoSpell restarts.
+        case GoSpellPermissionAccessibility:
             return AXIsProcessTrusted();
-        case HexPermissionMicrophone:
+        case GoSpellPermissionMicrophone:
             return [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio] ==
                        AVAuthorizationStatusAuthorized ||
-                   hex_microphone_preflight() == 0;
-        case HexPermissionSystemAudio:
+                   gospell_microphone_preflight() == 0;
+        case GoSpellPermissionSystemAudio:
             return systemAudioGranted();
-        case HexPermissionScreenRecording:
+        case GoSpellPermissionScreenRecording:
             return screenRecordingGranted();
     }
     return NO;
@@ -442,17 +442,17 @@ static void closeGuide(void) {
 
 /// Whether the guide for `permission` is open, in front or waiting behind
 /// another app for System Settings to come back.
-bool hex_permission_guide_active(int permission) {
+bool gospell_permission_guide_active(int permission) {
     NSCAssert(NSThread.isMainThread, @"permission guide must run on the main thread");
-    return guidePanel != nil && activePermission == (HexPermission)permission;
+    return guidePanel != nil && activePermission == (GoSpellPermission)permission;
 }
 
-/// Closes the guide for `permission`: Hex read the grant itself (Screen
+/// Closes the guide for `permission`: GoSpell read the grant itself (Screen
 /// Recording through a fresh helper, since this process's own preflight keeps
 /// the launch answer), so there is nothing left for the tile to point at.
-void hex_close_permission_guide(int permission) {
+void gospell_close_permission_guide(int permission) {
     NSCAssert(NSThread.isMainThread, @"permission guide must run on the main thread");
-    if (guidePanel == nil || activePermission != (HexPermission)permission) {
+    if (guidePanel == nil || activePermission != (GoSpellPermission)permission) {
         return;
     }
     closeGuide();
@@ -519,8 +519,8 @@ static void stepFlight(void) {
     }
 }
 
-/// The click that asked for the guide, when it was in one of Hex's windows.
-static BOOL clickInHexWindow(NSPoint point) {
+/// The click that asked for the guide, when it was in one of GoSpell's windows.
+static BOOL clickInGoSpellWindow(NSPoint point) {
     for (NSWindow *window in NSApp.windows) {
         if (window.visible && window != guidePanel && window != flightPanel &&
             NSPointInRect(point, window.frame)) {
@@ -530,14 +530,14 @@ static BOOL clickInHexWindow(NSPoint point) {
     return NO;
 }
 
-/// Lifts a copy of the tile out of Hex's window at `origin`.
+/// Lifts a copy of the tile out of GoSpell's window at `origin`.
 static void beginFlight(NSPoint origin, NSURL *bundleURL, NSSize tileSize) {
     flightOrigin = origin;
     flightShownAt = CACurrentMediaTime();
     flightStartedAt = 0;
     NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFile:bundleURL.path];
     icon.size = NSMakeSize(32, 32);
-    NSString *name = hexAppName(bundleURL);
+    NSString *name = gospellAppName(bundleURL);
     BOOL dark = isDark(NSApp.effectiveAppearance);
     NSImage *image = [NSImage imageWithSize:tileSize
                                     flipped:NO
@@ -651,36 +651,36 @@ static void updateGuidePosition(void) {
     [guidePanel orderFrontRegardless];
 }
 
-void hex_show_permission_guide(int permission) {
+void gospell_show_permission_guide(int permission) {
     NSCAssert(NSThread.isMainThread, @"permission guide must run on the main thread");
     NSPoint click = NSEvent.mouseLocation;
-    BOOL fly = clickInHexWindow(click) &&
+    BOOL fly = clickInGoSpellWindow(click) &&
                !NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion;
     closeGuide();
-    activePermission = (HexPermission)permission;
+    activePermission = (GoSpellPermission)permission;
     guideReopens = 0;
 
     NSURL *bundleURL = NSBundle.mainBundle.bundleURL.standardizedURL;
-    NSString *listName = [NSString stringWithUTF8String:hex_permission_list_name(permission)];
-    NSString *appName = hexAppName(bundleURL);
+    NSString *listName = [NSString stringWithUTF8String:gospell_permission_list_name(permission)];
+    NSString *appName = gospellAppName(bundleURL);
     NSString *pane;
     switch (activePermission) {
-        case HexPermissionAccessibility:
+        case GoSpellPermissionAccessibility:
             pane = @"Privacy_Accessibility";
             break;
-        case HexPermissionMicrophone:
+        case GoSpellPermissionMicrophone:
             pane = @"Privacy_Microphone";
             break;
-        case HexPermissionSystemAudio:
+        case GoSpellPermissionSystemAudio:
             pane = @"Privacy_AudioCapture";
             break;
-        case HexPermissionScreenRecording:
+        case GoSpellPermissionScreenRecording:
             pane = @"Privacy_ScreenCapture";
             break;
     }
     // The Microphone list only holds apps that asked, so a refused
     // microphone is switched on rather than dragged in.
-    BOOL draggable = activePermission != HexPermissionMicrophone;
+    BOOL draggable = activePermission != GoSpellPermissionMicrophone;
     NSURL *settingsURL = [NSURL URLWithString:[NSString stringWithFormat:
         @"x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?%@", pane]];
     openSettingsPane(settingsURL);
@@ -725,7 +725,7 @@ void hex_show_permission_guide(int permission) {
     [content addSubview:instruction];
 
     if (draggable) {
-        HexDragView *dragView = [[HexDragView alloc]
+        GoSpellDragView *dragView = [[GoSpellDragView alloc]
             initWithFrame:NSMakeRect(18, 17, panelSize.width - 36, 44)
                  bundleURL:bundleURL];
         [content addSubview:dragView];

@@ -1,4 +1,4 @@
-//! The listener's microphone: the one stream Hex keeps open, reopened after a
+//! The listener's microphone: the one stream GoSpell keeps open, reopened after a
 //! failure or a device change with `recovery`'s backoff, and closed while it
 //! is not needed.
 
@@ -334,7 +334,7 @@ impl RecoveringAudioInput {
     #[cfg(test)]
     pub fn pending_for_test() -> (Self, Sender<InputOpenResult>) {
         let mut input = Self::closed(
-            Some("Hex nonexistent microphone for pending open test"),
+            Some("GoSpell nonexistent microphone for pending open test"),
             0,
             None,
         );
@@ -371,7 +371,7 @@ impl RecoveringAudioInput {
         }
     }
 
-    /// Whether `input` already runs on the path Hex wants now.
+    /// Whether `input` already runs on the path GoSpell wants now.
     fn open_input_matches(&self, input: &AudioInput) -> bool {
         input.voice_path == self.voice_isolation.wanted_path()
     }
@@ -407,7 +407,7 @@ impl RecoveringAudioInput {
     }
 
     /// Makes `input` the listener's microphone and the only stream feeding
-    /// Hex Microphone, stopping the previous stream first.
+    /// GoSpell Microphone, stopping the previous stream first.
     fn install(&mut self, input: AudioInput) {
         self.install_after_open(input, false);
     }
@@ -441,25 +441,25 @@ impl RecoveringAudioInput {
             self.voice_isolation.mark_fallback(&reason);
         }
         self.retire_input();
-        input.feed_hex_microphone(true);
+        input.feed_gospell_microphone(true);
         self.input = Some(input);
         self.outage.clear();
         self.retry_warning = None;
     }
 
-    /// Stops the open stream and drops it, so no stream of Hex's is left on
+    /// Stops the open stream and drops it, so no stream of GoSpell's is left on
     /// the device.
     fn retire_input(&mut self) {
         self.delivery = StreamDelivery::Unobserved;
         if let Some(previous) = self.input.take() {
-            previous.feed_hex_microphone(false);
+            previous.feed_gospell_microphone(false);
             drop(previous);
         }
     }
 
     pub fn close(&mut self) {
         if let Some(previous) = self.input.take() {
-            previous.feed_hex_microphone(false);
+            previous.feed_gospell_microphone(false);
         }
         self.delivery = StreamDelivery::Unobserved;
         self.replacement = None;
@@ -657,7 +657,7 @@ impl RecoveringAudioInput {
                 if self.delivery.is_proven() {
                     self.recovery.request_stream_recovery(failed_at);
                 } else {
-                    // Release the dead stream before the wait starts: Hex
+                    // Release the dead stream before the wait starts: GoSpell
                     // holds no microphone while it backs off.
                     self.retire_input();
                     self.recovery.back_off_stream_recovery(failed_at);
@@ -698,7 +698,7 @@ impl RecoveringAudioInput {
             .unwrap_or(self.active_revision);
         // A failed stream is replaced even by the same device; a route,
         // selection, or voice-isolation change keeps the open device only
-        // when it already runs on the path Hex wants now.
+        // when it already runs on the path GoSpell wants now.
         let keep = self
             .input
             .as_ref()

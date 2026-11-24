@@ -1,5 +1,5 @@
 //! Labs › Transcribe dropped audio, headless: the window takes a file only
-//! with the lab on, says what Hex reads for one it can't, and queues what it
+//! with the lab on, says what GoSpell reads for one it can't, and queues what it
 //! takes one at a time on a stand-in worker, so no model loads.
 
 use std::path::{Path, PathBuf};
@@ -357,7 +357,7 @@ fn a_file_of_unknown_length_says_transcribing_without_a_percentage() {
 }
 
 #[test]
-fn a_file_hex_cannot_read_is_refused() {
+fn a_file_gospell_cannot_read_is_refused() {
     let (mut rt, started) = window(true);
     let at = landing(&rt);
     // WMA has no reader here, so the drop target refuses it.
@@ -366,7 +366,7 @@ fn a_file_hex_cannot_read_is_refused() {
     settle(&mut rt);
     assert!(
         texts(&rt).iter().any(|text| {
-            text == "Hex can transcribe WAV, MP3, AAC, M4A, MP4, MOV, AIFF, CAF, FLAC, OGG, Opus, WebM, or MKV files"
+            text == "GoSpell can transcribe WAV, MP3, AAC, M4A, MP4, MOV, AIFF, CAF, FLAC, OGG, Opus, WebM, or MKV files"
         }),
         "{:?}",
         texts(&rt)
@@ -378,7 +378,7 @@ fn a_file_hex_cannot_read_is_refused() {
     assert!(rt.state.drop.running().is_none());
     assert!(
         rt.find("drop-transcribe-rejected").is_some(),
-        "the toast says what Hex reads"
+        "the toast says what GoSpell reads"
     );
 }
 
@@ -473,7 +473,7 @@ fn press_labelled(rt: &mut Runtime<Ui>, label: &str) {
     settle(rt);
 }
 
-/// A file Hex reads starts with nothing on screen but the window's own
+/// A file GoSpell reads starts with nothing on screen but the window's own
 /// panes: the drop surface is not part of it until a drag or a file arrives.
 #[test]
 fn the_drop_surface_shows_nothing_at_rest() {

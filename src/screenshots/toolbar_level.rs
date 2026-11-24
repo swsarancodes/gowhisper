@@ -33,7 +33,7 @@ pub(super) fn start(overlay: OverlayHandle<Toolbar>, microphone: String) {
         return;
     }
     let spawned = std::thread::Builder::new()
-        .name("hex-record-level".into())
+        .name("gospell-record-level".into())
         .spawn(move || run(&overlay, &microphone, meter));
     if let Err(error) = spawned {
         tracing::warn!(%error, "could not meter the recording toolbar's microphone");

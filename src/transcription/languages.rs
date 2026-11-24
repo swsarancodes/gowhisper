@@ -1,4 +1,4 @@
-//! The languages Hex names. The catalog order is the order defaults,
+//! The languages GoSpell names. The catalog order is the order defaults,
 //! validation, the CLI, and the API use; menus sort it by name.
 
 use super::models::AUTO_LANGUAGE;
@@ -118,7 +118,7 @@ pub(crate) fn is_listed(code: &str) -> bool {
     LANGUAGES.iter().any(|(candidate, _)| *candidate == code)
 }
 
-/// The language's English name, or its code when Hex has none.
+/// The language's English name, or its code when GoSpell has none.
 pub fn language_name(code: &str) -> &str {
     LANGUAGES
         .iter()

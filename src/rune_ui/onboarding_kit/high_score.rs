@@ -1,6 +1,6 @@
-//! The practice game's best score: one number in `game-best` in Hex's data
+//! The practice game's best score: one number in `game-best` in GoSpell's data
 //! folder, owner-only and replaced whole. It isn't a setting, so it stays
-//! out of `settings.json` and `hex settings`.
+//! out of `settings.json` and `gospell settings`.
 
 use std::fs::{self, OpenOptions};
 use std::io::{self, Write};
@@ -51,7 +51,7 @@ mod tests {
 
     #[test]
     fn the_best_score_round_trips_owner_only() {
-        let dir = std::env::temp_dir().join(format!("hex-game-best-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("gospell-game-best-{}", std::process::id()));
         let _ = fs::remove_dir_all(&dir);
         assert_eq!(load_at(&dir), 0);
         save_at(&dir, 12).unwrap();

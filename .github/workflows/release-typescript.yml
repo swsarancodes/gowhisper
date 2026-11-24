@@ -61,7 +61,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          for tag in $(git tag --points-at HEAD --list '@kitlangton/hex@*'); do
+          for tag in $(git tag --points-at HEAD --list '@goml/gospell@*'); do
             git push origin "refs/tags/$tag"
             awk -v heading="## ${tag##*@}" '$0 == heading { on = 1; next } /^## / && on { exit } on' \
               typescript/CHANGELOG.md > "$RUNNER_TEMP/notes.md"

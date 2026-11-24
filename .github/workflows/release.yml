@@ -1,7 +1,7 @@
 name: Release
 
-# Builds, signs, and publishes Hex for macOS, Windows, and Linux from one
-# exact commit to the Anomaly release service (docs/releasing.md,
+# Builds, signs, and publishes GoSpell for macOS, Windows, and Linux from one
+# exact commit to the GoML release service (docs/releasing.md,
 # docs/plans/release-service.md), split the way OpenCode's release is:
 #
 # - build jobs (Build desktop, build-macos, the Windows setup engine, Windows
@@ -27,9 +27,9 @@ name: Release
 #
 # There is one environment, release, like OpenCode's: no approval, deployment
 # policy dev only. The service authorizes publish jobs by their OIDC token:
-# anomalyco/hex, this file, refs/heads/dev, environment release
-# (anomalyco/release registry/hex.json).
-# Hex never uses the service's dev stage.
+# goml/gospell, this file, refs/heads/dev, environment release
+# (anomalyco/release registry/gospell.json).
+# GoSpell never uses the service's dev stage.
 #
 # Channels (.github/release/plan.sh):
 # - dev: every push to dev (except docs/site/Markdown-only) publishes
@@ -78,7 +78,7 @@ defaults:
     shell: bash
 
 env:
-  HEX_TEAM_ID: 5NZ4Q7NXJ4
+  GOSPELL_TEAM_ID: 5NZ4Q7NXJ4
 
 jobs:
   plan:
@@ -197,15 +197,15 @@ jobs:
             /tmp/rune-settings-*-actual.png
           if-no-files-found: ignore
 
-  # Hex.app as the release identity (anomaly.hex), ad-hoc signed; sign-macos
+  # GoSpell.app as the release identity (com.goml.gospell), ad-hoc signed; sign-macos
   # signs it with the Developer ID.
   build-macos:
     needs: plan
     runs-on: blacksmith-6vcpu-macos-26
     timeout-minutes: 120
     env:
-      HEX_VERSION: ${{ needs.plan.outputs.release-version }}
-      HEX_BUILD_CHANNEL: ${{ needs.plan.outputs.release-channel }}
+      GOSPELL_VERSION: ${{ needs.plan.outputs.release-version }}
+      GOSPELL_BUILD_CHANNEL: ${{ needs.plan.outputs.release-channel }}
     outputs:
       digest: ${{ steps.upload.outputs.digest }}
     steps:
@@ -219,13 +219,13 @@ jobs:
       - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
       - name: Install the Metal toolchain
         run: xcrun --sdk macosx metal --version || xcodebuild -downloadComponent MetalToolchain
-      - name: Build Hex.app
+      - name: Build GoSpell.app
         run: |
           scripts/setup.sh
-          scripts/set-crate-version.sh "$PWD" "$HEX_VERSION"
-          bundle=$(HEX_RELEASE_UNSIGNED=1 scripts/build-app.sh)
+          scripts/set-crate-version.sh "$PWD" "$GOSPELL_VERSION"
+          bundle=$(GOSPELL_RELEASE_UNSIGNED=1 scripts/build-app.sh)
           mkdir -p "$RUNNER_TEMP/macos"
-          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$bundle" "$RUNNER_TEMP/macos/Hex.app.zip"
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$bundle" "$RUNNER_TEMP/macos/GoSpell.app.zip"
           # The DMG window's background and Finder layout: data for sign-macos.sh.
           cp packaging/macos/dmg/background.tiff "$RUNNER_TEMP/macos/dmg-background.tiff"
           cp packaging/macos/dmg/DS_Store "$RUNNER_TEMP/macos/dmg-DS_Store"
@@ -259,7 +259,7 @@ jobs:
 
   # ---- Sign: release environment; only .github/release/ is checked out -------
 
-  # Signs Hex.app inside-out with the Developer ID, notarizes and staples it,
+  # Signs GoSpell.app inside-out with the Developer ID, notarizes and staples it,
   # and makes the updater zip and the DMG from the stapled app. Without the
   # Apple values, dev and check go on without macOS; stable fails.
   sign-macos:
@@ -272,7 +272,7 @@ jobs:
       contents: read
       id-token: write
     env:
-      HEX_VERSION: ${{ needs.plan.outputs.release-version }}
+      GOSPELL_VERSION: ${{ needs.plan.outputs.release-version }}
       CHANNEL: ${{ needs.plan.outputs.channel }}
     outputs:
       signed: ${{ steps.credentials.outputs.available }}
@@ -319,8 +319,8 @@ jobs:
         name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: arn:aws:iam::604439173067:role/github/hex-release
-          role-session-name: hex-${{ github.run_id }}
+          role-to-assume: arn:aws:iam::604439173067:role/github/gospell-release
+          role-session-name: gospell-${{ github.run_id }}
           role-duration-seconds: 900
           aws-region: us-east-1
           output-env-credentials: false
@@ -338,10 +338,10 @@ jobs:
             -- bash .github/release/macos-credentials.sh "$RUNNER_TEMP/credentials"
       - name: Sign, notarize, and staple
         if: steps.credentials.outputs.available == 'true'
-        run: bash .github/release/sign-macos.sh "$RUNNER_TEMP/in/build-macos-arm64/Hex.app.zip" "$RUNNER_TEMP/out"
+        run: bash .github/release/sign-macos.sh "$RUNNER_TEMP/in/build-macos-arm64/GoSpell.app.zip" "$RUNNER_TEMP/out"
         env:
-          HEX_NOTARY_KEY_ID: ${{ vars.APPLE_NOTARY_KEY_ID }}
-          HEX_NOTARY_ISSUER: ${{ vars.APPLE_NOTARY_ISSUER_ID }}
+          GOSPELL_NOTARY_KEY_ID: ${{ vars.APPLE_NOTARY_KEY_ID }}
+          GOSPELL_NOTARY_ISSUER: ${{ vars.APPLE_NOTARY_ISSUER_ID }}
       - name: Remove the credentials
         if: always() && steps.credentials.outputs.available == 'true'
         run: |
@@ -354,7 +354,7 @@ jobs:
           name: sign-macos
           path: ${{ runner.temp }}/out
 
-  # Authenticode-signs both architectures' hex.exe and hex.com through Azure
+  # Authenticode-signs both architectures' gospell.exe and gospell.com through Azure
   # Artifact Signing.
   # Without the Azure values, dev and check go on without Windows; stable
   # fails.
@@ -430,8 +430,8 @@ jobs:
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
-          description: Hex
-          description-url: https://github.com/anomalyco/hex
+          description: GoSpell
+          description-url: https://github.com/goml/gospell
           exclude-environment-credential: true
           exclude-workload-identity-credential: true
           exclude-managed-identity-credential: true
@@ -506,8 +506,8 @@ jobs:
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
-          description: Hex
-          description-url: https://github.com/anomalyco/hex
+          description: GoSpell
+          description-url: https://github.com/goml/gospell
           exclude-environment-credential: true
           exclude-workload-identity-credential: true
           exclude-managed-identity-credential: true
@@ -592,7 +592,7 @@ jobs:
     runs-on: blacksmith-6vcpu-macos-26
     timeout-minutes: 30
     env:
-      HEX_VERSION: ${{ needs.plan.outputs.release-version }}
+      GOSPELL_VERSION: ${{ needs.plan.outputs.release-version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -604,24 +604,24 @@ jobs:
           digests: sign-macos=${{ needs.sign-macos.outputs.digest }}
       - name: Check the signed app and DMG
         run: |
-          dmg="$RUNNER_TEMP/in/sign-macos/hex-$HEX_VERSION-macos-arm64.dmg"
-          zip="$RUNNER_TEMP/in/sign-macos/hex-$HEX_VERSION-macos-arm64.zip"
+          dmg="$RUNNER_TEMP/in/sign-macos/gospell-$GOSPELL_VERSION-macos-arm64.dmg"
+          zip="$RUNNER_TEMP/in/sign-macos/gospell-$GOSPELL_VERSION-macos-arm64.zip"
           xcrun stapler validate "$dmg"
           spctl --assess --type open --context context:primary-signature --verbose=2 "$dmg"
           check=$(mktemp -d)
           hdiutil attach -quiet -nobrowse -readonly -mountpoint "$check/dmg" "$dmg"
           /usr/bin/ditto -x -k "$zip" "$check/update"
-          build=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$check/dmg/Hex.app/Contents/Info.plist")
-          scripts/validate-app.sh "$check/dmg/Hex.app" Hex.app "$HEX_VERSION" "$build"
-          scripts/validate-app.sh "$check/update/Hex.app" Hex.app "$HEX_VERSION" "$build"
-          xcrun stapler validate "$check/update/Hex.app"
+          build=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$check/dmg/GoSpell.app/Contents/Info.plist")
+          scripts/validate-app.sh "$check/dmg/GoSpell.app" GoSpell.app "$GOSPELL_VERSION" "$build"
+          scripts/validate-app.sh "$check/update/GoSpell.app" GoSpell.app "$GOSPELL_VERSION" "$build"
+          xcrun stapler validate "$check/update/GoSpell.app"
           # What the in-app updater requires before it swaps the bundle in.
-          codesign --verify --deep --strict -R="$(cat app/update-requirement.txt)" "$check/update/Hex.app"
-          spctl --assess --type execute --verbose=2 "$check/dmg/Hex.app"
-          diff -qr "$check/dmg/Hex.app" "$check/update/Hex.app"
-          scripts/smoke-macos-app.sh "$check/dmg/Hex.app"
+          codesign --verify --deep --strict -R="$(cat app/update-requirement.txt)" "$check/update/GoSpell.app"
+          spctl --assess --type execute --verbose=2 "$check/dmg/GoSpell.app"
+          diff -qr "$check/dmg/GoSpell.app" "$check/update/GoSpell.app"
+          scripts/smoke-macos-app.sh "$check/dmg/GoSpell.app"
           hdiutil detach -quiet "$check/dmg"
-          codesign -dv "$check/update/Hex.app" 2>&1 | grep -E '^(Identifier|TeamIdentifier|Authority=Developer)' >> "$GITHUB_STEP_SUMMARY"
+          codesign -dv "$check/update/GoSpell.app" 2>&1 | grep -E '^(Identifier|TeamIdentifier|Authority=Developer)' >> "$GITHUB_STEP_SUMMARY"
 
   # ---- Publish: release environment; only .github/release/ is checked out ----
 
@@ -647,8 +647,8 @@ jobs:
       id-token: write
     env: &publish-env
       RELEASE: ${{ needs.plan.outputs.service }}
-      HEX_VERSION: ${{ needs.plan.outputs.release-version }}
-      HEX_RELEASE_CHANNEL: ${{ needs.plan.outputs.release-channel }}
+      GOSPELL_VERSION: ${{ needs.plan.outputs.release-version }}
+      GOSPELL_RELEASE_CHANNEL: ${{ needs.plan.outputs.release-channel }}
     outputs:
       linux-x64-url: ${{ steps.publish.outputs.linux-x64-url }}
       linux-arm64-url: ${{ steps.publish.outputs.linux-arm64-url }}
@@ -673,7 +673,7 @@ jobs:
       - name: Sign the Linux executables
         env: *aws-env
         run: |
-          bash .github/release/with-secrets.sh HEX_RELEASE_SIGNING_KEY=hex/release/RELEASE_SIGNING_KEY \
+          bash .github/release/with-secrets.sh GOSPELL_RELEASE_SIGNING_KEY=gospell/release/RELEASE_SIGNING_KEY \
             -- bash .github/release/sign-linux.sh "$RUNNER_TEMP/dist"
       - id: publish
         name: Publish
@@ -691,7 +691,7 @@ jobs:
         if: needs.plan.outputs.channel == 'stable'
         run: |
           for kind in nix deb-x64 deb-arm64 rpm-x64 rpm-arm64; do
-            bash .github/release/release-service.sh distribution "$kind" "$HEX_VERSION"
+            bash .github/release/release-service.sh distribution "$kind" "$GOSPELL_VERSION"
           done
 
   # Last, once every platform and the release service published: tags
@@ -712,10 +712,10 @@ jobs:
       contents: write
     env:
       SHA: ${{ github.sha }}
-      HEX_VERSION: ${{ needs.plan.outputs.release-version }}
-      HEX_RELEASE_COMMIT: ${{ github.sha }}
-      HEX_RELEASE_TAG: ${{ needs.plan.outputs.tag }}
-      HEX_RELEASE_SOURCE: ${{ github.workspace }}
+      GOSPELL_VERSION: ${{ needs.plan.outputs.release-version }}
+      GOSPELL_RELEASE_COMMIT: ${{ github.sha }}
+      GOSPELL_RELEASE_TAG: ${{ needs.plan.outputs.tag }}
+      GOSPELL_RELEASE_SOURCE: ${{ github.workspace }}
     steps:
       # Credentials stay so the job can push the tag; it runs no repository
       # code beyond .github/release/.
@@ -728,7 +728,7 @@ jobs:
           sparse-checkout-cone-mode: false
       - name: Tag
         env:
-          HEX_RELEASE_TAG_TEST: ${{ needs.plan.outputs.channel == 'check' && '1' || '' }}
+          GOSPELL_RELEASE_TAG_TEST: ${{ needs.plan.outputs.channel == 'check' && '1' || '' }}
         run: bash .github/release/tag-release.sh
       - name: Download
         if: needs.plan.outputs.channel == 'stable'
@@ -750,7 +750,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: bash .github/release/publish-github-release.sh "$RUNNER_TEMP/dist"
 
-  # Builds and installs hex-bin from the published x64 file, without
+  # Builds and installs gospell-bin from the published x64 file, without
   # secrets; its PKGBUILD also names the published arm64 file.
   aur-stage:
     name: AUR package
@@ -759,7 +759,7 @@ jobs:
     runs-on: ubuntu-24.04
     container: archlinux:base-devel
     env:
-      HEX_VERSION: ${{ needs.plan.outputs.release-version }}
+      GOSPELL_VERSION: ${{ needs.plan.outputs.release-version }}
       LINUX_X64_URL: ${{ needs.publish.outputs.linux-x64-url }}
       LINUX_ARM64_URL: ${{ needs.publish.outputs.linux-arm64-url }}
     outputs:
@@ -779,10 +779,10 @@ jobs:
           digests: >-
             build-linux-x86_64=${{ needs.build.outputs.linux-x64-digest }}
             build-linux-aarch64=${{ needs.build.outputs.linux-arm64-digest }}
-      - name: Stage and test hex-bin
+      - name: Stage and test gospell-bin
         run: |
-          x64="$RUNNER_TEMP/in/build-linux-x86_64/hex-$HEX_VERSION-linux-x64"
-          arm64="$RUNNER_TEMP/in/build-linux-aarch64/hex-$HEX_VERSION-linux-arm64"
+          x64="$RUNNER_TEMP/in/build-linux-x86_64/gospell-$GOSPELL_VERSION-linux-x64"
+          arm64="$RUNNER_TEMP/in/build-linux-aarch64/gospell-$GOSPELL_VERSION-linux-arm64"
           # makepkg refuses root, so builder stages and builds in its own home from
           # copies; the runner's files in the workspace and RUNNER_TEMP keep their owner.
           src=/home/builder/src
@@ -790,16 +790,16 @@ jobs:
           mkdir "$src"
           cp -R scripts packaging LICENSE "$x64" "$arm64" "$src/"
           chown -R builder: "$src"
-          runuser -u builder -- "$src/scripts/release-aur.sh" stage "$HEX_VERSION" \
+          runuser -u builder -- "$src/scripts/release-aur.sh" stage "$GOSPELL_VERSION" \
             "$src/${x64##*/}" "$LINUX_X64_URL" "$src/${arm64##*/}" "$LINUX_ARM64_URL" "$stage"
           runuser -u builder -- "$src/scripts/release-aur.sh" test "$stage"
-          pacman -U --noconfirm "$stage"/hex-bin-*.pkg.tar.zst
-          test "$(hex --version | awk 'NF { value=$NF } END { print value }')" = "$HEX_VERSION"
+          pacman -U --noconfirm "$stage"/gospell-bin-*.pkg.tar.zst
+          test "$(gospell --version | awk 'NF { value=$NF } END { print value }')" = "$GOSPELL_VERSION"
           # The PKGBUILD's sources are the published files.
           curl -fsS "$LINUX_X64_URL" | cmp - "$x64"
           curl -fsS "$LINUX_ARM64_URL" | cmp - "$arm64"
           mkdir -p "$RUNNER_TEMP/aur-out"
-          (cd "$stage" && cp PKGBUILD .SRCINFO anomaly.hex.desktop hex.service LICENSE hex-bin.install anomaly.hex-*.png "$RUNNER_TEMP/aur-out/")
+          (cd "$stage" && cp PKGBUILD .SRCINFO com.goml.gospell.desktop gospell.service LICENSE gospell-bin.install com.goml.gospell-*.png "$RUNNER_TEMP/aur-out/")
           { echo '### AUR PKGBUILD'; echo '```'; cat "$stage/PKGBUILD"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
       - id: upload
         uses: ./.github/release/upload
@@ -841,7 +841,7 @@ jobs:
     env: *publish-env
     steps:
       - *checkout-release
-      - run: bash .github/release/release-service.sh distribution aur "$HEX_VERSION"
+      - run: bash .github/release/release-service.sh distribution aur "$GOSPELL_VERSION"
 
   # Renders the cask from the published DMG and checks it with brew, without
   # secrets.
@@ -852,7 +852,7 @@ jobs:
     runs-on: blacksmith-6vcpu-macos-15
     env:
       RELEASE: ${{ needs.plan.outputs.service }}
-      HEX_VERSION: ${{ needs.plan.outputs.release-version }}
+      GOSPELL_VERSION: ${{ needs.plan.outputs.release-version }}
       RELEASE_CHANNEL: ${{ needs.plan.outputs.release-channel }}
     outputs:
       digest: ${{ steps.upload.outputs.digest }}
@@ -863,35 +863,35 @@ jobs:
           persist-credentials: false
       - name: Render the cask from the published DMG
         run: |
-          curl -fsS "$RELEASE/hex/desktop/$RELEASE_CHANNEL.json" -o "$RUNNER_TEMP/manifest.json"
+          curl -fsS "$RELEASE/gospell/desktop/$RELEASE_CHANNEL.json" -o "$RUNNER_TEMP/manifest.json"
           version=$(jq -er .release.version "$RUNNER_TEMP/manifest.json")
-          test "$version" = "$HEX_VERSION"
+          test "$version" = "$GOSPELL_VERSION"
           dmg=$(jq -ec '.release.targets["macos-arm64-dmg"]' "$RUNNER_TEMP/manifest.json") || {
-            echo "::error::Hex $version has no macos-arm64-dmg build."
+            echo "::error::GoSpell $version has no macos-arm64-dmg build."
             exit 1
           }
           url="${RELEASE%/release}$(printf '%s' "$dmg" | jq -r .url)"
           sha256=$(printf '%s' "$dmg" | jq -r .sha256)
           mkdir -p "$RUNNER_TEMP/cask"
-          scripts/release-homebrew.sh render "$version" "$url" "$sha256" "$RUNNER_TEMP/cask/hex.rb"
-          { echo '### Casks/hex.rb'; echo '```ruby'; cat "$RUNNER_TEMP/cask/hex.rb"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          scripts/release-homebrew.sh render "$version" "$url" "$sha256" "$RUNNER_TEMP/cask/gospell.rb"
+          { echo '### Casks/gospell.rb'; echo '```ruby'; cat "$RUNNER_TEMP/cask/gospell.rb"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
       - name: Check it with brew
         env:
           HOMEBREW_NO_AUTO_UPDATE: "1"
           HOMEBREW_NO_INSTALL_FROM_API: "1"
         run: |
           brew tap anomalyco/tap
-          cp "$RUNNER_TEMP/cask/hex.rb" "$(brew --repo anomalyco/tap)/Casks/hex.rb"
+          cp "$RUNNER_TEMP/cask/gospell.rb" "$(brew --repo anomalyco/tap)/Casks/gospell.rb"
           # Homebrew 6 refuses to load casks from third-party taps until they
           # are trusted; this runner trusts our own tap. Older Homebrew has no
           # `brew trust` and no such check.
           if brew trust --help > /dev/null 2>&1; then brew trust anomalyco/tap; fi
-          brew style --cask anomalyco/tap/hex
+          brew style --cask goml/tap/gospell
           # Skipped audits: the DMG URL names its own SHA-256 rather than the
-          # version, so a pinned sha256 is right; and the token "hex" belongs to
-          # this tap's cask, not homebrew/core's unrelated hex formula.
+          # version, so a pinned sha256 is right; and the token "gospell" belongs to
+          # this tap's cask, not homebrew/core's unrelated gospell formula.
           brew audit --cask --strict --online \
-            --except=sha256_no_check_if_unversioned,token_conflicts anomalyco/tap/hex
+            --except=sha256_no_check_if_unversioned,token_conflicts goml/tap/gospell
       - id: upload
         uses: ./.github/release/upload
         with:
@@ -908,7 +908,7 @@ jobs:
       contents: read
       id-token: write
     env:
-      HEX_VERSION: ${{ needs.plan.outputs.release-version }}
+      GOSPELL_VERSION: ${{ needs.plan.outputs.release-version }}
     steps:
       - *checkout-release
       - uses: ./.github/release/download
@@ -920,7 +920,7 @@ jobs:
         env: *aws-env
         run: |
           bash .github/release/with-secrets.sh HOMEBREW_TAP_DEPLOY_KEY=shared/HOMEBREW_TAP_DEPLOY_KEY \
-            -- bash .github/release/push-homebrew.sh "$RUNNER_TEMP/in/build-homebrew/hex.rb" "$HEX_VERSION"
+            -- bash .github/release/push-homebrew.sh "$RUNNER_TEMP/in/build-homebrew/gospell.rb" "$GOSPELL_VERSION"
 
   # Tells Homebrew installs about the version only once the tap serves it.
   record-brew:
@@ -934,7 +934,7 @@ jobs:
     env: *publish-env
     steps:
       - *checkout-release
-      - run: bash .github/release/release-service.sh distribution brew "$HEX_VERSION"
+      - run: bash .github/release/release-service.sh distribution brew "$GOSPELL_VERSION"
 
   # ---- Dev notes: what each dev build changed ---------------------------------
 
@@ -945,7 +945,7 @@ jobs:
     if: needs.plan.outputs.channel == 'dev'
     runs-on: ubuntu-24.04
     env:
-      HEX_VERSION: ${{ needs.plan.outputs.release-version }}
+      GOSPELL_VERSION: ${{ needs.plan.outputs.release-version }}
       SHA: ${{ github.sha }}
     outputs:
       digest: ${{ steps.upload.outputs.digest }}
@@ -959,7 +959,7 @@ jobs:
       - name: Write the notes
         run: |
           mkdir -p "$RUNNER_TEMP/notes"
-          bash scripts/release-dev-notes.sh "$HEX_VERSION" "$SHA" "$RUNNER_TEMP/notes/dev-notes.json"
+          bash scripts/release-dev-notes.sh "$GOSPELL_VERSION" "$SHA" "$RUNNER_TEMP/notes/dev-notes.json"
           { echo '### Dev notes'; jq -r '.builds[0].items[] | "- \(.title) (\(.url))"' "$RUNNER_TEMP/notes/dev-notes.json"; } >> "$GITHUB_STEP_SUMMARY"
       - id: upload
         uses: ./.github/release/upload
@@ -969,7 +969,7 @@ jobs:
 
   # Once the build is the dev channel's release, its notes replace
   # dev-notes.json on the one-commit `dev-notes` branch, which
-  # https://anoma.ly/hex/files/dev-notes.json, https://anoma.ly/hex/dev, and
+  # https://gospell.goml.io/files/dev-notes.json, https://gospell.goml.io/dev, and
   # the app's update item read. The job needs only the last commit's
   # GITHUB_TOKEN, so it runs outside the release environment and holds no
   # bucket credential.
@@ -982,7 +982,7 @@ jobs:
     permissions:
       contents: write
     env:
-      HEX_VERSION: ${{ needs.plan.outputs.release-version }}
+      GOSPELL_VERSION: ${{ needs.plan.outputs.release-version }}
       SHA: ${{ github.sha }}
     steps:
       - *checkout-release
@@ -993,4 +993,4 @@ jobs:
       - name: Publish the notes
         env:
           GH_TOKEN: ${{ github.token }}
-        run: bash .github/release/publish-dev-notes.sh "$RUNNER_TEMP/in/build-dev-notes/dev-notes.json" "$HEX_VERSION" "$SHA"
+        run: bash .github/release/publish-dev-notes.sh "$RUNNER_TEMP/in/build-dev-notes/dev-notes.json" "$GOSPELL_VERSION" "$SHA"

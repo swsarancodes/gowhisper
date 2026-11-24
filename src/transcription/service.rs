@@ -33,7 +33,7 @@ const SHARED_RETRY: Duration = Duration::from_millis(50);
 /// using a copy of the service's own.
 const SHARED_WAIT: Duration = Duration::from_secs(20);
 /// Longer host audio would hold a dictation released during it behind it on
-/// the shared engine, so it runs on a copy of the service's own. `hex
+/// the shared engine, so it runs on a copy of the service's own. `gospell
 /// transcribe` sends a long file in pieces of this length.
 pub(crate) const SHARED_MAX_SAMPLES: usize = 30 * 16_000;
 

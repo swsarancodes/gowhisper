@@ -4,7 +4,7 @@
 //! One `pw-record` per output captures that output's monitor
 //! (`stream.capture.sink`), and the source mixes them, so a call that plays on
 //! a headset or dock instead of the default output is still heard (#1801).
-//! Each runs as a child process so Hex links no PipeWire library and a desktop
+//! Each runs as a child process so GoSpell links no PipeWire library and a desktop
 //! without PipeWire fails only this source. A capture that ends while its sink
 //! is still listed starts again, so a Bluetooth card switching from A2DP to
 //! HFP does not silence that output for the rest of the meeting.
@@ -38,8 +38,8 @@ const QUEUE_CAPACITY: usize = 1_024;
 /// listed.
 const ROUTE_CHECK: Duration = Duration::from_secs(2);
 /// The PipeWire node every system audio monitor presents.
-const NODE_NAME: &str = "hex-meeting-system-audio";
-const NODE_DESCRIPTION: &str = "Hex meeting system audio";
+const NODE_NAME: &str = "gospell-meeting-system-audio";
+const NODE_DESCRIPTION: &str = "GoSpell meeting system audio";
 
 /// Fails until `pw-record`, which hears the other participants, is installed.
 pub(super) fn ensure_system_audio() -> Result<()> {
@@ -47,13 +47,13 @@ pub(super) fn ensure_system_audio() -> Result<()> {
         Ok(())
     } else {
         Err(eyre!(
-            "Install PipeWire's pw-record (the pipewire-audio package) so Hex can hear the other participants, then try again"
+            "Install PipeWire's pw-record (the pipewire-audio package) so GoSpell can hear the other participants, then try again"
         ))
     }
 }
 
 /// Ends `command`'s process with the thread that starts it, so a helper
-/// never outlives a Hex that stopped without dropping it.
+/// never outlives a GoSpell that stopped without dropping it.
 fn tied_to_thread(command: &mut Command) -> &mut Command {
     // SAFETY: `prctl` is async-signal-safe and touches only the child.
     unsafe {
@@ -201,7 +201,7 @@ fn sinks_changed(open: &[String], listed: &[String]) -> bool {
 
 /// Whether the source should reopen: its captures moved with the listed sinks,
 /// or it is still on the untargeted fallback and sinks can now be listed.
-/// `None` is a sound server Hex could not read, which never reopens.
+/// `None` is a sound server GoSpell could not read, which never reopens.
 fn route_needs_reopen(open: &[String], listed: Option<&[String]>) -> bool {
     match listed {
         None => false,
@@ -211,7 +211,7 @@ fn route_needs_reopen(open: &[String], listed: Option<&[String]>) -> bool {
 }
 
 /// The outputs to start again: a capture that ended and is due, whose sink is
-/// still listed. A listing Hex could not read (`None`) keeps every such
+/// still listed. A listing GoSpell could not read (`None`) keeps every such
 /// output; the fallback output never restarts here, since the source reopens
 /// for it instead.
 fn restart_due(outputs: &[Output], listed: Option<&[String]>, now: Instant) -> Vec<usize> {
@@ -626,15 +626,15 @@ mod tests {
         // it to the default output.
         assert_eq!(
             properties(None, 0),
-            "{ stream.capture.sink = true node.name = hex-meeting-system-audio \
-             node.description = \"Hex meeting system audio\" }"
+            "{ stream.capture.sink = true node.name = gospell-meeting-system-audio \
+             node.description = \"GoSpell meeting system audio\" }"
         );
         // A targeted capture names its own node, never falls back to the
         // default output, and folds those flags into the property string.
         assert_eq!(
             properties(Some("bluez_output.AA_BB_CC_DD_EE_FF.1"), 2),
-            "{ stream.capture.sink = true node.name = hex-meeting-system-audio-2 \
-             node.description = \"Hex meeting system audio\" \
+            "{ stream.capture.sink = true node.name = gospell-meeting-system-audio-2 \
+             node.description = \"GoSpell meeting system audio\" \
              node.dont-fallback = true node.dont-reconnect = true \
              target.object = \"bluez_output.AA_BB_CC_DD_EE_FF.1\" }"
         );
@@ -731,7 +731,7 @@ mod tests {
         ];
         let listed = ["speakers".to_owned(), "dock".to_owned()];
         assert_eq!(restart_due(&outputs, Some(&listed), due), [0]);
-        // A listing Hex could not read keeps every output that is due by now;
+        // A listing GoSpell could not read keeps every output that is due by now;
         // the fallback still never restarts.
         let later = due + RETRY_INITIAL;
         assert_eq!(restart_due(&outputs, None, later), [0, 1, 2]);
@@ -772,7 +772,7 @@ mod tests {
 
     #[test]
     fn trashing_writes_restorable_info_and_never_overwrites() {
-        let root = std::env::temp_dir().join(format!("hex-trash-test-{}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("gospell-trash-test-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&root);
         let trash = root.join("Trash");
         let meeting = root.join("my meeting");

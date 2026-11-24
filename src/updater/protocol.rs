@@ -1,4 +1,4 @@
-//! The client rules of the Anomaly release protocol (`anomalyco/release`,
+//! The client rules of the GoML release protocol (`anomalyco/release`,
 //! `docs/protocol.md`, schema 1) as pure functions: lenient manifest parsing
 //! and the update decision. Versions are never compared: the channel's
 //! current release is the build to run. `tests/fixtures/release-protocol`
@@ -510,7 +510,7 @@ mod tests {
             channel: None,
         };
         for (app, artifact, reason) in [
-            ("hex", "desktop", "wrong_app"),
+            ("gospell", "desktop", "wrong_app"),
             ("example", "cli", "wrong_artifact"),
         ] {
             assert_eq!(
@@ -522,36 +522,40 @@ mod tests {
 
     #[test]
     fn target_urls_resolve_against_the_manifest() {
-        let manifest = "https://anoma.ly/release/hex/desktop/stable.json";
+        let manifest = "https://goml.io/release/gospell/desktop/stable.json";
         assert_eq!(
-            resolve_url(manifest, "/release/hex/files/abc/Hex.zip").as_deref(),
-            Some("https://anoma.ly/release/hex/files/abc/Hex.zip")
+            resolve_url(manifest, "/release/gospell/files/abc/GoSpell.zip").as_deref(),
+            Some("https://goml.io/release/gospell/files/abc/GoSpell.zip")
         );
         assert_eq!(
             resolve_url(
-                "https://dev.anoma.ly/release/hex/desktop/dev.json",
-                "/release/hex/files/abc/Hex.zip"
+                "https://dev.goml.io/release/gospell/desktop/dev.json",
+                "/release/gospell/files/abc/GoSpell.zip"
             )
             .as_deref(),
-            Some("https://dev.anoma.ly/release/hex/files/abc/Hex.zip")
+            Some("https://dev.goml.io/release/gospell/files/abc/GoSpell.zip")
         );
         assert_eq!(
-            resolve_url(manifest, "../files/abc/Hex.zip").as_deref(),
-            Some("https://anoma.ly/release/hex/files/abc/Hex.zip")
+            resolve_url(manifest, "../files/abc/GoSpell.zip").as_deref(),
+            Some("https://goml.io/release/gospell/files/abc/GoSpell.zip")
         );
         assert_eq!(
-            resolve_url(manifest, "files/abc/Hex.zip").as_deref(),
-            Some("https://anoma.ly/release/hex/desktop/files/abc/Hex.zip")
+            resolve_url(manifest, "files/abc/GoSpell.zip").as_deref(),
+            Some("https://goml.io/release/gospell/desktop/files/abc/GoSpell.zip")
         );
         assert_eq!(
-            resolve_url(manifest, "https://anoma.ly/release/hex/files/abc/Hex.zip").as_deref(),
-            Some("https://anoma.ly/release/hex/files/abc/Hex.zip")
+            resolve_url(
+                manifest,
+                "https://goml.io/release/gospell/files/abc/GoSpell.zip"
+            )
+            .as_deref(),
+            Some("https://goml.io/release/gospell/files/abc/GoSpell.zip")
         );
         for elsewhere in [
             "https://example.com/a",
-            "https://anoma.ly.example.com/a",
-            "https://anoma.ly@example.com/a",
-            "https://anoma.ly/../x",
+            "https://goml.io.example.com/a",
+            "https://goml.io@example.com/a",
+            "https://goml.io/../x",
         ] {
             assert_eq!(resolve_url(manifest, elsewhere), None, "{elsewhere}");
         }

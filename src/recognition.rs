@@ -23,7 +23,7 @@ use crate::feedback::{self, Tone};
 use crate::parakeet::{DictationWorker, TranscriptionTarget, WorkerEvent};
 use crate::suppression::{DictationHotkey, DiscardCause, HotkeyAction, InputMonitor, TapPolicy};
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 pub(crate) mod cancelled_words;
 mod capture_actions;
 mod context_watch;
@@ -31,7 +31,7 @@ mod events;
 mod guards;
 mod hotkeys;
 mod output;
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 mod paste_picker;
 mod stop_phrase;
 
@@ -79,7 +79,7 @@ impl DictationSink<'_> {
 
     /// A non-dictation capture (Annotate) moves only the Caps Lock light, not
     /// the dictation HUD.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     fn caps_only(&self, event: DictationIndicatorEvent) {
         self.caps_lock.observe(event);
     }
@@ -88,11 +88,11 @@ impl DictationSink<'_> {
 #[derive(Debug)]
 pub enum RecognitionControl {
     /// Pastes the last dictation once nothing records; `reply` answers
-    /// `hex paste-last`, and the menu bar sends none.
+    /// `gospell paste-last`, and the menu bar sends none.
     PasteLast {
         reply: Option<SyncSender<ControlReply>>,
     },
-    /// `hex dictation`: drives the shortcut machine as a press would, so the
+    /// `gospell dictation`: drives the shortcut machine as a press would, so the
     /// shortcut still finishes it.
     /// A `stop` with `print` answers `reply` once recording stops and sends
     /// the transcript to `print` instead of pasting it; a `start` with
@@ -104,16 +104,16 @@ pub enum RecognitionControl {
         raw: bool,
         reply: SyncSender<ControlReply>,
     },
-    /// What is recording, for `hex status`.
+    /// What is recording, for `gospell status`.
     CaptureStatus { reply: SyncSender<CaptureSnapshot> },
-    /// `hex capture` (the `capture` experiment; see `capture_host`).
-    #[cfg(hex_capture)]
+    /// `gospell capture` (the `capture` experiment; see `capture_host`).
+    #[cfg(gospell_capture)]
     ScrawlCapture {
         action: crate::control::ScrawlCaptureAction,
         reply: SyncSender<ControlReply>,
     },
     /// The capture capsule's switch chips and picker (`capture_host`).
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     CaptureCommand {
         command: crate::capture_host::CaptureCommand,
         reply: SyncSender<ControlReply>,
@@ -221,10 +221,10 @@ pub fn listen(
         caps_lock: &caps_lock,
     };
     let recording_environment = RecordingEnvironmentController::start();
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     let capture_environment = recording_environment.clone();
     let (mut microphone_revision, microphone) = crate::app_settings::microphone_selection();
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     let paste_history = history.clone();
     let dictation_worker = DictationWorker::start(
         input_monitor.activity.clone(),
@@ -233,7 +233,7 @@ pub fn listen(
     );
     // Labs › Paste Last picker follows its switch on every pass, so turning
     // it on or off applies without a restart.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     let mut paste_lab = paste_picker::Lab::new(paste_history, dictation_worker.engine());
     let input = DictationAudio::open(
         device_override,
@@ -244,10 +244,10 @@ pub fn listen(
         release.press,
         dictation_worker.engine(),
     )?;
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     let mut capture_host =
         crate::capture_host::CaptureHost::start(dictation_worker.engine(), &capture_environment);
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     let mut capture_shortcut = crate::capture_host::CaptureShortcut::default();
     let (mut transcription_revision, _) = crate::app_settings::transcription_selection();
     let mut personal_host_enabled = crate::personal_commands::host_needed(
@@ -283,19 +283,19 @@ pub fn listen(
     emit_state(&mut events, hotkeys.any_recording(), &input.device_name())?;
     tracing::info!(device = %input.device_name(), "dictation listener started");
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     let mut capture_was_recording = false;
 
     while !shutdown.load(Ordering::Relaxed) {
         release = warm_release.reconcile(&input, release);
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         crate::capture_host::CaptureHost::reconcile(
             &mut capture_host,
             dictation_worker.engine().as_ref(),
             &capture_environment,
             &input,
         );
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         {
             let capture_recording = capture_host
                 .as_mut()
@@ -309,7 +309,7 @@ pub fn listen(
                 });
             }
         }
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         paste_lab.sync(crate::paste::recent::enabled());
         let caps_lock_on = crate::labs::caps_lock_dictation();
         caps_lock.set_enabled(caps_lock_on);
@@ -337,7 +337,7 @@ pub fn listen(
                         let capture_active = programmatic.is_some()
                             || hotkeys.suppresses_recognition()
                             || input.is_recording();
-                        #[cfg(hex_capture)]
+                        #[cfg(gospell_capture)]
                         let capture_active = capture_active || paste_lab.busy();
                         let answer = match paste_last_refusal(capture_active) {
                             Some(refusal) => refusal,
@@ -349,19 +349,19 @@ pub fn listen(
                             let _ = reply.send(answer);
                         }
                     }
-                    #[cfg(hex_capture)]
+                    #[cfg(gospell_capture)]
                     RecognitionControl::ScrawlCapture { action, reply } => {
                         let answer = match capture_host.as_mut() {
                             Some(host) => host.control(action, &input),
                             None => ControlReply::error(
                                 "feature-off",
                                 "Annotate is off; turn it on in Settings › Annotate or \
-                                 run `hex settings set capture.enabled true`",
+                                 run `gospell settings set capture.enabled true`",
                             ),
                         };
                         let _ = reply.send(answer);
                     }
-                    #[cfg(hex_capture)]
+                    #[cfg(gospell_capture)]
                     RecognitionControl::CaptureCommand { command, reply } => {
                         let answer = match capture_host.as_mut() {
                             Some(host) => host.command(command, &input),
@@ -769,11 +769,11 @@ pub fn listen(
                 continue;
             }
             let caps_recording = hotkeys.caps_lock.is_recording();
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             let annotate_recording = capture_host
                 .as_mut()
                 .is_some_and(|host| host.recording_since(&input).is_some());
-            #[cfg(not(hex_capture))]
+            #[cfg(not(gospell_capture))]
             let annotate_recording = false;
             // Labs › Dictate while annotating leaves dictation working while
             // a capture records, so a Caps Lock press may start there too.
@@ -810,7 +810,7 @@ pub fn listen(
         }
         // The capture shortcut ignores keys while shortcuts are suspended or
         // a programmatic dictation holds them, so their releases go unseen.
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         if hotkey_capture_suspended || programmatic.is_some() {
             capture_shortcut.reset();
         }
@@ -827,7 +827,7 @@ pub fn listen(
             if hotkey_capture_suspended {
                 continue;
             }
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             if let Some(picker) = paste_lab.picker()
                 && let Err(error) = picker.edge(input_event, capture_at, &dictation_worker)
             {
@@ -838,7 +838,7 @@ pub fn listen(
             if input_event.is_escape_down() {
                 crate::dictation::yolo_mode::note_escape();
             }
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             if let Some(host) = capture_host.as_mut() {
                 // Escape while drawing stops drawing, never the recording.
                 if input_event.is_escape_down() && crate::capture_host::exit_drawing() {
@@ -865,7 +865,7 @@ pub fn listen(
             // Escape closes the capsule's picker or open list (never an
             // Undo: that is a click). It never ends a dictation or a
             // recording capture: it may be meant for the app in front (#786).
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             if input_event.is_escape_down()
                 && crate::capture_host::capsule_key(crate::capture_host::CapsuleKey::Escape)
             {
@@ -875,7 +875,7 @@ pub fn listen(
             // dictation shortcut starts nothing. The tap still swallows its
             // chord, so it never reaches the app. Labs › Dictate while
             // annotating leaves it working as usual instead.
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             if capture_owns_dictation(
                 !hotkeys.any_recording()
                     && capture_host
@@ -890,7 +890,7 @@ pub fn listen(
                 let (raw, print) = hotkeys.resolve_action(shortcut, action);
                 // Only a physical edge from the owner of a shortcut recording.
                 // Control requests also use CancelShortcut, but never come here.
-                #[cfg(hex_capture)]
+                #[cfg(gospell_capture)]
                 if action == HotkeyAction::CancelShortcut
                     && dictation_worker.started_by_shortcut()
                     && let Some(writer) = paste_lab.writer()
@@ -908,7 +908,7 @@ pub fn listen(
                     )?;
                     continue;
                 }
-                #[cfg(hex_capture)]
+                #[cfg(gospell_capture)]
                 if action == HotkeyAction::PasteLast
                     && let Some(picker) = paste_lab.picker()
                     && let Some(binding) = crate::app_settings::runtime_hotkeys().paste_last
@@ -964,7 +964,7 @@ pub fn listen(
         if !hotkey_capture_suspended && input_monitor.pending_events().oldest().is_none() {
             hotkeys.break_chords(CaptureInstant::now());
         }
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         if let Some(picker) = paste_lab.picker()
             && let Err(error) = picker.tick(
                 hotkey_capture_suspended
@@ -1025,13 +1025,13 @@ pub fn listen(
         // A recording capture takes Escape only while it draws (Escape stops
         // drawing); otherwise only the capture shortcut's press before it
         // starts, and the capsule's picker.
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         let capture_escape = capture_host.is_some() && capture_shortcut.takes_escape();
-        #[cfg(not(hex_capture))]
+        #[cfg(not(gospell_capture))]
         let capture_escape = false;
         // A held Hold capture takes Escape once it is past the hold threshold;
         // Toggle's cancel key (and Caps Lock / extra rows' cancel keys) is
-        // Hex's only while its recording runs. During a programmatic capture
+        // GoSpell's only while its recording runs. During a programmatic capture
         // the listener ignores every key, so the policy claims nothing.
         input_monitor.set_tap_policy(TapPolicy::for_listener(
             programmatic.is_some(),
@@ -1192,7 +1192,7 @@ pub fn listen(
             // Annotate's narration feeds only the Caps Lock light, never the
             // dictation HUD; without this its recording light never leaves
             // Waiting.
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             if capture_was_recording
                 && audio.is_current(input.recognition_generation())
                 && let Some(event) = DictationIndicatorEvent::meter(&audio.samples)
@@ -1202,7 +1202,7 @@ pub fn listen(
         }
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     if let Some(host) = &mut capture_host {
         host.shutdown(&input);
     }
@@ -1323,7 +1323,7 @@ fn fail_capture(
 enum CaptureEnd {
     /// The capture never became a dictation; no feedback tone.
     Discarded(Option<DiscardCause>),
-    /// The capture ended unfinished: the cancel shortcut, or Hex itself
+    /// The capture ended unfinished: the cancel shortcut, or GoSpell itself
     /// when its shortcuts were suspended or the event tap was lost.
     Cancelled,
 }
@@ -1701,7 +1701,7 @@ mod tests {
         assert!(!hotkeys.extra[0].as_ref().unwrap().is_recording());
 
         // Hold dictation ignores Escape until the hold threshold makes the
-        // press Hex's (it may be Option-Escape); then Escape cancels it, and
+        // press GoSpell's (it may be Option-Escape); then Escape cancels it, and
         // the tap keeps it from the app.
         assert_eq!(
             press(&mut hotkeys, OPTION_KEY_MASK, 600),
@@ -2007,7 +2007,7 @@ mod tests {
         let (mut owner, input) =
             crate::dictation::audio::OwnerForTest::interrupted_hold(pressed_at);
         let path = std::env::temp_dir().join(format!(
-            "hex-kept-hotkey-{}-{}.ndjson",
+            "gospell-kept-hotkey-{}-{}.ndjson",
             std::process::id(),
             now_ms()
         ));

@@ -2,10 +2,10 @@
 //! CleanShot does, and the shot lands on the clipboard, in the folder, and
 //! in a thumbnail in the corner.
 //!
-//! The shortcut is taken in Hex's session tap ([`key`]), never by the
+//! The shortcut is taken in GoSpell's session tap ([`key`]), never by the
 //! listener: a press opens a second capture picker, Escape closes it and
 //! Space switches it between an area and a window. What it picks is shot
-//! by ScreenCaptureKit at the display's own pixels, with Hex's overlays and
+//! by ScreenCaptureKit at the display's own pixels, with GoSpell's overlays and
 //! the pointer left out, on its own thread.
 //!
 //! The record shortcut (⌘⇧5) opens the recording toolbar ([`toolbar`]):
@@ -52,7 +52,7 @@ fn front() -> std::sync::MutexGuard<'static, picker::Front> {
 /// The folder the last shot, recording, or editor save couldn't be written
 /// to and why, which Labs › Screenshots' card names until a save works or
 /// another folder is chosen. It keeps its own folder: the setting may have
-/// changed since through `hex settings` or `settings.json`.
+/// changed since through `gospell settings` or `settings.json`.
 static SAVE_ERROR: Mutex<Option<(PathBuf, String)>> = Mutex::new(None);
 /// How many times [`SAVE_ERROR`] was recorded or cleared. A window's poll
 /// that reports nothing redraws nothing, so the card compares this count
@@ -96,7 +96,7 @@ pub(crate) fn install<S: 'static>(app: &mut rune::App<S>) {
         app,
         picked,
         PickerRole {
-            name: "Hex screenshot picker",
+            name: "GoSpell screenshot picker",
             screen_label: crate::desktop::i18n::tr("Full screen · Click to capture"),
             exclude_from_capture: true,
             prewarm: crate::labs::screenshots(),
@@ -164,7 +164,7 @@ fn open_as(record: bool, window: bool) -> bool {
     };
     // Off the tap's thread: a fresh Screen Recording read may take a moment.
     let spawned = std::thread::Builder::new()
-        .name("hex-screenshot-open".into())
+        .name("gospell-screenshot-open".into())
         .spawn(move || {
             let allowed =
                 crate::capture_host::permission_state(CaptureNeed::ScreenRecording, true).is_none();
@@ -274,14 +274,14 @@ fn picked(action: Action) {
         return;
     }
     let spawned = std::thread::Builder::new()
-        .name("hex-screenshot".into())
+        .name("gospell-screenshot".into())
         .spawn(move || shoot(target));
     if let Err(error) = spawned {
         tracing::warn!(%error, "could not start a screenshot");
     }
 }
 
-/// `hex screenshot`: the whole display under the pointer, at once.
+/// `gospell screenshot`: the whole display under the pointer, at once.
 pub(crate) fn shoot_display() -> anyhow::Result<std::path::PathBuf> {
     anyhow::ensure!(crate::labs::screenshots(), "Labs › Screenshots is off");
     let at = scrawl_capture::screens::pointer().unwrap_or_default();
@@ -393,7 +393,7 @@ pub(crate) fn append_words(file: std::path::PathBuf, words: String) {
     let writer = WRITER.get_or_init(|| {
         let (send, receive) = sync_channel::<Words>(32);
         match std::thread::Builder::new()
-            .name("hex-capture-words".into())
+            .name("gospell-capture-words".into())
             .spawn(move || {
                 // Preserve the UI's append order without doing disk I/O there.
                 for (file, words) in receive {
@@ -519,8 +519,8 @@ fn source(target: CaptureTarget) -> anyhow::Result<Shot> {
     })
 }
 
-/// Hex's own overlays (every window of Hex's above the normal layer) and
-/// the picker, left out of the shot. Hex's settings window stays in.
+/// GoSpell's own overlays (every window of GoSpell's above the normal layer) and
+/// the picker, left out of the shot. GoSpell's settings window stays in.
 fn exclusions() -> capture_core::Exclusions {
     let pid = std::process::id() as i32;
     let mut windows: Vec<u32> = scrawl_capture::windows::raw_windows()
@@ -749,9 +749,9 @@ pub(crate) fn key(key: Key) -> Take {
     take
 }
 
-/// Whether macOS's own screenshot shortcuts take one of Hex's now (⌘⇧4,
+/// Whether macOS's own screenshot shortcuts take one of GoSpell's now (⌘⇧4,
 /// or ⌘⇧5 for the toolbar): they're matched in the window server before any
-/// app's tap, so Hex never sees the press. Read again at most every 2 s,
+/// app's tap, so GoSpell never sees the press. Read again at most every 2 s,
 /// since Settings draws it each frame.
 pub(crate) fn system_takes_shortcut() -> bool {
     use std::time::{Duration, Instant};

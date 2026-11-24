@@ -95,7 +95,7 @@ pub struct ScrawlBundle {
     pub video_offset_ms: u64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub audio: Option<String>,
-    /// Where the capture's audio stops on the bundle's clock (ms), when Hex had to stop
+    /// Where the capture's audio stops on the bundle's clock (ms), when GoSpell had to stop
     /// keeping it (a streamed capture's disk guard, or a failed write). Everything after
     /// it is silence.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -129,7 +129,7 @@ pub struct ScrawlBundle {
     /// recovers to the same place.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub destination: Option<Destination>,
-    /// Why the capture has no picture of the screen ("Screen Recording is off for Hex"), when
+    /// Why the capture has no picture of the screen ("Screen Recording is off for GoSpell"), when
     /// it recorded no frame: it carries its voice and marks alone.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub no_screen: Option<String>,

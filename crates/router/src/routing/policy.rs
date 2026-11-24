@@ -86,7 +86,7 @@ pub fn obeyed(to: &Scored) -> bool {
 
 /// Whether a send rests on something set down ahead of time: a page that names its session, or
 /// a `routing.sites`, `routing.apps` or `routing.terminals` rule the person saved (an "Always
-/// send … here" among them). Hex sends only these without asking.
+/// send … here" among them). GoSpell sends only these without asking.
 pub fn explicit(to: &Scored) -> bool {
     matches!(
         to.lead().map(|r| r.basis),
@@ -898,10 +898,10 @@ mod tests {
         assert_eq!(
             rule_key(
                 None,
-                Some(Path::new("/code/hex")),
+                Some(Path::new("/code/gospell")),
                 Some("com.mitchellh.ghostty")
             ),
-            Some((RuleKind::Terminal, "/code/hex".to_owned()))
+            Some((RuleKind::Terminal, "/code/gospell".to_owned()))
         );
         // A terminal in the home folder or `/` says nothing yet.
         let home = crate::user_dirs::home_dir().unwrap();
@@ -918,19 +918,26 @@ mod tests {
     fn a_terminal_rule_covers_its_folder_and_below() {
         let rules = vec![
             ("/code".to_owned(), PathBuf::from("ses_code")),
-            ("/code/hex".to_owned(), PathBuf::from("ses_hex")),
+            ("/code/gospell".to_owned(), PathBuf::from("ses_gospell")),
             ("/".to_owned(), PathBuf::from("ses_root")),
         ];
         let rule = |folder: &str| terminal_rule(Path::new(folder), &rules).map(|(k, _)| k);
-        assert_eq!(rule("/code/hex/src").as_deref(), Some("/code/hex"));
-        assert_eq!(rule("/code/hex").as_deref(), Some("/code/hex"));
+        assert_eq!(rule("/code/gospell/src").as_deref(), Some("/code/gospell"));
+        assert_eq!(rule("/code/gospell").as_deref(), Some("/code/gospell"));
         assert_eq!(rule("/code/hexagon").as_deref(), Some("/code"));
         assert_eq!(rule("/elsewhere"), None, "never the rule for /");
         let home = crate::user_dirs::home_dir().unwrap();
-        assert!(rule_target(RuleKind::Terminal, "/code/hex", "ses_hex").is_ok());
-        assert!(rule_target(RuleKind::Terminal, &home.display().to_string(), "ses_hex").is_err());
-        assert!(rule_target(RuleKind::Terminal, "/", "ses_hex").is_err());
-        assert!(rule_target(RuleKind::Terminal, "code/hex", "ses_hex").is_err());
+        assert!(rule_target(RuleKind::Terminal, "/code/gospell", "ses_gospell").is_ok());
+        assert!(
+            rule_target(
+                RuleKind::Terminal,
+                &home.display().to_string(),
+                "ses_gospell"
+            )
+            .is_err()
+        );
+        assert!(rule_target(RuleKind::Terminal, "/", "ses_gospell").is_err());
+        assert!(rule_target(RuleKind::Terminal, "code/gospell", "ses_gospell").is_err());
     }
 
     #[test]

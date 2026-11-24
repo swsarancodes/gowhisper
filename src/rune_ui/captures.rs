@@ -25,7 +25,7 @@ use crate::history::captures::CaptureWord;
 use crate::history::captures::{self, CaptureEntry, CaptureKind};
 
 pub(super) static CAPTURES_ICON: Icon = Icon {
-    name: "hex-captures",
+    name: "gospell-captures",
     view: 24.0,
     body: include_str!("../../assets/icons/captures.svg"),
 };
@@ -115,7 +115,7 @@ pub(super) struct CapturesPane {
     thumbs: RefCell<HashMap<u64, rune::Image>>,
     /// Larger pictures for the unified History's detail, decoded from the
     /// same files; a fixture fills them directly.
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     pictures: RefCell<HashMap<u64, rune::Image>>,
     /// The entry whose Copy was pressed last.
     copied: Option<u64>,
@@ -130,7 +130,7 @@ impl CapturesPane {
 
     /// Entry `entry`'s picture at `width` points, for the unified History's
     /// detail; the list's own 72-point thumbs stay in [`Self::thumbnail`].
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     pub(super) fn picture(&self, entry: &Listed, width: f32) -> Option<rune::Pixels> {
         if let Some(image) = self.pictures.borrow().get(&entry.id())
             && image.is_ready()
@@ -227,7 +227,7 @@ impl CapturesPane {
             app: Some("Brave Browser".into()),
             words: "The send button overlaps the counter once the list scrolls.".into(),
             timed: Vec::new(),
-            sent_to: Some("Hex".into()),
+            sent_to: Some("GoSpell".into()),
             expired: false,
             picture: None,
         };
@@ -237,7 +237,7 @@ impl CapturesPane {
                     3,
                     2,
                     CaptureKind::Shot,
-                    "Hex Screenshot 2026-11-08 at 14.03.22.png",
+                    "GoSpell Screenshot 2026-11-08 at 14.03.22.png",
                     "",
                 )),
                 Listed::Annotated(annotation),
@@ -245,14 +245,14 @@ impl CapturesPane {
                     2,
                     48,
                     CaptureKind::Recording,
-                    "Hex Recording 2026-11-08 at 13.17.05.mp4",
+                    "GoSpell Recording 2026-11-08 at 13.17.05.mp4",
                     "Here the deploy button stays grey after the build finishes, even though the logs say it passed.",
                 )),
                 Listed::Saved(entry(
                     1,
                     26 * 60,
                     CaptureKind::Shot,
-                    "Hex Screenshot 2026-11-07 at 11.40.51.png",
+                    "GoSpell Screenshot 2026-11-07 at 11.40.51.png",
                     "The settings sheet clips its last row on a small display.",
                 )),
             ],
@@ -272,7 +272,7 @@ impl CapturesPane {
                 std::thread::yield_now();
             }
             pane.thumbs.borrow_mut().insert(id, image);
-            #[cfg(all(target_os = "macos", hex_capture))]
+            #[cfg(all(target_os = "macos", gospell_capture))]
             pane.pictures
                 .borrow_mut()
                 .insert(id, cache.rgba(720, 450, fixture_thumbnail(720, 450, hue)));
@@ -421,7 +421,7 @@ pub(super) fn copy(ui: &mut Ui, id: u64) {
     #[cfg(target_os = "macos")]
     {
         let spawned = std::thread::Builder::new()
-            .name("hex-capture-copy".into())
+            .name("gospell-capture-copy".into())
             .spawn(move || {
                 let copied = match &entry {
                     Listed::Saved(saved) => crate::screenshots::save::copy_saved(
@@ -544,7 +544,7 @@ pub(super) fn pane(ui: &Ui, p: Paint) -> El {
 
 /// The Copy action a unified History row shows in its hover, in the age's
 /// place: a capture's file or bundle goes on the clipboard.
-#[cfg(all(target_os = "macos", hex_capture))]
+#[cfg(all(target_os = "macos", gospell_capture))]
 pub(super) fn copy_action(ui: &Ui, p: Paint, id: u64, in_row: bool) -> El {
     let copied = ui.captures.copied == Some(id);
     ld::row_action(

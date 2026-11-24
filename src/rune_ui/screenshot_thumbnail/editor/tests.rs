@@ -189,10 +189,10 @@ fn a_shot_without_a_file_is_offered_a_new_screenshot_name() {
     let file_dialog::Target::Save { filters, file_name } = editor.save_dialog().target else {
         panic!("a save panel");
     };
-    assert!(file_name.starts_with("Hex Screenshot"), "{file_name}");
+    assert!(file_name.starts_with("GoSpell Screenshot"), "{file_name}");
     #[cfg(target_os = "macos")]
     assert!(
-        file_name.starts_with("Hex Screenshot "),
+        file_name.starts_with("GoSpell Screenshot "),
         "dated: {file_name}"
     );
     assert!(file_name.ends_with(".png"), "{file_name}");
@@ -202,9 +202,9 @@ fn a_shot_without_a_file_is_offered_a_new_screenshot_name() {
 #[cfg(target_os = "macos")]
 #[test]
 fn the_path_chosen_gets_the_recording() {
-    let folder = std::env::temp_dir().join(format!("hex-editor-save-{}", std::process::id()));
+    let folder = std::env::temp_dir().join(format!("gospell-editor-save-{}", std::process::id()));
     std::fs::create_dir_all(&folder).unwrap();
-    let movie = folder.join("Hex Recording.mp4");
+    let movie = folder.join("GoSpell Recording.mp4");
     std::fs::write(&movie, b"movie").unwrap();
     let mut recording = clip();
     recording.movie = movie;
@@ -433,8 +433,8 @@ fn the_send_list_searches_titles_first() {
         folder: Some(folder.into()),
     };
     let dests = vec![
-        dest("Fix the picker", "hex", "ses_a"),
-        dest("Hex editor", "rune", "ses_b"),
+        dest("Fix the picker", "gospell", "ses_a"),
+        dest("GoSpell editor", "rune", "ses_b"),
         dest("Seer cards", "seer", "ses_c"),
     ];
     let names = |query| -> Vec<String> {
@@ -443,7 +443,7 @@ fn the_send_list_searches_titles_first() {
             .map(|d| d.name.clone())
             .collect()
     };
-    assert_eq!(names("hex"), ["Hex editor", "Fix the picker"]);
+    assert_eq!(names("gospell"), ["GoSpell editor", "Fix the picker"]);
     assert_eq!(names("ses_c"), ["Seer cards"]);
     assert_eq!(names("").len(), 3);
 }
@@ -460,7 +460,7 @@ fn an_export_without_marks_is_the_crop_of_the_shot() {
         crop: Some([8.0, 4.0, 32.0, 20.0]),
     };
     let png = export.png().unwrap();
-    let path = std::env::temp_dir().join("hex-editor-export-test.png");
+    let path = std::env::temp_dir().join("gospell-editor-export-test.png");
     std::fs::write(&path, &png).unwrap();
     let back = export::decode(&path).unwrap();
     assert_eq!(back.size, [32, 20]);
@@ -594,7 +594,7 @@ fn escape_cancels_the_words_and_their_send_but_keeps_the_panel() {
     editor.listen(Listen::Recording, &mut tx);
     let dest = Dest {
         session: "ses_a".into(),
-        name: "Hex editor".into(),
+        name: "GoSpell editor".into(),
         folder: None,
     };
     editor.deliver(Out::Send(dest.clone()), &mut tx);
@@ -623,7 +623,7 @@ fn a_waiting_send_goes_once_the_words_land() {
     editor.deliver(
         Out::Send(Dest {
             session: "ses_a".into(),
-            name: "Hex editor".into(),
+            name: "GoSpell editor".into(),
             folder: None,
         }),
         &mut tx,
@@ -664,8 +664,8 @@ fn key(key: Key) -> KeyEvent {
 
 /// The editor over a 960 × 640 display: a 1440 × 900 shot at 2× with an
 /// arrow, a box, text, and a crop, then with the Send to… list open, then
-/// with words said over it while a dictation still records, against `tests/golden/screenshot-editor-*.png`. `HEX_UPDATE_GOLDENS=1`
-/// rewrites them and `HEX_GOLDEN_RENDERS` also writes them there. Without a
+/// with words said over it while a dictation still records, against `tests/golden/screenshot-editor-*.png`. `GOSPELL_UPDATE_GOLDENS=1`
+/// rewrites them and `GOSPELL_GOLDEN_RENDERS` also writes them there. Without a
 /// GPU adapter it skips. Checked on Linux only, like every golden.
 #[test]
 #[cfg_attr(not(target_os = "linux"), ignore = "goldens are checked on Linux")]
@@ -722,17 +722,17 @@ fn editor_goldens() {
             }
             if send {
                 editor.send = Some(SendList {
-                    query: "hex".into(),
+                    query: "gospell".into(),
                     sessions: Sessions::Ready(vec![
                         Dest {
                             session: "ses_a".into(),
-                            name: "Hex editor".into(),
-                            folder: Some("hex".into()),
+                            name: "GoSpell editor".into(),
+                            folder: Some("gospell".into()),
                         },
                         Dest {
                             session: "ses_b".into(),
                             name: "Fix the picker crosshair".into(),
-                            folder: Some("hex".into()),
+                            folder: Some("gospell".into()),
                         },
                     ]),
                     selected: 0,
@@ -753,14 +753,14 @@ fn editor_goldens() {
             );
             let (w, h) = ((SCREEN[0] * 2.0) as u32, (SCREEN[1] * 2.0) as u32);
             let pixels = crate::rune_ui::offscreen::draw(&gpu, &mut rt, w, h);
-            if let Some(renders) = std::env::var_os("HEX_GOLDEN_RENDERS") {
+            if let Some(renders) = std::env::var_os("GOSPELL_GOLDEN_RENDERS") {
                 let renders = PathBuf::from(renders);
                 std::fs::create_dir_all(&renders).unwrap();
                 rune::render::write_png(&renders.join(format!("{name}.png")), w, h, &pixels)
                     .unwrap();
             }
             let path = folder.join(format!("{name}.png"));
-            if std::env::var_os("HEX_UPDATE_GOLDENS").is_some() {
+            if std::env::var_os("GOSPELL_UPDATE_GOLDENS").is_some() {
                 rune::render::write_png(&path, w, h, &pixels).unwrap();
                 continue;
             }
@@ -789,14 +789,14 @@ fn editor_goldens() {
     assert!(misses.is_empty(), "{}", misses.join("\n"));
 }
 
-/// `HEX_SCREENSHOT_FRAMES=<folder>` writes the editor opening over a 960 ×
+/// `GOSPELL_SCREENSHOT_FRAMES=<folder>` writes the editor opening over a 960 ×
 /// 640 display, a box and an arrow drawn, words said over it, then
 /// closing, at 60 fps, dark, to
 /// `<folder>/editor/`. Without the variable or a GPU adapter it does
 /// nothing.
 #[test]
 fn editor_frames() {
-    let Some(folder) = std::env::var_os("HEX_SCREENSHOT_FRAMES") else {
+    let Some(folder) = std::env::var_os("GOSPELL_SCREENSHOT_FRAMES") else {
         return;
     };
     let Ok(gpu) = rune::render::Gpu::try_new(rune::render::Gpu::instance(), None) else {
@@ -871,7 +871,7 @@ fn editor_frames() {
     }
 }
 
-/// `HEX_SCREENSHOT_SNAPS=<folder>` writes the editor open on a recording,
+/// `GOSPELL_SCREENSHOT_SNAPS=<folder>` writes the editor open on a recording,
 /// light and dark: its bar's export size and estimate, the same bar while
 /// a 1080p copy is 42% done, while a save to the path the save panel chose
 /// is, and once it's saved.
@@ -879,7 +879,7 @@ fn editor_frames() {
 fn recording_editor_snapshots() {
     use crate::app_settings::ExportSize;
     use crate::rune_ui::offscreen;
-    let Some(folder) = std::env::var_os("HEX_SCREENSHOT_SNAPS") else {
+    let Some(folder) = std::env::var_os("GOSPELL_SCREENSHOT_SNAPS") else {
         return;
     };
     let folder = std::path::PathBuf::from(folder);

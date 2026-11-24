@@ -1,4 +1,4 @@
-//! The `hex settings` key registry: every key, its kind, the retired names,
+//! The `gospell settings` key registry: every key, its kind, the retired names,
 //! and the capability each key needs.
 
 use crate::app_settings::HotkeySlot;
@@ -10,7 +10,7 @@ pub(super) enum Kind {
         min: f64,
         max: f64,
     },
-    #[cfg_attr(not(hex_capture), allow(dead_code))]
+    #[cfg_attr(not(gospell_capture), allow(dead_code))]
     Integer {
         min: u64,
         max: u64,
@@ -80,7 +80,7 @@ const fn read_only(key: &'static str, kind: Kind, about: &'static str, why: &'st
 }
 
 const UNIT: Kind = Kind::Number { min: 0.0, max: 1.0 };
-const MODEL_CHANGE: &str = "change the transcription model with `hex model use`";
+const MODEL_CHANGE: &str = "change the transcription model with `gospell model use`";
 
 pub(super) const KEYS: &[Key] = &[
     key(
@@ -124,7 +124,7 @@ pub(super) const KEYS: &[Key] = &[
             "analog",
             "thock",
         ]),
-        "Which sounds play; classic, Hex's original tones, is the default",
+        "Which sounds play; classic, GoSpell's original tones, is the default",
     ),
     optional(
         "microphone",
@@ -180,7 +180,7 @@ pub(super) const KEYS: &[Key] = &[
         "cancel_hotkey",
         Kind::Shortcut(HotkeySlot::Cancel),
         "Toggle mode's cancel shortcut, Escape by default: discards the recording, \
-         nothing pasted or saved. Hex takes the key only while a toggled recording runs",
+         nothing pasted or saved. GoSpell takes the key only while a toggled recording runs",
     ),
     optional(
         "raw_dictation_hotkey",
@@ -289,7 +289,7 @@ pub(super) const KEYS: &[Key] = &[
     key(
         "show_dock_icon",
         Kind::Bool,
-        "Keep Hex in the Dock when Settings is closed (macOS)",
+        "Keep GoSpell in the Dock when Settings is closed (macOS)",
     ),
     read_only(
         "transcription.model",
@@ -307,7 +307,7 @@ pub(super) const KEYS: &[Key] = &[
         "transcription_recents",
         Kind::Json,
         "Recently used models, each with its language",
-        "Hex records these as you switch models",
+        "GoSpell records these as you switch models",
     ),
     key(
         "vocabulary_boost",
@@ -377,7 +377,7 @@ pub(super) const KEYS: &[Key] = &[
     key(
         "labs.learn_from_corrections",
         Kind::Bool,
-        "Labs: add names corrected in text Hex just pasted to Vocabulary, watching only that field for up to 5 minutes; nothing leaves this Mac (macOS)",
+        "Labs: add names corrected in text GoSpell just pasted to Vocabulary, watching only that field for up to 5 minutes; nothing leaves this Mac (macOS)",
     ),
     key(
         "labs.cursor_context",
@@ -552,7 +552,7 @@ pub(super) const KEYS: &[Key] = &[
     key(
         "labs.history_stats",
         Kind::Bool,
-        "Labs: a summary of retained dictations at the top of History, with a year-long heatmap and all-time totals from a daily rollup in usage.json (counts only, no text or app names) kept beyond History's retention. While off, the rollup is never written or read; hex history stats prints it too",
+        "Labs: a summary of retained dictations at the top of History, with a year-long heatmap and all-time totals from a daily rollup in usage.json (counts only, no text or app names) kept beyond History's retention. While off, the rollup is never written or read; gospell history stats prints it too",
     ),
     key(
         "labs.history_stats_strip",
@@ -567,12 +567,12 @@ pub(super) const KEYS: &[Key] = &[
     key(
         "labs.hide_menu_bar_icon",
         Kind::Bool,
-        "Labs: hide Hex's menu bar icon while nothing records; shortcuts keep working, and opening Hex again from Finder or Spotlight shows Settings (macOS)",
+        "Labs: hide GoSpell's menu bar icon while nothing records; shortcuts keep working, and opening GoSpell again from Finder or Spotlight shows Settings (macOS)",
     ),
     key(
         "labs.caps_lock_dictation",
         Kind::Bool,
-        "Labs: a Caps Lock press starts and stops dictation hands-free, and its light shows when Hex records and transcribes; Caps Lock stays off so typing is unchanged (macOS)",
+        "Labs: a Caps Lock press starts and stops dictation hands-free, and its light shows when GoSpell records and transcribes; Caps Lock stays off so typing is unchanged (macOS)",
     ),
     key(
         "labs.caps_lock_light",
@@ -625,7 +625,7 @@ pub(super) const KEYS: &[Key] = &[
     key(
         "labs.annotate_replay",
         Kind::Bool,
-        "Labs: keep a rolling 15-second screen buffer so hex capture replay or capture.replay_hotkey saves what just happened; macOS shows the screen-recording dot the whole time it's on (macOS 27+)",
+        "Labs: keep a rolling 15-second screen buffer so gospell capture replay or capture.replay_hotkey saves what just happened; macOS shows the screen-recording dot the whole time it's on (macOS 27+)",
     ),
     key(
         "labs.copy_capture_zip",
@@ -635,12 +635,12 @@ pub(super) const KEYS: &[Key] = &[
     key(
         "labs.annotate_agent_tools",
         Kind::Bool,
-        "Labs: hex annotate inspect, zoom, frames, and skill read a capture bundle in the CLI process, for a coding agent (macOS, Linux, Windows)",
+        "Labs: gospell annotate inspect, zoom, frames, and skill read a capture bundle in the CLI process, for a coding agent (macOS, Linux, Windows)",
     ),
     key(
         "labs.annotate_agent_install",
         Kind::Bool,
-        "Labs: Annotate gains an Agents section that writes the hex-annotate skill into Claude Code, Codex, OpenCode, or Pi, copies the npx skills add command, and on macOS links hex onto PATH without replacing another program's hex (macOS, Linux, Windows)",
+        "Labs: Annotate gains an Agents section that writes the gospell-annotate skill into Claude Code, Codex, OpenCode, or Pi, copies the npx skills add command, and on macOS links gospell onto PATH without replacing another program's gospell (macOS, Linux, Windows)",
     ),
     key(
         "labs.gnome_clipboard_restore",
@@ -690,7 +690,7 @@ pub(super) const KEYS: &[Key] = &[
     key(
         "labs.k_quant_models",
         Kind::Bool,
-        "Labs: add your own speech model files that use Q6_K, Q5_K, or Q4_K weights (macOS); they are smaller than Q8_0 but Hex hasn't verified them",
+        "Labs: add your own speech model files that use Q6_K, Q5_K, or Q4_K weights (macOS); they are smaller than Q8_0 but GoSpell hasn't verified them",
     ),
     key(
         "labs.picker_downloaded",
@@ -712,7 +712,7 @@ pub(super) const KEYS: &[Key] = &[
         "labs.drop_transcribe",
         Kind::Bool,
         "Labs: a WAV, MP3, AAC, M4A, MP4, MOV, AIFF, CAF, FLAC, OGG, Opus, WebM, or MKV file \
-         dropped on the Hex window is transcribed with the selected dictation model and saved \
+         dropped on the GoSpell window is transcribed with the selected dictation model and saved \
          as a text file next to it",
     ),
     key(
@@ -724,20 +724,20 @@ pub(super) const KEYS: &[Key] = &[
     key(
         "labs.api_processing",
         Kind::Bool,
-        "Labs: apps using Hex's local API can ask for transcripts with Global mode's corrections, \
+        "Labs: apps using GoSpell's local API can ask for transcripts with Global mode's corrections, \
          rewrite, and transformations applied (process=global)",
     ),
     key(
         "labs.api_timestamps",
         Kind::Bool,
-        "Labs: apps using Hex's local API can ask for each segment's or word's start and end times \
+        "Labs: apps using GoSpell's local API can ask for each segment's or word's start and end times \
          in a transcript, as the speech model heard them (timestamps=segment|word)",
     ),
     key(
         "labs.speakers_only",
         Kind::Bool,
         "Labs: While dictating applies only while the default output is speakers; headphones are \
-         left alone, and outputs Hex can't classify count as speakers",
+         left alone, and outputs GoSpell can't classify count as speakers",
     ),
     key(
         "labs.calendar_menu",
@@ -756,7 +756,7 @@ pub(super) const KEYS: &[Key] = &[
     key(
         "labs.pause_menu",
         Kind::Bool,
-        "Labs: the menu bar offers Pause Hex, which makes every capture shortcut inert until \
+        "Labs: the menu bar offers Pause GoSpell, which makes every capture shortcut inert until \
          Resume; a restart starts unpaused (macOS)",
     ),
     key(
@@ -793,7 +793,7 @@ pub(super) const KEYS: &[Key] = &[
         "labs.signature_text",
         Kind::Text,
         "Labs: the line added to each normal dictation, one line of at most 200 characters; \
-         \"Sent from Hex\" by default, and empty adds nothing",
+         \"Sent from GoSpell\" by default, and empty adds nothing",
     ),
     key(
         "labs.dictation_style",
@@ -815,7 +815,7 @@ pub(super) const KEYS: &[Key] = &[
     optional(
         "meetings.output_folder",
         Kind::Path,
-        "Folder for meeting Markdown; none uses ~/Documents/Hex Meetings",
+        "Folder for meeting Markdown; none uses ~/Documents/GoSpell Meetings",
     ),
     key(
         "meetings.summaries",
@@ -850,7 +850,7 @@ pub(super) const KEYS: &[Key] = &[
     key(
         "meetings.stop_when_call_ends",
         Kind::Bool,
-        "A meeting recording Hex started on its own stops 30 s after its call app leaves the microphone and goes quiet, unless you keep recording (macOS)",
+        "A meeting recording GoSpell started on its own stops 30 s after its call app leaves the microphone and goes quiet, unless you keep recording (macOS)",
     ),
     key(
         "meetings.export.descriptive_filenames",
@@ -894,12 +894,12 @@ pub(super) const KEYS: &[Key] = &[
         "Minutes before a meeting its reminder shows",
     ),
     key(
-        "experimental.hex_microphone",
+        "experimental.gospell_microphone",
         Kind::Bool,
-        "Labs: the Voice Filter and its Hex Microphone virtual input",
+        "Labs: the Voice Filter and its GoSpell Microphone virtual input",
     ),
     key(
-        "experimental.hex_microphone_mode",
+        "experimental.gospell_microphone_mode",
         Kind::Choice(&[
             "normal",
             "muffled",
@@ -911,22 +911,22 @@ pub(super) const KEYS: &[Key] = &[
             "underwater",
             "far",
         ]),
-        "What Hex Microphone does to your voice while you dictate",
+        "What GoSpell Microphone does to your voice while you dictate",
     ),
     key(
-        "experimental.hex_microphone_comfort_noise",
+        "experimental.gospell_microphone_comfort_noise",
         Kind::Bool,
-        "Hex Microphone fills silence with soft noise",
+        "GoSpell Microphone fills silence with soft noise",
     ),
     key(
-        "experimental.hex_microphone_strength",
+        "experimental.gospell_microphone_strength",
         UNIT,
-        "How strongly Hex Microphone applies its filter, from 0 to 1",
+        "How strongly GoSpell Microphone applies its filter, from 0 to 1",
     ),
     key(
         "enable_on_launch",
         Kind::Bool,
-        "Start listening when Hex opens (Windows and Linux)",
+        "Start listening when GoSpell opens (Windows and Linux)",
     ),
     key(
         "paste_with_shift",
@@ -936,7 +936,7 @@ pub(super) const KEYS: &[Key] = &[
     key(
         "gnome_keyboard_shortcuts",
         Kind::Bool,
-        "Hex's own GNOME custom keyboard shortcuts, for GNOME without a shortcuts portal (Linux)",
+        "GoSpell's own GNOME custom keyboard shortcuts, for GNOME without a shortcuts portal (Linux)",
     ),
     key(
         "share_dictation_shortcut",
@@ -968,7 +968,7 @@ pub(super) const KEYS: &[Key] = &[
 ];
 
 /// Captures exist only in builds with the `capture` build option.
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 pub(super) const CAPTURE_KEYS: &[Key] = &[
     key(
         "capture.enabled",
@@ -988,7 +988,7 @@ pub(super) const CAPTURE_KEYS: &[Key] = &[
     key(
         "capture.transcriber",
         Kind::Choice(&["parakeet", "apple"]),
-        "What transcribes a capture's narration: Hex's loaded model or Apple's",
+        "What transcribes a capture's narration: GoSpell's loaded model or Apple's",
     ),
     optional(
         "capture.folder",
@@ -1019,12 +1019,12 @@ pub(super) const CAPTURE_KEYS: &[Key] = &[
     key(
         "capture.show_overlays_in_recordings",
         Kind::Bool,
-        "Let screen recordings, captures included, show Hex's capsules, ink, and HUD (for demos)",
+        "Let screen recordings, captures included, show GoSpell's capsules, ink, and HUD (for demos)",
     ),
 ];
-#[cfg(not(hex_capture))]
+#[cfg(not(gospell_capture))]
 pub(super) const CAPTURE_KEYS: &[Key] = &[];
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 const RETENTION_DAYS: Kind = Kind::Integer { min: 1, max: 3650 };
 
 #[cfg(target_os = "macos")]
@@ -1055,14 +1055,14 @@ pub(super) const RETIRED: &[(&str, &str)] = &[
     ("labs.yearly_stats", "labs.history_stats true"),
 ];
 
-/// Settings that act only where Hex has a capability (by its
+/// Settings that act only where GoSpell has a capability (by its
 /// `rune_ui::capabilities` name), the same one that shows their row in the
 /// window. The first matching prefix decides.
 pub(super) const NEEDS: &[(&str, &str)] = &[
     ("meetings.calendar.", "calendar"),
     ("meetings.", "meetings"),
     ("labs.live_chapters", "meetings"),
-    ("experimental.hex_microphone", "fun"),
+    ("experimental.gospell_microphone", "fun"),
     ("typed_text_hotkey", "typed_text"),
     ("show_dock_icon", "dock_icon"),
     ("labs.hide_menu_bar_icon", "dock_icon"),

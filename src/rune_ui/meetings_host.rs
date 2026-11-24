@@ -183,7 +183,7 @@ fn pane_meeting(
         transcript,
         imported: manifest.imported,
         // Sections come from the transcript lines, not the merged turns, as
-        // the menu bar and `hex meetings show --chapter` read them.
+        // the menu bar and `gospell meetings show --chapter` read them.
         kept_for: (!meeting.status.is_active())
             .then(|| {
                 crate::meeting::retention_for(manifest, crate::app_settings::meeting_retention())
@@ -276,7 +276,7 @@ mod tests {
     #[test]
     fn copy_section_matches_the_menu_bar_and_the_cli() {
         let root = std::env::temp_dir().join(format!(
-            "hex-copy-section-{}-{}",
+            "gospell-copy-section-{}-{}",
             std::process::id(),
             crate::desktop::events::now_ms()
         ));

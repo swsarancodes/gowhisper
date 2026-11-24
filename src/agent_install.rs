@@ -1,17 +1,17 @@
-//! The hex-annotate skill in coding agents' own folders, and hex on PATH for
+//! The gospell-annotate skill in coding agents' own folders, and gospell on PATH for
 //! the agents that run it: the Annotate pane's Agents section (Labs › Install
 //! agent skill from Annotate). Every path is given, so the pane's rows read
-//! [status] and an install writes [SKILL] where it is asked, and a hex another
+//! [status] and an install writes [SKILL] where it is asked, and a gospell another
 //! program owns is never touched.
 //!
 //! Codex and Pi share ~/.agents/skills, where npx skills writes too, so a
 //! copy there is read by content and never written twice. A symlinked
-//! SKILL.md or hex-annotate folder is managed elsewhere: its content is read,
+//! SKILL.md or gospell-annotate folder is managed elsewhere: its content is read,
 //! and nothing is written through the link.
 
 use std::path::{Path, PathBuf};
 
-/// The guide "hex annotate skill" prints, embedded from the repository.
+/// The guide "gospell annotate skill" prints, embedded from the repository.
 pub(crate) use crate::control::cli::annotate_read::SKILL;
 
 /// One coding agent that reads skills from a folder of its own.
@@ -48,14 +48,14 @@ impl Agent {
     }
 }
 
-/// Whether an agent's folder already holds this Hex's skill.
+/// Whether an agent's folder already holds this GoSpell's skill.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum SkillState {
     /// No SKILL.md in the agent's folder.
     Missing,
-    /// The file is exactly the skill this Hex ships.
+    /// The file is exactly the skill this GoSpell ships.
     Current,
-    /// The file is there but differs: an older Hex wrote it, or someone
+    /// The file is there but differs: an older GoSpell wrote it, or someone
     /// edited it. Installing replaces it, unless it is a symlink.
     Outdated,
 }
@@ -69,7 +69,7 @@ pub(crate) struct AgentStatus {
     pub(crate) skill: SkillState,
     /// The SKILL.md the row reads and an install writes.
     pub(crate) path: PathBuf,
-    /// The file or its hex-annotate folder is a symlink, so the skill is
+    /// The file or its gospell-annotate folder is a symlink, so the skill is
     /// managed elsewhere: read by content, never written through.
     pub(crate) linked: bool,
 }
@@ -134,9 +134,10 @@ impl Paths {
         self.home.join(".agents")
     }
 
-    /// ~/.agents/skills/hex-annotate/SKILL.md.
+    /// ~/.agents/skills/gospell-annotate/SKILL.md.
     pub(crate) fn shared_skill(&self) -> PathBuf {
-        self.shared_folder().join("skills/hex-annotate/SKILL.md")
+        self.shared_folder()
+            .join("skills/gospell-annotate/SKILL.md")
     }
 
     /// The folder that means the agent is installed: ~/.claude (or
@@ -158,11 +159,15 @@ impl Paths {
     /// one, else its own.
     pub(crate) fn skill_path(&self, agent: Agent) -> PathBuf {
         match agent {
-            Agent::ClaudeCode => self.claude_folder().join("skills/hex-annotate/SKILL.md"),
+            Agent::ClaudeCode => self
+                .claude_folder()
+                .join("skills/gospell-annotate/SKILL.md"),
             Agent::Codex => self.shared_skill(),
-            Agent::OpenCode => self.opencode_folder().join("skills/hex-annotate/SKILL.md"),
+            Agent::OpenCode => self
+                .opencode_folder()
+                .join("skills/gospell-annotate/SKILL.md"),
             Agent::Pi if self.shared_skill().exists() => self.shared_skill(),
-            Agent::Pi => self.pi_folder().join("skills/hex-annotate/SKILL.md"),
+            Agent::Pi => self.pi_folder().join("skills/gospell-annotate/SKILL.md"),
         }
     }
 }
@@ -200,7 +205,7 @@ fn read_state(path: &Path) -> SkillState {
     }
 }
 
-/// Whether the skill file or its hex-annotate folder is a symlink: someone
+/// Whether the skill file or its gospell-annotate folder is a symlink: someone
 /// else manages it, so it is read but never written through.
 fn linked(path: &Path) -> bool {
     is_symlink(path) || path.parent().is_some_and(is_symlink)
@@ -210,7 +215,7 @@ fn is_symlink(path: &Path) -> bool {
     std::fs::symlink_metadata(path).is_ok_and(|meta| meta.file_type().is_symlink())
 }
 
-/// Writes this Hex's skill into the agent's folder, creating its directories,
+/// Writes this GoSpell's skill into the agent's folder, creating its directories,
 /// with a staging file renamed into place so a crash leaves the old file or
 /// the complete new one. Nothing else in the folder is touched. A symlinked
 /// skill or folder is left where it is.
@@ -228,8 +233,8 @@ pub(crate) fn install(paths: &Paths, agent: Agent) -> Result<PathBuf, String> {
     Ok(path)
 }
 
-/// Putting Hex's hex on PATH for agents: /opt/homebrew/bin, /usr/local/bin,
-/// else ~/.local/bin. A hex that isn't Hex's own link is never replaced.
+/// Putting GoSpell's gospell on PATH for agents: /opt/homebrew/bin, /usr/local/bin,
+/// else ~/.local/bin. A gospell that isn't GoSpell's own link is never replaced.
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 pub(crate) mod cli {
     use std::ffi::OsString;
@@ -277,15 +282,15 @@ pub(crate) mod cli {
     pub(crate) enum State {
         NotInstalled,
         Installed,
-        /// A regular file, or a link to anything but Hex.
+        /// A regular file, or a link to anything but GoSpell.
         OwnedByAnother,
     }
 
-    /// The hex link and the folder it is (or would be) in.
+    /// The gospell link and the folder it is (or would be) in.
     #[derive(Clone, Debug, Eq, PartialEq)]
     pub(crate) struct Status {
         pub(crate) state: State,
-        /// The link path, folder/hex.
+        /// The link path, folder/gospell.
         pub(crate) path: PathBuf,
         /// The folder is ~/.local/bin and $PATH doesn't name it.
         pub(crate) off_path: bool,
@@ -294,15 +299,15 @@ pub(crate) mod cli {
     /// Why an install didn't happen.
     #[derive(Clone, Debug, Eq, PartialEq)]
     pub(crate) enum LinkError {
-        /// macOS runs Hex from a temporary App Translocation folder; a link
+        /// macOS runs GoSpell from a temporary App Translocation folder; a link
         /// to it would stop working when that folder goes.
         Translocation,
         Io(String),
     }
 
-    /// The link as this computer has it: an existing hex in any candidate
+    /// The link as this computer has it: an existing gospell in any candidate
     /// folder wins, else the folder an install would use is named. A link
-    /// whose target is gone is Hex's own only when it names a Hex app; one
+    /// whose target is gone is GoSpell's own only when it names a GoSpell app; one
     /// to anything else stays another program's.
     pub(crate) fn status(env: &Environment) -> Status {
         for folder in env.candidates() {
@@ -314,11 +319,11 @@ pub(crate) mod cli {
         status_in(env, &target(env))
     }
 
-    /// Links hex into the first folder that takes it. A folder holding
-    /// another program's hex is left alone, and the status returned says so.
+    /// Links gospell into the first folder that takes it. A folder holding
+    /// another program's gospell is left alone, and the status returned says so.
     /// A system folder that exists but refuses the link (a root-owned
     /// /usr/local/bin) falls through to ~/.local/bin. A dangling link to a
-    /// Hex that was deleted is replaced; one to anything else is not.
+    /// GoSpell that was deleted is replaced; one to anything else is not.
     pub(crate) fn install(env: &Environment) -> Result<Status, LinkError> {
         if env.exe.to_string_lossy().contains("/AppTranslocation/") {
             return Err(LinkError::Translocation);
@@ -334,7 +339,7 @@ pub(crate) mod cli {
                     Err(error) => {
                         return Err(LinkError::Io(format!(
                             "{}: {}",
-                            folder.join("hex").display(),
+                            folder.join("gospell").display(),
                             error
                         )));
                     }
@@ -347,7 +352,7 @@ pub(crate) mod cli {
             std::fs::create_dir_all(&folder)
                 .map_err(|error| LinkError::Io(format!("{}: {}", folder.display(), error)))?;
             link(env, &folder).map_err(|error| {
-                LinkError::Io(format!("{}: {}", folder.join("hex").display(), error))
+                LinkError::Io(format!("{}: {}", folder.join("gospell").display(), error))
             })?;
         }
         Ok(status_in(env, &folder))
@@ -371,17 +376,17 @@ pub(crate) mod cli {
     }
 
     fn status_in(env: &Environment, folder: &Path) -> Status {
-        let path = folder.join("hex");
+        let path = folder.join("gospell");
         let state = match std::fs::symlink_metadata(&path) {
             Ok(meta) if meta.file_type().is_symlink() => match std::fs::read_link(&path) {
                 Ok(target) => {
                     let target = resolve(folder, &target);
-                    if !is_hex(&target, env) {
+                    if !is_gospell(&target, env) {
                         State::OwnedByAnother
                     } else if target.exists() {
                         State::Installed
                     } else {
-                        // A link to a Hex that is gone is ours to replace.
+                        // A link to a GoSpell that is gone is ours to replace.
                         State::NotInstalled
                     }
                 }
@@ -409,14 +414,14 @@ pub(crate) mod cli {
         }
     }
 
-    /// This Hex's own executable, or any Hex.app's: a link to another build's
-    /// app still is Hex.
-    fn is_hex(target: &Path, env: &Environment) -> bool {
-        target == env.exe || is_bundle_hex(target)
+    /// This GoSpell's own executable, or any GoSpell.app's: a link to another build's
+    /// app still is GoSpell.
+    fn is_gospell(target: &Path, env: &Environment) -> bool {
+        target == env.exe || is_bundle_gospell(target)
     }
 
-    fn is_bundle_hex(target: &Path) -> bool {
-        target.file_name().is_some_and(|name| name == "hex")
+    fn is_bundle_gospell(target: &Path) -> bool {
+        target.file_name().is_some_and(|name| name == "gospell")
             && target
                 .parent()
                 .and_then(Path::file_name)
@@ -434,8 +439,8 @@ pub(crate) mod cli {
 
     #[cfg(unix)]
     pub(super) fn link(env: &Environment, folder: &Path) -> std::io::Result<()> {
-        let path = folder.join("hex");
-        // Only a dangling link to a Hex that is gone is ours to replace. A
+        let path = folder.join("gospell");
+        // Only a dangling link to a GoSpell that is gone is ours to replace. A
         // live link, a link to anything else, or a regular file is never
         // removed, even if a caller reaches this directly.
         match std::fs::symlink_metadata(&path) {
@@ -443,11 +448,11 @@ pub(crate) mod cli {
                 let replaceable = meta.file_type().is_symlink()
                     && std::fs::read_link(&path).is_ok_and(|target| {
                         let target = resolve(folder, &target);
-                        is_hex(&target, env) && !target.exists()
+                        is_gospell(&target, env) && !target.exists()
                     });
                 if !replaceable {
                     return Err(std::io::Error::other(format!(
-                        "{} is not a dangling Hex link",
+                        "{} is not a dangling GoSpell link",
                         path.display()
                     )));
                 }
@@ -463,7 +468,10 @@ pub(crate) mod cli {
     fn link(_: &Environment, folder: &Path) -> std::io::Result<()> {
         Err(std::io::Error::new(
             std::io::ErrorKind::Unsupported,
-            format!("linking hex is not supported here: {}", folder.display()),
+            format!(
+                "linking gospell is not supported here: {}",
+                folder.display()
+            ),
         ))
     }
 }
@@ -484,7 +492,7 @@ mod tests {
             static SEQUENCE: AtomicU32 = AtomicU32::new(0);
             let sequence = SEQUENCE.fetch_add(1, Ordering::Relaxed);
             let path = std::env::temp_dir().join(format!(
-                "hex-agents-{}-{tag}-{sequence}",
+                "gospell-agents-{}-{tag}-{sequence}",
                 std::process::id()
             ));
             let _ = std::fs::remove_dir_all(&path);
@@ -527,19 +535,19 @@ mod tests {
         assert_eq!(before[0].skill, SkillState::Missing);
         assert_eq!(
             before[0].path,
-            home.join(".claude/skills/hex-annotate/SKILL.md")
+            home.join(".claude/skills/gospell-annotate/SKILL.md")
         );
         assert_eq!(
             before[1].path,
-            home.join(".agents/skills/hex-annotate/SKILL.md"),
+            home.join(".agents/skills/gospell-annotate/SKILL.md"),
             "Codex reads the shared copy"
         );
         assert_eq!(
             before[3].path,
-            home.join(".pi/agent/skills/hex-annotate/SKILL.md")
+            home.join(".pi/agent/skills/gospell-annotate/SKILL.md")
         );
 
-        // A skill Hex wrote reads current; an edited one reads outdated.
+        // A skill GoSpell wrote reads current; an edited one reads outdated.
         install(&paths, Agent::ClaudeCode).unwrap();
         let installed = status(&paths);
         assert_eq!(installed[0].skill, SkillState::Current);
@@ -583,7 +591,7 @@ mod tests {
         };
         assert_eq!(
             paths.skill_path(Agent::ClaudeCode),
-            claude.join("skills/hex-annotate/SKILL.md")
+            claude.join("skills/gospell-annotate/SKILL.md")
         );
         assert_eq!(
             paths.skill_path(Agent::Codex),
@@ -592,11 +600,11 @@ mod tests {
         );
         assert_eq!(
             paths.skill_path(Agent::OpenCode),
-            config.join("opencode/skills/hex-annotate/SKILL.md")
+            config.join("opencode/skills/gospell-annotate/SKILL.md")
         );
         assert_eq!(
             paths.skill_path(Agent::Pi),
-            pi.join("skills/hex-annotate/SKILL.md")
+            pi.join("skills/gospell-annotate/SKILL.md")
         );
         let found: Vec<_> = status(&paths).into_iter().map(|s| s.found).collect();
         assert_eq!(found, [true, true, true, true]);
@@ -628,7 +636,9 @@ mod tests {
         install(&paths, Agent::Pi).unwrap();
         assert_eq!(std::fs::read(&shared).unwrap(), SKILL.as_bytes());
         assert!(
-            !home.join(".pi/agent/skills/hex-annotate/SKILL.md").exists(),
+            !home
+                .join(".pi/agent/skills/gospell-annotate/SKILL.md")
+                .exists(),
             "no second copy is written"
         );
     }
@@ -640,10 +650,10 @@ mod tests {
         let home = temp.path().join("home");
         let outside = temp.path().join("outside");
         std::fs::create_dir_all(home.join(".claude/skills")).unwrap();
-        write_file(&outside.join("hex-annotate/SKILL.md"), "an older skill");
+        write_file(&outside.join("gospell-annotate/SKILL.md"), "an older skill");
         std::os::unix::fs::symlink(
-            outside.join("hex-annotate"),
-            home.join(".claude/skills/hex-annotate"),
+            outside.join("gospell-annotate"),
+            home.join(".claude/skills/gospell-annotate"),
         )
         .unwrap();
         let paths = Paths {
@@ -655,7 +665,7 @@ mod tests {
         assert_eq!(statuses[0].skill, SkillState::Outdated);
         install(&paths, Agent::ClaudeCode).unwrap();
         assert_eq!(
-            std::fs::read_to_string(outside.join("hex-annotate/SKILL.md")).unwrap(),
+            std::fs::read_to_string(outside.join("gospell-annotate/SKILL.md")).unwrap(),
             "an older skill",
             "nothing was written through the link"
         );
@@ -669,7 +679,7 @@ mod tests {
             home: home.clone(),
             ..Paths::default()
         };
-        let folder = home.join(".agents/skills/hex-annotate");
+        let folder = home.join(".agents/skills/gospell-annotate");
         std::fs::create_dir_all(&folder).unwrap();
         std::fs::write(folder.join("NOTES.md"), "mine").unwrap();
 
@@ -718,9 +728,9 @@ mod tests {
             );
             std::fs::create_dir_all(&home).unwrap();
             // A real file, as the running app's executable is.
-            let exe = base.join("Applications/Hex.app/Contents/MacOS/hex");
+            let exe = base.join("Applications/GoSpell.app/Contents/MacOS/gospell");
             std::fs::create_dir_all(exe.parent().unwrap()).unwrap();
-            std::fs::write(&exe, "hex").unwrap();
+            std::fs::write(&exe, "gospell").unwrap();
             let env = Environment {
                 home,
                 exe,
@@ -732,14 +742,14 @@ mod tests {
 
         fn link_to(target: &Path, folder: &Path) {
             std::fs::create_dir_all(folder).unwrap();
-            std::os::unix::fs::symlink(target, folder.join("hex")).unwrap();
+            std::os::unix::fs::symlink(target, folder.join("gospell")).unwrap();
         }
 
         /// A real file a link can point at, so it isn't dangling.
-        fn fake_hex(root: &TempDir, name: &str) -> PathBuf {
+        fn fake_gospell(root: &TempDir, name: &str) -> PathBuf {
             let path = root.path().join(name);
             std::fs::create_dir_all(path.parent().unwrap()).unwrap();
-            std::fs::write(&path, "hex").unwrap();
+            std::fs::write(&path, "gospell").unwrap();
             path
         }
 
@@ -748,46 +758,49 @@ mod tests {
             let root = TempDir::new("choose");
             let (env, homebrew, usr_local) = environment(&root, "env");
             assert_eq!(status(&env).state, State::NotInstalled);
-            assert_eq!(status(&env).path, env.home.join(".local/bin/hex"));
+            assert_eq!(status(&env).path, env.home.join(".local/bin/gospell"));
 
             std::fs::create_dir_all(&usr_local).unwrap();
             assert_eq!(
                 status(&env).path,
-                usr_local.join("hex"),
+                usr_local.join("gospell"),
                 "the first existing writable system folder"
             );
             std::fs::create_dir_all(&homebrew).unwrap();
-            assert_eq!(status(&env).path, homebrew.join("hex"));
+            assert_eq!(status(&env).path, homebrew.join("gospell"));
         }
 
         #[test]
-        fn installing_links_this_hex_into_the_first_folder() {
+        fn installing_links_this_gospell_into_the_first_folder() {
             let root = TempDir::new("install");
             let (env, homebrew, _) = environment(&root, "env");
             std::fs::create_dir_all(&homebrew).unwrap();
             let installed = install(&env).unwrap();
             assert_eq!(installed.state, State::Installed);
-            assert_eq!(installed.path, homebrew.join("hex"));
-            assert_eq!(std::fs::read_link(homebrew.join("hex")).unwrap(), env.exe);
+            assert_eq!(installed.path, homebrew.join("gospell"));
+            assert_eq!(
+                std::fs::read_link(homebrew.join("gospell")).unwrap(),
+                env.exe
+            );
             assert_eq!(status(&env).state, State::Installed);
         }
 
         #[test]
-        fn a_hex_another_program_owns_is_never_replaced() {
+        fn a_gospell_another_program_owns_is_never_replaced() {
             let root = TempDir::new("foreign");
             let (env, homebrew, _) = environment(&root, "file");
             std::fs::create_dir_all(&homebrew).unwrap();
-            std::fs::write(homebrew.join("hex"), "another program").unwrap();
+            std::fs::write(homebrew.join("gospell"), "another program").unwrap();
             let installed = install(&env).unwrap();
             assert_eq!(installed.state, State::OwnedByAnother);
             assert_eq!(
-                std::fs::read_to_string(homebrew.join("hex")).unwrap(),
+                std::fs::read_to_string(homebrew.join("gospell")).unwrap(),
                 "another program"
             );
 
-            // A link to something that isn't Hex is foreign too.
+            // A link to something that isn't GoSpell is foreign too.
             let (env, homebrew, _) = environment(&root, "link");
-            let other = fake_hex(&root, "other-bin/hex");
+            let other = fake_gospell(&root, "other-bin/gospell");
             link_to(&other, &homebrew);
             assert_eq!(status(&env).state, State::OwnedByAnother);
             assert_eq!(install(&env).unwrap().state, State::OwnedByAnother);
@@ -798,12 +811,12 @@ mod tests {
             let root = TempDir::new("no-clobber");
             let (env, homebrew, _) = environment(&root, "env");
 
-            // A live link to something that isn't Hex.
-            let other = fake_hex(&root, "other-bin/hex");
+            // A live link to something that isn't GoSpell.
+            let other = fake_gospell(&root, "other-bin/gospell");
             link_to(&other, &homebrew);
             assert!(link(&env, &homebrew).is_err());
             assert_eq!(
-                std::fs::read_link(homebrew.join("hex")).unwrap(),
+                std::fs::read_link(homebrew.join("gospell")).unwrap(),
                 other,
                 "the live foreign link is still there"
             );
@@ -811,70 +824,73 @@ mod tests {
             // A regular file.
             let regular = root.path().join("regular");
             std::fs::create_dir_all(&regular).unwrap();
-            std::fs::write(regular.join("hex"), "another program").unwrap();
+            std::fs::write(regular.join("gospell"), "another program").unwrap();
             assert!(link(&env, &regular).is_err());
             assert_eq!(
-                std::fs::read_to_string(regular.join("hex")).unwrap(),
+                std::fs::read_to_string(regular.join("gospell")).unwrap(),
                 "another program",
                 "the regular file is still there"
             );
         }
 
         #[test]
-        fn a_link_to_another_hex_build_is_hex_s_own() {
+        fn a_link_to_another_gospell_build_is_gospell_s_own() {
             let root = TempDir::new("other-build");
             let (env, homebrew, _) = environment(&root, "env");
-            let other = fake_hex(&root, "Hex 2.app/Contents/MacOS/hex");
+            let other = fake_gospell(&root, "GoSpell 2.app/Contents/MacOS/gospell");
             link_to(&other, &homebrew);
             assert_eq!(status(&env).state, State::Installed);
             assert_eq!(install(&env).unwrap().state, State::Installed);
             assert_eq!(
-                std::fs::read_link(homebrew.join("hex")).unwrap(),
+                std::fs::read_link(homebrew.join("gospell")).unwrap(),
                 other,
                 "another build's link is kept"
             );
         }
 
         #[test]
-        fn a_dangling_link_to_a_hex_app_is_ours_to_replace() {
-            let root = TempDir::new("dangling-hex");
+        fn a_dangling_link_to_a_gospell_app_is_ours_to_replace() {
+            let root = TempDir::new("dangling-gospell");
             let (env, homebrew, _) = environment(&root, "env");
             link_to(
-                Path::new("/Applications/Gone.app/Contents/MacOS/hex"),
+                Path::new("/Applications/Gone.app/Contents/MacOS/gospell"),
                 &homebrew,
             );
             assert_eq!(status(&env).state, State::NotInstalled);
             let installed = install(&env).unwrap();
             assert_eq!(installed.state, State::Installed);
-            assert_eq!(std::fs::read_link(homebrew.join("hex")).unwrap(), env.exe);
+            assert_eq!(
+                std::fs::read_link(homebrew.join("gospell")).unwrap(),
+                env.exe
+            );
         }
 
         #[test]
         fn a_dangling_link_elsewhere_stays_foreign() {
             let root = TempDir::new("dangling-other");
             let (env, homebrew, _) = environment(&root, "env");
-            let gone = root.path().join("gone/hex");
+            let gone = root.path().join("gone/gospell");
             link_to(&gone, &homebrew);
             assert_eq!(status(&env).state, State::OwnedByAnother);
             assert_eq!(install(&env).unwrap().state, State::OwnedByAnother);
             assert_eq!(
-                std::fs::read_link(homebrew.join("hex")).unwrap(),
+                std::fs::read_link(homebrew.join("gospell")).unwrap(),
                 gone,
                 "the foreign link was left alone"
             );
         }
 
         #[test]
-        fn a_translocated_hex_is_never_linked() {
+        fn a_translocated_gospell_is_never_linked() {
             let root = TempDir::new("translocation");
             let (mut env, homebrew, _) = environment(&root, "env");
             env.exe = PathBuf::from(
-                "/private/var/folders/x/AppTranslocation/ABC/d/Hex.app/Contents/MacOS/hex",
+                "/private/var/folders/x/AppTranslocation/ABC/d/GoSpell.app/Contents/MacOS/gospell",
             );
             std::fs::create_dir_all(&homebrew).unwrap();
             assert_eq!(install(&env), Err(LinkError::Translocation));
             assert!(
-                !homebrew.join("hex").exists(),
+                !homebrew.join("gospell").exists(),
                 "nothing was linked to a temporary folder"
             );
         }
@@ -892,7 +908,7 @@ mod tests {
             std::fs::set_permissions(&homebrew, original).unwrap();
             let installed = installed.unwrap();
             assert_eq!(installed.state, State::Installed);
-            assert_eq!(installed.path, env.home.join(".local/bin/hex"));
+            assert_eq!(installed.path, env.home.join(".local/bin/gospell"));
             assert!(installed.off_path, "~/.local/bin is not on this PATH");
         }
 
@@ -902,8 +918,8 @@ mod tests {
             let (mut env, _, _) = environment(&root, "env");
             let local = env.home.join(".local/bin");
             std::fs::create_dir_all(&local).unwrap();
-            let hex = fake_hex(&root, "Hex.app/Contents/MacOS/hex");
-            link_to(&hex, &local);
+            let gospell = fake_gospell(&root, "GoSpell.app/Contents/MacOS/gospell");
+            link_to(&gospell, &local);
             assert!(status(&env).off_path);
             env.path = Some(std::ffi::OsString::from(format!(
                 "/usr/bin:{}",
@@ -912,7 +928,7 @@ mod tests {
             assert!(!status(&env).off_path, "the folder is on PATH");
             let installed = status(&env);
             assert_eq!(installed.state, State::Installed);
-            assert_eq!(installed.path, local.join("hex"));
+            assert_eq!(installed.path, local.join("gospell"));
         }
     }
 }

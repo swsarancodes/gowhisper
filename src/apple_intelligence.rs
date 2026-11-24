@@ -13,42 +13,42 @@ use crate::meeting::generator::{
 };
 
 unsafe extern "C" {
-    fn hex_apple_intelligence_availability() -> i32;
-    fn hex_apple_intelligence_context_size() -> isize;
-    fn hex_apple_intelligence_notes(
+    fn gospell_apple_intelligence_availability() -> i32;
+    fn gospell_apple_intelligence_context_size() -> isize;
+    fn gospell_apple_intelligence_notes(
         instructions: *const c_char,
         prompt: *const c_char,
         title_only: bool,
         timeout_ms: u64,
         error: *mut *mut c_char,
     ) -> *mut c_char;
-    fn hex_apple_intelligence_chapter(
+    fn gospell_apple_intelligence_chapter(
         instructions: *const c_char,
         prompt: *const c_char,
         timeout_ms: u64,
         error: *mut *mut c_char,
     ) -> *mut c_char;
-    fn hex_apple_intelligence_chapter_lines(
+    fn gospell_apple_intelligence_chapter_lines(
         instructions: *const c_char,
         prompt: *const c_char,
         timeout_ms: u64,
         error: *mut *mut c_char,
     ) -> *mut c_char;
-    fn hex_apple_intelligence_text(
+    fn gospell_apple_intelligence_text(
         instructions: *const c_char,
         prompt: *const c_char,
         temperature: f64,
         timeout_ms: u64,
         error: *mut *mut c_char,
     ) -> *mut c_char;
-    fn hex_apple_intelligence_free_string(string: *mut c_char);
+    fn gospell_apple_intelligence_free_string(string: *mut c_char);
 }
 
 const AVAILABILITY_TTL: Duration = Duration::from_secs(10);
 const CONTEXT_WINDOW_MARKER: &str = "context-window:";
 const REFUSAL_MARKER: &str = "refused:";
 
-/// A plain-text answer, as `hex_apple_intelligence_text` encodes it.
+/// A plain-text answer, as `gospell_apple_intelligence_text` encodes it.
 #[derive(Deserialize)]
 struct GeneratedText {
     text: String,
@@ -105,7 +105,8 @@ pub fn availability() -> Availability {
         return availability;
     }
     // SAFETY: A synchronous property read without arguments.
-    let availability = Availability::from_code(unsafe { hex_apple_intelligence_availability() });
+    let availability =
+        Availability::from_code(unsafe { gospell_apple_intelligence_availability() });
     *cache = Some((Instant::now(), availability));
     availability
 }
@@ -114,7 +115,7 @@ pub fn availability() -> Availability {
 /// unknown to this build's SDK.
 pub fn context_tokens() -> usize {
     // SAFETY: A synchronous property read without arguments.
-    usize::try_from(unsafe { hex_apple_intelligence_context_size() }).unwrap_or(0)
+    usize::try_from(unsafe { gospell_apple_intelligence_context_size() }).unwrap_or(0)
 }
 
 /// Generates a meeting title and short summary with guided generation.
@@ -145,7 +146,9 @@ pub fn generate_chapter(
 ) -> Result<GeneratedChapter, GenerationError> {
     call(instructions, prompt, |instructions, prompt, error| {
         // SAFETY: Both strings outlive the call and the bridge writes only `error`.
-        unsafe { hex_apple_intelligence_chapter(instructions, prompt, timeout_ms(timeout), error) }
+        unsafe {
+            gospell_apple_intelligence_chapter(instructions, prompt, timeout_ms(timeout), error)
+        }
     })
 }
 
@@ -158,7 +161,12 @@ pub fn generate_chapter_lines(
     call(instructions, prompt, |instructions, prompt, error| {
         // SAFETY: Both strings outlive the call and the bridge writes only `error`.
         unsafe {
-            hex_apple_intelligence_chapter_lines(instructions, prompt, timeout_ms(timeout), error)
+            gospell_apple_intelligence_chapter_lines(
+                instructions,
+                prompt,
+                timeout_ms(timeout),
+                error,
+            )
         }
     })
     .map(|generated: GeneratedChapterLines| generated.lines)
@@ -177,7 +185,7 @@ pub fn generate_text(
     call(instructions, prompt, |instructions, prompt, error| {
         // SAFETY: Both strings outlive the call and the bridge writes only `error`.
         unsafe {
-            hex_apple_intelligence_text(
+            gospell_apple_intelligence_text(
                 instructions,
                 prompt,
                 temperature,
@@ -202,7 +210,7 @@ fn generate(
     call(instructions, prompt, |instructions, prompt, error| {
         // SAFETY: Both strings outlive the call and the bridge writes only `error`.
         unsafe {
-            hex_apple_intelligence_notes(
+            gospell_apple_intelligence_notes(
                 instructions,
                 prompt,
                 title_only,
@@ -252,7 +260,7 @@ fn take_string(string: *mut c_char) -> Option<String> {
         .to_string_lossy()
         .into_owned();
     // SAFETY: Ownership returns to the bridge allocator exactly once.
-    unsafe { hex_apple_intelligence_free_string(string) };
+    unsafe { gospell_apple_intelligence_free_string(string) };
     Some(value)
 }
 

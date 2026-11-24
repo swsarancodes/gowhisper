@@ -36,7 +36,7 @@ pub enum KeyUp {
 enum Mode {
     #[default]
     Off,
-    /// `hex annotate draw` started a recording and wants the pen on as soon as
+    /// `gospell annotate draw` started a recording and wants the pen on as soon as
     /// the engine attaches its input sink.
     #[cfg_attr(not(any(target_os = "linux", test)), allow(dead_code))]
     PendingPen,
@@ -239,7 +239,7 @@ impl Drawing {
     }
 
     /// Called when the capture engine attaches its input sink. Returns `true`
-    /// if a pending `hex annotate draw` pen just turned on.
+    /// if a pending `gospell annotate draw` pen just turned on.
     fn on_attach(&mut self) -> bool {
         if matches!(self.mode, Mode::PendingPen) {
             self.mode = Mode::Pen { button_down: false };
@@ -353,14 +353,14 @@ pub(super) fn reset() {
 }
 
 /// Called by [`super::LiveInput::attach`] once `TAP_RECORDING` is set: starts
-/// clean, or activates a pen armed by `hex annotate draw`.
+/// clean, or activates a pen armed by `gospell annotate draw`.
 pub(super) fn on_attach() {
     if state().on_attach() {
         tracing::info!(on = true, "Annotate pen");
     }
 }
 
-/// Arms the pen for a recording started by `hex annotate draw`, or turns it on
+/// Arms the pen for a recording started by `gospell annotate draw`, or turns it on
 /// immediately if the engine already attached.
 #[cfg(target_os = "linux")]
 pub(super) fn arm_pen_on_attach() {

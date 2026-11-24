@@ -13,8 +13,8 @@ use crate::dictation::vocabulary::{self, VocabularyEntry};
 /// How often the watched field is read.
 #[cfg(target_os = "macos")]
 const POLL: std::time::Duration = std::time::Duration::from_millis(100);
-/// How long the app may take to show a paste Hex already posted: ⌘V is
-/// handled after Hex's paste returns, so the first read is retried this long.
+/// How long the app may take to show a paste GoSpell already posted: ⌘V is
+/// handled after GoSpell's paste returns, so the first read is retried this long.
 #[cfg(target_os = "macos")]
 const LANDING: std::time::Duration = std::time::Duration::from_secs(1);
 /// How long one watch follows its field. A correction usually lands within
@@ -80,7 +80,7 @@ fn watches(pasted: bool, copied: bool, sent: bool) -> bool {
 }
 
 /// `entries` with `terms` added as plain terms, through
-/// [`vocabulary::add`], so `hex vocabulary add`'s rules apply: a term
+/// [`vocabulary::add`], so `gospell vocabulary add`'s rules apply: a term
 /// already listed in any case changes nothing. Returns the list and the terms
 /// actually added.
 fn with_terms(
@@ -173,7 +173,7 @@ fn follow(focus: crate::accessibility::PasteFocus, inserted: String, generation:
 }
 
 /// The field's text once the app has taken the paste: the app handles ⌘V
-/// after Hex's paste returns, so the first read is retried every [`POLL`]
+/// after GoSpell's paste returns, so the first read is retried every [`POLL`]
 /// for up to [`LANDING`] until the field holds what was inserted. `None`
 /// when the lab turns off, a newer paste starts, the focus moves, the read
 /// outlives its generation, or the paste never lands: a paste no watch can
@@ -251,7 +251,7 @@ fn finish(stop: Stop, baseline: &str, inserted: &str, latest: &str) -> usize {
     save(&terms)
 }
 
-/// Saves `terms` the way `hex vocabulary add` does: read the saved
+/// Saves `terms` the way `gospell vocabulary add` does: read the saved
 /// settings, add each new term through [`vocabulary::add`], and write the
 /// list in one update, which also applies it to this process. The open
 /// window adopts the save through the runtime's own settings reload. Returns
@@ -338,7 +338,7 @@ mod tests {
     }
 
     #[test]
-    fn learned_terms_join_the_list_the_way_hex_vocabulary_add_does() {
+    fn learned_terms_join_the_list_the_way_gospell_vocabulary_add_does() {
         let list = [entry("OpenCode", &["open code"])];
         let (list, added) = with_terms(
             &list,
@@ -354,7 +354,7 @@ mod tests {
             list,
             [entry("OpenCode", &["open code"]), entry("Raunak", &[])]
         );
-        // `add` matches terms, as `hex vocabulary add` does: a spelling of
+        // `add` matches terms, as `gospell vocabulary add` does: a spelling of
         // another term is a term of its own. `learned_terms` already drops
         // one, so a watch never offers it.
         let (extended, added) = with_terms(&list, &["open code".to_owned()]);

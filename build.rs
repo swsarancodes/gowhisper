@@ -6,22 +6,22 @@ fn main() {
     x86_baseline();
     build_version();
     test_build_commit();
-    // `hex_dev_onboarding`: the first run's replay strip and its swearing
-    // jokes, in debug and `HEX_TEST_BUILD=1` builds only.
-    println!("cargo::rustc-check-cfg=cfg(hex_dev_onboarding)");
+    // `gospell_dev_onboarding`: the first run's replay strip and its swearing
+    // jokes, in debug and `GOSPELL_TEST_BUILD=1` builds only.
+    println!("cargo::rustc-check-cfg=cfg(gospell_dev_onboarding)");
     if std::env::var_os("CARGO_CFG_DEBUG_ASSERTIONS").is_some()
-        || std::env::var("HEX_TEST_BUILD").as_deref() == Ok("1")
+        || std::env::var("GOSPELL_TEST_BUILD").as_deref() == Ok("1")
     {
-        println!("cargo::rustc-cfg=hex_dev_onboarding");
+        println!("cargo::rustc-cfg=gospell_dev_onboarding");
     }
-    // `hex_capture`: the `capture` experiment's code, in every macOS, Linux,
+    // `gospell_capture`: the `capture` experiment's code, in every macOS, Linux,
     // and Windows build (`scrawl-capture` is their dependency).
-    println!("cargo::rustc-check-cfg=cfg(hex_capture)");
+    println!("cargo::rustc-check-cfg=cfg(gospell_capture)");
     if matches!(
         std::env::var("CARGO_CFG_TARGET_OS").as_deref(),
         Ok("macos" | "linux" | "windows")
     ) {
-        println!("cargo::rustc-cfg=hex_capture");
+        println!("cargo::rustc-cfg=gospell_capture");
     }
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() != Ok("macos") {
         if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("linux") {
@@ -35,7 +35,7 @@ fn main() {
             // transcribe-cpp's Vulkan backend links the vulkan-1 import
             // library by name without its search path. The DLL itself ships
             // with the GPU driver, so it is delay-loaded: a missing or
-            // Vulkan 1.0 loader must not stop Hex at launch (#1240;
+            // Vulkan 1.0 loader must not stop GoSpell at launch (#1240;
             // `windows::vulkan` keeps ggml off it then).
             println!("cargo:rerun-if-env-changed=VULKAN_SDK");
             if std::env::var("CARGO_CFG_TARGET_ARCH").as_deref() == Ok("x86_64") {
@@ -59,11 +59,11 @@ fn main() {
         .expect("xcode-select is required to link ScreenCaptureKit");
     assert!(output.status.success(), "xcode-select -p failed");
     let developer_dir = String::from_utf8(output.stdout).expect("Xcode path must be UTF-8");
-    compile_swift_bridge("apple_speech", "HEXAppleSpeechBridge", &[], None);
+    compile_swift_bridge("apple_speech", "GOSPELLAppleSpeechBridge", &[], None);
     println!("cargo:rustc-link-lib=framework=AVFAudio");
     println!("cargo:rustc-link-lib=framework=Speech");
     // AVFoundation decodes an imported meeting's audio into a 16 kHz WAV.
-    compile_swift_bridge("meeting_import", "HEXMeetingImportBridge", &[], None);
+    compile_swift_bridge("meeting_import", "GOSPELLMeetingImportBridge", &[], None);
     println!("cargo:rustc-link-lib=framework=AudioToolbox");
     // Labs › Voice isolation runs dictation's microphone through Apple's
     // voice processing, an AVAudioEngine duplex unit on the chosen device.
@@ -83,22 +83,22 @@ fn main() {
     }
     compile_swift_bridge(
         "voice_processing",
-        "HEXVoiceProcessingBridge",
+        "GOSPELLVoiceProcessingBridge",
         &[],
         Some("native/voice_processing_guard.h"),
     );
     println!("cargo:rustc-link-lib=framework=CoreAudio");
     // FoundationModels exists only on macOS 26 and later. Weak-link it, and
-    // drop the object's strong autolink entry, so Hex still launches on older
+    // drop the object's strong autolink entry, so GoSpell still launches on older
     // systems and reports Apple Intelligence as unavailable.
     compile_swift_bridge(
         "apple_intelligence",
-        "HEXAppleIntelligenceBridge",
+        "GOSPELLAppleIntelligenceBridge",
         &["FoundationModels"],
         None,
     );
     println!("cargo:rustc-link-arg=-Wl,-weak_framework,FoundationModels");
-    compile_swift_bridge("calendar", "HEXCalendarBridge", &[], None);
+    compile_swift_bridge("calendar", "GOSPELLCalendarBridge", &[], None);
     println!("cargo:rustc-link-lib=framework=EventKit");
     compile_permission_guide();
     println!("cargo:rustc-link-arg=-Wl,-rpath,/usr/lib/swift");
@@ -111,7 +111,7 @@ fn main() {
     }
 }
 
-/// The version Hex reports (`HEX_BUILD_VERSION`): the crate version, which
+/// The version GoSpell reports (`GOSPELL_BUILD_VERSION`): the crate version, which
 /// the Release workflow stamps (scripts/set-crate-version.sh), else, for any
 /// other build of the unstamped `0.0.0`, `0.0.0-dev-local-<commit>` with
 /// `-dirty` for uncommitted changes (`0.0.0-dev-local` without git, as in Nix).
@@ -147,21 +147,21 @@ fn check_windows_split() {
     );
 }
 
-/// `HEX_X86_BASELINE=ivybridge` builds ggml for Ivy Bridge (2012: SSE4.2, AVX,
+/// `GOSPELL_X86_BASELINE=ivybridge` builds ggml for Ivy Bridge (2012: SSE4.2, AVX,
 /// F16C) instead of the releases' x86-64-v3, for source builds below the release
 /// floor (docs/linux.md, docs/windows.md). Unset, empty, and `v3` keep the
 /// release baseline exactly as CI builds it; any other target ignores the switch.
 fn x86_baseline() {
-    println!("cargo::rustc-check-cfg=cfg(hex_x86_ivybridge)");
-    println!("cargo:rerun-if-env-changed=HEX_X86_BASELINE");
+    println!("cargo::rustc-check-cfg=cfg(gospell_x86_ivybridge)");
+    println!("cargo:rerun-if-env-changed=GOSPELL_X86_BASELINE");
     println!("cargo:rerun-if-env-changed=TRANSCRIBE_CMAKE_ARGS");
     const RECOMMENDED: &str = "-DGGML_NATIVE=OFF -DGGML_SSE42=ON -DGGML_AVX=ON -DGGML_F16C=ON -DGGML_AVX2=OFF -DGGML_BMI2=OFF -DGGML_FMA=OFF";
-    let baseline = std::env::var("HEX_X86_BASELINE").ok();
+    let baseline = std::env::var("GOSPELL_X86_BASELINE").ok();
     match baseline.as_deref() {
         None | Some("" | "v3") => return,
         Some("ivybridge") => {}
         Some(other) => panic!(
-            "HEX_X86_BASELINE={other} is not a baseline; use `v3` (the release baseline), `ivybridge`, or leave it unset"
+            "GOSPELL_X86_BASELINE={other} is not a baseline; use `v3` (the release baseline), `ivybridge`, or leave it unset"
         ),
     }
     if !matches!(
@@ -186,29 +186,29 @@ fn x86_baseline() {
     ] {
         assert!(
             arguments.contains(&flag),
-            "HEX_X86_BASELINE=ivybridge needs `{flag}` in TRANSCRIBE_CMAKE_ARGS, or ggml keeps \
-             its previous CPU baseline: Hex would crash on the processor this build is for, or \
+            "GOSPELL_X86_BASELINE=ivybridge needs `{flag}` in TRANSCRIBE_CMAKE_ARGS, or ggml keeps \
+             its previous CPU baseline: GoSpell would crash on the processor this build is for, or \
              crawl on it.\n\
              Set TRANSCRIBE_CMAKE_ARGS=\"{RECOMMENDED}\""
         );
     }
-    println!("cargo::rustc-cfg=hex_x86_ivybridge");
+    println!("cargo::rustc-cfg=gospell_x86_ivybridge");
 }
 
 fn build_version() {
-    println!("cargo:rerun-if-env-changed=HEX_VERSION");
+    println!("cargo:rerun-if-env-changed=GOSPELL_VERSION");
     let version = std::env::var("CARGO_PKG_VERSION").unwrap();
-    // CI builds name their version in HEX_VERSION and check `hex --version`
+    // CI builds name their version in GOSPELL_VERSION and check `gospell --version`
     // against it, test builds included (they name the crate version).
-    if let Some(named) = std::env::var("HEX_VERSION")
+    if let Some(named) = std::env::var("GOSPELL_VERSION")
         .ok()
         .filter(|named| !named.is_empty())
     {
-        println!("cargo:rustc-env=HEX_BUILD_VERSION={named}");
+        println!("cargo:rustc-env=GOSPELL_BUILD_VERSION={named}");
         return;
     }
     if version != "0.0.0" {
-        println!("cargo:rustc-env=HEX_BUILD_VERSION={version}");
+        println!("cargo:rustc-env=GOSPELL_BUILD_VERSION={version}");
         return;
     }
     let git = |args: &[&str]| {
@@ -241,17 +241,17 @@ fn build_version() {
             }
         }
     }
-    println!("cargo:rustc-env=HEX_BUILD_VERSION={version}");
+    println!("cargo:rustc-env=GOSPELL_BUILD_VERSION={version}");
 }
 
-/// A test or local build carries its commit (`HEX_COMMIT`), which the sidebar shows
+/// A test or local build carries its commit (`GOSPELL_COMMIT`), which the sidebar shows
 /// beside the version.
 fn test_build_commit() {
-    println!("cargo:rerun-if-env-changed=HEX_BUILD_CHANNEL");
-    println!("cargo:rerun-if-env-changed=HEX_TEST_BUILD");
-    println!("cargo:rerun-if-env-changed=HEX_LOCAL_BUILD");
-    if std::env::var("HEX_TEST_BUILD").as_deref() != Ok("1")
-        && std::env::var("HEX_LOCAL_BUILD").as_deref() != Ok("1")
+    println!("cargo:rerun-if-env-changed=GOSPELL_BUILD_CHANNEL");
+    println!("cargo:rerun-if-env-changed=GOSPELL_TEST_BUILD");
+    println!("cargo:rerun-if-env-changed=GOSPELL_LOCAL_BUILD");
+    if std::env::var("GOSPELL_TEST_BUILD").as_deref() != Ok("1")
+        && std::env::var("GOSPELL_LOCAL_BUILD").as_deref() != Ok("1")
     {
         return;
     }
@@ -267,7 +267,7 @@ fn test_build_commit() {
     let Some(commit) = git(&["rev-parse", "--short=7", "HEAD"]) else {
         return;
     };
-    println!("cargo:rustc-env=HEX_COMMIT={commit}");
+    println!("cargo:rustc-env=GOSPELL_COMMIT={commit}");
     let reference = git(&["symbolic-ref", "-q", "HEAD"]);
     for name in ["HEAD", "packed-refs"]
         .into_iter()
@@ -281,13 +281,13 @@ fn test_build_commit() {
     }
 }
 
-/// Gives the executable its icon and the "Hex" name Explorer and Task
+/// Gives the executable its icon and the "GoSpell" name Explorer and Task
 /// Manager show, whatever the file is called.
 #[cfg(windows)]
 fn embed_windows_resources() {
     let manifest_dir = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
     let output_dir = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
-    let icon = manifest_dir.join("resources/windows/hex.ico");
+    let icon = manifest_dir.join("resources/windows/gospell.ico");
     println!("cargo:rerun-if-changed={}", icon.display());
     let version = std::env::var("CARGO_PKG_VERSION").unwrap();
     let numeric = version
@@ -311,12 +311,12 @@ BEGIN
   BEGIN
     BLOCK "040904B0"
     BEGIN
-      VALUE "FileDescription", "Hex"
-      VALUE "ProductName", "Hex"
+      VALUE "FileDescription", "GoSpell"
+      VALUE "ProductName", "GoSpell"
       VALUE "FileVersion", "{version}"
       VALUE "ProductVersion", "{version}"
-      VALUE "OriginalFilename", "hex.exe"
-      VALUE "InternalName", "hex"
+      VALUE "OriginalFilename", "gospell.exe"
+      VALUE "InternalName", "gospell"
     END
   END
   BLOCK "VarFileInfo"
@@ -327,7 +327,7 @@ END
 "#,
         icon = icon.display().to_string().replace('\\', "/"),
     );
-    let resource = output_dir.join("hex.rc");
+    let resource = output_dir.join("gospell.rc");
     std::fs::write(&resource, script).expect("write the Windows resource script");
     embed_resource::compile(&resource, embed_resource::NONE)
         .manifest_optional()
@@ -347,7 +347,7 @@ fn compile_permission_guide() {
     cc::Build::new()
         .file("native/permission_guide.m")
         .flag("-fobjc-arc")
-        .compile("hex_permission_guide");
+        .compile("gospell_permission_guide");
 }
 
 fn compile_swift_bridge(

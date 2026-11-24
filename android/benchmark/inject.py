@@ -4,7 +4,7 @@ from pathlib import Path
 import grpc, emulator_controller_pb2 as pb, emulator_controller_pb2_grpc as service
 
 def inject(filename):
-    port=os.environ.get("HEX_GRPC_PORT","8566")
+    port=os.environ.get("GOSPELL_GRPC_PORT","8566")
     for f in (Path.home()/"Library/Caches/TemporaryItems/avd/running").glob("pid_*.ini"):
         entries=dict(line.rstrip().split("=",1) for line in f.read_text().splitlines() if "=" in line)
         if entries.get("grpc.port")==port:break

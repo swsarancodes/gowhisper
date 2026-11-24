@@ -4,7 +4,7 @@
 
 use super::Step;
 
-/// A running `"Without Hex"` typing scene on the demo beat.
+/// A running `"Without GoSpell"` typing scene on the demo beat.
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct TypingRun {
     pub(crate) from: f64,
@@ -16,23 +16,23 @@ pub(crate) struct TypingRun {
 /// Sub-phase of the demo beat (`Parked..=Done`).
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum DemoPhase {
-    /// `"Without Hex"`, waiting for the Launch Room's row or playing it out.
+    /// `"Without GoSpell"`, waiting for the Launch Room's row or playing it out.
     Parked,
-    /// `"With Hex"` rewound and waiting for the shortcut.
+    /// `"With GoSpell"` rewound and waiting for the shortcut.
     YourTurn { voice_from: f64, hud_from: f64 },
-    /// `"With Hex"` shortcut down and voice take playing.
+    /// `"With GoSpell"` shortcut down and voice take playing.
     Hearing {
         voice_from: f64,
         hud_from: f64,
         take_from: f64,
     },
-    /// `"With Hex"` answer spoken, holding before score or permissions.
+    /// `"With GoSpell"` answer spoken, holding before score or permissions.
     Heard {
         voice_from: f64,
         hud_from: f64,
         take_from: f64,
     },
-    /// Non-first-run score screen after `"With Hex"`.
+    /// Non-first-run score screen after `"With GoSpell"`.
     Done {
         voice_from: Option<f64>,
         hud_from: Option<f64>,
@@ -46,10 +46,10 @@ pub(crate) struct DemoBeat {
     pub(crate) parked_from: f64,
     pub(crate) typing: Option<TypingRun>,
     pub(crate) phase: DemoPhase,
-    /// How many `"Without Hex"` bubbles have flown out of the field so far.
+    /// How many `"Without GoSpell"` bubbles have flown out of the field so far.
     pub(crate) sent_seen: usize,
-    /// Whether `"With Hex"`'s reply has flown out of the field.
-    pub(crate) hex_seen: bool,
+    /// Whether `"With GoSpell"`'s reply has flown out of the field.
+    pub(crate) gospell_seen: bool,
 }
 
 impl DemoBeat {
@@ -59,7 +59,7 @@ impl DemoBeat {
             typing: None,
             phase: DemoPhase::Parked,
             sent_seen: 0,
-            hex_seen: false,
+            gospell_seen: false,
         }
     }
 

@@ -16,6 +16,6 @@ if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
   echo "$tag already exists" >&2
   exit 1
 fi
-git tag -a "$tag" "$sha" -m "Hex Mobile $version App Store build"
+git tag -a "$tag" "$sha" -m "GoSpell Mobile $version App Store build"
 git push -q origin "$tag"
 echo "pushed $tag at $(git log --oneline -1 "$sha")"

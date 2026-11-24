@@ -1,10 +1,10 @@
-//! What each low-level hook decided for one event, and whether one of Hex's
+//! What each low-level hook decided for one event, and whether one of GoSpell's
 //! own shortcuts caused it.
 
 use super::Disposition;
 use super::activity;
 
-/// What a hook decided for one event, and whether one of Hex's own shortcut
+/// What a hook decided for one event, and whether one of GoSpell's own shortcut
 /// triggers sent it.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) struct Handled {
@@ -19,9 +19,9 @@ impl Handled {
         trigger: false,
     };
 
-    /// An event one of Hex's shortcut triggers caused, whatever the hook did
+    /// An event one of GoSpell's shortcut triggers caused, whatever the hook did
     /// with it. Labs › Share shortcut lets the dictation trigger's key reach
-    /// the app, and that press is Hex's, not the user's typing.
+    /// the app, and that press is GoSpell's, not the user's typing.
     pub(super) const fn own(disposition: Disposition) -> Self {
         Self {
             disposition,
@@ -29,7 +29,7 @@ impl Handled {
         }
     }
 
-    /// An event the hook decided for, `trigger` saying whether one of Hex's
+    /// An event the hook decided for, `trigger` saying whether one of GoSpell's
     /// shortcut triggers caused it.
     pub(super) const fn new(disposition: Disposition, trigger: bool) -> Self {
         Self {
@@ -38,7 +38,7 @@ impl Handled {
         }
     }
 
-    /// Whether one of Hex's own shortcuts caused the event, even where the
+    /// Whether one of GoSpell's own shortcuts caused the event, even where the
     /// hook let its key reach the app (Labs › Share shortcut).
     pub(super) fn triggered(self) -> bool {
         self.trigger
@@ -46,7 +46,7 @@ impl Handled {
 
     /// Whether the event is the user's own typing or clicking, which ends a
     /// paste continuation: it reached the app in front, and no shortcut of
-    /// Hex's triggered it.
+    /// GoSpell's triggered it.
     pub(super) fn ends_continuation(
         self,
         is_down: bool,

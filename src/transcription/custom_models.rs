@@ -7,8 +7,8 @@
 //! and a manifest of what its metadata declared. Its ID (`custom-` and the
 //! digest's first 16 hex digits) is stable across launches and machines.
 //!
-//! The digest identifies the file Hex copied; it is not a publisher's
-//! checksum and Hex vouches for nothing in it. A saved choice of an import
+//! The digest identifies the file GoSpell copied; it is not a publisher's
+//! checksum and GoSpell vouches for nothing in it. A saved choice of an import
 //! that is missing, changed since it was imported, or behind its Labs toggle
 //! stays saved, and the listener runs the default model until it is fixed
 //! ([`runnable`]).
@@ -35,7 +35,7 @@ const PREFIX: &str = "custom-";
 const DIGITS: usize = 16;
 const MAX_NAME_CHARS: usize = 64;
 
-/// The model families Hex's runtime handles, with the names people know.
+/// The model families GoSpell's runtime handles, with the names people know.
 const ARCHITECTURES: [(&str, &str); 6] = [
     ("parakeet", "Parakeet"),
     ("whisper", "Whisper"),
@@ -58,7 +58,7 @@ pub struct CustomModelId([u8; PREFIX.len() + DIGITS]);
 
 impl CustomModelId {
     fn from_sha256(sha256: &str) -> Self {
-        Self::parse(&format!("{PREFIX}{}", &sha256[..DIGITS])).expect("a SHA-256 is hex")
+        Self::parse(&format!("{PREFIX}{}", &sha256[..DIGITS])).expect("a SHA-256 is gospell")
     }
 
     pub fn parse(text: &str) -> Option<Self> {
@@ -109,20 +109,20 @@ struct Manifest {
     repository: Option<String>,
     imported_at: u64,
     /// A file found on this computer and used where it is (the Hugging Face
-    /// cache), never copied, written, or deleted; `None` for Hex's own copy.
+    /// cache), never copied, written, or deleted; `None` for GoSpell's own copy.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     path: Option<PathBuf>,
     /// Where a found file came from: `owner/name@abcdef1`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     origin: Option<String>,
     /// Its weights include K-quant tensors, which run only while Labs ›
-    /// Smaller model files is on. Older manifests were all imports Hex
+    /// Smaller model files is on. Older manifests were all imports GoSpell
     /// could run, so they read as false.
     #[serde(default)]
     k_quants: bool,
 }
 
-/// The receipt every model file has: the size and digest Hex checked, and
+/// The receipt every model file has: the size and digest GoSpell checked, and
 /// the modification time that proves the file is still that one.
 #[derive(Deserialize, Serialize)]
 pub(crate) struct Receipt {
@@ -167,7 +167,7 @@ pub enum Status {
     Changed,
 }
 
-/// One imported model, as the picker, `hex model list`, and the local API
+/// One imported model, as the picker, `gospell model list`, and the local API
 /// show it.
 #[derive(Clone)]
 pub struct Imported {
@@ -295,7 +295,7 @@ fn model_file(directory: &Path, id: CustomModelId) -> PathBuf {
     directory.join(format!("{}.gguf", id.digits()))
 }
 
-/// Where an import's file is: Hex's copy, or the found file it uses in place.
+/// Where an import's file is: GoSpell's copy, or the found file it uses in place.
 fn located(directory: &Path, id: CustomModelId, manifest: &Manifest) -> PathBuf {
     manifest
         .path
@@ -573,8 +573,8 @@ pub(crate) fn tensor_types() -> TensorTypes {
     }
 }
 
-/// Checks a header against what Hex can run, with the reason when it can't.
-/// What a header declares, or why Hex can't run it (also the hub-cache scan).
+/// Checks a header against what GoSpell can run, with the reason when it can't.
+/// What a header declares, or why GoSpell can't run it (also the hub-cache scan).
 pub(crate) fn profile_of(
     header: &GgufHeader,
     file_name: &str,
@@ -585,13 +585,13 @@ pub(crate) fn profile_of(
 
 fn profile(header: &GgufHeader, file_name: &str, types: TensorTypes) -> Result<Profile> {
     let Some(architecture) = header.string("general.architecture") else {
-        bail!("it has no general.architecture, so Hex can't tell which model family it is");
+        bail!("it has no general.architecture, so GoSpell can't tell which model family it is");
     };
     if !ARCHITECTURES.iter().any(|(name, _)| *name == architecture) {
         bail!(
-            "its architecture is {architecture}, so it was made for another program. Hex runs \
+            "its architecture is {architecture}, so it was made for another program. GoSpell runs \
              only GGUF files converted with transcribe.cpp (Parakeet, Whisper, Qwen3-ASR, \
-             Cohere Transcribe, SenseVoice, or GigaAM); for a model in Hex's list, download \
+             Cohere Transcribe, SenseVoice, or GigaAM); for a model in GoSpell's list, download \
              it from the list instead"
         );
     }
@@ -607,7 +607,7 @@ fn profile(header: &GgufHeader, file_name: &str, types: TensorTypes) -> Result<P
     let unsupported = header.unsupported_tensor_types(types);
     if !unsupported.is_empty() {
         bail!(
-            "it has {} tensors; Hex runs only {} weights {}. \
+            "it has {} tensors; GoSpell runs only {} weights {}. \
              Quantize it to Q8_0 with transcribe-quantize",
             unsupported.join(", "),
             types.names(),
@@ -627,7 +627,7 @@ fn profile(header: &GgufHeader, file_name: &str, types: TensorTypes) -> Result<P
         }
     }
     if languages.is_empty() {
-        bail!("its general.languages names no language Hex knows");
+        bail!("its general.languages names no language GoSpell knows");
     }
     Ok(Profile {
         name: header
@@ -844,7 +844,7 @@ fn valid_name(name: &str) -> Result<String> {
     Ok(name)
 }
 
-/// Checks Hex's copy of an import again: when its contents still match the
+/// Checks GoSpell's copy of an import again: when its contents still match the
 /// digest recorded at import (only its modification time moved, say), the
 /// receipt is rewritten and the import is ready again. A copy that no
 /// longer matches stays changed, and is never trusted on size alone.
@@ -875,7 +875,7 @@ pub fn repair(id: CustomModelId, canceled: &AtomicBool) -> Result<()> {
     Ok(())
 }
 
-/// Hex's verification for an import before it loads: its receipt still
+/// GoSpell's verification for an import before it loads: its receipt still
 /// holds, or a full rehash matches the digest recorded when it was chosen.
 pub fn verify(id: CustomModelId, canceled: &AtomicBool) -> Result<PathBuf> {
     let directory = directory()?;
@@ -891,8 +891,8 @@ pub fn verify(id: CustomModelId, canceled: &AtomicBool) -> Result<PathBuf> {
 
 /// Starts using a found file where it is: checks its header, hashes it in
 /// full once (the digest must be the hub's blob name, when it has one), and
-/// records it beside Hex's imports. Nothing is copied or written near the
-/// file; forgetting it later removes only Hex's record.
+/// records it beside GoSpell's imports. Nothing is copied or written near the
+/// file; forgetting it later removes only GoSpell's record.
 pub fn adopt_in_place(
     path: &Path,
     blob_sha256: Option<&str>,
@@ -905,10 +905,10 @@ pub fn adopt_in_place(
 /// Labs › Use model files where they are: adds a file the person chose
 /// and uses it where it is, as a found file is, so several accounts can
 /// share one file. Its header is checked, it is hashed in full once, and
-/// only Hex's receipt and record are written, in Hex's own folder. An
-/// earlier import of the same file by copy keeps its name, and Hex's copy
+/// only GoSpell's receipt and record are written, in GoSpell's own folder. An
+/// earlier import of the same file by copy keeps its name, and GoSpell's copy
 /// goes once the OS shows the chosen file is a different one; choosing
-/// Hex's copy itself changes nothing. Forgetting it later leaves the file.
+/// GoSpell's copy itself changes nothing. Forgetting it later leaves the file.
 pub fn add_in_place(path: &Path, canceled: &AtomicBool) -> Result<CustomModelId> {
     record_in_place(path, None, None, canceled, tensor_types())
 }
@@ -939,7 +939,7 @@ fn record_in_place(
         .and_then(|data| serde_json::from_slice::<Manifest>(&data).ok())
         .filter(|manifest| manifest.sha256 == sha256);
     let copy = model_file(&directory, id);
-    // Hex's own copy reached through another spelling (a linked folder, a
+    // GoSpell's own copy reached through another spelling (a linked folder, a
     // case-insensitive name, a hard link) is already imported: using it "in
     // place" would delete the file it names.
     if existing
@@ -947,7 +947,7 @@ fn record_in_place(
         .is_some_and(|existing| existing.path.is_none())
         && names_same_file(path, &copy)
     {
-        tracing::info!(id = id.as_str(), path = %path.display(), "the file chosen to use in place is Hex's own copy; keeping the import as it is");
+        tracing::info!(id = id.as_str(), path = %path.display(), "the file chosen to use in place is GoSpell's own copy; keeping the import as it is");
         return Ok(id);
     }
     super::models::write_json_atomically(
@@ -980,12 +980,12 @@ fn record_in_place(
         },
     )?;
     // The same file imported by copy before: the file in place replaces
-    // Hex's copy, but only once the OS shows they are two files. When it
+    // GoSpell's copy, but only once the OS shows they are two files. When it
     // can't tell, the copy stays.
     if existing.is_some_and(|existing| existing.path.is_none()) && independent(path, &copy) {
         match fs::remove_file(&copy) {
             Err(error) if error.kind() != std::io::ErrorKind::NotFound => {
-                tracing::warn!(%error, id = id.as_str(), "could not remove Hex's copy of a model now used in place");
+                tracing::warn!(%error, id = id.as_str(), "could not remove GoSpell's copy of a model now used in place");
             }
             _ => {}
         }
@@ -1027,7 +1027,7 @@ pub fn rename(id: CustomModelId, name: &str) -> Result<()> {
     )
 }
 
-/// Removes Hex's copy of an import, its receipt, and its manifest. The file
+/// Removes GoSpell's copy of an import, its receipt, and its manifest. The file
 /// it was imported from is not touched.
 pub fn remove(id: CustomModelId) -> Result<()> {
     let directory = directory()?;
@@ -1093,7 +1093,7 @@ mod tests {
     fn temporary_models_dir() -> PathBuf {
         static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
         let directory = std::env::temp_dir().join(format!(
-            "hex-custom-models-{}-{}",
+            "gospell-custom-models-{}-{}",
             std::process::id(),
             NEXT.fetch_add(1, Ordering::Relaxed)
         ));
@@ -1319,12 +1319,12 @@ mod tests {
         fs::remove_dir_all(models).unwrap();
     }
 
-    /// Hex's own copy chosen through a linked folder, a hard link, or
+    /// GoSpell's own copy chosen through a linked folder, a hard link, or
     /// (on a case-insensitive volume) another case is that copy: using it
     /// in place keeps the import as it is and never deletes the file.
     #[cfg(unix)]
     #[test]
-    fn hex_s_own_copy_chosen_through_another_path_is_never_deleted() {
+    fn gospell_s_own_copy_chosen_through_another_path_is_never_deleted() {
         let models = temporary_models_dir();
         let source = models.join("primeline.gguf");
         fs::write(&source, parakeet("Parakeet primeLine")).unwrap();
@@ -1351,7 +1351,7 @@ mod tests {
         }
         for path in chosen {
             assert_eq!(add_in_place(&path, &AtomicBool::new(false)).unwrap(), id);
-            assert!(copy.is_file(), "{} deleted Hex's copy", path.display());
+            assert!(copy.is_file(), "{} deleted GoSpell's copy", path.display());
             invalidate();
             assert_eq!(status(id), Status::Ready);
             let model = definition(id);
@@ -1363,10 +1363,10 @@ mod tests {
     }
 
     /// A separate file with the same bytes, here reached through a linked
-    /// folder, is a different file: it replaces Hex's copy.
+    /// folder, is a different file: it replaces GoSpell's copy.
     #[cfg(unix)]
     #[test]
-    fn an_independent_identical_file_replaces_hex_s_copy() {
+    fn an_independent_identical_file_replaces_gospell_s_copy() {
         let models = temporary_models_dir();
         let bytes = parakeet("Parakeet primeLine");
         let original = models.join("primeline.gguf");
@@ -1380,7 +1380,10 @@ mod tests {
         std::os::unix::fs::symlink(&shared, &linked).unwrap();
         let chosen = linked.join("primeline.gguf");
         assert_eq!(add_in_place(&chosen, &AtomicBool::new(false)).unwrap(), id);
-        assert!(!copy.exists(), "the independent file replaces Hex's copy");
+        assert!(
+            !copy.exists(),
+            "the independent file replaces GoSpell's copy"
+        );
         assert!(original.is_file() && shared.join("primeline.gguf").is_file());
         invalidate();
         assert_eq!(status(id), Status::Ready);
@@ -1403,7 +1406,7 @@ mod tests {
         let id = import(&source, None, &AtomicBool::new(false)).unwrap();
         assert_eq!(status(id), Status::Ready);
         let copy = model_file(&directory().unwrap(), id);
-        // Hex's copy swapped for a link to the identical shared file.
+        // GoSpell's copy swapped for a link to the identical shared file.
         fs::remove_file(&copy).unwrap();
         std::os::unix::fs::symlink(&source, &copy).unwrap();
         invalidate();
@@ -1606,7 +1609,7 @@ mod tests {
             .contains("its architecture is llama")
         );
         // A SenseVoice file made for another program names that, not a
-        // family Hex says it runs (#1299).
+        // family GoSpell says it runs (#1299).
         let other_runtime = reason(
             gguf(
                 &[("general.architecture", "sensevoice-small")],
@@ -1646,7 +1649,7 @@ mod tests {
         let refused = reason(quantized.clone(), TensorTypes::STANDARD);
         assert!(refused.contains("Q4_K (1) tensors"), "{refused}");
         assert!(
-            refused.contains("Hex runs only F32, F16, and Q8_0 weights on Metal and Vulkan"),
+            refused.contains("GoSpell runs only F32, F16, and Q8_0 weights on Metal and Vulkan"),
             "{refused}"
         );
         // Labs › Smaller model files runs the K quants, so the same header
@@ -1671,7 +1674,7 @@ mod tests {
         let refused = reason(legacy_quant, TensorTypes::WITH_K_QUANTS);
         assert!(refused.contains("Q5_0 (1) tensors"), "{refused}");
         assert!(
-            refused.contains("Hex runs only F32, F16, Q8_0, Q4_K, Q5_K, and Q6_K"),
+            refused.contains("GoSpell runs only F32, F16, Q8_0, Q4_K, Q5_K, and Q6_K"),
             "{refused}"
         );
         let no_languages = gguf(
@@ -1684,7 +1687,7 @@ mod tests {
             &[("a", 0, 4)],
         );
         let refused = reason(no_languages, TensorTypes::STANDARD);
-        assert!(refused.contains("no language Hex knows"), "{refused}");
+        assert!(refused.contains("no language GoSpell knows"), "{refused}");
     }
 
     /// A K-quant file: refused everywhere until Labs › Smaller model files

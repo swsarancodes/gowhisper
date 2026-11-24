@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- The emoji picker's section titles in sentence case, as the rest of Hex: its own translations
+    <!-- The emoji picker's section titles in sentence case, as the rest of GoSpell: its own translations
          for the keyboard's languages, with the capitals it writes them in taken out. -->
     <string name="emoji_category_recent" tools:override="true">Utilisés récemment</string>
     <string name="emoji_category_emotions" tools:override="true">Émoticônes et émotions</string>

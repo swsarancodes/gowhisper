@@ -36,9 +36,9 @@ mod tests {
 
     #[test]
     fn a_signed_dictation_reinserts_standalone() {
-        let last = LastDictation::new("we ship friday\nSent from Hex".to_owned(), true);
+        let last = LastDictation::new("we ship friday\nSent from GoSpell".to_owned(), true);
         assert!(last.standalone());
-        assert_eq!(last.text(), "we ship friday\nSent from Hex");
+        assert_eq!(last.text(), "we ship friday\nSent from GoSpell");
     }
 
     #[test]

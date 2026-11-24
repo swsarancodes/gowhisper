@@ -1,4 +1,4 @@
-//! `"Without Hex"` as one timeline, played from a [`Script`]: a scene file
+//! `"Without GoSpell"` as one timeline, played from a [`Script`]: a scene file
 //! in `scenes/` (syntax in `scenes/README.md`). In the shipping scene Jay
 //! (CEO) is presenting to the investors and asks whether we're ready to
 //! ship; you type the answer by hand, slow and shaky, then frantic, and every
@@ -32,14 +32,14 @@ pub(crate) struct Timing {
     pub(crate) panic_pace: f64,
     /// The silence after the accidental send, before `"Read"`.
     pub(crate) freeze: f64,
-    /// `"With Hex"`: how far apart the cheers land.
+    /// `"With GoSpell"`: how far apart the cheers land.
     pub(crate) cheer: f64,
-    /// How long the removal holds before `"With Hex"`.
+    /// How long the removal holds before `"With GoSpell"`.
     pub(crate) fired: f64,
-    /// `"With Hex"`: from the words landing to the reply sending.
-    pub(crate) hex_send: f64,
-    /// `"With Hex"`: from the send to a first reply that types first.
-    pub(crate) hex_reply: f64,
+    /// `"With GoSpell"`: from the words landing to the reply sending.
+    pub(crate) gospell_send: f64,
+    /// `"With GoSpell"`: from the send to a first reply that types first.
+    pub(crate) gospell_reply: f64,
 }
 
 impl Default for Timing {
@@ -54,8 +54,8 @@ impl Default for Timing {
             freeze: 1.5,
             cheer: 0.35,
             fired: 2.0,
-            hex_send: 0.7,
-            hex_reply: 1.3,
+            gospell_send: 0.7,
+            gospell_reply: 1.3,
         }
     }
 }
@@ -759,7 +759,7 @@ impl Scene {
         &self.strokes
     }
 
-    /// The whole scene, from start to the cut to `"With Hex"`.
+    /// The whole scene, from start to the cut to `"With GoSpell"`.
     pub(crate) fn duration(&self) -> f64 {
         self.end
     }
@@ -1059,7 +1059,7 @@ impl Scene {
     }
 }
 
-/// How long `"Without Hex"` may run, and how many tapbacks a line holds.
+/// How long `"Without GoSpell"` may run, and how many tapbacks a line holds.
 #[cfg(test)]
 pub(crate) const LENGTH: std::ops::RangeInclusive<f64> = 26.0..=36.0;
 #[cfg(test)]
@@ -1073,7 +1073,7 @@ pub(crate) fn check(t: &Timing, script: &'static Script<'static>) -> Vec<String>
     let mut problems = Vec::new();
     if !LENGTH.contains(&scene.duration()) {
         problems.push(format!(
-            "\"Without Hex\" runs {:.1} s; keep it between {} and {} s",
+            "\"Without GoSpell\" runs {:.1} s; keep it between {} and {} s",
             scene.duration(),
             LENGTH.start(),
             LENGTH.end()
@@ -1182,7 +1182,7 @@ mod tests {
     #[test]
     fn a_tapback_stays_on_the_line_above_it() {
         // The second haha lands after Jay's next line, still on yours.
-        let src = "title Room\nboss Jay coral\nJay: so?\nstart\ntype ok\nsend\ntap haha 0.2 haha 0.8\nwait 0.3\nJay: STOP [0.5]\nend removed\nwith\nhex Yes, on my way.\nscore {hex}\ntyped {secs}\n";
+        let src = "title Room\nboss Jay coral\nJay: so?\nstart\ntype ok\nsend\ntap haha 0.2 haha 0.8\nwait 0.3\nJay: STOP [0.5]\nend removed\nwith\ngospell Yes, on my way.\nscore {gospell}\ntyped {secs}\n";
         let script: &'static Script = Box::leak(Box::new(scene_script::parse(src).unwrap()));
         let scene = Scene::play(&Timing::default(), script);
         let mine = scene.lines().iter().position(|l| l.text == "ok").unwrap();
@@ -1214,7 +1214,7 @@ mod tests {
         let t = Timing::default();
         for (name, src) in scene_script::SCENES {
             let problems = validate(src);
-            // C and C-plus keep v3's approved 22-second "Without Hex".
+            // C and C-plus keep v3's approved 22-second "Without GoSpell".
             let problems: Vec<_> = problems
                 .into_iter()
                 .filter(|p| {
@@ -1239,21 +1239,21 @@ mod tests {
         }
         // The five typo marks come from the swearing scene, which only test
         // and debug builds carry.
-        #[cfg(hex_dev_onboarding)]
+        #[cfg(gospell_dev_onboarding)]
         let a = Scene::play(
             &t,
             Box::leak(Box::new(scene_script::bundled("A-incontinence.scene"))),
         );
-        #[cfg(hex_dev_onboarding)]
+        #[cfg(gospell_dev_onboarding)]
         assert_eq!(a.typos(), 5);
     }
 
-    /// `HEX_VALIDATE_SCENES=<folder> scripts/check validate_scene_folder
+    /// `GOSPELL_VALIDATE_SCENES=<folder> scripts/check validate_scene_folder
     /// -- --nocapture` checks every `.scene` in a folder and prints a verdict
     /// each; without it, nothing runs.
     #[test]
     fn validate_scene_folder() {
-        let Ok(dir) = std::env::var("HEX_VALIDATE_SCENES") else {
+        let Ok(dir) = std::env::var("GOSPELL_VALIDATE_SCENES") else {
             return;
         };
         let mut paths: Vec<_> = std::fs::read_dir(&dir)

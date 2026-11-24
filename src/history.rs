@@ -19,7 +19,7 @@ use std::time::{Duration, SystemTime};
 
 use serde::{Deserialize, Serialize};
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 pub mod annotations;
 pub mod captures;
 #[cfg(target_os = "macos")]
@@ -27,7 +27,7 @@ pub(crate) mod paste_source;
 pub mod playback;
 pub mod recordings;
 pub mod stats;
-#[cfg(all(target_os = "macos", hex_capture))]
+#[cfg(all(target_os = "macos", gospell_capture))]
 pub(crate) mod timeline;
 pub mod usage;
 pub mod versions;
@@ -107,7 +107,7 @@ pub enum HistoryKind {
     Dictation,
     Send,
     VoiceAction,
-    /// `hex dictation stop --print`: never pasted, so Paste Last skips it.
+    /// `gospell dictation stop --print`: never pasted, so Paste Last skips it.
     Printed,
     /// Dictate without processing: pasted as heard, with no step run.
     Raw,
@@ -292,7 +292,7 @@ pub fn read_snapshot(path: &std::path::Path) -> io::Result<Vec<HistoryEntry>> {
 
 /// Owner-only bounded history store. Entries are held oldest-first.
 pub struct HistoryStore {
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     cancel_generation: u64,
     #[cfg(target_os = "macos")]
     recovery: Option<paste_source::Recovery>,
@@ -328,7 +328,7 @@ impl HistoryStore {
     /// being silently destroyed.
     pub fn open(path: PathBuf, retention: HistoryRetention, now_ms: u64) -> Self {
         let mut store = Self {
-            #[cfg(all(target_os = "macos", hex_capture))]
+            #[cfg(all(target_os = "macos", gospell_capture))]
             cancel_generation: 0,
             #[cfg(target_os = "macos")]
             recovery: None,
@@ -650,7 +650,7 @@ impl HistoryStore {
     /// Delete every entry, and the Labs › Dictation stats rollup with them. A
     /// failed save keeps the entries, so the clear can be retried.
     pub fn clear(&mut self) -> io::Result<()> {
-        #[cfg(all(target_os = "macos", hex_capture))]
+        #[cfg(all(target_os = "macos", gospell_capture))]
         {
             self.cancel_generation += 1;
         }
@@ -677,7 +677,7 @@ impl HistoryStore {
             return Ok(());
         }
         self.retention = retention;
-        #[cfg(all(target_os = "macos", hex_capture))]
+        #[cfg(all(target_os = "macos", gospell_capture))]
         {
             self.cancel_generation += 1;
         }
@@ -1054,7 +1054,7 @@ mod tests {
 
     fn temp_path(name: &str) -> PathBuf {
         let directory =
-            std::env::temp_dir().join(format!("hex-history-{}-{name}", std::process::id()));
+            std::env::temp_dir().join(format!("gospell-history-{}-{name}", std::process::id()));
         let _ = fs::remove_dir_all(&directory);
         fs::create_dir_all(&directory).unwrap();
         directory.join("history.json")

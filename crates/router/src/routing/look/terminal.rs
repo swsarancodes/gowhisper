@@ -282,7 +282,7 @@ mod tests {
         );
         assert_eq!(tui_title("OpenCode"), TuiTitle::Home);
         assert_eq!(tui_title("OC | "), TuiTitle::Other);
-        assert_eq!(tui_title("~/code/hex"), TuiTitle::Other);
+        assert_eq!(tui_title("~/code/gospell"), TuiTitle::Other);
     }
 
     #[test]
@@ -290,12 +290,12 @@ mod tests {
         let long = "Make the capture capsule remember terminal folders";
         let shown: String = long.chars().take(37).collect::<String>() + "…";
         let sessions = [
-            session("ses_long", long, "/code/hex", 1),
-            session("ses_short", &long[..37], "/code/hex", 2),
+            session("ses_long", long, "/code/gospell", 1),
+            session("ses_short", &long[..37], "/code/gospell", 2),
             session("ses_same", "Fix the HUD", "/code/other", 9),
-            session("ses_here", "Fix the HUD", "/code/hex", 3),
-            session("ses_twin_a", "Twins", "/code/hex", 4),
-            session("ses_twin_b", "Twins", "/code/hex", 5),
+            session("ses_here", "Fix the HUD", "/code/gospell", 3),
+            session("ses_twin_a", "Twins", "/code/gospell", 4),
+            session("ses_twin_b", "Twins", "/code/gospell", 5),
         ];
         let id = |shown: &str, folder: Option<&str>, opened: Option<&str>| match session_titled(
             shown,
@@ -309,13 +309,16 @@ mod tests {
         };
         assert_eq!(id(&shown, None, None), Some("ses_long"));
         // Two sessions with one title: the one in the terminal's folder.
-        assert_eq!(id("Fix the HUD", Some("/code/hex"), None), Some("ses_here"));
+        assert_eq!(
+            id("Fix the HUD", Some("/code/gospell"), None),
+            Some("ses_here")
+        );
         // Nothing to tell them apart: no guess, not even the newest.
         assert_eq!(id("Fix the HUD", None, None), Some("several"));
-        assert_eq!(id("Twins", Some("/code/hex"), None), Some("several"));
+        assert_eq!(id("Twins", Some("/code/gospell"), None), Some("several"));
         // Two in one checkout with one title: the one OpenCode was opened on.
         assert_eq!(
-            id("Twins", Some("/code/hex"), Some("ses_twin_a")),
+            id("Twins", Some("/code/gospell"), Some("ses_twin_a")),
             Some("ses_twin_a")
         );
         assert_eq!(id("Nothing like it", None, None), None);
@@ -324,7 +327,7 @@ mod tests {
     #[test]
     fn opencodes_command_line_may_name_its_session() {
         let pane = |args: &[&str]| Pane {
-            foreground: Some(front("opencode-cli", args, "/code/hex")),
+            foreground: Some(front("opencode-cli", args, "/code/gospell")),
             ..Pane::default()
         };
         let id = |args: &[&str]| pane(args).argv_session().map(str::to_owned);
@@ -348,7 +351,7 @@ mod tests {
         assert!(pane(&["opencode"]).runs_opencode());
         // Another program's `-s` names nothing.
         let vim = Pane {
-            foreground: Some(front("nvim", &["nvim", "-s", "ses_x"], "/code/hex")),
+            foreground: Some(front("nvim", &["nvim", "-s", "ses_x"], "/code/gospell")),
             ..Pane::default()
         };
         assert_eq!(vim.argv_session(), None);
@@ -361,9 +364,9 @@ mod tests {
 
     #[test]
     fn the_focused_pane_is_the_one_that_fits_its_folder_and_title() {
-        let tui = front("opencode-cli", &["opencode-cli"], "/code/hex");
+        let tui = front("opencode-cli", &["opencode-cli"], "/code/gospell");
         let other_tui = front("opencode-cli", &["opencode-cli"], "/code/seer");
-        let shell = front("zsh", &["-zsh"], "/code/hex");
+        let shell = front("zsh", &["-zsh"], "/code/gospell");
         let vim = front("nvim", &["nvim"], "/code/seer");
         // One terminal needs no telling.
         assert_eq!(choose(vec![shell.clone()], None, ""), Some(shell.clone()));
@@ -371,7 +374,7 @@ mod tests {
         assert_eq!(
             choose(
                 vec![shell.clone(), tui.clone()],
-                Some(Path::new("/code/hex")),
+                Some(Path::new("/code/gospell")),
                 "OC | Fix"
             ),
             Some(tui.clone())
@@ -393,8 +396,8 @@ mod tests {
         assert_eq!(
             choose(
                 vec![shell.clone(), tui.clone()],
-                Some(Path::new("/code/hex")),
-                "~/code/hex"
+                Some(Path::new("/code/gospell")),
+                "~/code/gospell"
             ),
             None
         );

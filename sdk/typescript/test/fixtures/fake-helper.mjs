@@ -2,17 +2,17 @@ import http from "node:http"
 import fs from "node:fs"
 import path from "node:path"
 
-if (process.env.HEX_FAKE_PID_PATH) fs.writeFileSync(process.env.HEX_FAKE_PID_PATH, String(process.pid))
-if (process.env.HEX_FAKE_MODE === "exit-before-ready") process.exit(23)
-if (process.env.HEX_FAKE_MODE === "bad-handshake") {
+if (process.env.GOSPELL_FAKE_PID_PATH) fs.writeFileSync(process.env.GOSPELL_FAKE_PID_PATH, String(process.pid))
+if (process.env.GOSPELL_FAKE_MODE === "exit-before-ready") process.exit(23)
+if (process.env.GOSPELL_FAKE_MODE === "bad-handshake") {
   process.stdout.write('{"type":"ready","url":"https://example.com"}\n')
   process.stdin.resume()
   process.stdin.on("end", () => {
-    if (process.env.HEX_FAKE_IGNORE_LEASE === "1") setInterval(() => {}, 1_000)
+    if (process.env.GOSPELL_FAKE_IGNORE_LEASE === "1") setInterval(() => {}, 1_000)
     else process.exit(0)
   })
 } else {
-  const token = "hex_0000000000000000000000000000000000000000000000000000000000000000"
+  const token = "gospell_0000000000000000000000000000000000000000000000000000000000000000"
   const models = [{
     id: "parakeet_v2",
     name: "Parakeet v2",
@@ -24,7 +24,7 @@ if (process.env.HEX_FAKE_MODE === "bad-handshake") {
     supportsLanguageDetection: false,
   }]
   const dictations = new Map()
-  const ownerToken = "hex_capture_0000000000000000000000000000000000000000000000000000000000000000"
+  const ownerToken = "gospell_capture_0000000000000000000000000000000000000000000000000000000000000000"
   let finishAttempts = 0
   const server = http.createServer((request, response) => {
     if (request.headers.authorization !== `Bearer ${token}`) {
@@ -42,7 +42,7 @@ if (process.env.HEX_FAKE_MODE === "bad-handshake") {
       response.end(JSON.stringify({
         audioFormats: ["audio/wav"],
         partialTranscripts: false,
-        serviceCapture: process.env.HEX_FAKE_SERVICE_CAPTURE === "1",
+        serviceCapture: process.env.GOSPELL_FAKE_SERVICE_CAPTURE === "1",
         outputProcessing: false,
       }))
       return
@@ -54,7 +54,7 @@ if (process.env.HEX_FAKE_MODE === "bad-handshake") {
     }
     if (request.method === "POST" && url.pathname === "/models/parakeet_v2/prepare") {
       response.writeHead(200, { "content-type": "text/event-stream" })
-      if (process.env.HEX_FAKE_PREPARE_BATCH === "1") {
+      if (process.env.GOSPELL_FAKE_PREPARE_BATCH === "1") {
         response.end(
           'data: {"type":"downloading","downloadedBytes":21,"totalBytes":42}\n\n'
           + 'data: {"type":"loading"}\n\n'
@@ -65,8 +65,8 @@ if (process.env.HEX_FAKE_MODE === "bad-handshake") {
       response.write(': keep-alive\r\n\r\n')
       response.write('data:{"type":"downloading","downloadedBytes":21,')
       response.write('"totalBytes":42}\r\n\r\n')
-      if (process.env.HEX_FAKE_PREPARE_HANG === "1") return
-      if (process.env.HEX_FAKE_PREPARE_ERROR === "1") {
+      if (process.env.GOSPELL_FAKE_PREPARE_HANG === "1") return
+      if (process.env.GOSPELL_FAKE_PREPARE_ERROR === "1") {
         response.end('data: {"type":"error","error":{"code":"load-failed","message":"no metal"}}\r\n\r\n')
         return
       }
@@ -81,7 +81,7 @@ if (process.env.HEX_FAKE_MODE === "bad-handshake") {
       return
     }
     if (request.method === "POST" && url.pathname === "/transcriptions") {
-      if (process.env.HEX_FAKE_TRANSCRIBE_ERROR === "1") {
+      if (process.env.GOSPELL_FAKE_TRANSCRIBE_ERROR === "1") {
         response.writeHead(409, { "content-type": "application/json" })
         response.end(JSON.stringify({ code: "model-not-ready" }))
         return
@@ -89,7 +89,7 @@ if (process.env.HEX_FAKE_MODE === "bad-handshake") {
       request.resume()
       request.on("end", () => {
         response.setHeader("content-type", "application/json")
-        if (process.env.HEX_FAKE_TRANSCRIBE_HANG === "1") {
+        if (process.env.GOSPELL_FAKE_TRANSCRIBE_HANG === "1") {
           response.writeHead(200)
           response.flushHeaders()
           return
@@ -98,19 +98,19 @@ if (process.env.HEX_FAKE_MODE === "bad-handshake") {
         const timestamps = url.searchParams.get("timestamps")
         const timed = timestamps === "segment" || timestamps === "word"
         response.end(JSON.stringify({
-          transcript: "hello from hex",
+          transcript: "hello from gospell",
           durationMs: 750,
-          ...(processed ? { processed: "Hello from Hex." } : {}),
+          ...(processed ? { processed: "Hello from GoSpell." } : {}),
           ...(timed
             ? {
               timestampGranularity: timestamps,
-              segments: [{ text: "hello from hex", startMs: 0, endMs: 750 }],
+              segments: [{ text: "hello from gospell", startMs: 0, endMs: 750 }],
               ...(timestamps === "word"
                 ? {
                   words: [
                     { text: "hello", startMs: 0, endMs: 300 },
                     { text: "from", startMs: 320, endMs: 480 },
-                    { text: "hex", startMs: 500, endMs: 750 },
+                    { text: "gospell", startMs: 500, endMs: 750 },
                   ],
                 }
                 : {}),
@@ -120,7 +120,7 @@ if (process.env.HEX_FAKE_MODE === "bad-handshake") {
       })
       return
     }
-    if (process.env.HEX_FAKE_SERVICE_CAPTURE === "1" && request.method === "POST" && url.pathname === "/dictations") {
+    if (process.env.GOSPELL_FAKE_SERVICE_CAPTURE === "1" && request.method === "POST" && url.pathname === "/dictations") {
       const id = 1
       dictations.set(id, {})
       response.writeHead(201, { "content-type": "application/json" })
@@ -128,18 +128,18 @@ if (process.env.HEX_FAKE_MODE === "bad-handshake") {
       return
     }
     if (
-      process.env.HEX_FAKE_SERVICE_CAPTURE === "1"
+      process.env.GOSPELL_FAKE_SERVICE_CAPTURE === "1"
       && url.pathname.startsWith("/dictations/1/")
-      && request.headers["x-hex-dictation-token"] !== ownerToken
+      && request.headers["x-gospell-dictation-token"] !== ownerToken
     ) {
       response.writeHead(404, { "content-type": "application/json" })
       response.end(JSON.stringify({ code: "dictation-not-found" }))
       return
     }
-    if (process.env.HEX_FAKE_SERVICE_CAPTURE === "1" && request.method === "GET" && url.pathname === "/dictations/1/levels") {
+    if (process.env.GOSPELL_FAKE_SERVICE_CAPTURE === "1" && request.method === "GET" && url.pathname === "/dictations/1/levels") {
       response.writeHead(200, { "content-type": "text/event-stream" })
       dictations.get(1).levels = response
-      if (process.env.HEX_FAKE_LEVEL_BURST === "1") {
+      if (process.env.GOSPELL_FAKE_LEVEL_BURST === "1") {
         for (let index = 0; index < 40; index++) {
           response.write(`data: {"rmsDb":${index},"peakDb":${index}}\n\n`)
         }
@@ -148,7 +148,7 @@ if (process.env.HEX_FAKE_MODE === "bad-handshake") {
       }
       return
     }
-    if (process.env.HEX_FAKE_SERVICE_CAPTURE === "1" && request.method === "GET" && url.pathname === "/dictations/1/audio") {
+    if (process.env.GOSPELL_FAKE_SERVICE_CAPTURE === "1" && request.method === "GET" && url.pathname === "/dictations/1/audio") {
       response.writeHead(200, { "content-type": "application/octet-stream" })
       dictations.get(1).audio = response
       const samples = Buffer.alloc(8)
@@ -157,9 +157,9 @@ if (process.env.HEX_FAKE_MODE === "bad-handshake") {
       response.write(samples)
       return
     }
-    if (process.env.HEX_FAKE_SERVICE_CAPTURE === "1" && request.method === "POST" && url.pathname === "/dictations/1/finish") {
+    if (process.env.GOSPELL_FAKE_SERVICE_CAPTURE === "1" && request.method === "POST" && url.pathname === "/dictations/1/finish") {
       finishAttempts += 1
-      if (process.env.HEX_FAKE_FINISH_RETRY === "1" && finishAttempts === 1) {
+      if (process.env.GOSPELL_FAKE_FINISH_RETRY === "1" && finishAttempts === 1) {
         response.writeHead(503, { "content-type": "application/json" })
         response.end(JSON.stringify({ code: "service-capture-busy" }))
         return
@@ -170,11 +170,11 @@ if (process.env.HEX_FAKE_MODE === "bad-handshake") {
       response.end(JSON.stringify({ transcript: "running app text", durationMs: 1234 }))
       return
     }
-    if (process.env.HEX_FAKE_SERVICE_CAPTURE === "1" && request.method === "POST" && url.pathname === "/dictations/1/heartbeat") {
+    if (process.env.GOSPELL_FAKE_SERVICE_CAPTURE === "1" && request.method === "POST" && url.pathname === "/dictations/1/heartbeat") {
       response.writeHead(204).end()
       return
     }
-    if (process.env.HEX_FAKE_SERVICE_CAPTURE === "1" && request.method === "POST" && url.pathname === "/dictations/1/cancel") {
+    if (process.env.GOSPELL_FAKE_SERVICE_CAPTURE === "1" && request.method === "POST" && url.pathname === "/dictations/1/cancel") {
       dictations.get(1)?.levels?.end()
       dictations.get(1)?.audio?.end()
       response.writeHead(204).end()
@@ -187,8 +187,8 @@ if (process.env.HEX_FAKE_MODE === "bad-handshake") {
   server.listen(0, "127.0.0.1", () => {
     const address = server.address()
     if (typeof address === "object" && address !== null) {
-      if (process.env.HEX_FAKE_DISCOVERY_PATH) {
-        fs.writeFileSync(process.env.HEX_FAKE_DISCOVERY_PATH, JSON.stringify({
+      if (process.env.GOSPELL_FAKE_DISCOVERY_PATH) {
+        fs.writeFileSync(process.env.GOSPELL_FAKE_DISCOVERY_PATH, JSON.stringify({
           port: address.port,
           token,
           apiVersion: "2",
@@ -202,7 +202,7 @@ if (process.env.HEX_FAKE_MODE === "bad-handshake") {
         apiVersion: "2",
         pid: process.pid,
       })}\n`)
-      const gate = process.env.HEX_FAKE_HANDSHAKE_GATE
+      const gate = process.env.GOSPELL_FAKE_HANDSHAKE_GATE
       if (gate) {
         const check = () => {
           if (!fs.existsSync(gate)) return

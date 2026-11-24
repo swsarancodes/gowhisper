@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Name=GoSpell
+Comment=Local voice dictation
+Exec=@GOSPELL_BIN@
+Icon=com.goml.gospell
+Terminal=false
+Categories=Utility;Accessibility;
+StartupNotify=true
+StartupWMClass=com.goml.gospell
+Actions=quit;
+
+[Desktop Action quit]
+Name=Quit GoSpell
+Exec=@GOSPELL_BIN@ quit

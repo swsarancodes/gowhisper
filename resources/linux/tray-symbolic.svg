@@ -1,18 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="4.5 5 28 26" width="32" height="30">
   <!--
-    Hex's tray mark as a symbolic icon: two nested hexagon outlines around a
-    solid hexagonal core, drawn in the panel's text color.
+    GoSpell's tray mark as a symbolic icon: GoML's G-arrow, drawn in the
+    panel's text color.
 
     Plasma 6 loads this icon name with the panel's own palette and recolors it
     through KDE's current-color-scheme stylesheet. GNOME's AppIndicator
     extension and Waybar recolor it because its name ends in -symbolic, not
-    through that stylesheet. Hosts that do not recolor it show this default,
-    chosen like the tray pixmap from the desktop's color-scheme preference.
+    through that stylesheet.
 
-    X-Hex-Managed=true
+    X-GoSpell-Managed=true
   -->
   <style id="current-color-scheme" type="text/css">.ColorScheme-Text { color:#ffffff; }</style>
-  <path class="ColorScheme-Text" fill="currentColor" fill-rule="evenodd" d="M16 0.319L29.58 8.159L29.58 23.841L16 31.681L2.42 23.841L2.42 8.159ZM16 2.282L27.88 9.141L27.88 22.859L16 29.718L4.12 22.859L4.12 9.141Z"/>
-  <path class="ColorScheme-Text" fill="currentColor" fill-rule="evenodd" d="M16 5.619L24.99 10.809L24.99 21.191L16 26.381L7.01 21.191L7.01 10.809ZM16 7.582L23.29 11.791L23.29 20.209L16 24.418L8.71 20.209L8.71 11.791Z"/>
-  <path class="ColorScheme-Text" fill="currentColor" d="M16 11.3L20.07 13.65L20.07 18.35L16 20.7L11.93 18.35L11.93 13.65Z"/>
+  <path class="ColorScheme-Text" fill="currentColor" d="M20.0235 29.5758H17.2142C10.838 29.5561 5.65365 24.3543 5.65365 17.976C5.65365 11.6413 10.7725 6.46567 17.0898 6.38053V10.6721C13.1366 10.755 9.94083 14.0097 9.94083 17.976C9.94083 21.9466 13.1366 25.1991 17.0898 25.282L18.2489 25.2842L18.286 25.2471L23.2149 20.316L23.4288 20.1064H14.4135V15.8149H23.4288L23.2171 15.6032L18.8382 11.2243L21.8724 8.19014L31.6386 17.9585L20.0235 29.5758Z"/>
 </svg>

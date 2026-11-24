@@ -5,7 +5,7 @@
 //! input-language switch, is another application's chord from that press on.
 //! It takes the hold away like any key joining it, Toggle must not lock the
 //! cancelled press, and Alt's release is the app's: nothing was swallowed
-//! that would read as a lone Alt tap, unless Hex later swallows a key of this
+//! that would read as a lone Alt tap, unless GoSpell later swallows a key of this
 //! chord (Paste Last's V re-arms the mask).
 //!
 //! These drive the real hook state machine through `process_button`, whose
@@ -216,7 +216,7 @@ fn ctrl_after_alt_leaves_paste_last_to_fire() {
     );
 
     let v = u16::try_from(virtual_key("v").unwrap()).unwrap();
-    assert_eq!(rig.down(v), Disposition::Suppress, "Hex's paste key");
+    assert_eq!(rig.down(v), Disposition::Suppress, "GoSpell's paste key");
     assert_eq!(rig.next(), Some(HotkeyAction::PasteLast));
     assert_eq!(rig.next(), None);
     rig.up(v);

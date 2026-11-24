@@ -9,10 +9,10 @@ Keyboard suggestion filter: List of Dirty, Naughty, Obscene, and Otherwise Bad W
 (LDNOOBW), © 2012–2020 Shutterstock, Inc., and contributors. English, Spanish, German,
 Norwegian, French and Italian lists. Source: https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/tree/5faf2ba42d7b1c0977169ec3611df25a3c08eb13
 Creative Commons Attribution 4.0 International: https://creativecommons.org/licenses/by/4.0/
-Full licence: cc-by-4.0.txt. Hex lowercased and classified the entries, omitted ordinary,
+Full licence: cc-by-4.0.txt. GoSpell lowercased and classified the entries, omitted ordinary,
 medical and search-only terms, and added common slurs, inflections and spelling variants.
 
-English, Spanish, German, French and Italian keyboard language models (.hextm): derived from Google Books Ngram
+English, Spanish, German, French and Italian keyboard language models (.gospelltm): derived from Google Books Ngram
 Viewer, version 3 (2020-02-17), by Google and the Google Books Ngram contributors.
 https://storage.googleapis.com/books/ngrams/books/datasetsv3.html
 Creative Commons Attribution 3.0 Unported: https://creativecommons.org/licenses/by/3.0/

@@ -171,7 +171,7 @@ pub(super) fn deliver(out: &Out, png: &[u8], words: &str) -> anyhow::Result<()> 
         Out::Copy => save::copy(png, None),
         Out::Save(path) => save::write_to(path, png),
         Out::Send(dest) => {
-            let folder = std::env::temp_dir().join("hex-screenshots");
+            let folder = std::env::temp_dir().join("gospell-screenshots");
             let path = save::write(&folder, png)?;
             let text = if words.is_empty() { SEND_TEXT } else { words };
             crate::capture_host::send_image(&dest.session, text, &path)
@@ -248,7 +248,7 @@ impl ClipExport {
 /// Where copied and sent exports are written: they aren't saves.
 #[cfg(target_os = "macos")]
 fn scratch() -> std::path::PathBuf {
-    std::env::temp_dir().join("hex-screenshots")
+    std::env::temp_dir().join("gospell-screenshots")
 }
 
 /// What a sent recording says: its words, then where its movie is.
@@ -272,7 +272,7 @@ pub(super) fn load_sessions(overlay: Option<OverlayHandle<Editor>>) {
         return;
     };
     let spawned = std::thread::Builder::new()
-        .name("hex-screenshot-sessions".into())
+        .name("gospell-screenshot-sessions".into())
         .spawn(move || {
             let sessions = match recent_sessions() {
                 Ok(dests) => Sessions::Ready(dests),

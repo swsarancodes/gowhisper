@@ -1,12 +1,12 @@
-//! The labs Hex's website lists: `site/src/labs.json`, from which the site
-//! builds a page and a social card per lab at `/hex/labs/<id>`. Only the
+//! The labs GoSpell's website lists: `site/src/labs.json`, from which the site
+//! builds a page and a social card per lab at `/gospell/labs/<id>`. Only the
 //! test below reads it: it fails when the file is out of date with this
-//! registry, and `HEX_UPDATE_LABS_JSON=1 scripts/check labs::web` rewrites it.
+//! registry, and `GOSPELL_UPDATE_LABS_JSON=1 scripts/check labs::web` rewrites it.
 
 use super::{Audience, Feature, Os};
 
 impl Feature {
-    /// Whether Hex's website lists it: every public build has it. Dev
+    /// Whether GoSpell's website lists it: every public build has it. Dev
     /// features are left out, and so are the labs that only matter once
     /// Annotate is on.
     const fn on_the_web(self) -> bool {
@@ -93,12 +93,12 @@ mod tests {
     #[test]
     fn the_website_lists_every_public_lab() {
         let expected = catalog_json();
-        if std::env::var_os("HEX_UPDATE_LABS_JSON").is_some() {
+        if std::env::var_os("GOSPELL_UPDATE_LABS_JSON").is_some() {
             std::fs::write(PATH, &expected).unwrap();
             return;
         }
         // Git checks text files out with CRLF where `core.autocrlf` is set, as
-        // it is on Windows; the file Hex writes, and the repository's copy, is
+        // it is on Windows; the file GoSpell writes, and the repository's copy, is
         // LF. Compare lines so a checkout's line endings don't read as drift.
         let saved = std::fs::read_to_string(PATH)
             .unwrap_or_default()
@@ -110,7 +110,7 @@ mod tests {
             );
             panic!(
                 "site/src/labs.json is out of date with the Labs registry {at}; \
-                 run `HEX_UPDATE_LABS_JSON=1 scripts/check labs::web` and commit it"
+                 run `GOSPELL_UPDATE_LABS_JSON=1 scripts/check labs::web` and commit it"
             );
         }
     }

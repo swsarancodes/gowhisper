@@ -1,4 +1,4 @@
-import { HexError } from "./errors.js"
+import { GoSpellError } from "./errors.js"
 import { consumeSse } from "./sse.js"
 import {
   decodeCapabilities,
@@ -11,7 +11,7 @@ import {
   type EmbeddedEndpoint,
 } from "./protocol.js"
 import type {
-  HexClient,
+  GoSpellClient,
   DictationLevel,
   ListModelsOptions,
   ModelId,
@@ -26,9 +26,9 @@ interface ResponseContext {
   readonly signal: AbortSignal
 }
 
-const abortError = (signal: AbortSignal): HexError => {
-  if (signal.reason instanceof HexError) return signal.reason
-  return new HexError("cancelled", "HEX operation was cancelled", { cause: signal.reason })
+const abortError = (signal: AbortSignal): GoSpellError => {
+  if (signal.reason instanceof GoSpellError) return signal.reason
+  return new GoSpellError("cancelled", "GOSPELL operation was cancelled", { cause: signal.reason })
 }
 
 const boundaryError = (
@@ -36,10 +36,10 @@ const boundaryError = (
   signal: AbortSignal,
   code: "request-failed" | "invalid-response",
   message: string,
-): HexError => {
-  if (cause instanceof HexError) return cause
+): GoSpellError => {
+  if (cause instanceof GoSpellError) return cause
   if (signal.aborted) return abortError(signal)
-  return new HexError(code, message, { cause })
+  return new GoSpellError(code, message, { cause })
 }
 
 const rejection = async (
@@ -53,7 +53,7 @@ const rejection = async (
     }
   } catch (cause) {
     if (signal.aborted) throw abortError(signal)
-    if (cause instanceof HexError) throw cause
+    if (cause instanceof GoSpellError) throw cause
   }
   return { message: `HTTP ${response.status}` }
 }
@@ -62,7 +62,7 @@ const json = async ({ response, signal }: ResponseContext): Promise<unknown> => 
   try {
     return await response.json()
   } catch (cause) {
-    throw boundaryError(cause, signal, "invalid-response", "HEX returned malformed JSON")
+    throw boundaryError(cause, signal, "invalid-response", "GOSPELL returned malformed JSON")
   }
 }
 
@@ -80,7 +80,7 @@ export const makeClient = (
   endpoint: EmbeddedEndpoint,
   transport: typeof globalThis.fetch,
   lifetime: AbortSignal,
-): HexClient => {
+): GoSpellClient => {
   const request = async (
     path: string,
     init: RequestInit = {},
@@ -97,11 +97,11 @@ export const makeClient = (
         signal,
       })
     } catch (cause) {
-      throw boundaryError(cause, signal, "request-failed", "Could not reach the embedded HEX service")
+      throw boundaryError(cause, signal, "request-failed", "Could not reach the embedded GOSPELL service")
     }
     if (!response.ok) {
       const remote = await rejection(response, signal)
-      throw new HexError("request-failed", `HEX rejected the request: ${remote.message}`, {
+      throw new GoSpellError("request-failed", `GOSPELL rejected the request: ${remote.message}`, {
         status: response.status,
         ...(remote.remoteCode === undefined ? {} : { remoteCode: remote.remoteCode }),
       })
@@ -131,7 +131,7 @@ export const makeClient = (
       try {
         value = JSON.parse(data)
       } catch (cause) {
-        throw new HexError("invalid-response", "HEX returned malformed model progress", { cause })
+        throw new GoSpellError("invalid-response", "GOSPELL returned malformed model progress", { cause })
       }
       const progress = decodeProgress(value)
       if (progress === "ok") {
@@ -141,7 +141,7 @@ export const makeClient = (
       try {
         options?.onProgress?.(progress)
       } catch (cause) {
-        throw new HexError("request-failed", "The model progress callback failed", { cause })
+        throw new GoSpellError("request-failed", "The model progress callback failed", { cause })
       }
       if (signal.aborted) throw abortError(signal)
     }
@@ -149,9 +149,9 @@ export const makeClient = (
     try {
       await consumeSse(response, signal, "model progress", dispatch)
     } catch (cause) {
-      throw boundaryError(cause, signal, "invalid-response", "HEX model progress stream failed")
+      throw boundaryError(cause, signal, "invalid-response", "GOSPELL model progress stream failed")
     }
-    if (!completed) throw new HexError("model-prepare-failed", "HEX model preparation ended without a result")
+    if (!completed) throw new GoSpellError("model-prepare-failed", "GOSPELL model preparation ended without a result")
   }
 
   const transcribe = async (input: TranscriptionRequest) => {
@@ -234,7 +234,7 @@ export const makeClient = (
     }
     return {
       [Symbol.asyncIterator]: () => {
-        if (iterated) throw new HexError("request-failed", "HEX observation streams support one consumer")
+        if (iterated) throw new GoSpellError("request-failed", "GOSPELL observation streams support one consumer")
         iterated = true
         start()
         return {
@@ -244,7 +244,7 @@ export const makeClient = (
             if (failure !== undefined) throw failure
             if (ended) return { value: undefined, done: true }
             if (pending !== undefined) {
-              throw new HexError("request-failed", "Concurrent stream reads are not supported")
+              throw new GoSpellError("request-failed", "Concurrent stream reads are not supported")
             }
             return new Promise<IteratorResult<A>>((resolve, reject) => {
               pending = { resolve, reject }
@@ -263,10 +263,10 @@ export const makeClient = (
     }
   }
 
-  const dictationHeaders = (ownerToken: string) => ({ "x-hex-dictation-token": ownerToken })
+  const dictationHeaders = (ownerToken: string) => ({ "x-gospell-dictation-token": ownerToken })
 
   const levelStream = (id: number, ownerToken: string): AsyncIterable<DictationLevel> =>
-    boundedStream(32, "HEX dictation level stream failed", async (push, streamSignal) => {
+    boundedStream(32, "GOSPELL dictation level stream failed", async (push, streamSignal) => {
       const { response, signal } = await request(
         `/dictations/${id}/levels`,
         { headers: dictationHeaders(ownerToken) },
@@ -278,16 +278,16 @@ export const makeClient = (
     })
 
   const audioStream = (id: number, ownerToken: string): AsyncIterable<Float32Array> =>
-    boundedStream(8, "HEX dictation audio stream failed", async (push, streamSignal) => {
+    boundedStream(8, "GOSPELL dictation audio stream failed", async (push, streamSignal) => {
       const { response, signal } = await request(
         `/dictations/${id}/audio`,
         { headers: dictationHeaders(ownerToken) },
         streamSignal,
       )
       if (!response.headers.get("content-type")?.toLowerCase().startsWith("application/octet-stream")) {
-        throw new HexError("invalid-response", "HEX returned an invalid dictation audio content type")
+        throw new GoSpellError("invalid-response", "GOSPELL returned an invalid dictation audio content type")
       }
-      if (response.body === null) throw new HexError("invalid-response", "HEX returned no dictation audio stream")
+      if (response.body === null) throw new GoSpellError("invalid-response", "GOSPELL returned no dictation audio stream")
       const reader = response.body.getReader()
       let pending = new Uint8Array(0)
       try {
@@ -310,7 +310,7 @@ export const makeClient = (
           pending = bytes.slice(sampleBytes)
         }
         if (pending.length !== 0) {
-          throw new HexError("invalid-response", "HEX returned an incomplete Float32 audio sample")
+          throw new GoSpellError("invalid-response", "GOSPELL returned an incomplete Float32 audio sample")
         }
       } finally {
         if (signal.aborted) await reader.cancel(signal.reason).catch(() => {})
@@ -340,7 +340,7 @@ export const makeClient = (
     }
     const stopHeartbeatOnTerminalError = (error: unknown) => {
       // These responses cannot renew this capture; transport and server failures can be retried.
-      if (error instanceof HexError && (error.status === 401 || error.status === 404 || error.status === 409)) {
+      if (error instanceof GoSpellError && (error.status === 401 || error.status === 404 || error.status === 409)) {
         stopHeartbeat()
       }
     }
@@ -354,7 +354,7 @@ export const makeClient = (
       audio,
       finish: () => {
         if (finished !== undefined) return Promise.resolve(finished)
-        if (cancelled) return Promise.reject(new HexError("request-failed", "HEX dictation was cancelled"))
+        if (cancelled) return Promise.reject(new GoSpellError("request-failed", "GOSPELL dictation was cancelled"))
         finishInFlight ??= (async () => {
           const result = decodeTranscription(await json(await request(
             `/dictations/${id}/finish`,

@@ -2,7 +2,7 @@
 //! window records, every display dims but what's recorded, outlined as the
 //! picker outlined it, so it's plain what the movie holds. One click-through
 //! overlay per display, never taking focus, and left out of the recording
-//! unless `capture.show_overlays_in_recordings` asks for Hex's overlays.
+//! unless `capture.show_overlays_in_recordings` asks for GoSpell's overlays.
 //!
 //! [`crate::screenshots`] decides when it shows and where the target is;
 //! this draws it with the picker's own [`picker::dim`].
@@ -175,13 +175,13 @@ pub(crate) struct RecordingDim {
 }
 
 impl RecordingDim {
-    /// Adds one overlay per display Hex dims, hidden, holding no window or
+    /// Adds one overlay per display GoSpell dims, hidden, holding no window or
     /// GPU surface until it shows.
     pub(crate) fn install<S: 'static>(app: &mut rune::App<S>) -> Self {
         use rune::{OverlayLevel, OverlayOptions, OverlayPlacement, OverlaySpec};
         let overlays = (0..DIM_WINDOWS)
             .map(|n| {
-                let spec = OverlaySpec::new("Hex recording dim", (1440.0, 900.0), view)
+                let spec = OverlaySpec::new("GoSpell recording dim", (1440.0, 900.0), view)
                     .options(OverlayOptions {
                         placement: Some(OverlayPlacement::FullScreen),
                         display: picker::DISPLAY,

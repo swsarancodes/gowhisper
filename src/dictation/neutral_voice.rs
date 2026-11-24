@@ -663,7 +663,7 @@ mod tests {
             "Check the link for details."
         ));
         assert!(!is_acceptable(
-            "open ~/dev/projects/hex/readme.md next",
+            "open ~/dev/projects/gospell/readme.md next",
             "Open the readme next."
         ));
         assert!(!is_acceptable(

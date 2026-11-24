@@ -232,15 +232,16 @@ fn evaluate_clip_at_release(
 }
 
 #[test]
-#[ignore = "requires HEX_DICTATION_CORPUS_DIR and Unified English GGUF model"]
+#[ignore = "requires GOSPELL_DICTATION_CORPUS_DIR and Unified English GGUF model"]
 fn evaluate_dictation_corpus() {
     let corpus_dir = PathBuf::from(
-        std::env::var("HEX_DICTATION_CORPUS_DIR").expect("HEX_DICTATION_CORPUS_DIR must be set"),
+        std::env::var("GOSPELL_DICTATION_CORPUS_DIR")
+            .expect("GOSPELL_DICTATION_CORPUS_DIR must be set"),
     );
-    let model_path = std::env::var("HEX_TAIL_MODEL")
+    let model_path = std::env::var("GOSPELL_TAIL_MODEL")
         .map(PathBuf::from)
         .unwrap_or_else(|_| corpus_dir.join("parakeet-unified-en-0.6b-Q8_0.gguf"));
-    let sweep_limit: usize = std::env::var("HEX_CORPUS_SWEEP_LIMIT")
+    let sweep_limit: usize = std::env::var("GOSPELL_CORPUS_SWEEP_LIMIT")
         .ok()
         .and_then(|v| v.parse().ok())
         .unwrap_or(24);

@@ -79,7 +79,7 @@ fn system_default_passes_over_a_bluetooth_default() {
     use InputTarget::{Named, StandIn, SystemDefault};
     use Transport::{Bluetooth, BuiltIn, Other};
     let names = listed(&[
-        "Hex Microphone",
+        "GoSpell Microphone",
         "AirPods Pro",
         "MacBook Pro Microphone",
         "USB Mic",
@@ -139,15 +139,15 @@ fn system_default_passes_over_a_bluetooth_default() {
         plan(None, Some("AirPods Pro"), closed),
         found(StandIn(3), Selection::InUse)
     );
-    // A Hex Microphone default prefers a wired input to Bluetooth too.
-    let no_built_in = listed(&["Hex Microphone", "AirPods Pro", "USB Mic"]);
+    // A GoSpell Microphone default prefers a wired input to Bluetooth too.
+    let no_built_in = listed(&["GoSpell Microphone", "AirPods Pro", "USB Mic"]);
     let no_built_in_transports = [Other, Bluetooth, Other];
     assert_eq!(
         resolve_input(
             None,
             None,
             &no_built_in,
-            Some("Hex Microphone"),
+            Some("GoSpell Microphone"),
             |index| no_built_in_transports[index],
             avoid
         ),
@@ -206,7 +206,7 @@ fn a_bluetooth_default_is_kept_when_nothing_else_is_usable() {
         })
     };
 
-    let only_bluetooth = listed(&["Hex Microphone", "AirPods Pro", "Beats"]);
+    let only_bluetooth = listed(&["GoSpell Microphone", "AirPods Pro", "Beats"]);
     let bluetooth = |index: usize| [Other, Bluetooth, Bluetooth][index];
     assert_eq!(
         resolve_input(
@@ -290,15 +290,15 @@ fn a_virtual_input_never_stands_in() {
         ),
         found(SystemDefault, Selection::InUse)
     );
-    // Only Hex Microphone and a virtual input: nothing to record from.
-    let virtual_only = listed(&["Hex Microphone", "Microsoft Teams Audio"]);
+    // Only GoSpell Microphone and a virtual input: nothing to record from.
+    let virtual_only = listed(&["GoSpell Microphone", "Microsoft Teams Audio"]);
     let virtual_transports = |index: usize| [Virtual, Virtual][index];
     assert_eq!(
         resolve_input(
             None,
             None,
             &virtual_only,
-            Some("Hex Microphone"),
+            Some("GoSpell Microphone"),
             virtual_transports,
             OPEN
         ),
@@ -434,7 +434,7 @@ fn an_unreadable_device_name_is_skipped_instead_of_panicking() {
 fn inputs_resolve_to_the_selection_then_the_system_default() {
     use InputTarget::{Named, StandIn, SystemDefault};
     let names = listed(&[
-        "Hex Microphone",
+        "GoSpell Microphone",
         "ALEX PODS",
         "MacBook Pro Microphone",
         "USB Mic",
@@ -458,22 +458,22 @@ fn inputs_resolve_to_the_selection_then_the_system_default() {
         plan(Some("Studio Display Microphone"), Some("ALEX PODS")),
         found(SystemDefault, Selection::Unlisted)
     );
-    // A Hex Microphone default never loops back: the built-in mic stands in.
+    // A GoSpell Microphone default never loops back: the built-in mic stands in.
     assert_eq!(
-        plan(None, Some("Hex Microphone")),
+        plan(None, Some("GoSpell Microphone")),
         found(StandIn(2), Selection::InUse)
     );
     assert_eq!(
-        plan(Some("Gone"), Some("Hex Microphone")),
+        plan(Some("Gone"), Some("GoSpell Microphone")),
         found(StandIn(2), Selection::Unlisted)
     );
     // Without a built-in mic or any default, the first real input stands in.
-    let no_built_in = resolve_input(None, None, &names, Some("Hex Microphone"), other, OPEN);
+    let no_built_in = resolve_input(None, None, &names, Some("GoSpell Microphone"), other, OPEN);
     assert_eq!(no_built_in, found(StandIn(1), Selection::InUse));
     assert_eq!(plan(None, None), found(StandIn(2), Selection::InUse));
-    // A saved Hex Microphone is never captured from.
+    // A saved GoSpell Microphone is never captured from.
     assert_eq!(
-        plan(Some("Hex Microphone"), Some("ALEX PODS")),
+        plan(Some("GoSpell Microphone"), Some("ALEX PODS")),
         found(SystemDefault, Selection::InUse)
     );
     // No real inputs at all.
@@ -481,8 +481,8 @@ fn inputs_resolve_to_the_selection_then_the_system_default() {
         resolve_input(
             None,
             None,
-            &listed(&["Hex Microphone"]),
-            Some("Hex Microphone"),
+            &listed(&["GoSpell Microphone"]),
+            Some("GoSpell Microphone"),
             &built_in,
             OPEN
         ),
@@ -509,7 +509,7 @@ fn inputs_resolve_to_the_selection_then_the_system_default() {
 fn a_closed_lid_passes_over_the_built_in_microphone() {
     use InputTarget::{Named, StandIn, SystemDefault};
     let names = listed(&[
-        "Hex Microphone",
+        "GoSpell Microphone",
         "MacBook Pro Microphone",
         "Studio Display Microphone",
         "USB Mic",
@@ -524,9 +524,9 @@ fn a_closed_lid_passes_over_the_built_in_microphone() {
         closed(None, Some("MacBook Pro Microphone")),
         found(StandIn(2), Selection::InUse)
     );
-    // So does a Hex Microphone or missing default: never the built-in.
+    // So does a GoSpell Microphone or missing default: never the built-in.
     assert_eq!(
-        closed(None, Some("Hex Microphone")),
+        closed(None, Some("GoSpell Microphone")),
         found(StandIn(2), Selection::InUse)
     );
     assert_eq!(closed(None, None), found(StandIn(2), Selection::InUse));
@@ -565,8 +565,12 @@ fn a_closed_lid_passes_over_the_built_in_microphone() {
         found(SystemDefault, Selection::InUse)
     );
     // With nothing else to use, say why rather than record silence.
-    let only_built_in = listed(&["Hex Microphone", "MacBook Pro Microphone"]);
-    for default in [Some("MacBook Pro Microphone"), Some("Hex Microphone"), None] {
+    let only_built_in = listed(&["GoSpell Microphone", "MacBook Pro Microphone"]);
+    for default in [
+        Some("MacBook Pro Microphone"),
+        Some("GoSpell Microphone"),
+        None,
+    ] {
         assert_eq!(
             resolve_input(None, None, &only_built_in, default, &built_in, CLOSED),
             Err(LID_CLOSED_ERROR.into())
@@ -587,7 +591,7 @@ fn a_closed_lid_passes_over_the_built_in_microphone() {
 
 #[test]
 fn device_override_wins_and_never_falls_back() {
-    let names = listed(&["Hex Microphone", "ALEX PODS", "USB Mic"]);
+    let names = listed(&["GoSpell Microphone", "ALEX PODS", "USB Mic"]);
     let plan = |device_override| {
         resolve_input(
             device_override,
@@ -611,7 +615,7 @@ fn device_override_wins_and_never_falls_back() {
         Err("microphone is unavailable: Missing Mic".into())
     );
     assert!(
-        plan(Some("Hex Microphone"))
+        plan(Some("GoSpell Microphone"))
             .unwrap_err()
             .contains("its own virtual microphone")
     );

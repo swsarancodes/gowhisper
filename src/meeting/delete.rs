@@ -1,5 +1,5 @@
-//! Deleting a meeting: the Meetings pane's Delete, and `hex meetings delete`
-//! through the running Hex's control host. One path, so both move the same
+//! Deleting a meeting: the Meetings pane's Delete, and `gospell meetings delete`
+//! through the running GoSpell's control host. One path, so both move the same
 //! files to the Trash and refuse for the same reasons.
 
 use std::path::Path;
@@ -11,7 +11,7 @@ use super::{
     notes_file, notes_in_progress, os, read_manifest, root,
 };
 
-/// Why a meeting can't be deleted, as `hex meetings delete` reports it.
+/// Why a meeting can't be deleted, as `gospell meetings delete` reports it.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DeleteRefusal {
     /// No meeting has that id.
@@ -20,16 +20,16 @@ pub enum DeleteRefusal {
     Recording,
     /// It is still transcribing.
     Transcribing,
-    /// Hex is writing its notes.
+    /// GoSpell is writing its notes.
     Notes,
-    /// It is waiting for the final transcript of a run Hex quit during.
+    /// It is waiting for the final transcript of a run GoSpell quit during.
     FinalPending,
-    /// Another Hex holds its folder.
+    /// Another GoSpell holds its folder.
     Busy,
 }
 
 impl DeleteRefusal {
-    /// The control error code, stable for `hex meetings delete --json`.
+    /// The control error code, stable for `gospell meetings delete --json`.
     pub fn code(self) -> &'static str {
         match self {
             Self::Unknown => "not-found",
@@ -49,7 +49,7 @@ impl DeleteRefusal {
             Self::Transcribing => "Wait for the transcript to finish before deleting it",
             Self::Notes => "Wait for the notes to finish before deleting",
             Self::FinalPending => "Wait for its final transcript before deleting it",
-            Self::Busy => "Hex is still working on this meeting",
+            Self::Busy => "GoSpell is still working on this meeting",
         }
     }
 }
@@ -62,7 +62,7 @@ pub enum DeleteError {
 }
 
 impl DeleteError {
-    /// The control error code, stable for `hex meetings delete --json`.
+    /// The control error code, stable for `gospell meetings delete --json`.
     pub fn code(&self) -> &'static str {
         match self {
             Self::Refused(refusal) => refusal.code(),
@@ -135,7 +135,7 @@ pub(super) fn delete_in(
     delete_meeting(&directory, move_to_trash)
 }
 
-/// An id comes from `hex meetings list --json` and names one folder directly
+/// An id comes from `gospell meetings list --json` and names one folder directly
 /// under the meetings root: no separators, no `.` or `..`, no empty name, so
 /// a caller can't point deletion anywhere else.
 fn plausible_id(id: &str) -> bool {

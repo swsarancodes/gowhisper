@@ -1,5 +1,5 @@
-# C-plus: v3's "Without Hex" exactly as approved (same jokes, same timing),
-# with the over-the-top "With Hex" payoff. The investors only speak once Hex
+# C-plus: v3's "Without GoSpell" exactly as approved (same jokes, same timing),
+# with the over-the-top "With GoSpell" payoff. The investors only speak once GoSpell
 # has answered.
 
 title   Launch Room
@@ -44,7 +44,7 @@ wait    0.12
 end     removed
 
 with
-hex     Yes, we're ready. Everything's tested, go ahead.
+gospell     Yes, we're ready. Everything's tested, go ahead.
 tap     ❤ ❤ ‼ 👍
 Jay:    they're clapping. actual clapping
 Priya:  ready, not dead. wiring $40M now
@@ -56,5 +56,5 @@ pill    You're presenting
 rename  Ready, Not Dead
 effect  confetti
 effect  fireworks
-score   {hex}, no typos, one company.
+score   {gospell}, no typos, one company.
 typed   Typing: {secs}, {typos}, and one job.

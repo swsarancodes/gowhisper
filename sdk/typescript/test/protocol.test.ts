@@ -76,19 +76,19 @@ describe("endpoint decoding", () => {
   it("retains the startup JSON parse error and its cause", () => {
     expect(() => decodeEndpoint("{")).toThrowError(expect.objectContaining({
       code: "invalid-handshake",
-      message: "HEX returned malformed startup JSON",
+      message: "GOSPELL returned malformed startup JSON",
       cause: expect.any(SyntaxError),
     }))
   })
 
   it.each([
-    [null, "invalid-handshake", "HEX returned an invalid startup handshake"],
-    [{ ...endpoint, apiVersion: undefined }, "invalid-handshake", "HEX returned an invalid startup handshake"],
-    [{ ...endpoint, apiVersion: "1", pid: 0 }, "incompatible-api", "HEX local API 1 is incompatible with client API 2; install a matching HEX app"],
-    [{ ...endpoint, pid: 1.5 }, "invalid-handshake", "HEX returned an invalid startup handshake"],
-    [{ ...endpoint, token: null }, "invalid-handshake", "HEX returned an invalid startup handshake"],
-    [{ ...endpoint, url: "invalid" }, "invalid-handshake", "HEX returned an invalid service URL"],
-    [{ ...endpoint, url: "http://user@127.0.0.1:1234" }, "invalid-handshake", "HEX service URL is not an authenticated loopback endpoint"],
+    [null, "invalid-handshake", "GOSPELL returned an invalid startup handshake"],
+    [{ ...endpoint, apiVersion: undefined }, "invalid-handshake", "GOSPELL returned an invalid startup handshake"],
+    [{ ...endpoint, apiVersion: "1", pid: 0 }, "incompatible-api", "GOSPELL local API 1 is incompatible with client API 2; install a matching GOSPELL app"],
+    [{ ...endpoint, pid: 1.5 }, "invalid-handshake", "GOSPELL returned an invalid startup handshake"],
+    [{ ...endpoint, token: null }, "invalid-handshake", "GOSPELL returned an invalid startup handshake"],
+    [{ ...endpoint, url: "invalid" }, "invalid-handshake", "GOSPELL returned an invalid service URL"],
+    [{ ...endpoint, url: "http://user@127.0.0.1:1234" }, "invalid-handshake", "GOSPELL service URL is not an authenticated loopback endpoint"],
   ])("preserves validation errors for %j", (value, code, message) => {
     for (const decode of [() => decodeEndpointValue(value), () => decodeEndpoint(JSON.stringify(value))]) {
       expect(decode).toThrowError(expect.objectContaining({ code, message }))

@@ -94,7 +94,7 @@ pub(crate) enum Command {
         /// Where the stream publishes its text after each feed, when live
         /// text is on (Labs).
         partials: Option<Partials>,
-        /// Clip samples of Hex's own sounds at the capture's head (the
+        /// Clip samples of GoSpell's own sounds at the capture's head (the
         /// pre-roll and the start tone): speech it heard there is never a
         /// lost opening.
         head_ignored: usize,
@@ -103,7 +103,7 @@ pub(crate) enum Command {
         stream: u64,
         samples: Vec<f32>,
     },
-    /// Raises the clip samples ignored at the stream's head, as Hex's output
+    /// Raises the clip samples ignored at the stream's head, as GoSpell's output
     /// suppression only reports that it took effect after the stream began.
     /// The value only ever increases and is applied before the finalize.
     #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
@@ -683,7 +683,7 @@ impl TranscriptionEngine {
     }
 
     /// Opens a live stream whose opening-coverage check ignores `head_ignored`
-    /// clip samples: Hex's own sounds at the capture's head, never a lost
+    /// clip samples: GoSpell's own sounds at the capture's head, never a lost
     /// opening.
     pub fn begin_ignoring_head(&self, head_ignored: usize) -> Option<LiveStream> {
         if !self.streams() {
@@ -922,7 +922,7 @@ impl TranscriptionEngine {
     }
 
     /// Where the model held after its last finished command runs, for
-    /// `hex status`: `None` before a load and once it is unloaded.
+    /// `gospell status`: `None` before a load and once it is unloaded.
     pub(crate) fn held_backend(&self) -> Option<crate::transcription::SpeechBackend> {
         self.held
             .lock()
@@ -1267,13 +1267,13 @@ impl Worker {
     }
 
     /// Unloads a loaded GGUF model, freeing its memory, and keeps its
-    /// selection to reload. Apple Speech stays: it holds no model of Hex's.
+    /// selection to reload. Apple Speech stays: it holds no model of GoSpell's.
     fn park(&mut self) {
         let Some(selection) = self.slot.park() else {
             return;
         };
         tracing::info!(model = ?selection.model, "unloaded the idle speech model");
-        // The device goes with the model: `hex status` must not keep naming it.
+        // The device goes with the model: `gospell status` must not keep naming it.
         self.publish_slot();
     }
 
@@ -1769,7 +1769,7 @@ mod tests {
         finish_with_text_bounds_ignoring_head(clip, 0, text_start_ms, text_end_ms)
     }
 
-    /// As above, with `head_ignored` clip samples of Hex's own sounds at the
+    /// As above, with `head_ignored` clip samples of GoSpell's own sounds at the
     /// capture's head, as the audio owner passes for a real capture.
     fn finish_with_text_bounds_ignoring_head(
         clip: &[f32],
@@ -2122,9 +2122,9 @@ mod tests {
     }
 
     #[test]
-    fn hexs_own_sounds_at_the_captures_head_are_not_a_lost_opening() {
+    fn gospells_own_sounds_at_the_captures_head_are_not_a_lost_opening() {
         // The pre-roll (0-0.45 s), the 272 ms Classic start tone (0.45-0.72 s),
-        // and the tap's click (0.72-0.82 s) are Hex's own sounds; the first
+        // and the tap's click (0.72-0.82 s) are GoSpell's own sounds; the first
         // word comes 0.8 s later. The stream lost nothing, so the clip is kept.
         let mut clip = vec![0.0; 7_200]; // 450 ms of pre-roll
         clip.extend(tone(4_352)); // the 272 ms start tone

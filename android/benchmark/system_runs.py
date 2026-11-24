@@ -7,10 +7,10 @@ from inject import inject
 def adb(*args):
     return subprocess.check_output(["adb",*args],text=True,stderr=subprocess.DEVNULL).strip()
 def event(token):
-    lines=adb("logcat","-d","-s","HexMeasure:I").splitlines()
+    lines=adb("logcat","-d","-s","GoSpellMeasure:I").splitlines()
     return [l.split(token+"|",1)[1] for l in lines if token+"|" in l]
 def start(op,token,lang):
-    adb("shell","am","start","-n","local.hex.measure/.SystemProbe","--es","op",op,"--es","id",token,"--es","lang",lang)
+    adb("shell","am","start","-n","local.gospell.measure/.SystemProbe","--es","op",op,"--es","id",token,"--es","lang",lang)
 def uptime_ms():
     return float(adb("shell","cat","/proc/uptime").split()[0])*1000
 def trial(row):

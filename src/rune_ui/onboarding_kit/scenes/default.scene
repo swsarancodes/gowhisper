@@ -80,7 +80,7 @@ wait    0.12
 end     removed
 
 with
-hex     Yes, we're ready. Everything's tested, go ahead.
+gospell     Yes, we're ready. Everything's tested, go ahead.
 tap     ❤ ❤ ‼ 👍
 Jay:    they're standing up
 Priya:  wiring $40M now
@@ -91,5 +91,5 @@ Jay:    I quit. it's yours
 pill    You're presenting
 rename  Bow Before You
 effect  fireworks
-score   {hex}, no typos, one company.
+score   {gospell}, no typos, one company.
 typed   Typing: {secs}, {typos}, 1 incontinence, and one job.

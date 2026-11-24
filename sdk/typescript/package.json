@@ -1,7 +1,7 @@
 {
-  "name": "@kitlangton/hex",
+  "name": "@goml/gospell",
   "version": "0.3.1",
-  "description": "TypeScript client for the HEX local transcription service",
+  "description": "TypeScript client for the GOSPELL local transcription service",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -25,7 +25,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/anomalyco/hex.git",
+    "url": "git+https://github.com/goml/gospell.git",
     "directory": "sdk/typescript"
   },
   "publishConfig": {

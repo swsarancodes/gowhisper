@@ -35,7 +35,7 @@ pub(super) struct StartedStream {
     pub stream: InputStream,
     pub chunks: Receiver<(Vec<f32>, CaptureInstant)>,
     pub stream_errors: Receiver<StreamError>,
-    pub hex_microphone: crate::audio::hex_microphone::CaptureFeedSwitch,
+    pub gospell_microphone: crate::audio::gospell_microphone::CaptureFeedSwitch,
     pub sample_rate: u32,
 }
 
@@ -122,7 +122,7 @@ pub(super) fn start_stream_with_fallback(
         }
     }
     // Intel Smart Sound refused every stream cpal built, at any format and
-    // buffer, so Hex tries its own WASAPI paths next (#988).
+    // buffer, so GoSpell tries its own WASAPI paths next (#988).
     #[cfg(target_os = "windows")]
     match super::wasapi_capture::start(device, device_name) {
         Ok(started) => return Ok(started),
@@ -194,7 +194,7 @@ pub(super) fn start_voice_processing(uid: &str, device_name: &str) -> Result<Sta
         },
         chunks: started.chunks,
         stream_errors: started.stream_errors,
-        hex_microphone: started.hex_microphone,
+        gospell_microphone: started.gospell_microphone,
         sample_rate: started.sample_rate,
     })
 }
@@ -312,7 +312,7 @@ fn start_stream(
         sender: error_sender,
         default_name,
     };
-    let (feed, hex_microphone) = crate::audio::hex_microphone::capture_feed(sample_rate);
+    let (feed, gospell_microphone) = crate::audio::gospell_microphone::capture_feed(sample_rate);
     let stream = match sample_format {
         SampleFormat::F32 => build_stream(
             device,
@@ -370,7 +370,7 @@ fn start_stream(
         stream: InputStream::Cpal { _stream: stream },
         chunks,
         stream_errors,
-        hex_microphone,
+        gospell_microphone,
         sample_rate,
     })
 }
@@ -503,7 +503,7 @@ mod tests {
             range(SampleFormat::I16, 48_000, 48_000),
             // Neither standard rate fits, so the range keeps its top.
             range(SampleFormat::I32, 8_000, 16_000),
-            // Hex cannot decode 64-bit floats, so that range is skipped.
+            // GoSpell cannot decode 64-bit floats, so that range is skipped.
             range(SampleFormat::F64, 48_000, 48_000),
             // The first range again, at the rate it resolved to.
             range(SampleFormat::F32, 48_000, 48_000),

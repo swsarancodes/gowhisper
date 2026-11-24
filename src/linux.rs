@@ -39,15 +39,15 @@ use crate::linux::service::{Activation, Launch};
 
 #[derive(Parser)]
 #[command(
-    name = "hex",
+    name = "gospell",
     version = crate::VERSION,
     about = "Local, observable voice recognition (Linux beta)",
     long_about = "Local, observable voice recognition (Linux beta).\n\n\
         Control commands (status, dictation, settings, model, window, …) drive the one running \
-        Hex over its owner-only socket and never launch it, except `start` and `restart`. Every \
+        GoSpell over its owner-only socket and never launch it, except `start` and `restart`. Every \
         one takes --json for a versioned reply (docs/cli.md). Exit codes: 0 done or nothing to \
-        change, 1 refused or failed, 2 usage, 3 Hex isn't running.",
-    after_help = "Run `hex <command> --help` for details, or `hex settings list` for every setting."
+        change, 1 refused or failed, 2 usage, 3 GoSpell isn't running.",
+    after_help = "Run `gospell <command> --help` for details, or `gospell settings list` for every setting."
 )]
 struct Cli {
     #[command(subcommand)]
@@ -58,23 +58,23 @@ struct Cli {
 enum Command {
     #[command(flatten)]
     Control(ControlCli),
-    /// Open the Hex window, starting Hex when it is not running (the default).
+    /// Open the GoSpell window, starting GoSpell when it is not running (the default).
     App {
-        /// Start Hex in the background without opening the window.
+        /// Start GoSpell in the background without opening the window.
         #[arg(long)]
         hidden: bool,
         /// Arguments for a headless render, such as `--snap out.png --scene dark`.
         #[arg(last = true)]
         rune_args: Vec<String>,
     },
-    /// Run Hex in the foreground without opening the window (systemd's entry point).
+    /// Run GoSpell in the foreground without opening the window (systemd's entry point).
     Service {
         /// Run only the local API as a direct child whose stdin is owned by
         /// the host application (the TypeScript SDK).
         #[arg(long, hide = true)]
         embedded: bool,
     },
-    /// Quit Hex after its accepted work finishes (same as `hex quit`).
+    /// Quit GoSpell after its accepted work finishes (same as `gospell quit`).
     #[command(hide = true)]
     Stop,
     /// Run X11 or Wayland hotkey dictation and automatic paste until interrupted.
@@ -100,11 +100,11 @@ enum SessionAdoption {
     Launcher,
 }
 
-/// The service and the foreground `hex dictate` listener adopt the session's
+/// The service and the foreground `gospell dictate` listener adopt the session's
 /// Wayland display when their unit or shell has none (#756, #1506). A
 /// launcher adopts only behind Xwayland's `DISPLAY`, before it computes or
 /// writes the session environment; with no display at all it keeps today's
-/// behavior, including "Start Hex from your graphical login session" when it
+/// behavior, including "Start GoSpell from your graphical login session" when it
 /// would start the unit. The window, commands that only forward or read, and
 /// the embedded service keep whatever display their parent gave them.
 fn session_adoption(command: &Command) -> Option<SessionAdoption> {
@@ -112,8 +112,8 @@ fn session_adoption(command: &Command) -> Option<SessionAdoption> {
         Command::Service { embedded: false } | Command::Dictate { .. } => {
             Some(SessionAdoption::Service)
         }
-        // `hex start` spawns `hex app --hidden`, which is the launcher that
-        // writes session.env; `hex restart` writes it itself.
+        // `gospell start` spawns `gospell app --hidden`, which is the launcher that
+        // writes session.env; `gospell restart` writes it itself.
         Command::App { rune_args, .. } if rune_args.is_empty() => Some(SessionAdoption::Launcher),
         Command::Control(ControlCli::Restart { .. }) => Some(SessionAdoption::Launcher),
         _ => None,
@@ -128,7 +128,7 @@ pub(crate) fn run(shutdown: &'static AtomicBool) -> Result<()> {
         hidden: false,
         rune_args: Vec::new(),
     });
-    // Before the log, which starts a thread, and before `hex restart` writes
+    // Before the log, which starts a thread, and before `gospell restart` writes
     // session.env: a launcher and the service it talks to must agree on the
     // session (#756, #1506).
     let adopted = match session_adoption(&command) {
@@ -138,8 +138,8 @@ pub(crate) fn run(shutdown: &'static AtomicBool) -> Result<()> {
         }
         None => None,
     };
-    // Control and read commands talk to the running Hex or read files: no
-    // log, lock, or Hex of their own.
+    // Control and read commands talk to the running GoSpell or read files: no
+    // log, lock, or GoSpell of their own.
     let command = match command {
         Command::Control(command) => {
             crate::control::cli::finish(crate::control::cli::run(command, Cli::command))
@@ -201,7 +201,7 @@ pub(crate) fn run(shutdown: &'static AtomicBool) -> Result<()> {
                 None,
                 Default::default(),
                 // Only shortcuts drive a foreground listener: the service's
-                // `hex` commands can't reach it.
+                // `gospell` commands can't reach it.
                 crate::linux::input::CommandQueue::disconnected(),
                 Default::default(),
                 std::sync::mpsc::channel().1,
@@ -217,7 +217,7 @@ pub(crate) fn run(shutdown: &'static AtomicBool) -> Result<()> {
     }
 }
 
-/// Forwards to the running Hex, starts its systemd unit, or becomes Hex.
+/// Forwards to the running GoSpell, starts its systemd unit, or becomes GoSpell.
 fn launch(
     activation: &Activation,
     show: bool,
@@ -253,7 +253,7 @@ mod tests {
 
         for shell in [Shell::Bash, Shell::Zsh, Shell::Fish] {
             let mut script = Vec::new();
-            clap_complete::generate(shell, &mut Cli::command(), "hex", &mut script);
+            clap_complete::generate(shell, &mut Cli::command(), "gospell", &mut script);
             let script = String::from_utf8(script).expect("a completion script is UTF-8");
             assert!(
                 script.contains("dictation"),
@@ -291,7 +291,7 @@ mod tests {
             })),
             Some(SessionAdoption::Launcher)
         );
-        // `hex start` sends the detached `hex app --hidden` that adopts.
+        // `gospell start` sends the detached `gospell app --hidden` that adopts.
         assert_eq!(
             session_adoption(&Command::Control(ControlCli::Start {
                 output: Default::default(),
@@ -313,29 +313,29 @@ mod tests {
         Cli::command().debug_assert();
         let parse = |arguments: &[&str]| Cli::try_parse_from(arguments).map(|cli| cli.command);
         for arguments in [
-            &["hex", "status", "--json"][..],
-            &["hex", "dictation", "stop", "--print"],
-            &["hex", "paste-last"],
-            &["hex", "typed-text"],
-            &["hex", "settings", "set", "sound_effects", "off"],
-            &["hex", "model", "use", "parakeet_v3", "--language", "pl"],
-            &["hex", "model", "install"],
-            &["hex", "model", "status"],
-            &["hex", "window", "show", "history"],
-            &["hex", "vocabulary", "add", "Rune"],
-            &["hex", "history", "clear", "--yes"],
-            &["hex", "check-for-updates"],
-            &["hex", "launch-at-login", "on"],
-            &["hex", "logs", "-n", "5"],
-            &["hex", "meetings", "list"],
-            &["hex", "mcp"],
-            &["hex", "commands", "check"],
-            &["hex", "onboarding", "reset"],
-            &["hex", "annotate", "status"],
-            &["hex", "capture", "draw"],
-            &["hex", "labs"],
-            &["hex", "restart", "--force"],
-            &["hex", "start"],
+            &["gospell", "status", "--json"][..],
+            &["gospell", "dictation", "stop", "--print"],
+            &["gospell", "paste-last"],
+            &["gospell", "typed-text"],
+            &["gospell", "settings", "set", "sound_effects", "off"],
+            &["gospell", "model", "use", "parakeet_v3", "--language", "pl"],
+            &["gospell", "model", "install"],
+            &["gospell", "model", "status"],
+            &["gospell", "window", "show", "history"],
+            &["gospell", "vocabulary", "add", "Rune"],
+            &["gospell", "history", "clear", "--yes"],
+            &["gospell", "check-for-updates"],
+            &["gospell", "launch-at-login", "on"],
+            &["gospell", "logs", "-n", "5"],
+            &["gospell", "meetings", "list"],
+            &["gospell", "mcp"],
+            &["gospell", "commands", "check"],
+            &["gospell", "onboarding", "reset"],
+            &["gospell", "annotate", "status"],
+            &["gospell", "capture", "draw"],
+            &["gospell", "labs"],
+            &["gospell", "restart", "--force"],
+            &["gospell", "start"],
         ] {
             assert!(
                 matches!(parse(arguments), Ok(Some(Command::Control(_)))),
@@ -343,14 +343,17 @@ mod tests {
             );
         }
         assert!(matches!(
-            parse(&["hex", "quit", "--force"]),
+            parse(&["gospell", "quit", "--force"]),
             Ok(Some(Command::Control(ControlCli::Quit { force: true, .. })))
         ));
-        assert!(matches!(parse(&["hex", "stop"]), Ok(Some(Command::Stop))));
         assert!(matches!(
-            parse(&["hex", "app", "--hidden"]),
+            parse(&["gospell", "stop"]),
+            Ok(Some(Command::Stop))
+        ));
+        assert!(matches!(
+            parse(&["gospell", "app", "--hidden"]),
             Ok(Some(Command::App { hidden: true, .. }))
         ));
-        assert!(matches!(parse(&["hex"]), Ok(None)));
+        assert!(matches!(parse(&["gospell"]), Ok(None)));
     }
 }

@@ -757,7 +757,7 @@ impl ChunkModel {
         // Quitting drops the dictation engine; a model loaded now would
         // outlast the drain.
         if crate::desktop::process_exit::quitting() {
-            return Ok(Chunked::Unavailable(eyre!("Hex is quitting")));
+            return Ok(Chunked::Unavailable(eyre!("GoSpell is quitting")));
         }
         if speechless(samples) {
             return Ok(Chunked::Done(Transcript::default()));
@@ -790,7 +790,7 @@ impl ChunkModel {
             )));
         }
         if crate::desktop::process_exit::quitting() {
-            return Ok(Chunked::Unavailable(eyre!("Hex is quitting")));
+            return Ok(Chunked::Unavailable(eyre!("GoSpell is quitting")));
         }
         let model = match load_model(&mut self.owned, &selection) {
             Ok(model) => model,
@@ -1650,7 +1650,7 @@ fn transcribe_file(
     Ok(transcript)
 }
 
-/// Debug CLI `hex meeting echo <dir>`: replays a recording's tracks and
+/// Debug CLI `gospell meeting echo <dir>`: replays a recording's tracks and
 /// reports how many microphone lines echo suppression keeps, before (words
 /// only, one entry per model segment) and after (signal plus words, one
 /// entry per sentence). The microphone is placed `microphone_offset_ms`
@@ -2247,7 +2247,7 @@ mod tests {
     #[test]
     fn a_quiet_microphone_chunk_reaches_the_transcriber_raised_and_a_system_chunk_unchanged() {
         // Speech near -52 dBFS, the level a call app's voice processing can
-        // leave Hex's own track at when its peaks sit near 0.01 full scale, so
+        // leave GoSpell's own track at when its peaks sit near 0.01 full scale, so
         // every chunk is quiet but not silent.
         let quiet = speech(4)
             .iter()
@@ -2617,7 +2617,7 @@ mod tests {
     pub(super) static MODEL_LOADS: std::sync::atomic::AtomicUsize =
         std::sync::atomic::AtomicUsize::new(0);
 
-    const QUIT_CHILD: &str = "HEX_MEETING_QUIT_CHILD";
+    const QUIT_CHILD: &str = "GOSPELL_MEETING_QUIT_CHILD";
 
     /// The child half of `quitting_mid_meeting_loads_no_model_and_finishes_in_time`.
     #[test]
@@ -2626,7 +2626,7 @@ mod tests {
             return;
         };
         let directory =
-            std::env::temp_dir().join(format!("hex-meeting-quit-{}", std::process::id()));
+            std::env::temp_dir().join(format!("gospell-meeting-quit-{}", std::process::id()));
         fs::create_dir_all(&directory).unwrap();
         let mut rolling = Rolling::start(directory.clone(), TranscriptionSelection::default());
         let mut feed = rolling.feed().unwrap();
@@ -3334,7 +3334,7 @@ mod tests {
     #[test]
     fn an_empty_track_transcribes_to_nothing() {
         let directory = std::env::temp_dir().join(format!(
-            "hex-meeting-empty-track-{}-{}",
+            "gospell-meeting-empty-track-{}-{}",
             std::process::id(),
             crate::desktop::events::now_ms()
         ));
@@ -3413,7 +3413,7 @@ mod tests {
     #[test]
     fn export_never_overwrites_and_uses_safe_names() {
         let folder = std::env::temp_dir().join(format!(
-            "hex-meeting-export-{}-{}",
+            "gospell-meeting-export-{}-{}",
             std::process::id(),
             crate::desktop::events::now_ms()
         ));
@@ -3442,7 +3442,7 @@ mod tests {
     #[test]
     fn a_separated_export_names_the_transcript_and_keeps_the_pair_free() {
         let folder = std::env::temp_dir().join(format!(
-            "hex-meeting-export-pair-{}-{}",
+            "gospell-meeting-export-pair-{}-{}",
             std::process::id(),
             crate::desktop::events::now_ms()
         ));

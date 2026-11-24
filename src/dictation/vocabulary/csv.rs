@@ -12,7 +12,7 @@ use super::{MAX_ENTRIES, MAX_SOUNDS_LIKE, MAX_TERM_CHARS, VocabularyEntry};
 /// The most a file may hold to be imported.
 pub(crate) const MAX_IMPORT_BYTES: u64 = 1024 * 1024;
 
-/// The header row Hex writes, and the one Teams' template carries.
+/// The header row GoSpell writes, and the one Teams' template carries.
 pub(crate) const HEADER: &str =
     "Term (required),Sounds like,Long form of the term (for acronyms),Definition and context";
 
@@ -567,7 +567,7 @@ mod tests {
     #[test]
     fn a_file_over_the_limit_not_utf8_a_folder_or_unclosed_is_refused() {
         let directory =
-            std::env::temp_dir().join(format!("hex-vocabulary-csv-{}", std::process::id()));
+            std::env::temp_dir().join(format!("gospell-vocabulary-csv-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&directory);
         std::fs::create_dir_all(&directory).unwrap();
         let path = directory.join("terms.csv");

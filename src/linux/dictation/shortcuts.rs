@@ -57,8 +57,9 @@ pub(super) fn reregister<M>(
         }
         Err(error) => error,
     };
-    let refused =
-        format!("could not register the new shortcuts, so Hex kept the previous ones: {error:#}");
+    let refused = format!(
+        "could not register the new shortcuts, so GoSpell kept the previous ones: {error:#}"
+    );
     let monitor = start(running.clone())
         .map_err(|restore| eyre!("{refused}; restoring them failed too: {restore:#}"))?;
     tracing::warn!("{refused}");
@@ -84,7 +85,7 @@ mod tests {
 
     fn event_log() -> (EventLog, std::path::PathBuf) {
         let path = std::env::temp_dir().join(format!(
-            "hex-linux-shortcuts-{}-{:?}.ndjson",
+            "gospell-linux-shortcuts-{}-{:?}.ndjson",
             std::process::id(),
             thread::current().id()
         ));

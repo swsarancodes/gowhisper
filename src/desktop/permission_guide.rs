@@ -1,7 +1,7 @@
 //! The floating guide beside System Settings' Privacy & Security pane: it
-//! opens the pane for one permission, clears retired Hex identities' stale TCC
-//! rows in the background, and offers Hex as a drag tile (or, for a refused
-//! microphone, asks to switch Hex on), closing once it is granted.
+//! opens the pane for one permission, clears retired GoSpell identities' stale TCC
+//! rows in the background, and offers GoSpell as a drag tile (or, for a refused
+//! microphone, asks to switch GoSpell on), closing once it is granted.
 
 use std::ffi::CStr;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -14,13 +14,13 @@ use crate::desktop::onboarding::{
 };
 
 unsafe extern "C" {
-    fn hex_show_permission_guide(permission: i32);
-    fn hex_close_permission_guide(permission: i32);
-    fn hex_permission_guide_active(permission: i32) -> bool;
-    fn hex_permission_list_name(permission: i32) -> *const std::ffi::c_char;
-    fn hex_permission_settings_state() -> i32;
-    fn hex_prompt_accessibility_trust() -> bool;
-    fn hex_running_app_bundle_id(buf: *mut u8, cap: usize) -> usize;
+    fn gospell_show_permission_guide(permission: i32);
+    fn gospell_close_permission_guide(permission: i32);
+    fn gospell_permission_guide_active(permission: i32) -> bool;
+    fn gospell_permission_list_name(permission: i32) -> *const std::ffi::c_char;
+    fn gospell_permission_settings_state() -> i32;
+    fn gospell_prompt_accessibility_trust() -> bool;
+    fn gospell_running_app_bundle_id(buf: *mut u8, cap: usize) -> usize;
 }
 
 const fn code(kind: PermissionKind) -> i32 {
@@ -41,20 +41,20 @@ pub(crate) fn show(kind: PermissionKind) {
         crate::capture_host::invalidate_screen_access();
     }
     if MainThreadMarker::new().is_some() {
-        unsafe { hex_show_permission_guide(code(kind)) };
+        unsafe { gospell_show_permission_guide(code(kind)) };
     }
 }
 
 /// Whether the native guide for `kind` is open. Main thread only.
 pub(crate) fn active(kind: PermissionKind) -> bool {
-    MainThreadMarker::new().is_some() && unsafe { hex_permission_guide_active(code(kind)) }
+    MainThreadMarker::new().is_some() && unsafe { gospell_permission_guide_active(code(kind)) }
 }
 
-/// Dismisses the native guide for `kind` once Hex has what it asked for.
+/// Dismisses the native guide for `kind` once GoSpell has what it asked for.
 /// Main thread only.
 pub(crate) fn close(kind: PermissionKind) {
     if MainThreadMarker::new().is_some() {
-        unsafe { hex_close_permission_guide(code(kind)) };
+        unsafe { gospell_close_permission_guide(code(kind)) };
     }
 }
 
@@ -66,41 +66,41 @@ pub(crate) fn screen_recording_answered(access: crate::capture_host::ScreenAcces
 
 /// What System Settings calls the list: macOS 27 renamed Accessibility.
 pub(crate) fn list_name(kind: PermissionKind) -> &'static str {
-    let name = unsafe { CStr::from_ptr(hex_permission_list_name(code(kind))) };
+    let name = unsafe { CStr::from_ptr(gospell_permission_list_name(code(kind))) };
     name.to_str().unwrap_or("Accessibility")
 }
 
 /// Whether System Settings has an open window, whether it is frontmost, and
-/// whether Hex is active. Main thread only.
+/// whether GoSpell is active. Main thread only.
 pub(crate) fn settings_focus() -> SettingsFocus {
     if MainThreadMarker::new().is_none() {
         return SettingsFocus::default();
     }
-    let bits = unsafe { hex_permission_settings_state() };
+    let bits = unsafe { gospell_permission_settings_state() };
     SettingsFocus {
         settings_open: bits & 1 != 0,
         settings_frontmost: bits & 2 != 0,
-        hex_active: bits & 4 != 0,
+        gospell_active: bits & 4 != 0,
     }
 }
 
 /// Registers the running binary in TCC's Accessibility list and triggers
 /// macOS's prompt when untrusted.
 pub(crate) fn prompt_accessibility_trust() -> bool {
-    unsafe { hex_prompt_accessibility_trust() }
+    unsafe { gospell_prompt_accessibility_trust() }
 }
 
 /// The running `.app` bundle's `CFBundleIdentifier`, or the build's default
-/// Hex identifier (`anomaly.hex` / `anomaly.hex.test`) outside a bundle.
+/// GoSpell identifier (`com.goml.gospell` / `com.goml.gospell.test`) outside a bundle.
 pub(crate) fn running_bundle_id() -> String {
     let mut buf = [0u8; 256];
-    let len = unsafe { hex_running_app_bundle_id(buf.as_mut_ptr(), buf.len()) };
+    let len = unsafe { gospell_running_app_bundle_id(buf.as_mut_ptr(), buf.len()) };
     if len > 0
         && let Ok(id) = std::str::from_utf8(&buf[..len])
     {
         return id.to_owned();
     }
-    default_mac_bundle_id(option_env!("HEX_TEST_BUILD")).to_owned()
+    default_mac_bundle_id(option_env!("GOSPELL_TEST_BUILD")).to_owned()
 }
 
 fn tccutil_allowed() -> bool {
@@ -151,7 +151,7 @@ fn reset_bundle_service(service: &str, bundle_id: &str) {
 
 /// Clears retired Hex bundle IDs (`com.kitlangton.hex2`, `com.kitlangton.Hex`,
 /// `com.kitlangton.Hex.debug`) once per process for `kind`'s TCC services off
-/// the UI thread, so System Settings never lists duplicate Hex rows.
+/// the UI thread, so System Settings never lists duplicate GoSpell rows.
 pub(crate) fn clear_legacy_entries_async(kind: PermissionKind) {
     static ACCESSIBILITY_CLEARED: AtomicBool = AtomicBool::new(false);
     static SCREEN_AUDIO_CLEARED: AtomicBool = AtomicBool::new(false);
@@ -169,7 +169,7 @@ pub(crate) fn clear_legacy_entries_async(kind: PermissionKind) {
         return;
     }
     if let Err(error) = std::thread::Builder::new()
-        .name("hex-tcc-legacy".into())
+        .name("gospell-tcc-legacy".into())
         .spawn(move || {
             for service in services {
                 for bundle_id in LEGACY_MAC_BUNDLE_IDS {
@@ -183,7 +183,7 @@ pub(crate) fn clear_legacy_entries_async(kind: PermissionKind) {
     }
 }
 
-/// Resets the running bundle ID plus retired Hex bundle IDs for `kind` off the
+/// Resets the running bundle ID plus retired GoSpell bundle IDs for `kind` off the
 /// UI thread, then calls `done` so the main thread can re-prompt and reopen
 /// System Settings.
 pub(crate) fn reset_and_reopen_async(
@@ -198,7 +198,7 @@ pub(crate) fn reset_and_reopen_async(
     }
     let bundle_id = running_bundle_id();
     if let Err(error) = std::thread::Builder::new()
-        .name("hex-tcc-reset".into())
+        .name("gospell-tcc-reset".into())
         .spawn(move || {
             for service in own_services {
                 reset_bundle_service(service, &bundle_id);
@@ -222,7 +222,7 @@ mod tests {
     use super::*;
     use crate::capture_host::ScreenAccess;
 
-    /// A grant Hex can use now, or one it can use only after a restart, both
+    /// A grant GoSpell can use now, or one it can use only after a restart, both
     /// answer the Screen Recording guide; only an Off read leaves it up.
     #[test]
     fn a_screen_recording_grant_in_either_form_dismisses_the_guide() {

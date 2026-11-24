@@ -1,13 +1,13 @@
 [package]
-name = "hex"
+name = "gospell"
 version = "3.4.0"
 edition = "2024"
-default-run = "hex"
+default-run = "gospell"
 license = "MIT"
-repository = "https://github.com/anomalyco/hex"
+repository = "https://github.com/goml/gospell"
 
 # Crates imported from Scrawl live under `crates/`. Plain `cargo build` and
-# `cargo test` still select only Hex; pass `--workspace` or `-p` for the others.
+# `cargo test` still select only GoSpell; pass `--workspace` or `-p` for the others.
 # `crates/capture` and `crates/capture-core` are excluded so `--workspace`
 # never builds them: they compile only as the macOS and Linux dependencies
 # of the `capture` experiment, and `-p scrawl-capture` / `-p capture-core` test and lint
@@ -44,19 +44,19 @@ debug = false
 strip = true
 
 # transcribe.cpp 0.4.1 plus one ggml patch that builds only the Vulkan
-# shaders Hex's models use (see `CMAKE_ARGS` in .cargo/config.toml),
-# Parakeet's vocabulary rescoring (branches hex/parakeet-vocabulary and
-# hex/vocabulary-sounds-like), a Metal residency heartbeat that sleeps once
-# its keep-alive runs out (branch hex/metal-idle-residency), Fluid Speech
-# Pro's pre-Conformer encoder block (branch hex/fluid-pre-block), and
-# upstream's Parakeet padding-frame fix (branch hex/nemo-padding-frame). Drop
+# shaders GoSpell's models use (see `CMAKE_ARGS` in .cargo/config.toml),
+# Parakeet's vocabulary rescoring (branches gospell/parakeet-vocabulary and
+# gospell/vocabulary-sounds-like), a Metal residency heartbeat that sleeps once
+# its keep-alive runs out (branch gospell/metal-idle-residency), Fluid Speech
+# Pro's pre-Conformer encoder block (branch gospell/fluid-pre-block), and
+# upstream's Parakeet padding-frame fix (branch gospell/nemo-padding-frame). Drop
 # this once a transcribe.cpp release carries them.
 [patch.crates-io]
 transcribe-cpp = { git = "https://github.com/anomalyco/transcribe.cpp", rev = "60bed89dab84f7c1fddc3a17ad7fa8a27ddfba19" }
 transcribe-cpp-sys = { git = "https://github.com/anomalyco/transcribe.cpp", rev = "60bed89dab84f7c1fddc3a17ad7fa8a27ddfba19" }
 # The crates Rune patches in its own workspace (Rune's README, "Depending on
 # Rune"): a dependency's `[patch]` never reaches the workspace that depends on
-# it, and without these Hex builds against stock winit, sctk-adwaita,
+# it, and without these GoSpell builds against stock winit, sctk-adwaita,
 # parley_engine, wgpu-hal, accesskit_windows and accesskit_macos. Patch winit
 # and sctk-adwaita together: Rune's winit calls the vendored frame's
 # `AdwaitaFrame::content_corner_radius`. Bump the rev with the rune pin above.
@@ -93,7 +93,7 @@ serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
 serde_path_to_error = "0.1"
 sha2 = "0.11.0"
-# `hex transcribe`'s media reader. Opus decodes through `opuscule`.
+# `gospell transcribe`'s media reader. Opus decodes through `opuscule`.
 symphonia = { version = "0.5.5", default-features = false, features = ["wav", "aiff", "caf", "mp3", "flac", "ogg", "vorbis", "mkv", "isomp4", "aac", "alac", "pcm"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
@@ -102,7 +102,7 @@ transcribe-rs = { git = "https://github.com/cjpais/transcribe-rs", rev = "e37c66
 unicode-normalization = "0.1.25"
 unicode-segmentation = "1.13.3"
 url = "2.5.8"
-# Hex's HTTPS (`net`): model downloads, update checks, and transformation
+# GoSpell's HTTPS (`net`): model downloads, update checks, and transformation
 # scripts' `fetch`, over the platform's TLS and trusted roots.
 # `native-tls`, not `native-tls-no-default`: ureq 3.4 checks the former's
 # name and panics on any https request without it.
@@ -148,7 +148,7 @@ zbus = { version = "6.1.0", default-features = false, features = ["tokio", "prox
 # The desktop UI, and Annotate (Scrawl's capture engine), compiled into
 # every desktop build (`capture.enabled`).
 [target.'cfg(any(target_os = "linux", target_os = "macos", target_os = "windows"))'.dependencies]
-# `hex mcp`.
+# `gospell mcp`.
 rmcp = { version = "3.5.1", default-features = false, features = ["server", "macros", "transport-io"] }
 tokio = { version = "1.53.1", features = ["rt", "io-std"] }
 anyhow = "1.0.104"

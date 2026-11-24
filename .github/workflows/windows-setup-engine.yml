@@ -1,6 +1,6 @@
 name: Windows setup engine
 
-# Compiles packaging/windows/hex.iss with SignedUninstaller=yes so the compiler
+# Compiles packaging/windows/gospell.iss with SignedUninstaller=yes so the compiler
 # leaves the unsigned uninst-<version>-<hash>.e32 it asks to have signed
 # (scripts/build-windows-installer.ps1 -ExtractSignedEngine). Release signs that
 # file in its release environment (sign-windows-engine), then runs
@@ -45,7 +45,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 20
     env:
-      HEX_VERSION: ${{ inputs.version }}
+      GOSPELL_VERSION: ${{ inputs.version }}
     outputs:
       digest: ${{ steps.upload.outputs.digest }}
     steps:
@@ -63,11 +63,11 @@ jobs:
           $out = New-Item -ItemType Directory -Force "$env:RUNNER_TEMP/engine"
           foreach ($arch in 'x86_64', 'aarch64') {
             $label = if ($arch -eq 'x86_64') { 'x64' } else { 'arm64' }
-            $exe = @(Get-ChildItem "$env:RUNNER_TEMP/in" -Recurse -Filter "hex-$env:HEX_VERSION-windows-$label.exe")
-            if ($exe.Count -ne 1) { throw "Expected one hex-$env:HEX_VERSION-windows-$label.exe, found $($exe.Count)." }
-            $console = @(Get-ChildItem "$env:RUNNER_TEMP/in" -Recurse -Filter "hex-$env:HEX_VERSION-windows-$label.com")
-            if ($console.Count -ne 1) { throw "Expected one hex-$env:HEX_VERSION-windows-$label.com, found $($console.Count)." }
-            scripts/build-windows-installer.ps1 -Executable $exe[0].FullName -Console $console[0].FullName -Version $env:HEX_VERSION -Arch $arch -OutDir $out -ExtractSignedEngine
+            $exe = @(Get-ChildItem "$env:RUNNER_TEMP/in" -Recurse -Filter "gospell-$env:GOSPELL_VERSION-windows-$label.exe")
+            if ($exe.Count -ne 1) { throw "Expected one gospell-$env:GOSPELL_VERSION-windows-$label.exe, found $($exe.Count)." }
+            $console = @(Get-ChildItem "$env:RUNNER_TEMP/in" -Recurse -Filter "gospell-$env:GOSPELL_VERSION-windows-$label.com")
+            if ($console.Count -ne 1) { throw "Expected one gospell-$env:GOSPELL_VERSION-windows-$label.com, found $($console.Count)." }
+            scripts/build-windows-installer.ps1 -Executable $exe[0].FullName -Console $console[0].FullName -Version $env:GOSPELL_VERSION -Arch $arch -OutDir $out -ExtractSignedEngine
           }
           Get-ChildItem $out | Where-Object { $_.Name -notlike 'uninst-*.e32' } | Remove-Item -Force
           Get-ChildItem $out | Select-Object Name, Length | Format-Table -AutoSize | Out-String | Write-Output

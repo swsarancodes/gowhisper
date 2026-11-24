@@ -1,4 +1,4 @@
-//! The microphone Hex captures from: the inputs Settings offers, the one
+//! The microphone GoSpell captures from: the inputs Settings offers, the one
 //! stream it keeps open and reopens, and the routes that say when the OS's
 //! devices changed.
 
@@ -9,7 +9,7 @@ mod devices;
 pub(crate) mod effect_holds;
 mod fixture;
 #[cfg_attr(any(target_os = "linux", target_os = "windows"), allow(dead_code))]
-pub(crate) mod hex_microphone;
+pub(crate) mod gospell_microphone;
 pub(crate) mod idle_sleep;
 mod input_format;
 pub(crate) mod input_level;
@@ -66,7 +66,7 @@ pub use stream::{AudioInput, AudioInputEvent, Opened, Selection};
 
 pub use instant::{CaptureInstant, duration_for_frames};
 
-/// Whether `HEX_AUDIO_FIXTURE` names a WAV file that stands in for every
+/// Whether `GOSPELL_AUDIO_FIXTURE` names a WAV file that stands in for every
 /// microphone (benchmarks and tests; see `audio/fixture.rs`).
 pub fn uses_fixture() -> bool {
     fixture::path().is_some()

@@ -1,71 +1,71 @@
-# The hex .deb and .rpm, built by scripts/package-linux.sh with nfpm from a
-# release executable, in a directory it stages with hex, anomaly.hex.desktop,
-# the hicolor icons, hex.service, LICENSE, and the postinst/postrm scripts. They install what the AUR package hex-bin does:
-# /usr/bin/hex, the desktop entry, and the systemd user unit. Hex never
+# The gospell .deb and .rpm, built by scripts/package-linux.sh with nfpm from a
+# release executable, in a directory it stages with gospell, com.goml.gospell.desktop,
+# the hicolor icons, gospell.service, LICENSE, and the postinst/postrm scripts. They install what the AUR package gospell-bin does:
+# /usr/bin/gospell, the desktop entry, and the systemd user unit. GoSpell never
 # replaces a package-managed executable; it shows the update command the
 # release service lists for the deb-<arch> or rpm-<arch> distribution.
-name: hex
-arch: ${HEX_PACKAGE_ARCH}
+name: gospell
+arch: ${GOSPELL_PACKAGE_ARCH}
 platform: linux
-version: ${HEX_PACKAGE_VERSION}
+version: ${GOSPELL_PACKAGE_VERSION}
 version_schema: none
 release: "1"
 section: utils
 priority: optional
-maintainer: Anomaly <hex@anoma.ly>
-vendor: Anomaly
-homepage: https://anoma.ly/hex
+maintainer: GoML <hello@goml.io>
+vendor: GoML
+homepage: https://gospell.goml.io
 license: MIT
 description: |-
-  Hex voice dictation: hold a key, speak, and it types.
+  GoSpell voice dictation: hold a key, speak, and it types.
   Local speech recognition with optional voice commands (Linux beta).
 contents:
-  - src: hex
-    dst: /usr/bin/hex
+  - src: gospell
+    dst: /usr/bin/gospell
     file_info:
       mode: 0755
-  - src: anomaly.hex.desktop
-    dst: /usr/share/applications/anomaly.hex.desktop
+  - src: com.goml.gospell.desktop
+    dst: /usr/share/applications/com.goml.gospell.desktop
     file_info:
       mode: 0644
-  - src: icons/hicolor/16x16/apps/anomaly.hex.png
-    dst: /usr/share/icons/hicolor/16x16/apps/anomaly.hex.png
+  - src: icons/hicolor/16x16/apps/com.goml.gospell.png
+    dst: /usr/share/icons/hicolor/16x16/apps/com.goml.gospell.png
     file_info:
       mode: 0644
-  - src: icons/hicolor/24x24/apps/anomaly.hex.png
-    dst: /usr/share/icons/hicolor/24x24/apps/anomaly.hex.png
+  - src: icons/hicolor/24x24/apps/com.goml.gospell.png
+    dst: /usr/share/icons/hicolor/24x24/apps/com.goml.gospell.png
     file_info:
       mode: 0644
-  - src: icons/hicolor/32x32/apps/anomaly.hex.png
-    dst: /usr/share/icons/hicolor/32x32/apps/anomaly.hex.png
+  - src: icons/hicolor/32x32/apps/com.goml.gospell.png
+    dst: /usr/share/icons/hicolor/32x32/apps/com.goml.gospell.png
     file_info:
       mode: 0644
-  - src: icons/hicolor/48x48/apps/anomaly.hex.png
-    dst: /usr/share/icons/hicolor/48x48/apps/anomaly.hex.png
+  - src: icons/hicolor/48x48/apps/com.goml.gospell.png
+    dst: /usr/share/icons/hicolor/48x48/apps/com.goml.gospell.png
     file_info:
       mode: 0644
-  - src: icons/hicolor/64x64/apps/anomaly.hex.png
-    dst: /usr/share/icons/hicolor/64x64/apps/anomaly.hex.png
+  - src: icons/hicolor/64x64/apps/com.goml.gospell.png
+    dst: /usr/share/icons/hicolor/64x64/apps/com.goml.gospell.png
     file_info:
       mode: 0644
-  - src: icons/hicolor/128x128/apps/anomaly.hex.png
-    dst: /usr/share/icons/hicolor/128x128/apps/anomaly.hex.png
+  - src: icons/hicolor/128x128/apps/com.goml.gospell.png
+    dst: /usr/share/icons/hicolor/128x128/apps/com.goml.gospell.png
     file_info:
       mode: 0644
-  - src: icons/hicolor/256x256/apps/anomaly.hex.png
-    dst: /usr/share/icons/hicolor/256x256/apps/anomaly.hex.png
+  - src: icons/hicolor/256x256/apps/com.goml.gospell.png
+    dst: /usr/share/icons/hicolor/256x256/apps/com.goml.gospell.png
     file_info:
       mode: 0644
-  - src: icons/hicolor/512x512/apps/anomaly.hex.png
-    dst: /usr/share/icons/hicolor/512x512/apps/anomaly.hex.png
+  - src: icons/hicolor/512x512/apps/com.goml.gospell.png
+    dst: /usr/share/icons/hicolor/512x512/apps/com.goml.gospell.png
     file_info:
       mode: 0644
-  - src: hex.service
-    dst: /usr/lib/systemd/user/hex.service
+  - src: gospell.service
+    dst: /usr/lib/systemd/user/gospell.service
     file_info:
       mode: 0644
   - src: LICENSE
-    dst: /usr/share/licenses/hex/LICENSE
+    dst: /usr/share/licenses/gospell/LICENSE
     file_info:
       mode: 0644
 scripts:
@@ -117,4 +117,4 @@ overrides:
       - xdg-utils
 rpm:
   group: Applications/Productivity
-  summary: Hex voice dictation by Anomaly
+  summary: GoSpell voice dictation by GoML

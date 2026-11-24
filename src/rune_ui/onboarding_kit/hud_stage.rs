@@ -1,4 +1,4 @@
-//! Hex's real recording indicator (`Dot scope` phosphor HUD) inside onboarding:
+//! GoSpell's real recording indicator (`Dot scope` phosphor HUD) inside onboarding:
 //!
 //! Steps [`crate::dictation::indicator::IndicatorModel`] with the real listener
 //! events (`Started`, `Meter`, `Submitted` + `Transcribing`, `JobCompleted`),
@@ -36,6 +36,9 @@ const JOB: u64 = 1;
 /// Seconds after shortcut release (`Submitted` + `Transcribing`) when the final
 /// streamed word lands and `JobCompleted` triggers Dot scope's Done wipe.
 pub(crate) const DONE_DELAY: f64 = 0.14;
+/// Seconds after the shortcut's release by which the HUD has gone: done
+/// starts 0.2 s after it, Embers' finale holds 0.9 s, and the exit fades.
+const GONE_AFTER_RELEASE: f64 = 1.6;
 
 /// The download plate advances from the last presentation time. Rebuilding
 /// its whole history in every view made a long download progressively costly.
@@ -108,7 +111,7 @@ fn idle_time(idle: f64) -> f32 {
     t as f32
 }
 
-/// Hex's real [`DotFrame`] for a resting plate that showed `idle` seconds
+/// GoSpell's real [`DotFrame`] for a resting plate that showed `idle` seconds
 /// before the shortcut went down (or before now, while it still waits), then
 /// `take` recording `elapsed` seconds after the press, on one model: the plate
 /// unfolds when it mounts and keeps running through the press instead of
@@ -118,7 +121,9 @@ pub(crate) fn voice_frame_at(
     take: Option<(&Take, f64)>,
     reduce: bool,
 ) -> Option<DotFrame> {
-    if take.is_some_and(|(take, elapsed)| elapsed < 0.0 || elapsed > take.release + 1.2) {
+    if take
+        .is_some_and(|(take, elapsed)| elapsed < 0.0 || elapsed > take.release + GONE_AFTER_RELEASE)
+    {
         return None;
     }
     let clock = Instant::now();
@@ -177,7 +182,7 @@ pub(crate) fn voice_frame_at(
     model.active().then_some(drawn)
 }
 
-/// Computes Hex's real [`DotFrame`] at `elapsed` seconds after shortcut press
+/// Computes GoSpell's real [`DotFrame`] at `elapsed` seconds after shortcut press
 /// for `take`, returning `None` before press or once the Done collapse finishes.
 #[cfg(test)]
 pub(crate) fn frame_at(take: &Take, elapsed: f64, reduce: bool) -> Option<DotFrame> {
@@ -333,7 +338,7 @@ pub(crate) fn frame_slot(key: &str, centre: [f32; 2], scale: f32, frame: &DotFra
 }
 
 /// Mounts the real `Dot scope` `Processing::Flow` phosphor HUD centred in a
-/// layout box of `(w, h)` for `"Setting up Hex"` and `"Almost ready"`.
+/// layout box of `(w, h)` for `"Setting up GoSpell"` and `"Almost ready"`.
 pub(crate) fn flow_box(key: &str, scale: f32, s: &super::stories::Onboard) -> El {
     update_hud(hud_mark(key), s.flow_hud.frame(s.now, s.reduced.get()));
     let (w, h) = (WINDOW.0 * scale, 62.0 * scale);
@@ -344,7 +349,7 @@ pub(crate) fn flow_box(key: &str, scale: f32, s: &super::stories::Onboard) -> El
         .child(slot_el(key, [w * 0.5, h * 0.5], scale))
 }
 
-/// Mounts the real `Dot scope` phosphor HUD for `"With Hex"` or `"Your turn"`,
+/// Mounts the real `Dot scope` phosphor HUD for `"With GoSpell"` or `"Your turn"`,
 /// returning `(hud_element, hud_heat, voice_energy)`. The plate rests while
 /// `waiting`, then records `take` from `take_from`, on one model that started
 /// when the plate first showed (`Onboard::hud_from`).
@@ -438,8 +443,11 @@ mod tests {
             .expect("HUD wiping Done right after completion");
         assert!(wiping.pose.opacity > 0.05);
 
+        let finale = frame_at(&ANSWER_JAY, ANSWER_JAY.release + 0.9, false)
+            .expect("the GoML mark shows after Done");
+        assert_eq!(finale.pose.finale.mark, 1.0);
         assert!(
-            frame_at(&ANSWER_JAY, ANSWER_JAY.release + 1.0, false).is_none(),
+            frame_at(&ANSWER_JAY, ANSWER_JAY.release + GONE_AFTER_RELEASE, false).is_none(),
             "HUD collapses away cleanly after Done"
         );
 

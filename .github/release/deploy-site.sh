@@ -15,10 +15,10 @@
 mode=$1
 case "$mode" in
   dev)
-    worker=hex-dev-site host=dev.anoma.ly bucket=hex-dev-files
+    worker=gospell-dev-site host=dev.goml.io bucket=gospell-dev-files
     ;;
   production)
-    worker=hex-production-site host=anoma.ly bucket=hex-production-files
+    worker=gospell-production-site host=goml.io bucket=gospell-production-files
     ;;
   *) die "Unknown site mode: $mode" ;;
 esac
@@ -49,8 +49,8 @@ jq -e --arg worker "$worker" --arg host "$host" --arg bucket "$bucket" '
   and ((.compatibilityFlags // []) | all(type == "string"))
   and .assets == {runWorkerFirst: true}
   and .triggers == [
-    {type: "fetch", pattern: "\($host)/hex", zone: $host},
-    {type: "fetch", pattern: "\($host)/hex/*", zone: $host}
+    {type: "fetch", pattern: "\($host)/gospell", zone: $host},
+    {type: "fetch", pattern: "\($host)/gospell/*", zone: $host}
   ]
   and .workersDev == false
   and .previewUrls == false

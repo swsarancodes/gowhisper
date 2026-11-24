@@ -2,14 +2,14 @@
 German, Bokmål, French and Italian's: held-out Tatoeba sentences (CC BY 2.0 FR, or CC0 where
 released so), each tap sampled from the measured per-key offset and per-row spread in the
 English benchmark's input.json meta, 2% of spaces missed, a space tap landing on a letter typed
-as that letter. Hex's Polish keys are QWERTY at English's 39.5 pt pitch; ą ć ę ł ń ó ś ź ż have
+as that letter. GoSpell's Polish keys are QWERTY at English's 39.5 pt pitch; ą ć ę ł ń ó ś ź ż have
 no key of their own (each is held on its base key), so they are typed as their base key (ł as l).
 
 Writes OUTDIR/pl.jsonl (2,000 test rows, as synthetic_sets.py) and pl-dev.jsonl (300), and
 OUTDIR/pl.tsv.gz in held-out/'s format: Tatoeba ID, contributor, reference with the source's
 case, the literal hit keys with Shift where the reference has a capital (including the final
 space), and the taps as "x,y".
-INPUT.json is the English benchmark's (2026-11-20-hex-typing-logs), as for synthetic_sets.py;
+INPUT.json is the English benchmark's (2026-11-20-gospell-typing-logs), as for synthetic_sets.py;
 pol_sentences_detailed.tsv.bz2 is https://downloads.tatoeba.org/exports/per_language/pol/.
 Usage: python3 polish_set.py INPUT.json pol_sentences_detailed.tsv[.bz2] OUTDIR"""
 import bz2, gzip, json, os, random, re, sys, unicodedata

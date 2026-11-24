@@ -1,4 +1,4 @@
-# @kitlangton/hex
+# @goml/gospell
 
 ## 0.3.1
 
@@ -42,5 +42,5 @@
 
 ### Minor Changes
 
-- Require local API v2 for owner-scoped dictation capture, rejecting legacy HEX
+- Require local API v2 for owner-scoped dictation capture, rejecting legacy GOSPELL
   apps before a recording can start and become orphaned.

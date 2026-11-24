@@ -1,4 +1,4 @@
-//! The playground (Labs › Playground): Rune's playground in Hex's window,
+//! The playground (Labs › Playground): Rune's playground in GoSpell's window,
 //! opened from its sidebar item or ⇧⌘D (Ctrl+Shift+D off macOS). It swaps
 //! the window for a folded list of
 //! prototypes (the onboarding options, live meeting notes, and on macOS
@@ -215,46 +215,46 @@ const PATHS: &[(&str, &str)] = &[
         "Window/History/Select multiple dictations",
     ),
     ("history-empty", "Window/History/Empty"),
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     ("mac-history", "Window/History/History with captures"),
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     ("mac-history-capture", "Window/History/A capture's detail"),
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     ("mac-history-filtered", "Window/History/Only annotations"),
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     ("mac-history-types", "Window/History/Type menu"),
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     ("mac-history-search", "Window/History/Search with matches"),
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     (
         "mac-history-search-empty",
         "Window/History/Search with nothing",
     ),
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     ("mac-history-empty", "Window/History/Nothing yet"),
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     ("mac-paste-picker", "Window/History/Paste Last picker"),
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     ("captures", "Window/Captures/Captures"),
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     ("captures-empty", "Window/Captures/Empty"),
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     ("mac-scrawl", "Window/Annotate/On"),
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     ("mac-scrawl-off", "Window/Annotate/Off"),
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     ("mac-scrawl-running", "Window/Annotate/Scrawl.app running"),
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     (
         "mac-scrawl-permission",
         "Window/Annotate/Screen Recording missing",
     ),
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     (
         "mac-scrawl-restart",
         "Window/Annotate/Screen Recording needs restart",
     ),
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     ("mac-scrawl-agents", "Window/Annotate/Agents"),
     ("mac-voice-filter", "Window/Voice Filter/Voice Filter"),
     ("mac-voice-filter-muted", "Window/Voice Filter/Muted"),
@@ -286,7 +286,7 @@ const PATHS: &[(&str, &str)] = &[
     ),
     ("mac-production", "Window/General/Production build"),
     ("mac-activity", "Window/Activity/Activity"),
-    ("mac-onboarding", "Window/Onboarding/Setting up Hex"),
+    ("mac-onboarding", "Window/Onboarding/Setting up GoSpell"),
     (
         "mac-onboarding-permissions",
         "Window/Onboarding/Permissions",
@@ -313,13 +313,13 @@ const PATHS: &[(&str, &str)] = &[
         "mac-onboarding-reopen",
         "Window/Onboarding/Your turn · reopen",
     ),
-    ("mac-onboarding-ready", "Window/Onboarding/Hex is ready"),
+    ("mac-onboarding-ready", "Window/Onboarding/GoSpell is ready"),
     (
         "mac-onboarding-ready-tap",
-        "Window/Onboarding/Hex is ready · tap to start",
+        "Window/Onboarding/GoSpell is ready · tap to start",
     ),
     ("portal", "Linux & Windows/Settings · portal shortcuts"),
-    ("commands", "Linux & Windows/Settings · hex commands"),
+    ("commands", "Linux & Windows/Settings · gospell commands"),
     ("portal-mouse", "Linux & Windows/Settings · mouse button"),
     ("windows-settings", "Linux & Windows/Settings · Windows"),
     ("windows-labs", "Linux & Windows/Labs · Windows"),
@@ -411,7 +411,7 @@ fn playground() -> Playground<Ui> {
     let playground = Playground::new()
         .enabled(true)
         .bar(false)
-        .sizes(&[("Hex window", WINDOW_SIZE)])
+        .sizes(&[("GoSpell window", WINDOW_SIZE)])
         .group_order(GROUPS)
         .start_folded(true);
     let playground = super::onboarding_kit::stories(playground);
@@ -419,7 +419,7 @@ fn playground() -> Playground<Ui> {
     let playground = super::live_notes::add(playground);
     #[cfg(target_os = "macos")]
     let playground = super::hud_stories::add(playground);
-    #[cfg(all(hex_capture, target_os = "macos"))]
+    #[cfg(all(gospell_capture, target_os = "macos"))]
     let playground = super::capture_capsule::playground::stories(playground);
     playground
 }
@@ -615,7 +615,7 @@ mod tests {
         assert!(rt.playground_state::<Ui>().is_none(), "⇧⌘D closed it");
     }
 
-    /// Every HUD story, on every variant, opens from its `hex://story` link.
+    /// Every HUD story, on every variant, opens from its `gospell://story` link.
     #[cfg(target_os = "macos")]
     #[test]
     fn every_hud_story_and_variant_opens_from_its_link() {
@@ -630,7 +630,7 @@ mod tests {
                 for ending in endings {
                     open_link(
                         &mut rt,
-                        &format!("hex://story/prototypes/hud/{story}?variant={look}-{ending}"),
+                        &format!("gospell://story/prototypes/hud/{story}?variant={look}-{ending}"),
                     );
                 }
             }
@@ -639,11 +639,11 @@ mod tests {
             for variant in ["hud-lab", "notch", "pretend-notch", "menu-bar", "below"] {
                 open_link(
                     &mut rt,
-                    &format!("hex://story/prototypes/hud/{story}?variant={variant}"),
+                    &format!("gospell://story/prototypes/hud/{story}?variant={variant}"),
                 );
             }
         }
-        open_link(&mut rt, "hex://story/hud/processing?variant=menu-bar");
+        open_link(&mut rt, "gospell://story/hud/processing?variant=menu-bar");
         for control in [
             "dot-scope-reset",
             "dot-scope-copy",
@@ -661,8 +661,8 @@ mod tests {
     }
 
     /// Every capture-capsule story, on every flow after a capture, opens
-    /// from its `hex://story` link.
-    #[cfg(all(hex_capture, target_os = "macos"))]
+    /// from its `gospell://story` link.
+    #[cfg(all(gospell_capture, target_os = "macos"))]
     #[test]
     fn every_capsule_story_and_flow_opens_from_its_link() {
         let app = attach(App::new(spec(super::super::spec())));
@@ -684,20 +684,20 @@ mod tests {
             for flow in ["tuned", "list", "toast", "menu-bar", "cursor", "notch"] {
                 open_link(
                     &mut rt,
-                    &format!("hex://story/prototypes/capture-capsule/{story}?variant={flow}"),
+                    &format!("gospell://story/prototypes/capture-capsule/{story}?variant={flow}"),
                 );
             }
         }
         for variant in ["Side%20by%20side", "1", "2", "3"] {
             open_link(
                 &mut rt,
-                &format!("hex://story/prototypes/capture-capsule/notch?variant={variant}"),
+                &format!("gospell://story/prototypes/capture-capsule/notch?variant={variant}"),
             );
         }
         for variant in ["braid", "bars", "line"] {
             open_link(
                 &mut rt,
-                &format!("hex://story/prototypes/capture-capsule/family?variant={variant}"),
+                &format!("gospell://story/prototypes/capture-capsule/family?variant={variant}"),
             );
         }
     }
@@ -706,7 +706,7 @@ mod tests {
     /// variant isn't there.
     #[cfg(target_os = "macos")]
     fn open_link(rt: &mut rune::Runtime<Ui>, link: &str) {
-        let link = super::super::story_link::parse(link, "hex").expect(link);
+        let link = super::super::story_link::parse(link, "gospell").expect(link);
         rt.open_playground(&link.story, link.variant.as_deref());
         assert!(
             rt.playground_state::<Ui>().is_none(),

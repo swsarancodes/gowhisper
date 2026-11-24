@@ -9,7 +9,7 @@
 mod group;
 #[cfg(target_os = "macos")]
 mod hud_height;
-#[cfg(all(target_os = "macos", hex_capture))]
+#[cfg(all(target_os = "macos", gospell_capture))]
 pub(super) mod screenshots;
 mod signature;
 mod stop_phrase;
@@ -33,7 +33,7 @@ use crate::desktop::i18n::{tr, tr_fill, tr_named};
 use crate::labs::{Feature, Group};
 
 pub(super) static LABS_ICON: Icon = Icon {
-    name: "hex-labs",
+    name: "gospell-labs",
     view: 16.0,
     body: r#"<path d="M6.25 2.5h3.5M6.75 2.5v4L3.2 12.3a.8.8 0 0 0 .7 1.2h8.2a.8.8 0 0 0 .7-1.2L9.25 6.5v-4M4.8 10h6.4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>"#,
 };
@@ -47,14 +47,14 @@ pub(super) fn main_panes(ui: &Ui) -> Vec<Pane> {
         panes.push(Pane::Modes);
     }
     panes.push(Pane::History);
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     let optional = [
         Pane::Captures,
         Pane::Meetings,
         Pane::Annotate,
         Pane::VoiceFilter,
     ];
-    #[cfg(not(hex_capture))]
+    #[cfg(not(gospell_capture))]
     let optional = [Pane::Meetings, Pane::VoiceFilter];
     panes.extend(optional.into_iter().filter(|pane| pane.shown(ui)));
     panes
@@ -160,16 +160,16 @@ pub(super) fn nav(ui: &Ui, p: Paint) -> El {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum Lab {
     Feature(Feature),
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     Annotate,
 }
 
 impl Lab {
-    /// Its stable id, in `hex://labs/<id>`.
+    /// Its stable id, in `gospell://labs/<id>`.
     pub(super) fn id(self) -> &'static str {
         match self {
             Self::Feature(feature) => feature.name(),
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Self::Annotate => "annotate",
         }
     }
@@ -178,7 +178,7 @@ impl Lab {
     fn added(self) -> u32 {
         match self {
             Self::Feature(feature) => feature.added(),
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Self::Annotate => 0,
         }
     }
@@ -189,7 +189,7 @@ impl Lab {
                 .iter()
                 .position(|known| *known == feature)
                 .unwrap_or(0),
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Self::Annotate => 0,
         }
     }
@@ -197,7 +197,7 @@ impl Lab {
     fn audience(self) -> crate::labs::Audience {
         match self {
             Self::Feature(feature) => feature.audience(),
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Self::Annotate => crate::labs::Audience::Everyone,
         }
     }
@@ -237,7 +237,7 @@ pub(super) struct Store {
     /// before release saves it.
     #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
     pub(super) hud_gap: Option<u16>,
-    /// The lab a `hex://labs/<feature>` link named and when, so its card
+    /// The lab a `gospell://labs/<feature>` link named and when, so its card
     /// shows a focus border for [`FLASH`].
     pub(super) flash: Option<(&'static str, std::time::Instant)>,
 }
@@ -397,7 +397,7 @@ impl Store {
     }
 }
 
-/// What a `hex://labs` link asks the store to show.
+/// What a `gospell://labs` link asks the store to show.
 #[cfg_attr(
     not(any(target_os = "macos", all(test, target_os = "linux"))),
     allow(dead_code)
@@ -451,7 +451,7 @@ pub(super) fn reveal(ui: &mut Ui, link: &LabsLink, tx: &mut Tx) {
             tx.scroll_into_view(format!("lab-card-{id}"));
             tx.wake_after(FLASH);
         }
-        None => tracing::warn!(feature = %id, "a Labs link named no feature this Hex has"),
+        None => tracing::warn!(feature = %id, "a Labs link named no feature this GoSpell has"),
     }
 }
 
@@ -486,7 +486,7 @@ struct Row {
     /// typing card explaining this desktop has no input method it can use).
     note: Option<String>,
     on: bool,
-    /// Can't be switched: on while an installed Hex Microphone driver or
+    /// Can't be switched: on while an installed GoSpell Microphone driver or
     /// the dictation model needs it, off under an organization's lock, or off
     /// because this desktop offers no input method Live typing uses.
     locked: bool,
@@ -581,7 +581,7 @@ fn rows(ui: &Ui) -> Vec<Row> {
             on: super::fun::running(ui),
             locked,
             about: if locked {
-                tr("On while the Hex Microphone driver is installed. Uninstall the driver in Voice Filter to turn it off.").into()
+                tr("On while the GoSpell Microphone driver is installed. Uninstall the driver in Voice Filter to turn it off.").into()
             } else {
                 voice_filter.about.clone()
             },
@@ -684,19 +684,19 @@ fn rows(ui: &Ui) -> Vec<Row> {
             rows.push(row(Feature::RecentDictations, None));
             // macOS's status item hides itself while nothing records.
             rows.push(row(Feature::HideMenuBarIcon, None));
-            // macOS's status item offers Pause Hex while its keyboard
+            // macOS's status item offers Pause GoSpell while its keyboard
             // listener stays up.
             rows.push(row(Feature::PauseMenu, None));
-            // macOS's app menu Quit Hex closes the window instead.
+            // macOS's app menu Quit GoSpell closes the window instead.
             // macOS's HUD reads the screen's notch from NSScreen.
             rows.push(row(Feature::NotchIndicator, Some(&WAVE)));
             // macOS's HUD reads its bottom gap from the saved setting.
             rows.push(row(Feature::HudHeight, Some(&PANEL)));
-            // Hex's session tap takes the shortcut; ScreenCaptureKit shoots.
-            #[cfg(hex_capture)]
+            // GoSpell's session tap takes the shortcut; ScreenCaptureKit shoots.
+            #[cfg(gospell_capture)]
             rows.push(row(Feature::Screenshots, Some(&CAMERA)));
             // macOS 27's SCClipBufferingOutput keeps a rolling 15 s display ring in replayd.
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             if Feature::AnnotateReplay.on_this_os() {
                 rows.push(row(Feature::AnnotateReplay, Some(Pane::Annotate.icon())));
             }
@@ -802,7 +802,7 @@ fn rows(ui: &Ui) -> Vec<Row> {
         Some(_) => drop,
         None => Row {
             about: tr_fill(
-                "Drop a {} file on the Hex window to save its transcript as a text file next to it",
+                "Drop a {} file on the GoSpell window to save its transcript as a text file next to it",
                 super::drop_transcribe::formats(),
             )
             .into(),
@@ -847,7 +847,7 @@ fn rows(ui: &Ui) -> Vec<Row> {
     if caps.os != super::platform::Os::Macos {
         rows.push(row(Feature::TerminalPasteShortcut, Some(&TERMINAL)));
     }
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     if ui.platform.scrawl.is_some() {
         // Every Annotate-group feature carries Lock::Annotate in its managed()
         // check, so `row` locks them under DisableAnnotate automatically.
@@ -926,7 +926,7 @@ fn live_text_note_for(
 fn row_key(lab: Lab) -> &'static str {
     let feature = match lab {
         Lab::Feature(feature) => feature,
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         Lab::Annotate => return "lab-annotate",
     };
     match feature {
@@ -1020,7 +1020,7 @@ fn row_key(lab: Lab) -> &'static str {
 fn flip(ui: &mut Ui, lab: Lab) {
     let feature = match lab {
         Lab::Feature(feature) => feature,
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         Lab::Annotate => {
             if ui.settings.capture.enabled {
                 group::keep_open(ui, Group::Annotate);
@@ -1073,7 +1073,7 @@ fn flip(ui: &mut Ui, lab: Lab) {
         }
         // A notice already on screen leaves with its lab.
         Feature::FailureNotices if !on => crate::rune_ui::live_text::dismiss_failure(),
-        // Hex hears the browser through System Audio Recording.
+        // GoSpell hears the browser through System Audio Recording.
         Feature::PauseBrowser if on && !ui.platform.system_audio => {
             ui.ask(super::platform::PlatformRequest::SystemAudio);
         }
@@ -1166,7 +1166,7 @@ fn extras(ui: &Ui, p: Paint, entry: &Row, layer: &mut Vec<El>) -> Option<El> {
         ),
         // Wayland reports no file drags, so its card offers the file dialog.
         Lab::Feature(Feature::DropTranscribe) => Some(super::drop_transcribe::card(p)),
-        #[cfg(all(target_os = "macos", hex_capture))]
+        #[cfg(all(target_os = "macos", gospell_capture))]
         Lab::Feature(Feature::Screenshots) => Some(screenshots::body(
             ui,
             p,

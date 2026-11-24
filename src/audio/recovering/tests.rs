@@ -5,7 +5,7 @@ use std::time::{Duration, Instant};
 use color_eyre::eyre::{Result, eyre};
 
 use crate::audio::CaptureInstant;
-use crate::audio::hex_microphone;
+use crate::audio::gospell_microphone;
 use crate::audio::open::OpenRequest;
 use crate::audio::recovery::{MICROPHONE_RETRY_INITIAL, MicrophoneRecovery};
 use crate::audio::routes::notify_audio_service_restarted;
@@ -548,17 +548,17 @@ fn failed_startup_retry_keeps_backoff_without_an_open_stream() {
 }
 
 #[test]
-fn only_the_listeners_current_input_feeds_hex_microphone() {
+fn only_the_listeners_current_input_feeds_gospell_microphone() {
     let (meeting, _) = AudioInput::channel_for_test();
     let (first, _) = AudioInput::channel_for_test();
     let (replacement, _) = AudioInput::channel_for_test();
-    let first_feed = first.hex_microphone.clone();
-    let replacement_feed = replacement.hex_microphone.clone();
+    let first_feed = first.gospell_microphone.clone();
+    let replacement_feed = replacement.gospell_microphone.clone();
 
     let mut input = RecoveringAudioInput::closed(None, 3, Some("Test microphone"));
     input.finish_initial_open(Ok(first), Instant::now());
     assert!(first_feed.is_on());
-    assert!(!meeting.hex_microphone.is_on());
+    assert!(!meeting.gospell_microphone.is_on());
 
     let (sender, receiver) = mpsc::channel();
     input.replacement = Some(receiver);
@@ -608,7 +608,7 @@ fn startup_retry_recovers_metadata_and_audio_without_restarting() {
 #[test]
 fn startup_recovery_opens_even_when_a_capture_is_pending() {
     let mut input = RecoveringAudioInput::closed(
-        Some("Hex nonexistent microphone for pending recovery test"),
+        Some("GoSpell nonexistent microphone for pending recovery test"),
         3,
         None,
     );
@@ -750,7 +750,7 @@ fn a_stream_that_stops_delivering_audio_is_reopened() {
 /// What the opener saw of the previous stream's feed switch when it ran.
 fn recording_opener(
     seen: &Arc<Mutex<Option<bool>>>,
-    switch: &hex_microphone::CaptureFeedSwitch,
+    switch: &gospell_microphone::CaptureFeedSwitch,
 ) -> impl Fn(&OpenRequest) -> Result<Opened> + Send + Sync + 'static {
     let seen = seen.clone();
     let switch = switch.clone();
@@ -766,7 +766,7 @@ fn recording_opener(
 fn a_dead_stream_is_stopped_before_its_replacement_opens() {
     // A failed stream lets go of the device before its replacement opens.
     let (failed, samples) = AudioInput::channel_for_test();
-    let failed_switch = failed.hex_microphone.clone();
+    let failed_switch = failed.gospell_microphone.clone();
     let seen = Arc::new(Mutex::new(None));
     let mut input = RecoveringAudioInput::with_opener_for_test(
         None,
@@ -791,7 +791,7 @@ fn a_dead_stream_is_stopped_before_its_replacement_opens() {
 
     // A route change still keeps the old stream until the new one installs.
     let (old, samples) = AudioInput::channel_for_test();
-    let old_switch = old.hex_microphone.clone();
+    let old_switch = old.gospell_microphone.clone();
     let seen = Arc::new(Mutex::new(None));
     let mut routed = RecoveringAudioInput::with_opener_for_test(
         None,

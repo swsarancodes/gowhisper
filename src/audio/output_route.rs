@@ -1,15 +1,15 @@
 //! Whether the default output plays through speakers or headphones, for
-//! Labs › Only on speakers. Anything Hex can't classify counts as speakers,
+//! Labs › Only on speakers. Anything GoSpell can't classify counts as speakers,
 //! so "While dictating" applies as before.
 
 /// What the default output is, as far as "While dictating" cares.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum OutputRoute {
-    /// Built-in or external speakers, or anything Hex can't classify.
+    /// Built-in or external speakers, or anything GoSpell can't classify.
     Speakers,
     /// Wired or Bluetooth headphones.
     Headphones,
-    /// Hex couldn't read the default output at all; counts as speakers.
+    /// GoSpell couldn't read the default output at all; counts as speakers.
     Unknown,
 }
 
@@ -41,7 +41,7 @@ const HEADPHONES_JACK: u32 = u32::from_be_bytes(*b"hdpn");
 /// data source, and UID: Bluetooth is headphones; a built-in device is
 /// headphones while its jack data source is selected, or when it is Apple
 /// silicon's `BuiltInHeadphoneOutputDevice`. Everything else, including a
-/// data source or UID Hex couldn't read, is speakers.
+/// data source or UID GoSpell couldn't read, is speakers.
 #[cfg(any(target_os = "macos", test))]
 fn classify(transport: u32, data_source: Option<u32>, uid: Option<&str>) -> OutputRoute {
     if transport == BLUETOOTH || transport == BLUETOOTH_LE {
@@ -200,7 +200,7 @@ fn listed_sinks() -> Option<Vec<Sink>> {
 /// not the default is still heard (#1801). Each sink appears once.
 ///
 /// Virtual sinks (EasyEffects, filter-chain, loopback, combine, null) are left
-/// out: they forward to a hardware sink Hex hears already, so capturing both
+/// out: they forward to a hardware sink GoSpell hears already, so capturing both
 /// would sum the call's audio twice. Only when nothing listed is a device is
 /// the default captured alone, which is the audio the single default capture
 /// always heard.
@@ -246,7 +246,7 @@ pub(crate) fn meeting_sinks() -> Option<Vec<String>> {
 
 /// The route of the sound server's default sink now: `pactl` names it and
 /// describes every sink. A session with only `wpctl`, an older `pactl`
-/// without `get-default-sink`, or JSON Hex can't read is unknown.
+/// without `get-default-sink`, or JSON GoSpell can't read is unknown.
 #[cfg(target_os = "linux")]
 pub(crate) fn default_output_route() -> OutputRoute {
     use crate::linux::input::route;
@@ -262,7 +262,7 @@ pub(crate) fn default_output_route() -> OutputRoute {
 
 /// The route a cpal device type reports: headphones, a headset, an earpiece,
 /// and a handset are headphones, speakers are speakers. Anything else, or a
-/// device or description Hex can't read, is unknown, which applies "While
+/// device or description GoSpell can't read, is unknown, which applies "While
 /// dictating" as before.
 #[cfg(any(target_os = "windows", test))]
 fn classify_device(device_type: cpal::DeviceType) -> OutputRoute {
@@ -290,7 +290,7 @@ pub(crate) fn default_output_route() -> OutputRoute {
     // cpal's `Device::description` expects `OpenPropertyStore` to succeed, so
     // an endpoint that vanishes between the lookup above and this read panics.
     // Catching it keeps the audio-control worker (the thread that calls this)
-    // alive; a description Hex can't read is unknown either way.
+    // alive; a description GoSpell can't read is unknown either way.
     match catch_unwind(AssertUnwindSafe(|| {
         device
             .description()
@@ -346,7 +346,7 @@ mod tests {
             ),
             OutputRoute::Speakers
         );
-        // A data source Hex couldn't read counts as speakers.
+        // A data source GoSpell couldn't read counts as speakers.
         assert_eq!(
             classify(BUILT_IN, None, Some("AppleHDAEngineOutput:1B,0,1,1:0")),
             OutputRoute::Speakers
@@ -571,11 +571,11 @@ mod tests {
 
     #[test]
     fn only_virtual_sinks_capture_just_the_default() {
-        // Nothing is backed by a device, so the default is the one sink Hex
+        // Nothing is backed by a device, so the default is the one sink GoSpell
         // can hear without also hearing the sink it forwards into.
         let sinks: Vec<Sink> = serde_json::from_str(
             r#"[{"name": "easyeffects_sink", "properties": {"node.virtual": "true"}},
-                {"name": "loopback_hex", "properties": {"node.virtual": "true"}},
+                {"name": "loopback_gospell", "properties": {"node.virtual": "true"}},
                 {"name": "combine_sink", "properties": {}}]"#,
         )
         .unwrap();

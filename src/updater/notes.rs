@@ -12,10 +12,10 @@ use serde_json::Value;
 use super::transport::ManifestCache;
 use crate::desktop::host::UpdateNotes;
 
-const URL: &str = "https://anoma.ly/hex/files/dev-notes.json";
-const PAGE: &str = "https://anoma.ly/hex/dev";
+const URL: &str = "https://gospell.goml.io/files/dev-notes.json";
+const PAGE: &str = "https://gospell.goml.io/dev";
 /// A stable release's notes, as the release workflow links them (`plan.sh`).
-const RELEASES: &str = "https://github.com/anomalyco/hex/releases/tag";
+const RELEASES: &str = "https://github.com/goml/gospell/releases/tag";
 const TIMEOUT: Duration = Duration::from_secs(30);
 const MAX_ITEMS: usize = 40;
 const MAX_TITLE: usize = 200;
@@ -129,7 +129,7 @@ mod tests {
         assert_eq!(notes.items, ["Fix A", "Fix B", "Fix C"]);
         assert_eq!(
             notes.url,
-            "https://anoma.ly/hex/dev?since=0.0.0-dev-8#0.0.0-dev-11"
+            "https://gospell.goml.io/dev?since=0.0.0-dev-8#0.0.0-dev-11"
         );
     }
 
@@ -138,7 +138,7 @@ mod tests {
         let notes = parse(NOTES, "0.0.0-dev-2", "0.0.0-dev-9").unwrap();
         assert_eq!(notes.items, ["Fix A", "Fix C", "Already running"]);
         let from_stable = parse(NOTES, "3.1.1", "0.0.0-dev-9").unwrap();
-        assert_eq!(from_stable.url, "https://anoma.ly/hex/dev#0.0.0-dev-9");
+        assert_eq!(from_stable.url, "https://gospell.goml.io/dev#0.0.0-dev-9");
     }
 
     #[test]
@@ -152,7 +152,7 @@ mod tests {
     fn a_dev_build_opens_the_changelog_at_itself() {
         assert_eq!(
             release_notes_url("0.0.0-dev-12").as_deref(),
-            Some("https://anoma.ly/hex/dev#0.0.0-dev-12")
+            Some("https://gospell.goml.io/dev#0.0.0-dev-12")
         );
     }
 
@@ -160,7 +160,7 @@ mod tests {
     fn a_stable_build_opens_its_github_release() {
         assert_eq!(
             release_notes_url("3.3.0").as_deref(),
-            Some("https://github.com/anomalyco/hex/releases/tag/v3.3.0")
+            Some("https://github.com/goml/gospell/releases/tag/v3.3.0")
         );
     }
 

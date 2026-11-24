@@ -76,7 +76,7 @@ pub struct ExtraDictationHotkey {
 impl AppSettings {
     /// Row `index`'s binding while it takes effect: macOS, Labs › More
     /// dictation shortcuts on, bound, and sharing no key with another active
-    /// shortcut. Otherwise Hex registers nothing for it.
+    /// shortcut. Otherwise GoSpell registers nothing for it.
     pub fn active_extra_dictation_hotkey(&self, index: usize) -> Option<&HotkeyBinding> {
         if !cfg!(target_os = "macos") || !self.labs.more_dictation_shortcuts {
             return None;

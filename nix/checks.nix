@@ -1,19 +1,19 @@
 { self, pkgs }:
 let
   inherit (pkgs) lib;
-  hex = self.packages.${pkgs.stdenv.hostPlatform.system}.hex;
+  gospell = self.packages.${pkgs.stdenv.hostPlatform.system}.gospell;
   shell = self.devShells.${pkgs.stdenv.hostPlatform.system}.default;
   home =
     settings:
     (self.inputs.home-manager.lib.homeManagerConfiguration {
       inherit pkgs;
       modules = [
-        self.homeManagerModules.hex
+        self.homeManagerModules.gospell
         {
-          home.username = "hex-test";
-          home.homeDirectory = "/home/hex-test";
+          home.username = "gospell-test";
+          home.homeDirectory = "/home/gospell-test";
           home.stateVersion = "26.05";
-          programs.hex = settings;
+          programs.gospell = settings;
         }
       ];
     }).config;
@@ -34,7 +34,7 @@ let
       "transcription.language" = "de";
     };
   };
-  declaredSettings = (pkgs.formats.json { }).generate "hex-settings.json" {
+  declaredSettings = (pkgs.formats.json { }).generate "gospell-settings.json" {
     dictation_hotkey = "control+option+space";
     "transcription.model" = "parakeet_v3";
     "transcription.language" = "de";
@@ -51,30 +51,30 @@ let
     (self.inputs.nixpkgs.lib.nixosSystem {
       system = pkgs.stdenv.hostPlatform.system;
       modules = [
-        self.nixosModules.hex
+        self.nixosModules.gospell
         {
-          programs.hex.enable = true;
+          programs.gospell.enable = true;
           system.stateVersion = "26.05";
         }
       ];
     }).config;
 in
 {
-  package = pkgs.runCommand "hex-package-check" { } ''
+  package = pkgs.runCommand "gospell-package-check" { } ''
     export HOME="$TMPDIR/home"
     mkdir -p "$HOME"
-    ${lib.getExe hex} --version
-    ${lib.getExe hex} model status | grep '^missing[[:space:]]'
+    ${lib.getExe gospell} --version
+    ${lib.getExe gospell} model status | grep '^missing[[:space:]]'
     touch "$out"
   '';
 
   shell-environment =
-    assert lib.all (name: shell.${name} == hex.${name}) [
+    assert lib.all (name: shell.${name} == gospell.${name}) [
       "BLA_VENDOR"
       "OPENSSL_NO_VENDOR"
     ];
     # OpenBLAS ordering belongs to build.rs, not an injected Nix-only workaround.
-    assert !(hex ? RUSTFLAGS) && !(shell ? RUSTFLAGS);
+    assert !(gospell ? RUSTFLAGS) && !(shell ? RUSTFLAGS);
     assert lib.all
       (package: builtins.elem "${lib.getLib package}/lib" (lib.splitString ":" shell.LD_LIBRARY_PATH))
       [
@@ -90,7 +90,7 @@ in
       pkgs.wtype
       pkgs.ffmpeg-headless
     ];
-    pkgs.runCommand "hex-shell-environment-check" { } ''
+    pkgs.runCommand "gospell-shell-environment-check" { } ''
       test -d ${shell.ALSA_PLUGIN_DIR}
       ${lib.getExe' pkgs.ffmpeg-headless "ffmpeg"} -hide_banner -encoders | grep ' libx264 ' >/dev/null
       test -x ${lib.getExe' pkgs.ffmpeg-headless "ffprobe"}
@@ -98,45 +98,45 @@ in
     '';
 
   modules =
-    assert builtins.elem hex system.environment.systemPackages;
-    assert builtins.elem hex enabled.home.packages;
-    assert !(builtins.elem hex disabled.home.packages);
-    assert manual.systemd.user.services.hex.Install.WantedBy == [ ];
-    assert !(disabled.systemd.user.services ? hex);
-    assert enabled.systemd.user.services.hex.Service.ExecStart == [ "${lib.getExe hex} service" ];
-    assert enabled.systemd.user.services.hex.Service.Restart == "on-failure";
-    assert enabled.systemd.user.services.hex.Service.Type == "notify";
-    assert enabled.systemd.user.services.hex.Service.NotifyAccess == "main";
-    assert builtins.elem "HEX_APPLICATION_SUPPORT_DIR=${enabled.xdg.dataHome}/hex"
-      enabled.systemd.user.services.hex.Service.Environment;
-    assert custom.systemd.user.services.hex.Service.ExecStart == [ "${lib.getExe pkgs.hello} service" ];
-    assert lib.all (name: custom.systemd.user.services.hex.Unit.${name} == [ "sway-session.target" ]) [
+    assert builtins.elem gospell system.environment.systemPackages;
+    assert builtins.elem gospell enabled.home.packages;
+    assert !(builtins.elem gospell disabled.home.packages);
+    assert manual.systemd.user.services.gospell.Install.WantedBy == [ ];
+    assert !(disabled.systemd.user.services ? gospell);
+    assert enabled.systemd.user.services.gospell.Service.ExecStart == [ "${lib.getExe gospell} service" ];
+    assert enabled.systemd.user.services.gospell.Service.Restart == "on-failure";
+    assert enabled.systemd.user.services.gospell.Service.Type == "notify";
+    assert enabled.systemd.user.services.gospell.Service.NotifyAccess == "main";
+    assert builtins.elem "GOSPELL_APPLICATION_SUPPORT_DIR=${enabled.xdg.dataHome}/gospell"
+      enabled.systemd.user.services.gospell.Service.Environment;
+    assert custom.systemd.user.services.gospell.Service.ExecStart == [ "${lib.getExe pkgs.hello} service" ];
+    assert lib.all (name: custom.systemd.user.services.gospell.Unit.${name} == [ "sway-session.target" ]) [
       "After"
       "PartOf"
     ];
-    assert custom.systemd.user.services.hex.Install.WantedBy == [ "sway-session.target" ];
-    assert !(enabled.home.activation ? hexSettings);
-    assert !(enabled.systemd.user.services ? hex-model);
+    assert custom.systemd.user.services.gospell.Install.WantedBy == [ "sway-session.target" ];
+    assert !(enabled.home.activation ? gospellSettings);
+    assert !(enabled.systemd.user.services ? gospell-model);
     assert lib.hasInfix (builtins.unsafeDiscardStringContext "settings apply ${declaredSettings}") (
-      builtins.unsafeDiscardStringContext declared.home.activation.hexSettings.data
+      builtins.unsafeDiscardStringContext declared.home.activation.gospellSettings.data
     );
-    assert lib.elem "reloadSystemd" declared.home.activation.hexSettings.after;
-    assert declared.systemd.user.services.hex-model.Service.Type == "exec";
-    assert declared.systemd.user.services.hex-model.Install.WantedBy == [ "default.target" ];
-    pkgs.runCommand "hex-module-check" { } ''
-      bash -n ${enabled.systemd.user.services.hex.Service.ExecStartPre}
-      bash -n ${toString declared.systemd.user.services.hex-model.Service.ExecStart}
+    assert lib.elem "reloadSystemd" declared.home.activation.gospellSettings.after;
+    assert declared.systemd.user.services.gospell-model.Service.Type == "exec";
+    assert declared.systemd.user.services.gospell-model.Install.WantedBy == [ "default.target" ];
+    pkgs.runCommand "gospell-module-check" { } ''
+      bash -n ${enabled.systemd.user.services.gospell.Service.ExecStartPre}
+      bash -n ${toString declared.systemd.user.services.gospell-model.Service.ExecStart}
       touch "$out"
     '';
 
   session-readiness =
     let
       xprop = pkgs.writeShellScriptBin "xprop" ''
-        printf '%s\n' "''${HEX_TEST_XPROP:-}"
+        printf '%s\n' "''${GOSPELL_TEST_XPROP:-}"
       '';
       sleep = pkgs.writeShellScriptBin "sleep" "exit 0";
     in
-    pkgs.runCommand "hex-session-readiness-check" { } ''
+    pkgs.runCommand "gospell-session-readiness-check" { } ''
       run() {
         env -i PATH=${
           lib.makeBinPath [
@@ -149,9 +149,9 @@ in
       }
 
       if run; then exit 1; fi
-      if run DISPLAY=:1 HEX_TEST_XPROP='_NET_SUPPORTING_WM_CHECK: not found.'; then exit 1; fi
-      if run DISPLAY=:1 HEX_TEST_XPROP='_NET_SUPPORTING_WM_CHECK(WINDOW): window id # 0x0'; then exit 1; fi
-      run DISPLAY=:1 HEX_TEST_XPROP='_NET_SUPPORTING_WM_CHECK(WINDOW): window id # 0xa00001'
+      if run DISPLAY=:1 GOSPELL_TEST_XPROP='_NET_SUPPORTING_WM_CHECK: not found.'; then exit 1; fi
+      if run DISPLAY=:1 GOSPELL_TEST_XPROP='_NET_SUPPORTING_WM_CHECK(WINDOW): window id # 0x0'; then exit 1; fi
+      run DISPLAY=:1 GOSPELL_TEST_XPROP='_NET_SUPPORTING_WM_CHECK(WINDOW): window id # 0xa00001'
 
       if run WAYLAND_DISPLAY=wayland-test XDG_RUNTIME_DIR="$TMPDIR"; then exit 1; fi
       ${pkgs.python3}/bin/python -c \

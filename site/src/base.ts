@@ -1,11 +1,11 @@
-// The site lives under /hex on anoma.ly (production) and dev.anoma.ly (dev), and
-// the release files under /hex/files. Pages keep root-relative paths internally;
+// The site lives under /gospell on goml.io (production) and dev.goml.io (dev), and
+// the release files under /gospell/files. Pages keep root-relative paths internally;
 // these helpers add and remove the prefix at the edges.
-export const BASE_PATH = "/hex"
+export const BASE_PATH = "/gospell"
 export const FILES_PATH = `${BASE_PATH}/files`
-// The Anomaly release service. Its dev stage (dev.anoma.ly/release) is only for
+// The GoML release service. Its dev stage (dev.goml.io/release) is only for
 // testing the service itself, so both site environments read production.
-export const RELEASE_SERVICE = "https://anoma.ly/release"
+export const RELEASE_SERVICE = "https://goml.io/release"
 // Redirects to the latest dev channel Mac download (worker.ts).
 export const DEV_DOWNLOAD_PATH = `${BASE_PATH}/download/dev`
 // The dev builds' changelog (worker.ts, src/dev-notes.ts).
@@ -14,13 +14,13 @@ export const DEV_NOTES_PATH = `${BASE_PATH}/dev`
 // branch (publish-dev-notes.sh), which the Worker serves at
 // `${FILES_PATH}/dev-notes.json` and renders at `DEV_NOTES_PATH`, so neither
 // the app nor the changelog waits for a site deploy.
-export const DEV_NOTES_URL = "https://raw.githubusercontent.com/anomalyco/hex/dev-notes/dev-notes.json"
+export const DEV_NOTES_URL = "https://raw.githubusercontent.com/goml/gospell/dev-notes/dev-notes.json"
 // Redirects to the current release's file for a target (worker.ts).
 export const DOWNLOAD_PATH = `${BASE_PATH}/download`
 
 // The build mode (`--mode dev`) picks the environment; every other mode builds production.
 export function hostForMode(mode: string | undefined): string {
-  return mode === "dev" ? "dev.anoma.ly" : "anoma.ly"
+  return mode === "dev" ? "dev.goml.io" : "goml.io"
 }
 
 export function originForMode(mode: string | undefined): string {

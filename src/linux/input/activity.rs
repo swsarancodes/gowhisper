@@ -2,11 +2,11 @@
 //! pastes on Wayland, which ends a paste continuation
 //! ([`crate::continuation`]).
 //!
-//! Hex reads no input devices there, so it asks the compositor when the seat
+//! GoSpell reads no input devices there, so it asks the compositor when the seat
 //! goes quiet and when it wakes (`ext_idle_notifier_v1`, at version 2 for the
 //! notification idle inhibitors don't silence). That gives bursts of input
-//! without saying what was pressed, and Hex's own shortcut and paste keys are
-//! bursts too. A burst that begins and ends at Hex's own input is Hex's; any
+//! without saying what was pressed, and GoSpell's own shortcut and paste keys are
+//! bursts too. A burst that begins and ends at GoSpell's own input is GoSpell's; any
 //! other is the person's and ends the continuation.
 //!
 //! X11, and a desktop without the protocol, report nothing: dictations paste
@@ -34,11 +34,11 @@ use crate::linux::session::LinuxSession;
 
 /// How long the seat is quiet before the compositor ends a burst.
 const QUIET: Duration = Duration::from_millis(250);
-/// How far a burst's first or last input may be from the moment Hex noted
-/// its own: a shortcut reaches Hex through the portal or a `hex` command
+/// How far a burst's first or last input may be from the moment GoSpell noted
+/// its own: a shortcut reaches GoSpell through the portal or a `gospell` command
 /// after the compositor saw the key.
 const SLACK: Duration = Duration::from_millis(200);
-/// How many of Hex's own inputs are remembered; a burst holds a few.
+/// How many of GoSpell's own inputs are remembered; a burst holds a few.
 const OWN_KEPT: usize = 16;
 /// The first `ext_idle_notifier_v1` with the input-only notification.
 const INPUT_VERSION: u32 = 2;
@@ -65,14 +65,14 @@ pub(crate) fn start() {
     });
 }
 
-/// Notes Hex's own input: a shortcut event, or keys it is sending.
+/// Notes GoSpell's own input: a shortcut event, or keys it is sending.
 pub(crate) fn own() {
     if let Some(Some(watch)) = WATCH.get() {
         watch.bursts().own(Instant::now());
     }
 }
 
-/// Runs `send`, which sends Hex's own keys.
+/// Runs `send`, which sends GoSpell's own keys.
 pub(crate) fn sending<T>(send: impl FnOnce() -> T) -> T {
     own();
     let sent = send();
@@ -96,13 +96,13 @@ impl Watch {
     }
 }
 
-/// The seat's bursts of input, and which of them were Hex's own.
+/// The seat's bursts of input, and which of them were GoSpell's own.
 #[derive(Default)]
 struct Bursts {
     activity: InputActivity,
     /// When the burst in progress began; `None` while the seat is quiet.
     began: Option<Instant>,
-    /// Hex's own recent input, oldest first.
+    /// GoSpell's own recent input, oldest first.
     own: VecDeque<Instant>,
 }
 
@@ -176,7 +176,7 @@ fn watch() -> Result<Arc<Watch>, String> {
     });
     let mut watcher = Watcher(watch.clone());
     thread::Builder::new()
-        .name("hex-input-activity".to_owned())
+        .name("gospell-input-activity".to_owned())
         .spawn(move || {
             // The queue reads from this connection for the thread's lifetime.
             let _connection = connection;
@@ -289,7 +289,7 @@ mod tests {
             self.input();
         }
 
-        /// A Hex shortcut: the key, then Hex hearing of it.
+        /// A GoSpell shortcut: the key, then GoSpell hearing of it.
         fn shortcut(&mut self) {
             self.input();
             self.wait(20);
@@ -422,7 +422,11 @@ mod tests {
 
         sending(key);
         settle();
-        assert_eq!(revision(), Some(before), "Hex's own keys ended the join");
+        assert_eq!(
+            revision(),
+            Some(before),
+            "GoSpell's own keys ended the join"
+        );
 
         key();
         settle();

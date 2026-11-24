@@ -177,15 +177,15 @@ impl WindowsHotkey {
     }
 
     /// The chord holds Alt or Windows, whose release Chrome reads as a menu
-    /// tap once Hex swallows the chord's key, so that release is masked.
+    /// tap once GoSpell swallows the chord's key, so that release is masked.
     fn holds_menu_modifier(&self) -> bool {
         self.alt.is_some() || self.windows.is_some()
     }
 }
 
-/// `dwExtraInfo` on every event Hex injects, so its own hook skips them: a
+/// `dwExtraInfo` on every event GoSpell injects, so its own hook skips them: a
 /// paste's Ctrl must never press a Ctrl-alone shortcut.
-pub(crate) const HEX_INJECTED: usize = 0x4845_5821;
+pub(crate) const GOSPELL_INJECTED: usize = 0x4845_5821;
 
 /// Unassigned, so pressing it between an Alt or Windows press and release
 /// keeps the menu bar and Start closed, as AutoHotkey and PowerToys do.
@@ -274,10 +274,10 @@ struct CallbackState {
     annotate_trigger_down: bool,
     /// Escape went down to stop Annotate's drawing; its release is ours too.
     drawing_escape_down: bool,
-    /// Toggle mode's cancel shortcut, Hex's only while a recording runs.
+    /// Toggle mode's cancel shortcut, GoSpell's only while a recording runs.
     cancel: Option<WindowsHotkey>,
     cancel_vk: Option<u32>,
-    /// The cancel key went down while Hex held it; its release is ours too.
+    /// The cancel key went down while GoSpell held it; its release is ours too.
     cancel_down: bool,
     modifiers: ModifierState,
     /// The same read with AltGr's synthesized Left Ctrl still counted, which
@@ -663,7 +663,7 @@ unsafe extern "system" fn keyboard_hook(code: i32, wparam: WPARAM, lparam: LPARA
         return unsafe { CallNextHookEx(ptr::null_mut(), code, wparam, lparam) };
     }
     let event = unsafe { &*(lparam as *const KBDLLHOOKSTRUCT) };
-    if event.dwExtraInfo == HEX_INJECTED {
+    if event.dwExtraInfo == GOSPELL_INJECTED {
         return unsafe { CallNextHookEx(ptr::null_mut(), code, wparam, lparam) };
     }
     let left_control = LeftControl::of(event.vkCode, event.scanCode);
@@ -678,7 +678,7 @@ unsafe extern "system" fn keyboard_hook(code: i32, wparam: WPARAM, lparam: LPARA
     } else {
         event.time
     };
-    // The capture capsule's keys, once no shortcut of Hex's claimed them (#2113).
+    // The capture capsule's keys, once no shortcut of GoSpell's claimed them (#2113).
     let handled = capsule::settle(
         process_button(vk, left_control, is_down, time, key_down),
         event.vkCode,
@@ -714,7 +714,7 @@ fn replay_masked_release(release: &KBDLLHOOKSTRUCT) -> bool {
                 wScan: scan,
                 dwFlags: flags,
                 time: 0,
-                dwExtraInfo: HEX_INJECTED,
+                dwExtraInfo: GOSPELL_INJECTED,
             },
         },
     };
@@ -957,7 +957,7 @@ fn process_button(
                 }
                 return Handled::own(Disposition::Suppress);
             }
-            // Toggle's cancel key discards the recording. Hex takes it only
+            // Toggle's cancel key discards the recording. GoSpell takes it only
             // while a toggled capture records, and keeps its repeats and
             // release, so the app in front never acts on it.
             let cancel_event = state.cancel_vk == Some(vk)
@@ -1043,7 +1043,7 @@ fn process_button(
                             send_event(state, action, time);
                         }
                     }
-                    // The key is Hex's own only once the shortcut fired: Labs
+                    // The key is GoSpell's own only once the shortcut fired: Labs
                     // › Share shortcut lets it reach the app, and a bare press
                     // of it without the shortcut's modifiers is the user
                     // typing, which ends a paste continuation.
@@ -1349,7 +1349,7 @@ mod tests {
     #[test]
     fn a_shared_shortcut_trigger_does_not_end_a_paste_continuation() {
         // Labs › Share shortcut lets the dictation trigger's key reach the
-        // app, and its press is Hex's own key, not typing between dictations.
+        // app, and its press is GoSpell's own key, not typing between dictations.
         assert!(Handled::PASS.ends_continuation(true, false, 0));
         assert!(!Handled::own(Disposition::Pass).ends_continuation(true, false, 0));
         // A swallowed trigger never reaches the app, so it ends nothing either.
@@ -1357,8 +1357,8 @@ mod tests {
         // A modifier-only trigger's press is part of the shortcut's chord.
         let control = u32::from(VK_LCONTROL);
         assert!(!Handled::PASS.ends_continuation(true, ModifierState::is_modifier(control), 0));
-        // Hex's own synthetic paste or chord carries its marker.
-        assert!(!Handled::PASS.ends_continuation(true, false, HEX_INJECTED));
+        // GoSpell's own synthetic paste or chord carries its marker.
+        assert!(!Handled::PASS.ends_continuation(true, false, GOSPELL_INJECTED));
     }
 
     /// A key chord, Ctrl+Space, for the tests that drive a trigger key; the
@@ -1450,7 +1450,7 @@ mod tests {
         let ctrl_held = |key: u16| key == VK_LCONTROL;
 
         // Labs › Share shortcut: Ctrl+Space reaches the app in front, and
-        // since Hex's shortcut fired, its press is Hex's key, not typing.
+        // since GoSpell's shortcut fired, its press is GoSpell's key, not typing.
         let events = callback_state(ctrl_space(), true);
         let handled = process_button(space, LeftControl::Other, true, 1_000, ctrl_held);
         assert_eq!(handled.disposition, Disposition::Pass);
@@ -2278,7 +2278,7 @@ mod tests {
         assert!(state.is_idle());
     }
 
-    /// Toggle's cancel key is Hex's only while a toggled capture records:
+    /// Toggle's cancel key is GoSpell's only while a toggled capture records:
     /// held or locked, never idle, and never in Hold mode.
     #[test]
     fn cancel_is_wanted_only_while_a_toggled_capture_records() {

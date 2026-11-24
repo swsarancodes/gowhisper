@@ -1,5 +1,5 @@
-//! `hex` control: the typed command/reply protocol an agent uses to drive the
-//! one running Hex, the settings registry behind `hex settings`, and the CLI
+//! `gospell` control: the typed command/reply protocol an agent uses to drive the
+//! one running GoSpell, the settings registry behind `gospell settings`, and the CLI
 //! client. Transports (the macOS local API's `POST /control`) only move
 //! [`ControlRequest`]s and [`ControlResponse`]s; the app's host carries out
 //! each command, and every rule shared between the window and the CLI lives
@@ -43,7 +43,7 @@ pub enum CaptureAction {
     Cancel,
 }
 
-/// What `hex capture` does (the `capture` experiment).
+/// What `gospell capture` does (the `capture` experiment).
 /// Idempotent like [`CaptureAction`].
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, clap::ValueEnum)]
 #[serde(rename_all = "kebab-case")]
@@ -62,7 +62,7 @@ pub enum ScrawlCaptureAction {
     Replay,
 }
 
-/// The window's panes, by the names `hex window show` takes.
+/// The window's panes, by the names `gospell window show` takes.
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, clap::ValueEnum)]
 #[serde(rename_all = "kebab-case")]
 pub enum Pane {
@@ -116,7 +116,7 @@ pub enum ControlCommand {
     /// Move a finished meeting to the Trash, as the Meetings pane's Delete
     /// does: its exported Markdown and notes file, then its recording folder.
     MeetingDelete {
-        /// The exact id `hex meetings list --json` prints.
+        /// The exact id `gospell meetings list --json` prints.
         id: String,
     },
     SettingsGet {
@@ -127,7 +127,7 @@ pub enum ControlCommand {
         key: String,
         value: String,
     },
-    /// Several settings at once, all or none (`hex settings apply`).
+    /// Several settings at once, all or none (`gospell settings apply`).
     SettingsApply {
         values: serde_json::Map<String, serde_json::Value>,
     },
@@ -253,7 +253,7 @@ pub enum ControlReply {
     ScrawlCaptureRoute {
         explanation: String,
     },
-    /// `hex dictation stop --print` or `hex transcribe`: the transcript.
+    /// `gospell dictation stop --print` or `gospell transcribe`: the transcript.
     Transcript {
         text: String,
     },
@@ -292,7 +292,7 @@ impl From<ControlError> for ControlReply {
     }
 }
 
-/// `hex meetings delete`: the meeting module's typed answer as a reply, so
+/// `gospell meetings delete`: the meeting module's typed answer as a reply, so
 /// the refusal codes travel with the reply the wire and the CLI print.
 pub fn meeting_deleted(
     answer: Result<crate::meeting::TrashedMeeting, crate::meeting::DeleteError>,
@@ -354,7 +354,7 @@ pub struct ScrawlCaptureOutcome {
     /// Spans of a written capture's audio that went missing.
     #[serde(default)]
     pub gaps: Option<usize>,
-    /// Where a written capture's audio stops (ms on its clock), when Hex had
+    /// Where a written capture's audio stops (ms on its clock), when GoSpell had
     /// to stop keeping it; the rest is silence.
     #[serde(default)]
     pub audio_stopped_at_ms: Option<u64>,
@@ -364,7 +364,7 @@ pub struct ScrawlCaptureOutcome {
     pub missing_transcript: Option<String>,
 }
 
-/// A capture on disk, as `hex capture list` shows it.
+/// A capture on disk, as `gospell capture list` shows it.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ScrawlCaptureSummary {
     /// The bundle's folder name, which `show`, `send`, and `route` take.
@@ -378,7 +378,7 @@ pub struct ScrawlCaptureSummary {
     pub words: usize,
     /// The session it was sent to, if it was.
     pub sent_to: Option<ScrawlCaptureSession>,
-    /// OpenCode didn't take its send yet; Hex retries it.
+    /// OpenCode didn't take its send yet; GoSpell retries it.
     #[serde(default)]
     pub queued: bool,
 }
@@ -389,7 +389,7 @@ pub struct ScrawlCaptureSession {
     pub title: String,
 }
 
-/// `hex capture show`: a capture's summary with its words and files.
+/// `gospell capture show`: a capture's summary with its words and files.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ScrawlCaptureDetail {
     #[serde(flatten)]
@@ -399,7 +399,7 @@ pub struct ScrawlCaptureDetail {
     pub note: Option<String>,
     /// Why there is no transcript although there was audio.
     pub missing_transcript: Option<String>,
-    /// Where the capture's audio stops (ms on its clock), when Hex had to
+    /// Where the capture's audio stops (ms on its clock), when GoSpell had to
     /// stop keeping it; the rest is silence.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub audio_stopped_at_ms: Option<u64>,
@@ -426,9 +426,9 @@ impl ControlError {
     }
 }
 
-/// How long `hex dictation stop --print` waits for its transcript.
+/// How long `gospell dictation stop --print` waits for its transcript.
 pub const PRINT_WAIT: Duration = Duration::from_secs(60);
-/// How long `hex dictation start --print` waits for its dictation to end.
+/// How long `gospell dictation start --print` waits for its dictation to end.
 pub const PRINT_START_WAIT: Duration = Duration::from_secs(31 * 60);
 /// How long the app may take to carry out any other control command.
 const CONTROL_DEADLINE: Duration = Duration::from_secs(10);
@@ -539,13 +539,13 @@ pub fn check_flags(
     if print && !matches!(action, CaptureAction::Start | CaptureAction::Stop) {
         return Err(ControlError::new(
             "invalid-value",
-            "--print works only with `hex dictation start` and `hex dictation stop`",
+            "--print works only with `gospell dictation start` and `gospell dictation stop`",
         ));
     }
     if raw && !matches!(action, CaptureAction::Start | CaptureAction::Toggle) {
         return Err(ControlError::new(
             "invalid-value",
-            "--raw works only with `hex dictation start` and `hex dictation toggle`",
+            "--raw works only with `gospell dictation start` and `gospell dictation toggle`",
         ));
     }
     Ok(action)
@@ -557,7 +557,7 @@ pub struct ControlCall {
     pub reply: SyncSender<ControlResponse>,
 }
 
-/// Rejects a request from a `hex` built for another protocol version.
+/// Rejects a request from a `gospell` built for another protocol version.
 pub fn check_version(request: &ControlRequest) -> Result<(), ControlError> {
     if request.version == CONTROL_VERSION {
         return Ok(());
@@ -569,8 +569,8 @@ pub fn version_mismatch(version: u64) -> ControlError {
     ControlError::new(
         "version-mismatch",
         format!(
-            "this hex speaks control version {version}, but the running Hex speaks \
-             {CONTROL_VERSION}; use the hex inside the running app or restart Hex"
+            "this gospell speaks control version {version}, but the running GoSpell speaks \
+             {CONTROL_VERSION}; use the gospell inside the running app or restart GoSpell"
         ),
     )
 }
@@ -590,10 +590,10 @@ pub struct StatusReport {
     pub window: WindowReport,
     /// current, checking, available, or unavailable.
     pub update: String,
-    /// The Labs features turned on (`crate::labs`), by `hex labs` name.
+    /// The Labs features turned on (`crate::labs`), by `gospell labs` name.
     #[serde(default)]
     pub labs: Vec<String>,
-    /// What this OS's Hex can do, by capability name (`rune_ui::platform`).
+    /// What this OS's GoSpell can do, by capability name (`rune_ui::platform`).
     /// A command for one it can't do answers `unsupported`.
     #[serde(default)]
     pub capabilities: std::collections::BTreeMap<String, bool>,
@@ -705,16 +705,16 @@ pub struct ModelReport {
     pub preparing: Option<String>,
     pub downloaded_bytes: u64,
     pub error: Option<String>,
-    /// The loaded model's device, when the running Hex has one to report.
+    /// The loaded model's device, when the running GoSpell has one to report.
     #[serde(default)]
     pub backend: Option<crate::transcription::SpeechBackend>,
-    /// The model Hex runs in place of the saved one while that can't run.
+    /// The model GoSpell runs in place of the saved one while that can't run.
     #[serde(default)]
     pub fallback: Option<FallbackReport>,
 }
 
 impl ModelReport {
-    /// The saved `selection`, and the fallback Hex runs while it can't run;
+    /// The saved `selection`, and the fallback GoSpell runs while it can't run;
     /// no preparation.
     pub fn saved(selection: &crate::transcription::models::TranscriptionSelection) -> Self {
         use crate::transcription::{custom_models, models, readiness};
@@ -786,15 +786,15 @@ pub struct ModelInfo {
     /// Deprecated: whether the model reads the vocabulary as its prompt,
     /// which is what recognition hints became. Use `vocabulary`.
     pub supports_recognition_hints: bool,
-    /// Where the file is or comes from: `download` (Hex downloads it),
-    /// `hex` (Hex's own download), `imported` (Hex's copy of a file you
+    /// Where the file is or comes from: `download` (GoSpell downloads it),
+    /// `gospell` (GoSpell's own download), `imported` (GoSpell's copy of a file you
     /// added), or `found: owner/name@abcdef1` (another app's download in the
     /// Hugging Face cache, used where it is).
     #[serde(default)]
     pub source: String,
 }
 
-/// Every model `hex model` can name, with what this computer has installed.
+/// Every model `gospell model` can name, with what this computer has installed.
 pub fn model_infos(
     selection: &crate::transcription::models::TranscriptionSelection,
 ) -> Vec<ModelInfo> {
@@ -818,7 +818,7 @@ pub fn model_infos(
         })
         .collect();
     // Compatible files that aren't catalog models and aren't in use yet:
-    // `hex model use` takes their id and checks them in full first.
+    // `gospell model use` takes their id and checks them in full first.
     for model in found.into_iter().filter(|found| {
         found.catalog.is_none() && !crate::transcription::custom_models::uses_path(&found.path)
     }) {
@@ -836,13 +836,13 @@ pub fn model_infos(
             streams: false,
             vocabulary: readiness::vocabulary_use_label(vocabulary).into(),
             supports_recognition_hints: vocabulary == VocabularyUse::Prompt,
-            source: format!("found: {} (not tested by Hex)", model.source()),
+            source: format!("found: {} (not tested by GoSpell)", model.source()),
         });
     }
     infos
 }
 
-/// The selection `hex model use` or `install` asks for: a known, available
+/// The selection `gospell model use` or `install` asks for: a known, available
 /// model, and a language it supports (the model's best match for the
 /// current language when none is given).
 pub fn model_selection(
@@ -908,7 +908,7 @@ fn model_selection_where(
         return Err(ControlError::new(
             "model-unavailable",
             format!(
-                "`{model}` can't be used: turn on Labs › Parakeet Ultra: hex labs on parakeet-ultra"
+                "`{model}` can't be used: turn on Labs › Parakeet Ultra: gospell labs on parakeet-ultra"
             ),
         ));
     }
@@ -922,7 +922,7 @@ fn model_selection_where(
             "model-unavailable",
             format!(
                 "`{model}` can't be used: its weights need Labs › Smaller model files on macOS: \
-                 hex labs on k-quant-models"
+                 gospell labs on k-quant-models"
             ),
         ));
     }
@@ -931,7 +931,7 @@ fn model_selection_where(
         .ok_or_else(|| {
             ControlError::new(
                 "unknown-model",
-                format!("unknown model `{model}`; run `hex model list` for the ids"),
+                format!("unknown model `{model}`; run `gospell model list` for the ids"),
             )
         })?;
     // The model's own remembered language, as the menu bar picks it; only
@@ -943,7 +943,7 @@ fn model_selection_where(
     let definition = crate::transcription::models::definition(id);
     crate::transcription::models::validate_where(&selection, k_quants).map_err(|error| {
         let supported = if definition.languages.contains(&"*") {
-            "any language code Hex knows (en, de, fr, ja, …)".to_owned()
+            "any language code GoSpell knows (en, de, fr, ja, …)".to_owned()
         } else {
             definition.languages.join(", ")
         };
@@ -955,7 +955,7 @@ fn model_selection_where(
     Ok(selection)
 }
 
-/// Refuses to stop Hex while it records, unless forced. `capture` is the
+/// Refuses to stop GoSpell while it records, unless forced. `capture` is the
 /// listener's answer (idle when no listener runs or setup gates it); a
 /// listener that couldn't answer might be recording, so it refuses too.
 pub fn check_quit(
@@ -970,7 +970,7 @@ pub fn check_quit(
         return Err(ControlError::new(
             "meeting-active",
             format!(
-                "a meeting is {}; stop it first (`hex meetings stop`) or pass --force",
+                "a meeting is {}; stop it first (`gospell meetings stop`) or pass --force",
                 meeting.state
             ),
         ));
@@ -993,7 +993,7 @@ pub fn check_quit(
     }
 }
 
-/// Carries out `hex vocabulary add|remove` on the saved list. The reply's
+/// Carries out `gospell vocabulary add|remove` on the saved list. The reply's
 /// `changed` says whether the list needs saving.
 pub fn edit_vocabulary(
     list: &mut Vec<VocabularyEntry>,
@@ -1063,7 +1063,7 @@ mod tests {
         use crate::transcription::gguf_header::TensorTypes;
         use crate::transcription::gguf_header::tests::gguf;
         let models =
-            std::env::temp_dir().join(format!("hex-control-models-{}", std::process::id()));
+            std::env::temp_dir().join(format!("gospell-control-models-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&models);
         std::fs::create_dir_all(&models).unwrap();
         crate::transcription::models::set_test_models_dir(Some(models.clone()));
@@ -1107,7 +1107,7 @@ mod tests {
             error.message
         );
         assert!(
-            error.message.contains("hex labs on k-quant-models"),
+            error.message.contains("gospell labs on k-quant-models"),
             "{}",
             error.message
         );
@@ -1491,7 +1491,7 @@ mod tests {
                     id: "1.scrawl".into(),
                     sent_to: Some(ScrawlCaptureSession {
                         session: "ses_1".into(),
-                        title: "Hex".into(),
+                        title: "GoSpell".into(),
                     }),
                     ..ScrawlCaptureSummary::default()
                 }],
@@ -1512,7 +1512,7 @@ mod tests {
             ControlReply::Transcript {
                 text: "Ship it.".into(),
             },
-            ControlReply::error("busy", "Hex is busy"),
+            ControlReply::error("busy", "GoSpell is busy"),
         ] {
             let response = ControlResponse::from(reply);
             let json = serde_json::to_string(&response).unwrap();
@@ -1604,7 +1604,7 @@ mod tests {
         assert_eq!(remembered.language, "de");
         let french = pick("whisper_large_v3_turbo", Some("fr")).unwrap();
         assert_eq!(french.language, "fr");
-        // Whisper's wildcard takes any language Hex knows, not any string.
+        // Whisper's wildcard takes any language GoSpell knows, not any string.
         for (model, language) in [
             ("whisper_large_v3_turbo", "klingon"),
             ("sense_voice_small", "de"),

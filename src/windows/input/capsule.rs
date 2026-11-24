@@ -1,10 +1,10 @@
 //! The finished capture capsule's keys on Windows, read from the keyboard
 //! hook: a Rune overlay never takes the keyboard here (its window is a
 //! no-activate tool window, and Rune hands an overlay the keyboard on macOS
-//! and Wayland only), so the search and the suggestions hear what Hex's macOS
+//! and Wayland only), so the search and the suggestions hear what GoSpell's macOS
 //! tap hands them (`capture_host::list_key`, `suppression::list_tap`).
 //!
-//! As on the Mac, nothing here consumes a key a shortcut of Hex's claimed, no
+//! As on the Mac, nothing here consumes a key a shortcut of GoSpell's claimed, no
 //! modifier is ever kept from the app, and a key the capsule took keeps its
 //! release with it. A key that edits nothing, and one the app already holds,
 //! stay the app's.
@@ -42,11 +42,11 @@ enum Typed {
     Dead,
 }
 
-/// What the capsule may take of a press right now, as its grab and Hex's own
+/// What the capsule may take of a press right now, as its grab and GoSpell's own
 /// shortcuts decide it.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 struct Opening {
-    /// One of Hex's shortcuts took the key, so it stays that shortcut's.
+    /// One of GoSpell's shortcuts took the key, so it stays that shortcut's.
     claimed: bool,
     /// The mode taking keys, or `None` while the capsule takes none.
     mode: Option<Mode>,
@@ -361,7 +361,7 @@ impl Keys {
 
 static KEYS: Mutex<Keys> = Mutex::new(Keys::new());
 
-/// The keyboard hook's event once Hex's own shortcuts have had it: a shortcut
+/// The keyboard hook's event once GoSpell's own shortcuts have had it: a shortcut
 /// keeps its key, and the capture capsule takes what else it may.
 pub(super) fn settle(handled: Handled, vk: u32, scan: u32, down: bool) -> Handled {
     let claimed = handled.disposition != Disposition::Pass || handled.triggered();
@@ -398,7 +398,7 @@ pub(super) fn press(message: u32) {
 }
 
 /// The mode taking keys now, if any: its list or suggestions are open, and
-/// Annotate is on, no shortcut is being recorded, and Hex isn't paused, as
+/// Annotate is on, no shortcut is being recorded, and GoSpell isn't paused, as
 /// `suppression::list_takes_keys` has it on the Mac.
 fn mode() -> Option<Mode> {
     if !crate::app_settings::capture_on()

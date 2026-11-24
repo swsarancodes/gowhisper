@@ -1,31 +1,31 @@
 <resources>
-    <!-- 简体中文。与 iPhone 版 Hex 相同的句子沿用其 Localizable.xcstrings 的译文；Android 自有的用语（如“应用”“复制”“点按”“个人字典”）按 Android 的习惯。 -->
+    <!-- 简体中文。与 iPhone 版 GoSpell 相同的句子沿用其 Localizable.xcstrings 的译文；Android 自有的用语（如“应用”“复制”“点按”“个人字典”）按 Android 的习惯。 -->
     <string name="back">返回</string>
     <string name="full_keyboard">全键盘</string>
 
     <string name="setup_step">第 %1$d 步，共 %2$d 步</string>
     <string name="setup_on_device" formatted="false">100% 设备端处理</string>
     <string name="setup_welcome_title">在任何应用中，\n用说话代替打字。</string>
-    <string name="setup_welcome_detail">Hex 只在下载语音模型（190 MB）时使用网络。你的声音和文字都保留在这台设备上。</string>
+    <string name="setup_welcome_detail">GoSpell 只在下载语音模型（190 MB）时使用网络。你的声音和文字都保留在这台设备上。</string>
     <string name="setup_get_started">开始使用</string>
-    <string name="setup_title">设置 Hex</string>
-    <string name="setup_detail">允许使用麦克风，然后选择 Hex 作为键盘。</string>
+    <string name="setup_title">设置 GoSpell</string>
+    <string name="setup_detail">允许使用麦克风，然后选择 GoSpell 作为键盘。</string>
     <string name="setup_microphone">麦克风</string>
-    <string name="setup_microphone_detail">让 Hex 能听见你</string>
+    <string name="setup_microphone_detail">让 GoSpell 能听见你</string>
     <string name="setup_allow">允许</string>
     <string name="setup_settings">设置</string>
-    <string name="setup_keyboard">Hex 键盘</string>
+    <string name="setup_keyboard">GoSpell 键盘</string>
     <string name="setup_keyboard_chosen">当前键盘</string>
-    <string name="setup_keyboard_enabled">在列表中选择 Hex</string>
-    <string name="setup_keyboard_off">在“设置”中打开 Hex</string>
+    <string name="setup_keyboard_enabled">在列表中选择 GoSpell</string>
+    <string name="setup_keyboard_off">在“设置”中打开 GoSpell</string>
     <string name="setup_enable">打开</string>
     <string name="setup_choose">选择</string>
     <string name="setup_ready">就绪</string>
     <string name="setup_continue">继续</string>
     <string name="setup_try_title">试用键盘</string>
-    <string name="setup_try_detail">按住 Hex 键，说几句话，然后松开。</string>
+    <string name="setup_try_detail">按住 GoSpell 键，说几句话，然后松开。</string>
     <string name="setup_try_hint">你说的话会显示在这里</string>
-    <string name="setup_choose_hex">选择 Hex 键盘</string>
+    <string name="setup_choose_gospell">选择 GoSpell 键盘</string>
     <string name="setup_skip">暂时跳过</string>
     <string name="setup_done">完成</string>
 
@@ -93,10 +93,10 @@
     <string name="settings_popups">字符预览</string>
     <string name="settings_popups_detail">在手指上方显示字母</string>
     <string name="settings_haptics">触感反馈</string>
-    <string name="settings_haptics_detail">按下 Hex 的按键时会有轻微触感</string>
+    <string name="settings_haptics_detail">按下 GoSpell 的按键时会有轻微触感</string>
     <string name="settings_test_keyboard">测试键盘…</string>
     <string name="settings_privacy_line">所有内容都保留在这台手机上</string>
-    <string name="settings_privacy_detail">Hex 在这台手机上将语音转换为文字，绝不上传你的声音或输入的内容，也不保存任何按键记录或转录内容。</string>
+    <string name="settings_privacy_detail">GoSpell 在这台手机上将语音转换为文字，绝不上传你的声音或输入的内容，也不保存任何按键记录或转录内容。</string>
     <string name="settings_privacy_policy">隐私政策</string>
     <string name="settings_licences">开源许可</string>
 </resources>

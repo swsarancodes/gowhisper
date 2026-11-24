@@ -2,7 +2,7 @@
 //! on-device pass over a macOS dictation, after speech preparation and the
 //! mode's corrections and instead of the OpenCode rewrite (a mode that
 //! rewrites keeps its own model). The instructions are the iOS cleaner's,
-//! word for word (`ios/HEXMobile/TranscriptCleanup.swift`), and the guard
+//! word for word (`ios/GoSpellMobile/TranscriptCleanup.swift`), and the guard
 //! applies its rules, counted in scalars where iOS counts graphemes.
 //!
 //! The guard is pure and runs on every OS; only the bridge call is macOS's.
@@ -738,7 +738,7 @@ mod tests {
     use super::*;
 
     /// The iOS cleaner's cases, so both apps refuse and accept the same
-    /// answers (`ios/HEXMobileTests/TranscriptCleanupTests.swift`).
+    /// answers (`ios/GoSpellMobileTests/TranscriptCleanupTests.swift`).
     #[test]
     fn misheard_words_and_spoken_self_corrections_are_accepted() {
         assert!(is_acceptable(
@@ -1120,7 +1120,7 @@ mod tests {
     /// The Swift instructions literal, with its line continuations joined the
     /// way Swift joins them.
     fn swift_instructions() -> String {
-        const SWIFT: &str = include_str!("../../ios/HEXMobile/TranscriptCleanup.swift");
+        const SWIFT: &str = include_str!("../../ios/GoSpellMobile/TranscriptCleanup.swift");
         // A Windows checkout writes the file with CRLF; Swift's literal is
         // the same text either way.
         let swift = SWIFT.replace("\r\n", "\n");

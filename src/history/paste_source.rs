@@ -104,13 +104,13 @@ impl HistoryStore {
 impl super::History {
     /// A clear (including an empty clear) or retention change invalidates
     /// a local inference result that has not yet reached the store.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     pub(crate) fn cancel_generation(&self) -> Option<u64> {
         let store = self.synced();
         (!store.retention.is_off()).then_some(store.cancel_generation)
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     pub(crate) fn keep_cancelled_words(
         &self,
         generation: u64,

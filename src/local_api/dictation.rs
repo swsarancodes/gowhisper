@@ -1,6 +1,6 @@
 //! Running-app dictation (`/dictations`): a host starts, finishes, cancels
 //! and observes a dictation the app records. The macOS recognition loop and
-//! the Linux and Windows listeners drive it; without a capture loop (`hex
+//! the Linux and Windows listeners drive it; without a capture loop (`gospell
 //! service`) the routes answer `service-capture-unavailable` and
 //! `/capabilities` reports `serviceCapture: false`. A start with
 //! `"partials": true` also streams the text so far (`/partials`) where the

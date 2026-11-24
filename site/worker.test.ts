@@ -1,4 +1,4 @@
-// The URLs and headers people and old clients depend on: /hex/files serves
+// The URLs and headers people and old clients depend on: /gospell/files serves
 // the built installers and appcast with the headers the bucket objects had,
 // the frozen feeds from the bucket, and the dev notes from the Release
 // workflow's branch.
@@ -12,7 +12,7 @@ const NOTES = JSON.stringify({
       version: "0.0.0-dev-2",
       commit: "a".repeat(40),
       published_at: "2026-11-09T00:00:00Z",
-      items: [{ title: "A new thing", url: "https://github.com/anomalyco/hex/pull/2" }],
+      items: [{ title: "A new thing", url: "https://github.com/goml/gospell/pull/2" }],
     },
   ],
 })
@@ -51,7 +51,7 @@ function environment(objects: Record<string, ReturnType<typeof object>> = {}) {
       get: (key: string) => Promise.resolve(objects[key] ?? null),
       head: (key: string) => Promise.resolve(objects[key] ?? null),
     },
-    CANONICAL_HOST: "anoma.ly",
+    CANONICAL_HOST: "goml.io",
   } as unknown as Parameters<typeof worker.fetch>[1]
 }
 
@@ -66,11 +66,11 @@ function notesFetch(response: () => Response) {
 }
 
 async function get(path: string, env = environment(), method = "GET") {
-  return worker.fetch(new Request(`https://anoma.ly${path}`, { method }), env)
+  return worker.fetch(new Request(`https://goml.io${path}`, { method }), env)
 }
 
 test("serves the Linux installer with the bucket's type and cache", async () => {
-  const response = await get("/hex/files/install-linux.sh")
+  const response = await get("/gospell/files/install-linux.sh")
   expect(response.status).toBe(200)
   expect(response.headers.get("Content-Type")).toBe("text/x-shellscript")
   expect(response.headers.get("Cache-Control")).toBe("public, max-age=300")
@@ -79,18 +79,18 @@ test("serves the Linux installer with the bucket's type and cache", async () => 
 })
 
 test("answers HEAD for an installer without a body", async () => {
-  const response = await get("/hex/files/install-linux.sh", environment(), "HEAD")
+  const response = await get("/gospell/files/install-linux.sh", environment(), "HEAD")
   expect(response.status).toBe(200)
   expect(response.headers.get("Content-Type")).toBe("text/x-shellscript")
   expect(response.body).toBeNull()
 })
 
 test("serves the Windows installer and the legacy appcast with their old headers", async () => {
-  const windows = await get("/hex/files/install-windows.ps1")
+  const windows = await get("/gospell/files/install-windows.ps1")
   expect(windows.headers.get("Content-Type")).toBe("text/plain; charset=utf-8")
   expect(windows.headers.get("Cache-Control")).toBe("public, max-age=300")
 
-  const appcast = await get("/hex/files/appcast.xml")
+  const appcast = await get("/gospell/files/appcast.xml")
   expect(appcast.headers.get("Content-Type")).toBe("application/xml")
   expect(appcast.headers.get("Cache-Control")).toBe("no-cache")
   expect(await appcast.text()).toBe(files.get("/appcast.xml") as string)
@@ -98,7 +98,7 @@ test("serves the Windows installer and the legacy appcast with their old headers
 
 test("serves a frozen 2.3.1 feed from the bucket with its stored headers", async () => {
   const feed = object('{"version":"2.3.1"}', "application/json", "no-cache")
-  const response = await get("/hex/files/linux-update.json", environment({ "linux-update.json": feed }))
+  const response = await get("/gospell/files/linux-update.json", environment({ "linux-update.json": feed }))
   expect(response.status).toBe(200)
   expect(response.headers.get("Content-Type")).toBe("application/json")
   expect(response.headers.get("Cache-Control")).toBe("no-cache")
@@ -107,7 +107,7 @@ test("serves a frozen 2.3.1 feed from the bucket with its stored headers", async
 
 test("serves dev-notes.json from the dev-notes branch", async () => {
   notesFetch(() => new Response(NOTES, { headers: { "Content-Type": "text/plain" } }))
-  const response = await get("/hex/files/dev-notes.json")
+  const response = await get("/gospell/files/dev-notes.json")
   expect(response.status).toBe(200)
   expect(response.headers.get("Content-Type")).toBe("application/json; charset=utf-8")
   expect(response.headers.get("Cache-Control")).toBe("public, max-age=60")
@@ -116,23 +116,23 @@ test("serves dev-notes.json from the dev-notes branch", async () => {
 
 test("falls back to the bucket's dev notes before the branch exists", async () => {
   notesFetch(() => new Response("Not found", { status: 404 }))
-  const response = await get("/hex/files/dev-notes.json", environment({ "dev-notes.json": object(NOTES, "application/json; charset=utf-8", "public, max-age=60") }))
+  const response = await get("/gospell/files/dev-notes.json", environment({ "dev-notes.json": object(NOTES, "application/json; charset=utf-8", "public, max-age=60") }))
   expect(response.status).toBe(200)
   expect(await response.json()).toMatchObject({ schema: 1 })
 })
 
-test("renders /hex/dev from the dev-notes branch", async () => {
+test("renders /gospell/dev from the dev-notes branch", async () => {
   notesFetch(() => new Response(NOTES))
-  const response = await get("/hex/dev")
+  const response = await get("/gospell/dev")
   expect(response.status).toBe(200)
   expect(response.headers.get("Content-Type")).toBe("text/html; charset=utf-8")
   const body = await response.text()
   expect(body).toContain("A new thing")
-  expect(body).toContain('href="https://github.com/anomalyco/hex/pull/2"')
+  expect(body).toContain('href="https://github.com/goml/gospell/pull/2"')
 })
 
 test("does not answer writes", async () => {
-  const response = await get("/hex/files/install-linux.sh", environment(), "POST")
+  const response = await get("/gospell/files/install-linux.sh", environment(), "POST")
   expect(response.status).toBe(405)
   expect(response.headers.get("Allow")).toBe("GET, HEAD")
 })

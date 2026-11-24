@@ -259,7 +259,7 @@ fn mute_other_sessions() -> Option<Suppressed> {
     }
 }
 
-/// Lower every other process's render session, so Hex's own tones stay
+/// Lower every other process's render session, so GoSpell's own tones stay
 /// at full volume. Sessions that start while recording are left alone.
 fn duck_other_sessions() -> Option<Suppressed> {
     output_ducking::Guard::start(crate::app_settings::recording_duck_volume(), || {

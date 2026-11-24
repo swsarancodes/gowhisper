@@ -27,8 +27,8 @@ private func importPath(_ pointer: UnsafePointer<CChar>?) -> String? {
     return String(cString: pointer)
 }
 
-@_cdecl("hex_meeting_import_decode")
-public func hexMeetingImportDecode(
+@_cdecl("gospell_meeting_import_decode")
+public func gospellMeetingImportDecode(
     _ inputPath: UnsafePointer<CChar>?,
     _ outputPath: UnsafePointer<CChar>?,
     _ isCancelled: (@convention(c) () -> Int32)?,
@@ -60,8 +60,8 @@ public func hexMeetingImportDecode(
     }
 }
 
-@_cdecl("hex_meeting_import_free_string")
-public func hexMeetingImportFreeString(_ string: UnsafeMutablePointer<CChar>?) {
+@_cdecl("gospell_meeting_import_free_string")
+public func gospellMeetingImportFreeString(_ string: UnsafeMutablePointer<CChar>?) {
     free(string)
 }
 
@@ -81,10 +81,10 @@ private func convertAudio(
         channels: 1,
         interleaved: false
     ) else {
-        throw ImportError("Hex could not convert audio to 16 kHz.")
+        throw ImportError("GoSpell could not convert audio to 16 kHz.")
     }
     guard let converter = AVAudioConverter(from: input.processingFormat, to: outputFormat) else {
-        throw ImportError("Hex could not read this audio file's format.")
+        throw ImportError("GoSpell could not read this audio file's format.")
     }
     // Stereo and multichannel files mix down; the converter otherwise keeps
     // one channel and drops the rest.
@@ -125,7 +125,7 @@ private func convertAudio(
             frameCapacity: outputFrames
         )
     else {
-        throw ImportError("Hex ran out of memory converting this audio file.")
+        throw ImportError("GoSpell ran out of memory converting this audio file.")
     }
 
     var inputExhausted = false
@@ -136,7 +136,7 @@ private func convertAudio(
 
     while !finished {
         if isCancelled() != 0 {
-            throw ImportError("Hex is quitting; the audio was not imported.")
+            throw ImportError("GoSpell is quitting; the audio was not imported.")
         }
         try autoreleasepool {
             outputBuffer.frameLength = 0
@@ -150,7 +150,7 @@ private func convertAudio(
                     return nil
                 }
                 if isCancelled() != 0 {
-                    failure = ImportError("Hex is quitting; the audio was not imported.")
+                    failure = ImportError("GoSpell is quitting; the audio was not imported.")
                     inputStatus.pointee = .endOfStream
                     return nil
                 }
@@ -173,7 +173,7 @@ private func convertAudio(
                         inputStatus.pointee = .endOfStream
                     } else {
                         failure = ImportError(
-                            "Hex could not read the audio at frame \(input.framePosition) of \(input.length): \(error.localizedDescription)"
+                            "GoSpell could not read the audio at frame \(input.framePosition) of \(input.length): \(error.localizedDescription)"
                         )
                         inputStatus.pointee = .endOfStream
                     }
@@ -216,9 +216,9 @@ private func convertAudio(
             case .endOfStream:
                 finished = true
             case .error:
-                throw ImportError("Hex could not convert this audio file.")
+                throw ImportError("GoSpell could not convert this audio file.")
             @unknown default:
-                throw ImportError("Hex could not convert this audio file.")
+                throw ImportError("GoSpell could not convert this audio file.")
             }
         }
     }

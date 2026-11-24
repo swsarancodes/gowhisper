@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Build a keyboard language's capitals sidecar (<lang>.capitals) from Google Books Ngram v3
-1-grams (2020-02-17, CC BY 3.0), the corpus its .hextm model was counted from.
+1-grams (2020-02-17, CC BY 3.0), the corpus its .gospelltm model was counted from.
 
-    python3 build-capitals.py en MODEL.hextm WORKDIR OUTPUT.capitals scowl-2020.12.07.tar.gz
-    python3 build-capitals.py {es|fr|it} MODEL.hextm WORKDIR OUTPUT.capitals
-    python3 build-capitals.py pl MODEL.hextm WORKDIR OUTPUT.capitals ParlaMint-PL.tgz polimorf.tab.gz
+    python3 build-capitals.py en MODEL.gospelltm WORKDIR OUTPUT.capitals scowl-2020.12.07.tar.gz
+    python3 build-capitals.py {es|fr|it} MODEL.gospelltm WORKDIR OUTPUT.capitals
+    python3 build-capitals.py pl MODEL.gospelltm WORKDIR OUTPUT.capitals ParlaMint-PL.tgz polimorf.tab.gz
 
 Polish has no Google Books counts: its counts come from ParlaMint 5.0's Polish transcripts (CC BY
 4.0, the corpus build-typing-model.py pl checks marks against), which keep case, leaving out each
@@ -216,7 +216,7 @@ def main():
     lang, model, work, output = sys.argv[1:5]
     lowercase = scowl_lowercase(sys.argv[5]) if lang == "en" else polimorf_lowercase(sys.argv[6]) if lang == "pl" else set()
     if lang == "en":
-        # Hex's own chat and tech words (en-extra-words.tsv, which build-typing-model.py adds to the
+        # GoSpell's own chat and tech words (en-extra-words.tsv, which build-typing-model.py adds to the
         # model) are lowercase words: "plz" and "okie", capitalised in books, are held too.
         extra = os.path.join(os.path.dirname(os.path.abspath(__file__)), "en-extra-words.tsv")
         lowercase |= {line.split("\t")[0] for line in open(extra, encoding="utf-8") if line.strip() and not line.startswith("#")}

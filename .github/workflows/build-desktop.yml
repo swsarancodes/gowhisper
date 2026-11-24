@@ -22,7 +22,7 @@ on:
         required: true
         type: string
       channel:
-        description: The release channel this build is published on, compiled in as HEX_BUILD_CHANNEL (src/updater.rs); empty for test builds
+        description: The release channel this build is published on, compiled in as GOSPELL_BUILD_CHANNEL (src/updater.rs); empty for test builds
         type: string
         default: ""
       test-build:
@@ -58,10 +58,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
-      HEX_VERSION: ${{ inputs.version }}
-      HEX_BUILD_CHANNEL: ${{ inputs.channel }}
-      HEX_LINUX_ARCH: x86_64
-      HEX_LINUX_LABEL: x64
+      GOSPELL_VERSION: ${{ inputs.version }}
+      GOSPELL_BUILD_CHANNEL: ${{ inputs.channel }}
+      GOSPELL_LINUX_ARCH: x86_64
+      GOSPELL_LINUX_LABEL: x64
       NFPM_ARCHIVE: nfpm_2.48.0_Linux_x86_64.tar.gz
       NFPM_SHA256: 6d7f9a28b2f397934403950fcbba83f598b08d02edbe79a0815b3b4897341750
     outputs:
@@ -91,54 +91,54 @@ jobs:
           echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
       - name: Build
         env:
-          HEX_RELEASE_DIST: ${{ runner.temp }}/dist
+          GOSPELL_RELEASE_DIST: ${{ runner.temp }}/dist
           CARGO_BUILD_JOBS: 4
           OPENSSL_NO_VENDOR: 1
           CC: clang
           CXX: clang++
         run: |
           executable=$(scripts/build-linux-release.sh)
-          scripts/package-linux.sh "$executable" "$HEX_VERSION" "$HEX_LINUX_LABEL" "$HEX_RELEASE_DIST"
+          scripts/package-linux.sh "$executable" "$GOSPELL_VERSION" "$GOSPELL_LINUX_LABEL" "$GOSPELL_RELEASE_DIST"
       - name: Check the glibc floor
         shell: bash
         run: |
-          bash .github/release/check-glibc-floor.sh "$RUNNER_TEMP/dist/hex-$HEX_VERSION-linux-$HEX_LINUX_LABEL" \
+          bash .github/release/check-glibc-floor.sh "$RUNNER_TEMP/dist/gospell-$GOSPELL_VERSION-linux-$GOSPELL_LINUX_LABEL" \
             | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Install the .deb here and on Debian 12, and the .rpm on Fedora
         run: |
-          base="$RUNNER_TEMP/dist/hex-$HEX_VERSION-linux-$HEX_LINUX_LABEL"
+          base="$RUNNER_TEMP/dist/gospell-$GOSPELL_VERSION-linux-$GOSPELL_LINUX_LABEL"
           dpkg-deb --info "$base.deb"
           sudo apt-get update
           sudo apt-get install -y "$base.deb"
-          test "$(/usr/bin/hex --version | awk 'NF { value=$NF } END { print value }')" = "$HEX_VERSION"
-          dpkg-query -S /usr/bin/hex /usr/lib/systemd/user/hex.service /usr/share/applications/anomaly.hex.desktop /usr/share/icons/hicolor/256x256/apps/anomaly.hex.png
-          sudo apt-get remove -y hex
-          docker run --rm -v "$RUNNER_TEMP/dist:/dist:ro" -e HEX_VERSION -e HEX_LINUX_LABEL fedora:42 sh -euc '
-            dnf install -y -q "/dist/hex-$HEX_VERSION-linux-$HEX_LINUX_LABEL.rpm"
-            test "$(hex --version | awk "NF { value=\$NF } END { print value }")" = "$HEX_VERSION"
-            rpm -qf /usr/bin/hex /usr/lib/systemd/user/hex.service /usr/share/applications/anomaly.hex.desktop /usr/share/icons/hicolor/256x256/apps/anomaly.hex.png'
+          test "$(/usr/bin/gospell --version | awk 'NF { value=$NF } END { print value }')" = "$GOSPELL_VERSION"
+          dpkg-query -S /usr/bin/gospell /usr/lib/systemd/user/gospell.service /usr/share/applications/com.goml.gospell.desktop /usr/share/icons/hicolor/256x256/apps/com.goml.gospell.png
+          sudo apt-get remove -y gospell
+          docker run --rm -v "$RUNNER_TEMP/dist:/dist:ro" -e GOSPELL_VERSION -e GOSPELL_LINUX_LABEL fedora:42 sh -euc '
+            dnf install -y -q "/dist/gospell-$GOSPELL_VERSION-linux-$GOSPELL_LINUX_LABEL.rpm"
+            test "$(gospell --version | awk "NF { value=\$NF } END { print value }")" = "$GOSPELL_VERSION"
+            rpm -qf /usr/bin/gospell /usr/lib/systemd/user/gospell.service /usr/share/applications/com.goml.gospell.desktop /usr/share/icons/hicolor/256x256/apps/com.goml.gospell.png'
           # The oldest supported distribution: the packaged and bare
           # executables start and answer model-free commands.
-          docker run --rm -v "$RUNNER_TEMP/dist:/dist:ro" -e HEX_VERSION -e HEX_LINUX_LABEL debian:12 sh -euc '
+          docker run --rm -v "$RUNNER_TEMP/dist:/dist:ro" -e GOSPELL_VERSION -e GOSPELL_LINUX_LABEL debian:12 sh -euc '
             apt-get update -qq
-            apt-get install -y -qq "/dist/hex-$HEX_VERSION-linux-$HEX_LINUX_LABEL.deb" > /dev/null
-            for hex in /usr/bin/hex "/dist/hex-$HEX_VERSION-linux-$HEX_LINUX_LABEL"; do
-              test "$("$hex" --version | awk "NF { value=\$NF } END { print value }")" = "$HEX_VERSION"
-              "$hex" history > /dev/null
-              status=0; "$hex" status > /dev/null 2>&1 || status=$?
+            apt-get install -y -qq "/dist/gospell-$GOSPELL_VERSION-linux-$GOSPELL_LINUX_LABEL.deb" > /dev/null
+            for gospell in /usr/bin/gospell "/dist/gospell-$GOSPELL_VERSION-linux-$GOSPELL_LINUX_LABEL"; do
+              test "$("$gospell" --version | awk "NF { value=\$NF } END { print value }")" = "$GOSPELL_VERSION"
+              "$gospell" history > /dev/null
+              status=0; "$gospell" status > /dev/null 2>&1 || status=$?
               test "$status" = 3
             done'
       - name: Check the x86_64 CPU floor
-        if: env.HEX_LINUX_ARCH == 'x86_64'
+        if: env.GOSPELL_LINUX_ARCH == 'x86_64'
         run: |
           mapfile -t ggml < <(find target/release/build -path '*transcribe-cpp-sys*/out/lib*' -name 'libggml*.a' -type f)
           [ "${#ggml[@]}" -gt 0 ] || { echo "::error::no ggml archives under target/release/build" >&2; exit 1; }
-          bash .github/release/check-x86-baseline.sh "$RUNNER_TEMP/dist/hex-$HEX_VERSION-linux-$HEX_LINUX_LABEL" \
+          bash .github/release/check-x86-baseline.sh "$RUNNER_TEMP/dist/gospell-$GOSPELL_VERSION-linux-$GOSPELL_LINUX_LABEL" \
             "${ggml[@]}"
       - id: upload
         uses: ./.github/release/upload
         with:
-          name: ${{ inputs.artifact-prefix }}-linux-${{ env.HEX_LINUX_ARCH }}
+          name: ${{ inputs.artifact-prefix }}-linux-${{ env.GOSPELL_LINUX_ARCH }}
           path: ${{ runner.temp }}/dist
           retention-days: ${{ inputs.retention-days }}
 
@@ -147,10 +147,10 @@ jobs:
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 90
     env:
-      HEX_VERSION: ${{ inputs.version }}
-      HEX_BUILD_CHANNEL: ${{ inputs.channel }}
-      HEX_LINUX_ARCH: aarch64
-      HEX_LINUX_LABEL: arm64
+      GOSPELL_VERSION: ${{ inputs.version }}
+      GOSPELL_BUILD_CHANNEL: ${{ inputs.channel }}
+      GOSPELL_LINUX_ARCH: aarch64
+      GOSPELL_LINUX_LABEL: arm64
       NFPM_ARCHIVE: nfpm_2.48.0_Linux_arm64.tar.gz
       NFPM_SHA256: a9a75213763783b7669719e505474c748c5ad7dc66591a195619deb50f85c2f4
     outputs:
@@ -162,13 +162,13 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 120
     env:
-      HEX_VERSION: ${{ inputs.version }}
-      HEX_BUILD_CHANNEL: ${{ inputs.channel }}
-      HEX_WINDOWS_ARCH: x86_64
-      HEX_WINDOWS_LABEL: x64
+      GOSPELL_VERSION: ${{ inputs.version }}
+      GOSPELL_BUILD_CHANNEL: ${{ inputs.channel }}
+      GOSPELL_WINDOWS_ARCH: x86_64
+      GOSPELL_WINDOWS_LABEL: x64
       DUMPBIN_HOST: Hostx64\\x64
       # Compiled into src/updater.rs: test builds never self-update.
-      HEX_TEST_BUILD: ${{ inputs.test-build && '1' || '' }}
+      GOSPELL_TEST_BUILD: ${{ inputs.test-build && '1' || '' }}
     outputs:
       digest: ${{ steps.upload.outputs.digest }}
     steps: &windows-steps
@@ -182,7 +182,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
         with:
           toolchain: stable
-          targets: ${{ env.HEX_WINDOWS_ARCH }}-pc-windows-msvc
+          targets: ${{ env.GOSPELL_WINDOWS_ARCH }}-pc-windows-msvc
       # target/ holds C++ objects (transcribe.cpp via clang-cl) built against
       # one MSVC STL and CRT; an object cached from a newer toolset fails to link
       # against an older one (__std_replace_2, LNK2019), so the key names it.
@@ -209,13 +209,13 @@ jobs:
           key: test-build-msvc-${{ steps.msvc.outputs.version }}
           cache-on-failure: true
       - name: Install the Vulkan SDK
-        if: env.HEX_WINDOWS_ARCH == 'x86_64'
+        if: env.GOSPELL_WINDOWS_ARCH == 'x86_64'
         uses: humbletim/install-vulkan-sdk@30ba978f977e81b72d091fc8888feb1fb26f9aff # v1.2
         with:
           version: 1.4.309.0
           cache: true
       - name: Install SPIRV-Headers for the Vulkan backend
-        if: env.HEX_WINDOWS_ARCH == 'x86_64'
+        if: env.GOSPELL_WINDOWS_ARCH == 'x86_64'
         shell: pwsh
         run: |
           vcpkg install spirv-headers:x64-windows
@@ -224,7 +224,7 @@ jobs:
           $combined = if ($env:CMAKE_PREFIX_PATH) { "$prefix;$env:CMAKE_PREFIX_PATH" } else { $prefix }
           Add-Content $env:GITHUB_ENV "CMAKE_PREFIX_PATH=$combined"
       - name: Configure clang-cl for ARM64
-        if: env.HEX_WINDOWS_ARCH == 'aarch64'
+        if: env.GOSPELL_WINDOWS_ARCH == 'aarch64'
         shell: pwsh
         run: |
           @(
@@ -240,45 +240,45 @@ jobs:
           # Git Bash would rewrite CL=/EHsc into a path that clang-cl reads as
           # a second source file.
           export MSYS2_ENV_CONV_EXCL=CL
-          export HEX_RELEASE_DIST="$(cygpath -u "$RUNNER_TEMP")/dist"
+          export GOSPELL_RELEASE_DIST="$(cygpath -u "$RUNNER_TEMP")/dist"
           source/scripts/build-windows.sh
       - name: Check the x86_64 CPU floor
-        if: env.HEX_WINDOWS_ARCH == 'x86_64'
+        if: env.GOSPELL_WINDOWS_ARCH == 'x86_64'
         shell: bash
         run: |
           mapfile -t ggml < <(find source/target/x86_64-pc-windows-msvc/release/build -path '*transcribe-cpp-sys*/out/lib*' -name 'ggml*.lib' -type f)
           [ "${#ggml[@]}" -gt 0 ] || { echo "::error::no ggml archives under source/target/x86_64-pc-windows-msvc/release/build" >&2; exit 1; }
           OBJDUMP="$(cygpath -u "$PROGRAMFILES")/LLVM/bin/llvm-objdump.exe" \
             bash source/.github/release/check-x86-baseline.sh \
-            "$(cygpath -u "$RUNNER_TEMP")/dist/hex-$HEX_VERSION-windows-$HEX_WINDOWS_LABEL.exe" \
+            "$(cygpath -u "$RUNNER_TEMP")/dist/gospell-$GOSPELL_VERSION-windows-$GOSPELL_WINDOWS_LABEL.exe" \
             "${ggml[@]}"
-      - name: Check the executables need no Visual C++ Redistributable or Vulkan loader, hex.exe is a GUI program and hex.com a console one
+      - name: Check the executables need no Visual C++ Redistributable or Vulkan loader, gospell.exe is a GUI program and gospell.com a console one
         shell: pwsh
         run: |
           $dumpbin = Get-ChildItem "${env:ProgramFiles}\Microsoft Visual Studio" -Recurse -Filter dumpbin.exe -ErrorAction SilentlyContinue |
             Where-Object { $_.FullName -match $env:DUMPBIN_HOST } | Select-Object -First 1
           if (-not $dumpbin) { throw "dumpbin.exe was not found" }
-          $imports = & $dumpbin.FullName /dependents "$env:RUNNER_TEMP/dist/hex-$env:HEX_VERSION-windows-$env:HEX_WINDOWS_LABEL.exe"
+          $imports = & $dumpbin.FullName /dependents "$env:RUNNER_TEMP/dist/gospell-$env:GOSPELL_VERSION-windows-$env:GOSPELL_WINDOWS_LABEL.exe"
           $imports
           $redist = $imports | Select-String -Pattern 'VCRUNTIME|MSVCP|vcomp'
-          if ($redist) { throw "hex.exe imports Visual C++ runtime DLLs: $redist" }
+          if ($redist) { throw "gospell.exe imports Visual C++ runtime DLLs: $redist" }
           # The Vulkan loader comes with the graphics driver: imported at load
-          # time, a missing or Vulkan 1.0 one stops Hex before main (#1240).
+          # time, a missing or Vulkan 1.0 one stops GoSpell before main (#1240).
           $static = ($imports -join "`n") -split 'delay load dependencies' | Select-Object -First 1
-          if ($static -match 'vulkan-1\.dll') { throw "hex.exe imports vulkan-1.dll at load time instead of delay-loading it" }
-          # A GUI program, so opening Hex shows no console window (#850).
-          $headers = & $dumpbin.FullName /headers "$env:RUNNER_TEMP/dist/hex-$env:HEX_VERSION-windows-$env:HEX_WINDOWS_LABEL.exe"
-          if (-not ($headers | Select-String -SimpleMatch 'subsystem (Windows GUI)')) { throw "hex.exe is not a Windows GUI program" }
-          # hex.com, its console entry point, is a console program that shells wait for.
-          $console = "$env:RUNNER_TEMP/dist/hex-$env:HEX_VERSION-windows-$env:HEX_WINDOWS_LABEL.com"
+          if ($static -match 'vulkan-1\.dll') { throw "gospell.exe imports vulkan-1.dll at load time instead of delay-loading it" }
+          # A GUI program, so opening GoSpell shows no console window (#850).
+          $headers = & $dumpbin.FullName /headers "$env:RUNNER_TEMP/dist/gospell-$env:GOSPELL_VERSION-windows-$env:GOSPELL_WINDOWS_LABEL.exe"
+          if (-not ($headers | Select-String -SimpleMatch 'subsystem (Windows GUI)')) { throw "gospell.exe is not a Windows GUI program" }
+          # gospell.com, its console entry point, is a console program that shells wait for.
+          $console = "$env:RUNNER_TEMP/dist/gospell-$env:GOSPELL_VERSION-windows-$env:GOSPELL_WINDOWS_LABEL.com"
           $consoleImports = & $dumpbin.FullName /dependents $console
-          if ($consoleImports | Select-String -Pattern 'VCRUNTIME|MSVCP|vcomp') { throw "hex.com imports Visual C++ runtime DLLs" }
+          if ($consoleImports | Select-String -Pattern 'VCRUNTIME|MSVCP|vcomp') { throw "gospell.com imports Visual C++ runtime DLLs" }
           $consoleHeaders = & $dumpbin.FullName /headers $console
-          if (-not ($consoleHeaders | Select-String -SimpleMatch 'subsystem (Windows CUI)')) { throw "hex.com is not a console program" }
+          if (-not ($consoleHeaders | Select-String -SimpleMatch 'subsystem (Windows CUI)')) { throw "gospell.com is not a console program" }
       - id: upload
         uses: ./source/.github/release/upload
         with:
-          name: ${{ inputs.artifact-prefix }}-windows-${{ env.HEX_WINDOWS_ARCH }}
+          name: ${{ inputs.artifact-prefix }}-windows-${{ env.GOSPELL_WINDOWS_ARCH }}
           path: ${{ runner.temp }}/dist
           retention-days: ${{ inputs.retention-days }}
 
@@ -287,12 +287,12 @@ jobs:
     runs-on: windows-11-arm
     timeout-minutes: 120
     env:
-      HEX_VERSION: ${{ inputs.version }}
-      HEX_BUILD_CHANNEL: ${{ inputs.channel }}
-      HEX_WINDOWS_ARCH: aarch64
-      HEX_WINDOWS_LABEL: arm64
+      GOSPELL_VERSION: ${{ inputs.version }}
+      GOSPELL_BUILD_CHANNEL: ${{ inputs.channel }}
+      GOSPELL_WINDOWS_ARCH: aarch64
+      GOSPELL_WINDOWS_LABEL: arm64
       DUMPBIN_HOST: Hostarm64\\arm64
-      HEX_TEST_BUILD: ${{ inputs.test-build && '1' || '' }}
+      GOSPELL_TEST_BUILD: ${{ inputs.test-build && '1' || '' }}
     outputs:
       digest: ${{ steps.upload.outputs.digest }}
     steps: *windows-steps

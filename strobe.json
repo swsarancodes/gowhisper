@@ -1,11 +1,11 @@
 {
   "$schema": "https://raw.githubusercontent.com/anomalyco/strobe/main/schema/strobe.v1.json",
   "build": {
-    "command": "cargo build --locked --release --bin hex",
+    "command": "cargo build --locked --release --bin gospell",
     "output": {
-      "windows": "{cache}/cargo-target/release/hex.exe",
-      "macos": "{cache}/cargo-target/release/hex",
-      "linux": "{cache}/cargo-target/release/hex"
+      "windows": "{cache}/cargo-target/release/gospell.exe",
+      "macos": "{cache}/cargo-target/release/gospell",
+      "linux": "{cache}/cargo-target/release/gospell"
     },
     "env": {
       "CARGO_TARGET_DIR": "{cache}/cargo-target",
@@ -19,71 +19,71 @@
     }
   },
   "apps": {
-    "hex": {
+    "gospell": {
       "kind": "native",
       "exe": {
-        "windows": "target/release/hex.exe",
-        "macos": "/Applications/Hex.app/Contents/MacOS/hex",
-        "linux": "~/.local/share/hex/current/hex"
+        "windows": "target/release/gospell.exe",
+        "macos": "/Applications/GoSpell.app/Contents/MacOS/gospell",
+        "linux": "~/.local/share/gospell/current/gospell"
       },
       "args": ["app"],
       "env": {
-        "HEX_APPLICATION_SUPPORT_DIR": "{home}/hex-data",
-        "HEX_DISABLE_UPDATES": "1",
+        "GOSPELL_APPLICATION_SUPPORT_DIR": "{home}/gospell-data",
+        "GOSPELL_DISABLE_UPDATES": "1",
         "HF_HUB_CACHE": "{home}/.cache/huggingface/hub"
       },
-      "unset": ["HEX_*", "WGPU_*", "RUNE_*", "HF_HOME", "RUST_LOG"],
-      "moved": ["~/Library/Application Support/hex"],
+      "unset": ["GOSPELL_*", "WGPU_*", "RUNE_*", "HF_HOME", "RUST_LOG"],
+      "moved": ["~/Library/Application Support/gospell"],
       "files": {
-        "hex-data/onboarding-complete": "",
-        "hex-data/settings.json": {
+        "gospell-data/onboarding-complete": "",
+        "gospell-data/settings.json": {
           "enable_on_launch": false,
           "history_retention": "forever",
-          "migrations": ["scrawl-capture-settings", "scrawl-routing-settings", "anomaly-hex-identity"]
+          "migrations": ["scrawl-capture-settings", "scrawl-routing-settings", "goml-gospell-identity"]
         }
       },
       "guard": [
-        { "os": "windows", "file": "%APPDATA%/hex/local-api.json", "pid": "pid" },
-        { "os": "windows", "file": "%APPDATA%/hex/settings.json" },
-        { "os": "macos", "file": "~/Library/Application Support/hex/local-api.json", "pid": "pid" },
-        { "os": "macos", "file": "~/Library/Application Support/hex/settings.json" },
-        { "os": "linux", "file": "~/.local/share/hex/local-api.json", "pid": "pid" },
-        { "os": "linux", "file": "~/.local/share/hex/settings.json" }
+        { "os": "windows", "file": "%APPDATA%/gospell/local-api.json", "pid": "pid" },
+        { "os": "windows", "file": "%APPDATA%/gospell/settings.json" },
+        { "os": "macos", "file": "~/Library/Application Support/gospell/local-api.json", "pid": "pid" },
+        { "os": "macos", "file": "~/Library/Application Support/gospell/settings.json" },
+        { "os": "linux", "file": "~/.local/share/gospell/local-api.json", "pid": "pid" },
+        { "os": "linux", "file": "~/.local/share/gospell/settings.json" }
       ]
     },
-    "hex-listening": {
-      "extends": "hex",
+    "gospell-listening": {
+      "extends": "gospell",
       "files": {
-        "hex-data/settings.json": {
+        "gospell-data/settings.json": {
           "enable_on_launch": true,
           "release_microphone_while_idle": true,
           "dictation_hotkey": { "keys": [{ "code": 80, "label": "F19" }] },
           "paste_last_hotkey": null,
           "capture": { "enabled": true, "hotkey": { "keys": [{ "code": 79, "label": "F18" }] } },
           "history_retention": "forever",
-          "migrations": ["scrawl-capture-settings", "scrawl-routing-settings", "annotate-on-by-default", "anomaly-hex-identity"]
+          "migrations": ["scrawl-capture-settings", "scrawl-routing-settings", "annotate-on-by-default", "goml-gospell-identity"]
         }
       }
     },
-    "hex-listening-warm": {
-      "extends": "hex",
+    "gospell-listening-warm": {
+      "extends": "gospell",
       "files": {
-        "hex-data/settings.json": {
+        "gospell-data/settings.json": {
           "enable_on_launch": true,
           "release_microphone_while_idle": false,
           "dictation_hotkey": { "keys": [{ "code": 80, "label": "F19" }] },
           "paste_last_hotkey": null,
           "capture": { "enabled": true, "hotkey": { "keys": [{ "code": 79, "label": "F18" }] } },
           "history_retention": "forever",
-          "migrations": ["scrawl-capture-settings", "scrawl-routing-settings", "annotate-on-by-default", "anomaly-hex-identity"]
+          "migrations": ["scrawl-capture-settings", "scrawl-routing-settings", "annotate-on-by-default", "goml-gospell-identity"]
         }
       }
     },
-    "hex-dictation": {
-      "extends": "hex",
-      "env": { "HEX_AUDIO_FIXTURE": "{home}/speech.wav" },
+    "gospell-dictation": {
+      "extends": "gospell",
+      "env": { "GOSPELL_AUDIO_FIXTURE": "{home}/speech.wav" },
       "files": {
-        "hex-data/settings.json": {
+        "gospell-data/settings.json": {
           "enable_on_launch": true,
           "release_microphone_while_idle": false,
           "sound_effects": false,
@@ -92,14 +92,14 @@
           "paste_last_hotkey": null,
           "capture": { "enabled": true, "hotkey": { "keys": [{ "code": 79, "label": "F18" }] } },
           "history_retention": "forever",
-          "migrations": ["scrawl-capture-settings", "scrawl-routing-settings", "annotate-on-by-default", "anomaly-hex-identity"]
+          "migrations": ["scrawl-capture-settings", "scrawl-routing-settings", "annotate-on-by-default", "goml-gospell-identity"]
         }
       }
     },
-    "hex-dictation-released": {
-      "extends": "hex-dictation",
+    "gospell-dictation-released": {
+      "extends": "gospell-dictation",
       "files": {
-        "hex-data/settings.json": {
+        "gospell-data/settings.json": {
           "enable_on_launch": true,
           "release_microphone_while_idle": true,
           "sound_effects": false,
@@ -108,7 +108,7 @@
           "paste_last_hotkey": null,
           "capture": { "enabled": true, "hotkey": { "keys": [{ "code": 79, "label": "F18" }] } },
           "history_retention": "forever",
-          "migrations": ["scrawl-capture-settings", "scrawl-routing-settings", "annotate-on-by-default", "anomaly-hex-identity"]
+          "migrations": ["scrawl-capture-settings", "scrawl-routing-settings", "annotate-on-by-default", "goml-gospell-identity"]
         }
       }
     }

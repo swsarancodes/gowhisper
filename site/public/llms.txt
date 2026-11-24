@@ -1,17 +1,17 @@
-# Hex
+# GoSpell
 
-> Hex is local voice dictation for Mac, Windows, and Linux. Hold a shortcut, speak, and Hex transcribes on the device and pastes the text wherever the cursor is.
+> GoSpell is local voice dictation for Mac, Windows, and Linux. Hold a shortcut, speak, and GoSpell transcribes on the device and pastes the text wherever the cursor is.
 
-- Mac (Apple silicon, macOS 15 or later): https://anoma.ly/hex/files/releases/HEX-latest-arm64.dmg, or `brew install --cask anomalyco/tap/hex`
+- Mac (Apple silicon, macOS 15 or later): https://gospell.goml.io/files/releases/GOSPELL-latest-arm64.dmg, or `brew install --cask goml/tap/gospell`
 - Windows 10 or 11 beta, x64 and ARM64: per-user Setup.exe installers at __ORIGIN__/
-- Linux beta, x86_64 Arch with glibc 2.44 or later: `curl -fsSL https://anoma.ly/hex/files/install-linux.sh | sh`
+- Linux beta, x86_64 Arch with glibc 2.44 or later: `curl -fsSL https://gospell.goml.io/files/install-linux.sh | sh`
 
 ## Docs
 
-- [README](https://github.com/anomalyco/hex/blob/dev/README.md): features, settings, privacy, and troubleshooting
-- [Windows guide](https://github.com/anomalyco/hex/blob/dev/docs/windows.md)
-- [Linux guide](https://github.com/anomalyco/hex/blob/dev/docs/linux.md)
-- [Transforms](https://anoma.ly/hex/docs/transforms): the JavaScript API for changing dictated text before Hex pastes it, including `fetch` and `node:child_process`
-- [Managing Hex](https://anoma.ly/hex/docs/admin): macOS configuration-profile keys that turn off Meetings, Annotate, OpenCode processing, transforms, Labs, and updates, or hold transforms to this computer
-- [Hex Labs](__ORIGIN__/labs): features Hex is trying out, each off until it's turned on in Settings › Labs or with `hex labs on <id>`, one page per lab at __ORIGIN__/labs/<id>
-- [TypeScript SDK](https://github.com/anomalyco/hex/blob/dev/sdk/typescript/README.md): local transcription for other apps
+- [README](https://github.com/goml/gospell/blob/dev/README.md): features, settings, privacy, and troubleshooting
+- [Windows guide](https://github.com/goml/gospell/blob/dev/docs/windows.md)
+- [Linux guide](https://github.com/goml/gospell/blob/dev/docs/linux.md)
+- [Transforms](https://gospell.goml.io/docs/transforms): the JavaScript API for changing dictated text before GoSpell pastes it, including `fetch` and `node:child_process`
+- [Managing GoSpell](https://gospell.goml.io/docs/admin): macOS configuration-profile keys that turn off Meetings, Annotate, OpenCode processing, transforms, Labs, and updates, or hold transforms to this computer
+- [GoSpell Labs](__ORIGIN__/labs): features GoSpell is trying out, each off until it's turned on in Settings › Labs or with `gospell labs on <id>`, one page per lab at __ORIGIN__/labs/<id>
+- [TypeScript SDK](https://github.com/goml/gospell/blob/dev/sdk/typescript/README.md): local transcription for other apps

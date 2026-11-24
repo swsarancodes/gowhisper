@@ -3,37 +3,37 @@
 ## Public Paths
 
 ```ts
-anoma.ly/release/hex/                      the Anomaly release service (docs/releasing.md)
+goml.io/release/gospell/                      the GoML release service (docs/releasing.md)
 ├── index.json, desktop/stable.json        what the site, installers, and apps read
-└── files/<sha256>/<name>                  hex-<v>-macos-arm64.{zip,dmg}, hex-<v>-windows-<arch>.exe,
-                                           hex-setup-<v>-windows-<arch>.exe,
-                                           hex-<v>-linux-<x64|arm64>{,.deb,.rpm}
-anoma.ly/hex                               the one site: platform-aware download (Worker hex-production-site)
-├── download/<target>                      302 to anoma.ly/release/hex/desktop/stable/<target> once stable.json
+└── files/<sha256>/<name>                  gospell-<v>-macos-arm64.{zip,dmg}, gospell-<v>-windows-<arch>.exe,
+                                           gospell-setup-<v>-windows-<arch>.exe,
+                                           gospell-<v>-linux-<x64|arm64>{,.deb,.rpm}
+gospell.goml.io                               the one site: platform-aware download (Worker gospell-production-site)
+├── download/<target>                      302 to goml.io/release/gospell/desktop/stable/<target> once stable.json
 │                                          exists, else to .../dev/<target> (the newest dev build)
 ├── install-linux.sh, install-windows.ps1  installers (copied from .github/release/ at the site build)
 └── files/…                                the one owner of every release file (same Worker)
     ├── install-linux.sh, install-windows.ps1, appcast.xml  built and served with the site
     ├── dev-notes.json                                    the Release workflow's dev-notes branch
-    └── linux-update.json, windows-update.json, windows-aarch64-update.json, releases/HEX-2.3.1-…
-                                                          frozen 2.3.1 history in hex-production-files,
+    └── linux-update.json, windows-update.json, windows-aarch64-update.json, releases/GOSPELL-2.3.1-…
+                                                          frozen 2.3.1 history in gospell-production-files,
                                                           read-only from the Worker binding
-dev.anoma.ly/hex                           the dev site (reads anoma.ly/release; the service's dev stage
+dev.gospell.goml.io                           the dev site (reads goml.io/release; the service's dev stage
                                            is only for testing the service)
-hex.kitlangton.com, .dev                   Kit's old site (Kit's Cloudflare account); should 301 to
-                                           anoma.ly/hex (Kit's change; nothing links to it)
-downloads.hex.kitlangton.dev, .com         Kit's old bucket, frozen at 2.3.1; releases up to 2.3.1
+gospell.goml.io, .dev                   Kit's old site (Kit's Cloudflare account); should 301 to
+                                           gospell.goml.io (Kit's change; nothing links to it)
+downloads.gospell.goml.io, .com         Kit's old bucket, frozen at 2.3.1; releases up to 2.3.1
                                            compiled it, so it stays up forever; the Worker in
                                            packaging/legacy-downloads redirects it to
-                                           anoma.ly/hex/files (same bytes) once deployed
-github.com/anomalyco/hex/releases/tag/v<version>       identical-byte mirror of every file (app-v through 2.3.1)
+                                           gospell.goml.io/files (same bytes) once deployed
+github.com/goml/gospell/releases/tag/v<version>       identical-byte mirror of every file (app-v through 2.3.1)
 ```
 
 `docs/releasing.md` describes the Worker config, the workflow that publishes
 these, the credentials, and the transition from Kit's bucket.
-`hex-production-files` was seeded with byte copies of everything the old bucket
-served. A Configuration Rule in the anoma.ly zone disables **Browser Integrity
-Check** for `/hex/files/` on anoma.ly and dev.anoma.ly: the zone check returned
+`gospell-production-files` was seeded with byte copies of everything the old bucket
+served. A Configuration Rule in the goml.io zone disables **Browser Integrity
+Check** for `/gospell/files/` on goml.io and dev.goml.io: the zone check returned
 HTTP 403 to Python's default user agent. Keep browser challenges off download
 and updater routes.
 
@@ -48,15 +48,15 @@ name the release service or an explicit `v<version>` tag.
 The site reads the stable manifest when it builds, so the production deploy
 that follows a stable release updates every link. Bump the README's explicit
 app mirror link by hand; the Release workflow pushes
-`anomalyco/homebrew-tap/Casks/hex.rb`.
+`anomalyco/homebrew-tap/Casks/gospell.rb`.
 `bun run --cwd site check:downloads` must pass; then verify the live links.
 
 ## Network Recovery
 
 App and model downloads have different hosts. Managed networks may need to allow:
 
-- `anoma.ly` (paths `/release/` and, for 2.3.1, `/hex/files/`) for app
-  downloads and updates (`downloads.hex.kitlangton.dev` too for releases up to
+- `goml.io` (paths `/release/` and, for 2.3.1, `/gospell/files/`) for app
+  downloads and updates (`downloads.gospell.goml.io` too for releases up to
   2.3.1, which reach it through a redirect).
 - GitHub release downloads and their asset delivery host for the alternative DMG.
 - `huggingface.co` and its model download CDN for dictation-model setup.
@@ -67,7 +67,7 @@ HTTP 200. This is an observed delivery host, not a permanent exhaustive CDN list
 No model body was downloaded for that check.
 
 Model downloads, update checks, and transformation scripts' `fetch` go through
-Hex's own HTTPS client (`src/net.rs`, #894), which behaves like a browser on a
+GoSpell's own HTTPS client (`src/net.rs`, #894), which behaves like a browser on a
 managed network:
 
 - Proxy: `HTTPS_PROXY`, `HTTP_PROXY`, `ALL_PROXY`, and `NO_PROXY` on every OS
@@ -75,7 +75,7 @@ managed network:
   user's proxy (Settings › Network › Proxy, Internet Options), its PAC file or
   WPAD, then the machine's WinHTTP proxy (`netsh winhttp set proxy`). macOS:
   the network's HTTP and HTTPS proxies and their exceptions; a PAC file isn't
-  evaluated, so Hex passes over it to the next HTTP or HTTPS proxy in the list
+  evaluated, so GoSpell passes over it to the next HTTP or HTTPS proxy in the list
   (#1235), and a PAC-only network needs `HTTPS_PROXY`. Linux: the environment only. A proxy that
   needs a sign-in (NTLM, Kerberos) fails with "the proxy needs a sign-in".
 - TLS: the platform's own (SChannel, Security.framework, OpenSSL) with the

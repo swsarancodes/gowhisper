@@ -1,5 +1,5 @@
 //! A Screenshots recording once written: its movie is saved to the
-//! screenshots folder as "Hex Recording … .mp4", as a shot's PNG is, and
+//! screenshots folder as "GoSpell Recording … .mp4", as a shot's PNG is, and
 //! its card shows in the corner from its first frame, pointing at that
 //! file. The recording itself is an Annotate capture
 //! (`CaptureCommand::Clip`) that skips the clipboard and the router; its
@@ -15,7 +15,7 @@ use crate::rune_ui::screenshot_thumbnail::{Recording, Taken};
 /// thread: the movie is saved and the card read on a thread of its own.
 pub(super) fn written(bundle: PathBuf) {
     let spawned = std::thread::Builder::new()
-        .name("hex-recording-card".into())
+        .name("gospell-recording-card".into())
         .spawn(move || {
             if let Err(error) = show(&bundle) {
                 tracing::warn!(%error, bundle = %bundle.display(), "could not show the recording");
@@ -180,7 +180,7 @@ fn heard(wav: &Path) -> bool {
     })
 }
 
-/// `movie` saved as a fresh "Hex Recording … .mp4" in `folder`, making the
+/// `movie` saved as a fresh "GoSpell Recording … .mp4" in `folder`, making the
 /// folder if it's missing, with `sound` mixed in as one AAC track. Without
 /// sound it's a copy, which on one volume is a clone: instant, and taking no
 /// space until either changes. A mix that fails saves the silent copy.
@@ -214,15 +214,16 @@ mod tests {
     #[test]
     fn a_recording_saves_beside_the_shots_and_never_over_one() {
         let folder =
-            std::env::temp_dir().join(format!("hex-recording-save-{}", std::process::id()));
+            std::env::temp_dir().join(format!("gospell-recording-save-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&folder);
-        let source = std::env::temp_dir().join(format!("hex-recording-{}.mp4", std::process::id()));
+        let source =
+            std::env::temp_dir().join(format!("gospell-recording-{}.mp4", std::process::id()));
         std::fs::write(&source, b"movie").unwrap();
         let first = save(&source, &[], &folder).unwrap();
         let second = save(&source, &[], &folder).unwrap();
         let name = first.file_name().unwrap().to_string_lossy().into_owned();
         assert!(
-            name.starts_with("Hex Recording ") && name.ends_with(".mp4"),
+            name.starts_with("GoSpell Recording ") && name.ends_with(".mp4"),
             "{name}"
         );
         assert_ne!(first, second);
@@ -248,7 +249,7 @@ mod tests {
     #[test]
     fn a_recording_keeps_the_microphone_it_heard_and_the_computer_audio_on_its_clock() {
         let bundle =
-            std::env::temp_dir().join(format!("hex-recording-sound-{}", std::process::id()));
+            std::env::temp_dir().join(format!("gospell-recording-sound-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&bundle);
         std::fs::create_dir_all(&bundle).unwrap();
         std::fs::write(

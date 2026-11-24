@@ -47,7 +47,7 @@ private final class VoiceProcessingGate {
 private func withVoiceProcessingGuard(_ body: @escaping () throws -> Void) throws {
     var failure: Error?
     var reason: UnsafeMutablePointer<CChar>?
-    let status = hex_voice_processing_guard({
+    let status = gospell_voice_processing_guard({
         do {
             try body()
         } catch {
@@ -89,7 +89,7 @@ private func voiceProcessingDeviceID(_ uid: String) throws -> AudioDeviceID {
         )
     }
     guard status == noErr, deviceID != kAudioObjectUnknown else {
-        throw VoiceProcessingError("Hex couldn't find the microphone (\(status)).")
+        throw VoiceProcessingError("GoSpell couldn't find the microphone (\(status)).")
     }
     return deviceID
 }
@@ -100,7 +100,7 @@ private func voiceProcessingSelect(
     on input: AVAudioInputNode
 ) throws {
     guard let audioUnit = input.audioUnit else {
-        throw VoiceProcessingError("Hex couldn't reach the microphone's audio unit.")
+        throw VoiceProcessingError("GoSpell couldn't reach the microphone's audio unit.")
     }
     var device = deviceID
     let status = AudioUnitSetProperty(
@@ -112,14 +112,14 @@ private func voiceProcessingSelect(
         UInt32(MemoryLayout<AudioDeviceID>.size)
     )
     guard status == noErr else {
-        throw VoiceProcessingError("Hex couldn't select the microphone (\(status)).")
+        throw VoiceProcessingError("GoSpell couldn't select the microphone (\(status)).")
     }
 }
 
 /// The CoreAudio device the input node's audio unit records from now.
 private func voiceProcessingSelected(_ input: AVAudioInputNode) throws -> AudioDeviceID {
     guard let audioUnit = input.audioUnit else {
-        throw VoiceProcessingError("Hex couldn't reach the microphone's audio unit.")
+        throw VoiceProcessingError("GoSpell couldn't reach the microphone's audio unit.")
     }
     var device = AudioDeviceID(kAudioObjectUnknown)
     var size = UInt32(MemoryLayout<AudioDeviceID>.size)
@@ -132,7 +132,7 @@ private func voiceProcessingSelected(_ input: AVAudioInputNode) throws -> AudioD
         &size
     )
     guard status == noErr, device != kAudioObjectUnknown else {
-        throw VoiceProcessingError("Hex couldn't read which microphone voice processing uses (\(status)).")
+        throw VoiceProcessingError("GoSpell couldn't read which microphone voice processing uses (\(status)).")
     }
     return device
 }
@@ -201,7 +201,7 @@ private func makeVoiceProcessingGraph(
                 interleaved: false
             )
         else {
-            throw VoiceProcessingError("Hex couldn't make a tap format for the microphone.")
+            throw VoiceProcessingError("GoSpell couldn't make a tap format for the microphone.")
         }
         let rate = inputOutput.sampleRate
         input.installTap(onBus: 0, bufferSize: 1024, format: tapFormat) { buffer, when in
@@ -223,7 +223,7 @@ private func makeVoiceProcessingGraph(
         )
     }
     guard let graph else {
-        throw VoiceProcessingError("Hex couldn't build the voice-processing graph.")
+        throw VoiceProcessingError("GoSpell couldn't build the voice-processing graph.")
     }
     return graph
 }
@@ -288,7 +288,7 @@ final class VoiceProcessingCapture {
             engine.prepare()
             try engine.start()
             // The engine may have moved to another device while it started;
-            // Hex records from the chosen one or not at all.
+            // GoSpell records from the chosen one or not at all.
             let selected = try voiceProcessingSelected(engine.inputNode)
             guard selected == deviceID else {
                 throw VoiceProcessingError(
@@ -350,8 +350,8 @@ final class VoiceProcessingCapture {
 /// Builds the voice-processing engine for `deviceUID` and connects its graph,
 /// without starting it. Answers a retained handle, the capture rate and
 /// channels, or null with a message in `errorOutput`.
-@_cdecl("hex_voice_processing_start")
-public func hexVoiceProcessingStart(
+@_cdecl("gospell_voice_processing_start")
+public func gospellVoiceProcessingStart(
     _ deviceUID: UnsafePointer<CChar>?,
     _ callback: VoiceProcessingCallback?,
     _ errorCallback: VoiceProcessingErrorCallback?,
@@ -362,7 +362,7 @@ public func hexVoiceProcessingStart(
 ) -> UnsafeMutableRawPointer? {
     guard let deviceUID, let callback, let errorCallback, let context else {
         writeVoiceProcessingError(
-            "Hex's voice isolation received no microphone, callback, or context.",
+            "GoSpell's voice isolation received no microphone, callback, or context.",
             to: errorOutput
         )
         return nil
@@ -388,13 +388,13 @@ public func hexVoiceProcessingStart(
 
 /// Starts the engine behind `handle` and verifies its device; 0 on success,
 /// else 1 with a message in `errorOutput`.
-@_cdecl("hex_voice_processing_begin")
-public func hexVoiceProcessingBegin(
+@_cdecl("gospell_voice_processing_begin")
+public func gospellVoiceProcessingBegin(
     _ handle: UnsafeMutableRawPointer?,
     _ errorOutput: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
 ) -> Int32 {
     guard let handle else {
-        writeVoiceProcessingError("Hex lost the voice isolation engine.", to: errorOutput)
+        writeVoiceProcessingError("GoSpell lost the voice isolation engine.", to: errorOutput)
         return 1
     }
     do {
@@ -411,13 +411,13 @@ public func hexVoiceProcessingBegin(
 
 /// Clears the callback gate, removes the tap, stops the engine, resets it,
 /// and releases the handle.
-@_cdecl("hex_voice_processing_stop")
-public func hexVoiceProcessingStop(_ handle: UnsafeMutableRawPointer?) {
+@_cdecl("gospell_voice_processing_stop")
+public func gospellVoiceProcessingStop(_ handle: UnsafeMutableRawPointer?) {
     guard let handle else { return }
     Unmanaged<VoiceProcessingCapture>.fromOpaque(handle).takeRetainedValue().stop()
 }
 
-@_cdecl("hex_voice_processing_free_string")
-public func hexVoiceProcessingFreeString(_ string: UnsafeMutablePointer<CChar>?) {
+@_cdecl("gospell_voice_processing_free_string")
+public func gospellVoiceProcessingFreeString(_ string: UnsafeMutablePointer<CChar>?) {
     free(string)
 }

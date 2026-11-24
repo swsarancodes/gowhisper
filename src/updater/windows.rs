@@ -1,9 +1,9 @@
 //! Windows installs: the per-user version layout our installers receipt
-//! (`%APPDATA%\hex\install.json`) updates itself by staging the
-//! new `hex.exe` and its console entry point `hex.com` (crates/console) into
+//! (`%APPDATA%\gospell\install.json`) updates itself by staging the
+//! new `gospell.exe` and its console entry point `gospell.com` (crates/console) into
 //! their own version directory and switching the `current-version` pointer.
-//! `bin\hex.com`, the copy PATH names, follows. Before anything runs, every
-//! download must carry a valid Authenticode signature from Anomaly's
+//! `bin\gospell.com`, the copy PATH names, follows. Before anything runs, every
+//! download must carry a valid Authenticode signature from GoML's
 //! Artifact Signing identity. Administrators turn updates off with the
 //! `DisableUpdates` policy value.
 
@@ -33,15 +33,15 @@ pub const DOWNLOAD_TARGET: &str = "windows-x64-setup";
 pub const DOWNLOAD_TARGET: &str = "windows-arm64-setup";
 
 /// The common name of the certificate Azure Artifact Signing issues to
-/// Anomaly (as on OpenCode's signed Windows builds); updates signed by
+/// GoML (as on OpenCode's signed Windows builds); updates signed by
 /// anyone else are refused.
-pub const AUTHENTICODE_SIGNER: &str = "Anomaly Innovations, Inc https://anoma.ly/";
-/// `HKLM` (or `HKCU`) `\SOFTWARE\Policies\Anomaly\Hex`, value `DisableUpdates`.
-const POLICY_KEY: &str = r"SOFTWARE\Policies\Anomaly\Hex";
-/// The Apps & Features entry that packaging/windows/hex.iss registers.
+pub const AUTHENTICODE_SIGNER: &str = "GoML Innovations, Inc https://goml.io/";
+/// `HKLM` (or `HKCU`) `\SOFTWARE\Policies\GoML\GoSpell`, value `DisableUpdates`.
+const POLICY_KEY: &str = r"SOFTWARE\Policies\GoML\GoSpell";
+/// The Apps & Features entry that packaging/windows/gospell.iss registers.
 const UNINSTALL_KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\{6ED48C92-5177-41F4-B8D6-37B7B02CFDF4}_is1";
 
-/// The activated `hex.exe`.
+/// The activated `gospell.exe`.
 #[derive(Clone, Debug)]
 pub struct Staged(PathBuf);
 
@@ -52,12 +52,12 @@ impl Staged {
     }
 }
 
-/// Why this copy of Hex can't update itself; the window says so beside
+/// Why this copy of GoSpell can't update itself; the window says so beside
 /// Download update, with what to do.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Ineligible {
     /// Not running from `<support>\versions\<version>`: a downloaded or
-    /// copied `hex.exe`, or a build.
+    /// copied `gospell.exe`, or a build.
     NotInstalled,
     /// The data folder is outside the user's own profile.
     OutsideProfile,
@@ -69,13 +69,13 @@ impl Ineligible {
     fn message(self) -> &'static str {
         match self {
             Self::NotInstalled => {
-                "This copy of Hex can't update itself because the Hex installer didn't install it. Install Hex from anoma.ly/hex to get updates in the app."
+                "This copy of GoSpell can't update itself because the GoSpell installer didn't install it. Install GoSpell from gospell.goml.io to get updates in the app."
             }
             Self::OutsideProfile => {
-                "This copy of Hex can't update itself because it's installed outside your user folder. Reinstall Hex from anoma.ly/hex to get updates in the app."
+                "This copy of GoSpell can't update itself because it's installed outside your user folder. Reinstall GoSpell from gospell.goml.io to get updates in the app."
             }
             Self::Receipt => {
-                "This copy of Hex can't update itself because its install record is from another installer. Reinstall Hex from anoma.ly/hex to get updates in the app."
+                "This copy of GoSpell can't update itself because its install record is from another installer. Reinstall GoSpell from gospell.goml.io to get updates in the app."
             }
         }
     }
@@ -88,13 +88,13 @@ pub fn method() -> Method {
     match eligibility() {
         Ok(channel) => Method::Direct { channel },
         Err(why) => {
-            tracing::warn!(?why, "this Hex can't update itself");
+            tracing::warn!(?why, "this GoSpell can't update itself");
             Method::Unknown
         }
     }
 }
 
-/// What the window shows when this Hex can't update itself.
+/// What the window shows when this GoSpell can't update itself.
 pub fn blocked() -> Option<&'static str> {
     eligibility().err().map(Ineligible::message)
 }
@@ -204,7 +204,7 @@ pub fn updates_disabled_by_policy() -> bool {
         })
 }
 
-/// Stages `file` (hex.exe) and `console` (hex.com), when the release has
+/// Stages `file` (gospell.exe) and `console` (gospell.com), when the release has
 /// one, as `version`.
 pub fn stage(file: &Path, console: Option<&Path>, version: &str) -> Result<Staged> {
     verify_authenticode(file, AUTHENTICODE_SIGNER)?;
@@ -220,8 +220,8 @@ pub fn stage(file: &Path, console: Option<&Path>, version: &str) -> Result<Stage
         .open(support.join("updates").join("update.lock"))?;
     lock.try_lock_exclusive()
         .wrap_err("another Windows update is already in progress")?;
-    let staging = support.join("updates").join("hex.exe.staging");
-    let console_staging = support.join("updates").join("hex.com.staging");
+    let staging = support.join("updates").join("gospell.exe.staging");
+    let console_staging = support.join("updates").join("gospell.com.staging");
     let _ = fs::remove_file(&staging);
     let _ = fs::remove_file(&console_staging);
     fs::copy(file, &staging)?;
@@ -238,18 +238,18 @@ pub fn stage(file: &Path, console: Option<&Path>, version: &str) -> Result<Stage
         }
     }
     let executable = activation?;
-    // A release without hex.com keeps the one in bin, which finds hex.exe
+    // A release without gospell.com keeps the one in bin, which finds gospell.exe
     // through current-version.
     if console.is_some()
-        && let Err(error) = publish_console(&support, &executable.with_file_name("hex.com"))
+        && let Err(error) = publish_console(&support, &executable.with_file_name("gospell.com"))
     {
-        tracing::warn!(%error, "could not put the updated hex.com on PATH");
+        tracing::warn!(%error, "could not put the updated gospell.com on PATH");
     }
     if let Err(error) = crate::windows::login_item::repoint(&executable) {
-        tracing::warn!(%error, "could not repoint Launch at login to the updated Hex");
+        tracing::warn!(%error, "could not repoint Launch at login to the updated GoSpell");
     }
     if let Err(error) = repoint_shortcuts(&support, &executable) {
-        tracing::warn!(%error, "could not repoint shortcuts to the updated Hex");
+        tracing::warn!(%error, "could not repoint shortcuts to the updated GoSpell");
     }
     if let Err(error) = update_uninstall_entry(version) {
         tracing::warn!(%error, "could not update the Apps & Features version");
@@ -265,11 +265,11 @@ pub fn verify_authenticode(file: &Path, signer: &str) -> Result<()> {
             "-NoProfile",
             "-NonInteractive",
             "-Command",
-            "$s = Get-AuthenticodeSignature -LiteralPath $env:HEX_UPDATE_FILE; \
+            "$s = Get-AuthenticodeSignature -LiteralPath $env:GOSPELL_UPDATE_FILE; \
              [Console]::Out.Write(\"$($s.Status)`n\"); \
              if ($s.SignerCertificate) { [Console]::Out.Write($s.SignerCertificate.GetNameInfo('SimpleName', $false)) }",
         ])
-        .env("HEX_UPDATE_FILE", file)
+        .env("GOSPELL_UPDATE_FILE", file)
         // A PowerShell 7 parent's module path breaks Windows PowerShell's
         // own modules, Microsoft.PowerShell.Security among them.
         .env_remove("PSModulePath")
@@ -289,7 +289,7 @@ pub fn verify_authenticode(file: &Path, signer: &str) -> Result<()> {
 
 /// Retarget every shortcut that belongs to this install in one PowerShell
 /// run: the Start Menu, Desktop, and taskbar pins. Only a shortcut whose
-/// target is `hex.exe` in this install's `versions\<version>` folder is
+/// target is `gospell.exe` in this install's `versions\<version>` folder is
 /// touched; its arguments and name stay, and an icon from an old version
 /// follows. A managed Start Menu link that still exists but reads as empty
 /// (zero-filled, for example) is recreated as the installer writes it. One bad
@@ -332,12 +332,12 @@ fn retarget_shortcuts(folders: &[PathBuf; 3], support: &Path, executable: &Path)
             "-Command",
             SHORTCUT_REPOINT_SCRIPT,
         ])
-        .env("HEX_PROGRAMS", programs)
-        .env("HEX_DESKTOP", desktop)
-        .env("HEX_TASKBAR", taskbar)
-        .env("HEX_VERSIONS", support.join("versions"))
-        .env("HEX_STAGING", &staging)
-        .env("HEX_EXECUTABLE", executable)
+        .env("GOSPELL_PROGRAMS", programs)
+        .env("GOSPELL_DESKTOP", desktop)
+        .env("GOSPELL_TASKBAR", taskbar)
+        .env("GOSPELL_VERSIONS", support.join("versions"))
+        .env("GOSPELL_STAGING", &staging)
+        .env("GOSPELL_EXECUTABLE", executable)
         .env_remove("PSModulePath")
         .stdin(Stdio::null())
         .stdout(Stdio::null())
@@ -359,7 +359,7 @@ fn retarget_shortcuts(folders: &[PathBuf; 3], support: &Path, executable: &Path)
 /// cold PowerShell on a slow ARM machine can take many seconds.
 const SHORTCUT_UPDATE_TIMEOUT: Duration = Duration::from_secs(60);
 
-/// Waits for `child` without blocking Hex's update lock forever: a redirected
+/// Waits for `child` without blocking GoSpell's update lock forever: a redirected
 /// Desktop on an unreachable network share can keep PowerShell from finishing.
 fn wait_for_exit(child: &mut std::process::Child) -> Result<std::process::ExitStatus> {
     let started = Instant::now();
@@ -395,17 +395,17 @@ fn wait_for_exit(child: &mut std::process::Child) -> Result<std::process::ExitSt
 const SHORTCUT_REPOINT_SCRIPT: &str = "\
     $ErrorActionPreference = 'Stop'; \
     $shell = New-Object -ComObject WScript.Shell; \
-    $executable = $env:HEX_EXECUTABLE; \
+    $executable = $env:GOSPELL_EXECUTABLE; \
     $working = [IO.Path]::GetDirectoryName($executable); \
-    $versions = $env:HEX_VERSIONS.TrimEnd('\\') + '\\'; \
-    $staging = $env:HEX_STAGING; \
+    $versions = $env:GOSPELL_VERSIONS.TrimEnd('\\') + '\\'; \
+    $staging = $env:GOSPELL_STAGING; \
     $temp = if ($staging) { Join-Path $staging 'shortcut.tmp.lnk' } else { '' }; \
-    $folders = @($env:HEX_PROGRAMS, $env:HEX_TASKBAR, $env:HEX_DESKTOP); \
+    $folders = @($env:GOSPELL_PROGRAMS, $env:GOSPELL_TASKBAR, $env:GOSPELL_DESKTOP); \
     $failed = $false; \
-    $programs = $env:HEX_PROGRAMS; \
+    $programs = $env:GOSPELL_PROGRAMS; \
     if ($programs) { \
       try { \
-        $managed = Join-Path $programs 'Hex.lnk'; \
+        $managed = Join-Path $programs 'GoSpell.lnk'; \
         $broken = $false; \
         if (Test-Path -LiteralPath $managed -PathType Leaf -ErrorAction SilentlyContinue) { \
           try { $existing = $shell.CreateShortcut($managed); if (-not [string]$existing.TargetPath) { $broken = $true } } catch { $broken = $true } } \
@@ -415,7 +415,7 @@ const SHORTCUT_REPOINT_SCRIPT: &str = "\
           $fresh = $shell.CreateShortcut($temp); \
           $fresh.TargetPath = $executable; \
           $fresh.Arguments = 'app'; \
-          $fresh.Description = 'Hex managed install'; \
+          $fresh.Description = 'GoSpell managed install'; \
           $fresh.WorkingDirectory = $working; \
           $fresh.Save(); \
           $fs = [IO.File]::Open($temp, 'Open', 'ReadWrite'); \
@@ -440,7 +440,7 @@ const SHORTCUT_REPOINT_SCRIPT: &str = "\
             $s = $shell.CreateShortcut($file.FullName); \
             $target = [string]$s.TargetPath; \
             if (-not $target -or -not $target.StartsWith($versions, [StringComparison]::OrdinalIgnoreCase)) { continue } \
-            if ([IO.Path]::GetFileName($target) -ine 'hex.exe') { continue } \
+            if ([IO.Path]::GetFileName($target) -ine 'gospell.exe') { continue } \
             $relative = $target.Substring($versions.Length).Split('\\'); \
             if ($relative.Count -ne 2 -or -not $relative[0]) { continue } \
             $matched = $true; \
@@ -454,7 +454,7 @@ const SHORTCUT_REPOINT_SCRIPT: &str = "\
             $cleanIcon = [Environment]::ExpandEnvironmentVariables($iconPath.Trim().Trim('\"')); \
             if ($cleanIcon.StartsWith($versions, [StringComparison]::OrdinalIgnoreCase)) { \
               $iconRelative = $cleanIcon.Substring($versions.Length).Split('\\'); \
-              if ($iconRelative.Count -eq 2 -and $iconRelative[0] -and $iconRelative[1] -ieq 'hex.exe') { \
+              if ($iconRelative.Count -eq 2 -and $iconRelative[0] -and $iconRelative[1] -ieq 'gospell.exe') { \
                 $index = if ($comma -ge 0) { $icon.Substring($comma) } else { ',0' }; \
                 $newIcon = $executable + $index; \
                 if (-not [string]::Equals($icon, $newIcon, [StringComparison]::OrdinalIgnoreCase)) { $changed = $true } } } \
@@ -491,7 +491,7 @@ const SHORTCUT_REPOINT_SCRIPT: &str = "\
     if ($failed) { exit 1 }";
 
 /// Show the activated version in Apps & Features when Setup.exe installed
-/// Hex; script installs have no entry and are left alone.
+/// GoSpell; script installs have no entry and are left alone.
 fn update_uninstall_entry(version: &str) -> Result<()> {
     use winreg::RegKey;
     use winreg::enums::{HKEY_CURRENT_USER, KEY_WRITE};
@@ -524,53 +524,53 @@ fn validate_executable(path: &Path, version: &str) -> Result<()> {
     Ok(())
 }
 
-/// `hex.com --version` runs the `hex.exe` beside it and reports its version.
+/// `gospell.com --version` runs the `gospell.exe` beside it and reports its version.
 fn validate_console(path: &Path, version: &str) -> Result<()> {
     let output = background_process::command(path)
         .arg("--version")
         .stdin(Stdio::null())
         .output()
-        .wrap_err("could not start the downloaded hex.com")?;
+        .wrap_err("could not start the downloaded gospell.com")?;
     if !output.status.success()
         || String::from_utf8_lossy(&output.stdout)
             .split_whitespace()
             .last()
             != Some(version)
     {
-        bail!("the downloaded hex.com doesn't run this version's hex.exe");
+        bail!("the downloaded gospell.com doesn't run this version's gospell.exe");
     }
     Ok(())
 }
 
-/// Whether this install lacks `hex.com` beside the running `hex.exe` or in
-/// `bin`: Setup and updaters before it installed only `hex.exe`.
+/// Whether this install lacks `gospell.com` beside the running `gospell.exe` or in
+/// `bin`: Setup and updaters before it installed only `gospell.exe`.
 pub fn console_missing() -> bool {
     let (Ok(executable), Ok(support)) = (std::env::current_exe(), crate::app_paths::support_dir())
     else {
         return false;
     };
-    !executable.with_file_name("hex.com").is_file()
-        || !support.join("bin").join("hex.com").is_file()
+    !executable.with_file_name("gospell.com").is_file()
+        || !support.join("bin").join("gospell.com").is_file()
 }
 
-/// Adds a release's verified `hex.com` beside the running `hex.exe` and on
-/// PATH, for an install whose updater predates it. hex.com only starts the
-/// `hex.exe` beside it, so any release's copy serves this version.
+/// Adds a release's verified `gospell.com` beside the running `gospell.exe` and on
+/// PATH, for an install whose updater predates it. gospell.com only starts the
+/// `gospell.exe` beside it, so any release's copy serves this version.
 pub fn install_console(file: &Path) -> Result<()> {
     verify_authenticode(file, AUTHENTICODE_SIGNER)?;
     let support = crate::app_paths::support_dir()?;
-    let beside = std::env::current_exe()?.with_file_name("hex.com");
+    let beside = std::env::current_exe()?.with_file_name("gospell.com");
     replace_file(file, &beside)?;
     validate_console(&beside, crate::VERSION)?;
     publish_console(&support, &beside)
 }
 
-/// Copies `console` to `bin\hex.com` and keeps `bin` on the user's PATH,
-/// where a terminal finds `hex` across updates.
+/// Copies `console` to `bin\gospell.com` and keeps `bin` on the user's PATH,
+/// where a terminal finds `gospell` across updates.
 fn publish_console(support: &Path, console: &Path) -> Result<()> {
     let bin = support.join("bin");
     fs::create_dir_all(&bin)?;
-    replace_file(console, &bin.join("hex.com"))?;
+    replace_file(console, &bin.join("gospell.com"))?;
     add_to_path(&bin)
 }
 
@@ -636,7 +636,7 @@ fn add_to_path(folder: &Path) -> Result<()> {
     let vtype = existing.map_or(REG_EXPAND_SZ, |value| value.vtype);
     environment
         .set_raw_value("Path", &RegValue { bytes, vtype })
-        .wrap_err("could not add Hex to PATH")?;
+        .wrap_err("could not add GoSpell to PATH")?;
     let name: Vec<u16> = "Environment".encode_utf16().chain([0]).collect();
     // SAFETY: `name` is NUL-terminated and outlives the call; a hung window
     // is skipped after the timeout.
@@ -669,7 +669,7 @@ fn sync_file(path: &Path) -> Result<()> {
     Ok(())
 }
 
-/// Stage the executable, and hex.com beside it when there is one, into its
+/// Stage the executable, and gospell.com beside it when there is one, into its
 /// version directory and switch the `current-version` pointer atomically;
 /// the running version's files are never touched, and every version but the
 /// new, running, and previous one is pruned.
@@ -682,16 +682,16 @@ pub(super) fn activate(
     let versions = support.join("versions");
     let version_dir = versions.join(version);
     fs::create_dir_all(&version_dir)?;
-    let executable = version_dir.join("hex.exe");
-    let staged = version_dir.join("hex.exe.partial");
+    let executable = version_dir.join("gospell.exe");
+    let staged = version_dir.join("gospell.exe.partial");
     let _ = fs::remove_file(&staged);
     fs::rename(staging, &staged)?;
     // FlushFileBuffers requires write access on Windows, unlike fsync.
     sync_file(&staged)?;
     fs::rename(&staged, &executable)?;
     if let Some(console) = console {
-        let installed = version_dir.join("hex.com");
-        let staged = version_dir.join("hex.com.partial");
+        let installed = version_dir.join("gospell.com");
+        let staged = version_dir.join("gospell.com.partial");
         let _ = fs::remove_file(&staged);
         fs::rename(console, &staged)?;
         sync_file(&staged)?;
@@ -719,7 +719,7 @@ pub(super) fn activate(
             && is_version_name(name)
             && let Err(error) = fs::remove_dir_all(entry.path())
         {
-            tracing::warn!(%error, path = %entry.path().display(), "could not prune an old Hex version");
+            tracing::warn!(%error, path = %entry.path().display(), "could not prune an old GoSpell version");
         }
     }
     Ok(executable)
@@ -737,13 +737,13 @@ pub fn restart_into(staged: &Staged) -> Result<()> {
             "-Command",
             &restart_script(std::process::id()),
         ])
-        .env("HEX_EXECUTABLE", &staged.0)
+        .env("GOSPELL_EXECUTABLE", &staged.0)
         .env_remove("PSModulePath")
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn()
-        .wrap_err("could not schedule the updated Hex version")?;
+        .wrap_err("could not schedule the updated GoSpell version")?;
     Ok(())
 }
 
@@ -755,7 +755,7 @@ fn restart_script(pid: u32) -> String {
     format!(
         "$old = Get-Process -Id {pid} -ErrorAction SilentlyContinue; \
          if ($old -and -not $old.WaitForExit(300000)) {{ exit 1 }}; \
-         Start-Process -FilePath $env:HEX_EXECUTABLE -ArgumentList 'app'"
+         Start-Process -FilePath $env:GOSPELL_EXECUTABLE -ArgumentList 'app'"
     )
 }
 
@@ -763,15 +763,16 @@ fn restart_script(pid: u32) -> String {
 mod tests {
     use super::*;
 
-    /// A profile with `<profile>\hex\versions\3.3.0\hex.exe`, the layout both
+    /// A profile with `<profile>\gospell\versions\3.3.0\gospell.exe`, the layout both
     /// Setup.exe and install-windows.ps1 create (#1352).
     fn installed(name: &str) -> (PathBuf, PathBuf, PathBuf) {
-        let profile = std::env::temp_dir().join(format!("hex-win-{name}-{}", std::process::id()));
+        let profile =
+            std::env::temp_dir().join(format!("gospell-win-{name}-{}", std::process::id()));
         let _ = fs::remove_dir_all(&profile);
-        let support = profile.join("hex");
+        let support = profile.join("gospell");
         fs::create_dir_all(support.join(r"versions\3.3.0")).unwrap();
-        let executable = support.join(r"versions\3.3.0\hex.exe");
-        fs::write(&executable, b"hex").unwrap();
+        let executable = support.join(r"versions\3.3.0\gospell.exe");
+        fs::write(&executable, b"gospell").unwrap();
         let canonical = |path: &Path| path.canonicalize().unwrap();
         (
             canonical(&profile),
@@ -784,8 +785,8 @@ mod tests {
     fn the_installed_layout_is_eligible_and_others_say_why() {
         let (profile, support, executable) = installed("layout");
         assert_eq!(check_layout(&executable, &support, &profile), Ok(()));
-        let loose = profile.join("hex.exe");
-        fs::write(&loose, b"hex").unwrap();
+        let loose = profile.join("gospell.exe");
+        fs::write(&loose, b"gospell").unwrap();
         assert_eq!(
             check_layout(&loose.canonicalize().unwrap(), &support, &profile),
             Err(Ineligible::NotInstalled)
@@ -801,10 +802,10 @@ mod tests {
     #[test]
     fn both_installers_receipts_verify_and_an_ansi_one_is_repaired() {
         let (profile, support, _) = installed("receipt");
-        let root = profile.join("hex");
+        let root = profile.join("gospell");
         let receipt = |root: &str| {
             format!(
-                r#"{{"app":"hex","artifact":"desktop","channel":"dev","method":"direct","root":"{}"}}"#,
+                r#"{{"app":"gospell","artifact":"desktop","channel":"dev","method":"direct","root":"{}"}}"#,
                 root.replace('\\', "\\\\")
             )
         };
@@ -840,7 +841,7 @@ mod tests {
         // A record another installer wrote is left alone.
         fs::write(
             root.join("install.json"),
-            r#"{"app":"hex","artifact":"desktop","channel":"stable","method":"msix","root":"x"}"#,
+            r#"{"app":"gospell","artifact":"desktop","channel":"stable","method":"msix","root":"x"}"#,
         )
         .unwrap();
         assert_eq!(repair_receipt(&root), Err(Ineligible::Receipt));
@@ -849,14 +850,15 @@ mod tests {
 
     #[test]
     fn activation_switches_the_pointer_without_removing_the_old_version() {
-        let root = std::env::temp_dir().join(format!("hex-win-activate-{}", std::process::id()));
+        let root =
+            std::env::temp_dir().join(format!("gospell-win-activate-{}", std::process::id()));
         let _ = fs::remove_dir_all(&root);
         fs::create_dir_all(root.join("versions/1.0.0")).unwrap();
-        fs::write(root.join("versions/1.0.0/hex.exe"), b"old").unwrap();
+        fs::write(root.join("versions/1.0.0/gospell.exe"), b"old").unwrap();
         fs::create_dir_all(root.join("versions/0.9.0")).unwrap();
-        fs::write(root.join("versions/0.9.0/hex.exe"), b"older").unwrap();
+        fs::write(root.join("versions/0.9.0/gospell.exe"), b"older").unwrap();
         fs::write(root.join("current-version"), "1.0.0\n").unwrap();
-        let staging = root.join("hex.exe.staging");
+        let staging = root.join("gospell.exe.staging");
         fs::write(&staging, b"new").unwrap();
 
         let executable = activate(&root, "1.1.0", &staging, None).unwrap();
@@ -869,7 +871,7 @@ mod tests {
             "1.1.0"
         );
         assert_eq!(
-            fs::read(root.join("versions/1.0.0/hex.exe")).unwrap(),
+            fs::read(root.join("versions/1.0.0/gospell.exe")).unwrap(),
             b"old"
         );
         assert!(!root.join("versions/0.9.0").exists());
@@ -878,10 +880,13 @@ mod tests {
 
     #[test]
     fn path_entries_match_without_case_or_a_trailing_backslash() {
-        let path = r"C:\Windows;C:\Users\Jo\AppData\Roaming\hex\bin\;D:\tools";
-        assert!(path_contains(path, r"c:\users\jo\appdata\roaming\HEX\bin"));
-        assert!(!path_contains(path, r"C:\Users\Jo\AppData\Roaming\hex"));
-        assert!(!path_contains("", r"C:\hex\bin"));
+        let path = r"C:\Windows;C:\Users\Jo\AppData\Roaming\gospell\bin\;D:\tools";
+        assert!(path_contains(
+            path,
+            r"c:\users\jo\appdata\roaming\GOSPELL\bin"
+        ));
+        assert!(!path_contains(path, r"C:\Users\Jo\AppData\Roaming\gospell"));
+        assert!(!path_contains("", r"C:\gospell\bin"));
     }
 
     /// Creates all three shortcuts in one PowerShell process and returns the
@@ -894,24 +899,24 @@ mod tests {
             "-Command",
             "$shell = New-Object -ComObject WScript.Shell; \
              foreach ($n in 1..3) { \
-               $s = $shell.CreateShortcut([Environment]::GetEnvironmentVariable('HEX_LINK_' + $n)); \
-               $s.TargetPath = [Environment]::GetEnvironmentVariable('HEX_TARGET_' + $n); \
-               $s.Description = [Environment]::GetEnvironmentVariable('HEX_DESC_' + $n); \
-               $s.Arguments = [Environment]::GetEnvironmentVariable('HEX_ARGS_' + $n); \
-               $icon = [Environment]::GetEnvironmentVariable('HEX_ICON_' + $n); \
+               $s = $shell.CreateShortcut([Environment]::GetEnvironmentVariable('GOSPELL_LINK_' + $n)); \
+               $s.TargetPath = [Environment]::GetEnvironmentVariable('GOSPELL_TARGET_' + $n); \
+               $s.Description = [Environment]::GetEnvironmentVariable('GOSPELL_DESC_' + $n); \
+               $s.Arguments = [Environment]::GetEnvironmentVariable('GOSPELL_ARGS_' + $n); \
+               $icon = [Environment]::GetEnvironmentVariable('GOSPELL_ICON_' + $n); \
                if ($icon) { $s.IconLocation = $icon }; \
                $s.Save() }; \
-             $check = $shell.CreateShortcut($env:HEX_LINK_1); \
+             $check = $shell.CreateShortcut($env:GOSPELL_LINK_1); \
              [Console]::Out.Write($check.IconLocation)",
         ]);
         for (index, (link, target, description, arguments, icon)) in links.iter().enumerate() {
             let number = index + 1;
             command
-                .env(format!("HEX_LINK_{number}"), link)
-                .env(format!("HEX_TARGET_{number}"), target)
-                .env(format!("HEX_DESC_{number}"), description)
-                .env(format!("HEX_ARGS_{number}"), arguments)
-                .env(format!("HEX_ICON_{number}"), icon);
+                .env(format!("GOSPELL_LINK_{number}"), link)
+                .env(format!("GOSPELL_TARGET_{number}"), target)
+                .env(format!("GOSPELL_DESC_{number}"), description)
+                .env(format!("GOSPELL_ARGS_{number}"), arguments)
+                .env(format!("GOSPELL_ICON_{number}"), icon);
         }
         let output = command
             .env_remove("PSModulePath")
@@ -936,12 +941,12 @@ mod tests {
             "$shell = New-Object -ComObject WScript.Shell; \
              $nl = [Environment]::NewLine; \
              foreach ($n in 1..3) { \
-               $s = $shell.CreateShortcut([Environment]::GetEnvironmentVariable('HEX_LINK_' + $n)); \
+               $s = $shell.CreateShortcut([Environment]::GetEnvironmentVariable('GOSPELL_LINK_' + $n)); \
                [Console]::Out.Write($s.TargetPath + $nl + $s.WorkingDirectory + $nl + $s.Arguments + $nl + $s.IconLocation + $nl) }; \
              [Console]::Out.Write('END')",
         ]);
         for (index, link) in links.iter().enumerate() {
-            command.env(format!("HEX_LINK_{}", index + 1), link);
+            command.env(format!("GOSPELL_LINK_{}", index + 1), link);
         }
         let output = command
             .env_remove("PSModulePath")
@@ -979,18 +984,18 @@ mod tests {
         // A long path: WScript.Shell expands an 8.3 short name (`RUNNER~1`)
         // when it saves a shortcut, and the match is a prefix compare.
         let local = dirs::data_local_dir().expect("a local app data folder");
-        let root = local.join(format!("hex-win-shortcuts-{}", std::process::id()));
+        let root = local.join(format!("gospell-win-shortcuts-{}", std::process::id()));
         let _ = fs::remove_dir_all(&root);
-        let support = root.join("hex");
-        let old = support.join(r"versions\1.0.0\hex.exe");
-        let new = support.join(r"versions\2.0.0\hex.exe");
+        let support = root.join("gospell");
+        let old = support.join(r"versions\1.0.0\gospell.exe");
+        let new = support.join(r"versions\2.0.0\gospell.exe");
         fs::create_dir_all(old.parent().unwrap()).unwrap();
         fs::create_dir_all(new.parent().unwrap()).unwrap();
         fs::write(&old, b"old").unwrap();
         fs::write(&new, b"new").unwrap();
         let folder = root.join("shortcuts");
         fs::create_dir_all(&folder).unwrap();
-        let elsewhere = root.join("elsewhere").join("hex.exe");
+        let elsewhere = root.join("elsewhere").join("gospell.exe");
         fs::create_dir_all(elsewhere.parent().unwrap()).unwrap();
         fs::write(&elsewhere, b"other").unwrap();
 
@@ -1000,12 +1005,12 @@ mod tests {
             "%LOCALAPPDATA%\\{},0",
             old.strip_prefix(&local).unwrap().display()
         );
-        let managed = folder.join("Hex.lnk");
+        let managed = folder.join("GoSpell.lnk");
         let foreign = folder.join("Foreign.lnk");
         let unrelated = folder.join("Unrelated.lnk");
         let stored_icon = create_shortcuts([
-            (&managed, &old, "Hex managed install", "app", &icon),
-            (&foreign, &elsewhere, "Hex managed install", "app", ""),
+            (&managed, &old, "GoSpell managed install", "app", &icon),
+            (&foreign, &elsewhere, "GoSpell managed install", "app", ""),
             (&unrelated, &elsewhere, "", "", ""),
         ]);
         assert_eq!(
@@ -1048,10 +1053,13 @@ mod tests {
         // A zero-filled Start Menu link reads as no target at all, which the
         // update would otherwise skip forever.
         let local = dirs::data_local_dir().expect("a local app data folder");
-        let root = local.join(format!("hex-win-broken-shortcut-{}", std::process::id()));
+        let root = local.join(format!(
+            "gospell-win-broken-shortcut-{}",
+            std::process::id()
+        ));
         let _ = fs::remove_dir_all(&root);
-        let support = root.join("hex");
-        let executable = support.join(r"versions\2.0.0\hex.exe");
+        let support = root.join("gospell");
+        let executable = support.join(r"versions\2.0.0\gospell.exe");
         let working = executable.parent().unwrap().to_path_buf();
         fs::create_dir_all(&working).unwrap();
         fs::write(&executable, b"new").unwrap();
@@ -1059,7 +1067,7 @@ mod tests {
         let staging = support.join("updates");
         let folder = root.join("shortcuts");
         fs::create_dir_all(&folder).unwrap();
-        let managed = folder.join("Hex.lnk");
+        let managed = folder.join("GoSpell.lnk");
         let folders = [folder, PathBuf::new(), PathBuf::new()];
 
         // A link the user removed stays removed: the update never creates one.
@@ -1077,11 +1085,11 @@ mod tests {
                 "-NoProfile",
                 "-NonInteractive",
                 "-Command",
-                "$s = (New-Object -ComObject WScript.Shell).CreateShortcut($env:HEX_LINK); \
+                "$s = (New-Object -ComObject WScript.Shell).CreateShortcut($env:GOSPELL_LINK); \
                  $nl = [Environment]::NewLine; \
                  [Console]::Out.Write($s.TargetPath + $nl + $s.Arguments + $nl + $s.Description + $nl + $s.WorkingDirectory)",
             ])
-            .env("HEX_LINK", &managed)
+            .env("GOSPELL_LINK", &managed)
             .env_remove("PSModulePath")
             .output()
             .expect("could not read the repaired shortcut");
@@ -1097,7 +1105,7 @@ mod tests {
             [
                 executable.display().to_string(),
                 "app".to_owned(),
-                "Hex managed install".to_owned(),
+                "GoSpell managed install".to_owned(),
                 working.display().to_string(),
             ],
             "unexpected repaired shortcut: {text}"
@@ -1127,10 +1135,10 @@ mod tests {
                 .args([
                     "-NoProfile",
                     "-Command",
-                    "$s = Get-AuthenticodeSignature -LiteralPath $env:HEX_UPDATE_FILE; \
+                    "$s = Get-AuthenticodeSignature -LiteralPath $env:GOSPELL_UPDATE_FILE; \
                      if ($s.Status -eq 'Valid') { $s.SignerCertificate.GetNameInfo('SimpleName', $false) }",
                 ])
-                .env("HEX_UPDATE_FILE", path)
+                .env("GOSPELL_UPDATE_FILE", path)
                 .env_remove("PSModulePath")
                 .output()
                 .unwrap();
@@ -1150,7 +1158,7 @@ mod tests {
         assert!(verify_authenticode(&signed, AUTHENTICODE_SIGNER).is_err());
 
         let unsigned =
-            std::env::temp_dir().join(format!("hex-unsigned-{}.exe", std::process::id()));
+            std::env::temp_dir().join(format!("gospell-unsigned-{}.exe", std::process::id()));
         fs::write(&unsigned, b"MZ not a signed program").unwrap();
         assert!(verify_authenticode(&unsigned, &signer).is_err());
         let _ = fs::remove_file(unsigned);

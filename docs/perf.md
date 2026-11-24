@@ -1,6 +1,6 @@
 # Performance benchmarks
 
-Hex is benchmarked with [strobe](https://github.com/anomalyco/strobe) as a native
+GoSpell is benchmarked with [strobe](https://github.com/anomalyco/strobe) as a native
 app. strobe builds two variants (for example `origin/dev` and your checkout),
 launches each in a fresh private home, and compares them in alternating runs.
 
@@ -40,11 +40,11 @@ unlocked.
 
 ## What runs
 
-- `strobe.json` builds `hex` with `cargo build --release` into
+- `strobe.json` builds `gospell` with `cargo build --release` into
   `{cache}/cargo-target`, a target folder strobe shares between variants.
-  The build output is `hex.exe` on Windows and `hex` on macOS and Linux.
-- The build's env keeps release's code and adds line tables in `hex.pdb`, so
-  CPU profiles name Hex's functions: `CARGO_PROFILE_RELEASE_DEBUG=line-tables-only`,
+  The build output is `gospell.exe` on Windows and `gospell` on macOS and Linux.
+- The build's env keeps release's code and adds line tables in `gospell.pdb`, so
+  CPU profiles name GoSpell's functions: `CARGO_PROFILE_RELEASE_DEBUG=line-tables-only`,
   `CARGO_PROFILE_RELEASE_STRIP=false`, and `CARGO_PROFILE_RELEASE_INCREMENTAL=false`.
   It needs no profile or feature in `Cargo.toml`, so every commit builds the
   same way: a `--base` from before the benches existed, and `--bisect` across
@@ -54,30 +54,30 @@ unlocked.
   (GNU fails with "dlltool not found"). Windows builds also need the Vulkan
   SDK (`docs/windows.md`).
 - Each variant keeps the GPU driver's compiled shaders across its own
-  launches (strobe's default, `gpuCache: "warm"`), as a machine that ran Hex
+  launches (strobe's default, `gpuCache: "warm"`), as a machine that ran GoSpell
   before has them. Base and head never share them, and discarded warm-up
   launches fill them before the timed pairs. Without them, every launch
-  compiled Hex's shaders again: a dictation spent 4.6 to 5.3 s of each 6 s
+  compiled GoSpell's shaders again: a dictation spent 4.6 to 5.3 s of each 6 s
   run in the driver's compiler. So `cold-launch` is a returning user's launch
-  (Hex not running, shaders cached). A first launch after an install or a
+  (GoSpell not running, shaders cached). A first launch after an install or a
   driver update would need a target with `gpuCache: "cold"`.
 
 ## Isolation
 
-The `hex` app profile in `strobe.json` keeps a launched copy away from your
-own Hex:
+The `gospell` app profile in `strobe.json` keeps a launched copy away from your
+own GoSpell:
 
-- `HEX_APPLICATION_SUPPORT_DIR={home}/hex-data`: settings, history, logs,
+- `GOSPELL_APPLICATION_SUPPORT_DIR={home}/gospell-data`: settings, history, logs,
   models, locks, and `local-api.json` live in the private home.
 - A data root other than the default claims its own Windows single-instance
-  event, so the copy never signals or yields to your running Hex, and on
+  event, so the copy never signals or yields to your running GoSpell, and on
   Linux never hands the launch to your systemd unit. Inside a redirected
-  home the default (`AppData/Roaming/hex`, `.local/share/hex`) follows the
-  redirection, so name another folder, as `hex-data` does.
-- `HEX_DISABLE_UPDATES=1`: no update checks and no network.
-- `USERPROFILE` (Windows) and `HOME` locate `~/.config/hex`, so your
-  `hex.config.ts` stays out of the copy.
-- Every folder Hex and Annotate derive from yours follows the copy's
+  home the default (`AppData/Roaming/gospell`, `.local/share/gospell`) follows the
+  redirection, so name another folder, as `gospell-data` does.
+- `GOSPELL_DISABLE_UPDATES=1`: no update checks and no network.
+- `USERPROFILE` (Windows) and `HOME` locate `~/.config/gospell`, so your
+  `gospell.config.ts` stays out of the copy.
+- Every folder GoSpell and Annotate derive from yours follows the copy's
   environment on Windows too (`USERPROFILE`, `APPDATA`, `LOCALAPPDATA`;
   `app_paths` and `scrawl_router::user_dirs`), where `dirs` would ask the
   shell for your own: Annotate's captures folder and its retention, Scrawl's
@@ -93,15 +93,15 @@ own Hex:
   `onboarding-complete` marker skips first-run setup. The two `scrawl-*`
   migrations skip importing Scrawl's settings from your home.
 - `guard` stops a run if your own `settings.json` or `local-api.json`
-  changes, or your Hex exits. Each guard names its OS.
-- macOS: a variant runs as a bare `hex` executable, not `Hex.app`, so it has
+  changes, or your GoSpell exits. Each guard names its OS.
+- macOS: a variant runs as a bare `gospell` executable, not `GoSpell.app`, so it has
   no bundle id and shares no Preferences, saved state, or permissions with
-  your installed Hex. `moved` tells strobe that the copy keeps its data in
-  the private home (`HEX_APPLICATION_SUPPORT_DIR`), not in your
-  `~/Library/Application Support/hex`, so your own Hex there does not stop
+  your installed GoSpell. `moved` tells strobe that the copy keeps its data in
+  the private home (`GOSPELL_APPLICATION_SUPPORT_DIR`), not in your
+  `~/Library/Application Support/gospell`, so your own GoSpell there does not stop
   the bench. strobe brings the copy's window to the front only after a
   minute without keyboard or mouse input. Every profile records the
-  `anomaly-hex-identity` migration: without it, a copy whose setup isn't
+  `goml-gospell-identity` migration: without it, a copy whose setup isn't
   ready (the copy has no Microphone grant) reopens the first-run tour over
   the window, and every click lands on the tour.
 
@@ -124,8 +124,8 @@ The copy loads no model, except in the listening and dictation cases below.
 | `perf/interaction.bench.ts` | `model-picker` | `ui.cpu` | The speech model picker opened, its list of every model, back to the comparison, and closed | waits for an unlock |
 
 Secondary metrics are thread wakeups (`cpu.wakes`), GPU use, and private
-memory. `strobe query <rec> threads` names the threads; Hex names every
-long-lived thread, and the window's thread is `hex-ui` on Windows.
+memory. `strobe query <rec> threads` names the threads; GoSpell names every
+long-lived thread, and the window's thread is `gospell-ui` on Windows.
 
 Tray cases use `window: false`: strobe neither waits for nor checks a window,
 so they also run while the session is locked. Cases with a window, or with
@@ -140,11 +140,11 @@ strobe query <rec> threads
 
 ## Listening cases
 
-`perf/listening.bench.ts` runs Hex with its listener on: the
-`hex-listening` profile (microphone released while idle) and
-`hex-listening-warm` (microphone open, the default). The copy installs its
+`perf/listening.bench.ts` runs GoSpell with its listener on: the
+`gospell-listening` profile (microphone released while idle) and
+`gospell-listening-warm` (microphone open, the default). The copy installs its
 keyboard hook and loads the default English model, which
-`perf/seeds/listening.ts` copies from this machine's own Hex install into
+`perf/seeds/listening.ts` copies from this machine's own GoSpell install into
 `perf/seeds/.generated`. strobe shares a seed file this large (64 MB and up)
 read only between launches instead of copying it into each private home. The warm profile opens the machine's real microphone; neither records.
 
@@ -167,21 +167,21 @@ see every key and mouse move, so input on the bench machine adds
 ## Dictation cases
 
 `perf/dictation.bench.ts` runs whole dictations with no microphone and no
-paste. The `hex-dictation` profiles set `HEX_AUDIO_FIXTURE` to `speech.wav`,
+paste. The `gospell-dictation` profiles set `GOSPELL_AUDIO_FIXTURE` to `speech.wav`,
 which `perf/seeds/dictation.ts` makes with this machine's own
 text-to-speech voice (one sentence at 48 kHz, then 2 s of silence) beside
 the model the listening seed links. Every microphone open in the copy plays
 that file instead, from its start, in 10 ms chunks at real-time pace, and
 no device is opened, so nothing is recorded.
 
-The bench drives the copy through its local API as `hex dictation` does.
+The bench drives the copy through its local API as `gospell dictation` does.
 Each dictation starts as the sentence begins (with the microphone open,
 when the looping file comes round) and ends with `dictation stop --print`,
 which returns the processed text instead of pasting it. The profiles move
 the copy's shortcuts to F19 and F18 and unbind Paste Last, so a key pressed
 while a bench runs on a machine in use reaches nothing.
 
-Only bench builds that have `HEX_AUDIO_FIXTURE`. An older build ignores it
+Only bench builds that have `GOSPELL_AUDIO_FIXTURE`. An older build ignores it
 and opens the real microphone; setup then refuses the block, but only
 after the microphone was open.
 
@@ -189,9 +189,9 @@ after the microphone was open.
 
 `perf/interaction.bench.ts` uses the Settings window the way a person does.
 strobe drives it from outside, through what Windows gives assistive
-technology: it finds each control in Hex's accessibility tree (UI
+technology: it finds each control in GoSpell's accessibility tree (UI
 Automation, which Rune builds with AccessKit) and posts mouse and key input to
-the window. Hex needs no build feature, flag, or bridge for this; a release
+the window. GoSpell needs no build feature, flag, or bridge for this; a release
 build answers the same way for a screen reader.
 
 - Selectors are element keys, which the tree exposes as UI Automation
@@ -203,7 +203,7 @@ build answers the same way for a screen reader.
   ends when the change is in the tree, not after a fixed wait.
 - `interaction.*` counts an input only when the accessibility tree changed
   within a second of it, so the change shows to strobe as well as on screen.
-- The home holds a full History: 10,000 dictations, Hex's cap, from
+- The home holds a full History: 10,000 dictations, GoSpell's cap, from
   `perf/seeds/history.ts` (written once into `perf/seeds/.generated/history`).
   The list shows the newest 200, as search results do.
 - Choosing a model is not a case: it downloads or loads a model, which costs

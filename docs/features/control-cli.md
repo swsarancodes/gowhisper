@@ -4,7 +4,7 @@
 Agent or terminal                                  // control.cli; every OS
 ├── One tree and protocol over the local API's POST /control on every OS;
 │   OS can't do it -> unsupported at runtime, exit 1
-├── hex status [--json] -> Listener, capture, meeting, model, features,
+├── gospell status [--json] -> Listener, capture, meeting, model, features,
 │   permissions, window, update, version, pid, memory
 │   ├── Speech -> the loaded model's device ("Vulkan — AMD Radeon RX 9060 XT"),
 │   │   or "CPU (GPU start crashed twice)" after a Windows GPU-start
@@ -13,24 +13,24 @@ Agent or terminal                                  // control.cli; every OS
 │   ├── Capture -> listener query: shortcut/CLI or SDK recording, including a
 │   │   pending microphone start and release tail, plus accepted output jobs
 │   │   └── Listener does not answer -> capture unknown, never inferred idle from logs
-│   └── Hex not running -> exit 3, "Hex is not running; run `hex start`"
-├── hex start -> Already running: nothing | else open Hex.app (Linux and
-│   Windows: a detached `hex app --hidden`), wait ≤ 20 s
+│   └── GoSpell not running -> exit 3, "GoSpell is not running; run `gospell start`"
+├── gospell start -> Already running: nothing | else open GoSpell.app (Linux and
+│   Windows: a detached `gospell app --hidden`), wait ≤ 20 s
 │   ├── A launch that hands off exits 0 -> the ordinary wait continues: a
-│   │   Linux `hex app` forwards to the unit, a 2.3.1 install starts the
+│   │   Linux `gospell app` forwards to the unit, a 2.3.1 install starts the
 │   │   managed copy. Any other launch that exits gets a 2 s grace
-│   ├── Still no answer after an exit -> failed, "run `hex start` again":
-│   │   another Hex is probably still shutting down and holds the instance
-│   └── The caller's HEX_* variables -> open --env (values never logged)
-├── hex quit | restart [--force]
+│   ├── Still no answer after an exit -> failed, "run `gospell start` again":
+│   │   another GoSpell is probably still shutting down and holds the instance
+│   └── The caller's GOSPELL_* variables -> open --env (values never logged)
+├── gospell quit | restart [--force]
 │   ├── Meeting or dictation in progress, no --force -> refused, exit 1
 │   ├── Listener didn't answer, no --force -> busy (it might be recording)
-│   └── restart -> reopens with the running Hex's HEX_* variables (macOS);
+│   └── restart -> reopens with the running GoSpell's GOSPELL_* variables (macOS);
 │       Linux unit -> systemctl restart; else waits for that process to exit
 │       (Windows: discovery goes at the start of the local API's shutdown,
 │       the tray next, and the instance event at exit; Linux: the service
 │       lock goes before the discovery file), then start
-├── hex dictation start|stop|toggle|cancel
+├── gospell dictation start|stop|toggle|cancel
 │   ├── Same shortcut state machine as the hotkey; start locks the capture
 │   │   ├── Windows CLI/tray start -> hook adopts the accepted capture; first
 │   │   │   press of its shortcut finishes it, in Hold and Toggle alike
@@ -57,42 +57,42 @@ Agent or terminal                                  // control.cli; every OS
 │   └── dictation start|toggle --raw -> the dictation it starts pastes the
 │       transcript as heard (Dictate without processing); History keeps it as Raw;
 │       --raw with stop -> usage error, exit 2
-├── hex paste-last -> pastes the last dictation
+├── gospell paste-last -> pastes the last dictation
 │   ├── Setup gates the listener -> not-ready
 │   └── Recording or shortcut gesture in progress -> busy (menu bar: nothing)
-├── hex typed-text (Linux) -> the Transform typed text shortcut's one job
+├── gospell typed-text (Linux) -> the Transform typed text shortcut's one job
 │   ├── Labs › Transform typed text off -> disabled
 │   ├── Terminal paste on -> disabled (it would send Ctrl+Shift+V)
 │   ├── Setup gates the listener -> not-ready
 │   └── Recording, a pending start, or a capture still finishing -> done,
 │       but the listener drops the job: no keys are sent and no state changes
-├── hex transcribe <file> [--model <id>] [--language <code>]
+├── gospell transcribe <file> [--model <id>] [--language <code>]
 │   ├── WAV, AIFF, CAF, FLAC, MP3, Ogg Vorbis/Opus, WebM, MP4/M4A/MOV
 │   │   (AAC-LC, HE-AAC, ALAC; a video's soundtrack) -> decoded here
 │   ├── Not media, no audio track, or an unknown codec -> unsupported, exit 1,
-│   │   before Hex is asked
+│   │   before GoSpell is asked
 │   ├── Any length -> decoded in ≤30 s pieces, their text joined with one space
-│   ├── Hex running -> one piece at a time to its POST /transcriptions with
+│   ├── GoSpell running -> one piece at a time to its POST /transcriptions with
 │   │   the model named; each piece on the dictation engine's loaded copy when
 │   │   it holds that model; no child starts
-│   ├── Hex stopped -> starts and owns `hex service --embedded`, the same
+│   ├── GoSpell stopped -> starts and owns `gospell service --embedded`, the same
 │   │   route, ended on every exit
 │   ├── Model not downloaded
 │   │   ├── stdin and stderr terminals, no --json -> Download <model>? [Y/n];
 │   │   │   yes downloads, loads, and retries the piece
-│   │   └── otherwise -> model-unavailable naming `hex model install`, exit 1
+│   │   └── otherwise -> model-unavailable naming `gospell model install`, exit 1
 │   ├── stdout -> only the transcript or --json reply; progress on a TTY stderr
 │   ├── Ctrl-C -> the child ends, nothing printed, exit 130
 │   └── No speech in every piece -> no-speech, exit 4; nothing pasted, kept,
 │       or processed
-├── hex completions <bash|zsh|fish|elvish|powershell>
-│   ├── Runs here: no running Hex, no /control request
+├── gospell completions <bash|zsh|fish|elvish|powershell>
+│   ├── Runs here: no running GoSpell, no /control request
 │   └── The script on stdout and nothing else, generated from the same clap
 │       tree every command parses
-├── hex meetings record [--title] | stop | copy-last | delete <id>
+├── gospell meetings record [--title] | stop | copy-last | delete <id>
 │   ├── Meetings off -> feature-off; recording shows in the menu bar and HUD
 │   │   exactly like a menu-bar recording
-│   ├── No meetings cancel: Hex cannot discard a recording
+│   ├── No meetings cancel: GoSpell cannot discard a recording
 │   └── delete -> the pane's Delete for the exact `meetings list --json` id:
 │       Markdown, tracked notes file, then recording folder to the Trash,
 │       never `rm`; works with Meetings off, asks no confirmation
@@ -101,45 +101,45 @@ Agent or terminal                                  // control.cli; every OS
 │       │   -final-pending, exit 1, nothing moved
 │       └── done -> "Deleted “<title>”; moved to the Trash", the open Meetings
 │           window drops the row at its next 1 s scan
-├── hex settings list | get <key|prefix> | set <key> <value>
+├── gospell settings list | get <key|prefix> | set <key> <value>
 │   ├── The window's save, then ReloadSettings -> live, no restart
 │   ├── Unknown key, bad value, read-only key -> refused, nothing written
 │   ├── Shortcut conflict -> refused, as the window's recorder would
 │   └── apply <file|-> -> a JSON object of key: value, all or none
 │       ├── Undeclared settings keep their values; dependent keys in any order
 │       ├── transcription.model / .language -> selected, never downloaded
-│       ├── Hex running -> SettingsApply: saved and adopted live, like set
-│       └── Hex stopped -> written to settings.json under the service lock
-│           (Linux); a Hex holding it is waited for (≤ 35 s) instead
-├── hex model list | use <id> | install [id] | cancel
-│   ├── use -> installed models only; needs the running Hex; never downloads
+│       ├── GoSpell running -> SettingsApply: saved and adopted live, like set
+│       └── GoSpell stopped -> written to settings.json under the service lock
+│           (Linux); a GoSpell holding it is waited for (≤ 35 s) instead
+├── gospell model list | use <id> | install [id] | cancel
+│   ├── use -> installed models only; needs the running GoSpell; never downloads
 │   │   or repairs; keeps the model's remembered language and hints
 │   │   (--language overrides)
-│   └── Linux/Windows: install with Hex stopped downloads and selects here
-│       (a Hex that starts meanwhile makes the switch); status, devices,
+│   └── Linux/Windows: install with GoSpell stopped downloads and selects here
+│       (a GoSpell that starts meanwhile makes the switch); status, devices,
 │       check, transcribe run here (macOS: unsupported)
-├── hex window show [pane] | hide
+├── gospell window show [pane] | hide
 │   ├── settings -> the General pane (status window.pane stays "settings")
 │   ├── meetings pane with Meetings off -> the pane's opt-in card
 │   └── story <story> [--variant V] [--play] -> a playground story, as a
-│       hex://story link opens (labs.md); playground off -> feature-off
-├── hex history clear --yes -> without --yes refused before Hex is asked
-├── hex check-for-updates -> The updater checks now
-├── hex launch-at-login [on|off] -> SMAppService (changes need Hex.app);
+│       gospell://story link opens (labs.md); playground off -> feature-off
+├── gospell history clear --yes -> without --yes refused before GoSpell is asked
+├── gospell check-for-updates -> The updater checks now
+├── gospell launch-at-login [on|off] -> SMAppService (changes need GoSpell.app);
 │   Windows Run key; Linux XDG autostart entry
-└── hex logs [--process] [-n N] [-f] -> local tail; works with Hex stopped
+└── gospell logs [--process] [-n N] [-f] -> local tail; works with GoSpell stopped
 ```
 
 Every command except `start`, `restart`, `logs`, `settings apply`,
-`completions`, and the read commands talks only to the running Hex; none of
-them launch Hex. Every OS reaches it through
+`completions`, and the read commands talks only to the running GoSpell; none of
+them launch GoSpell. Every OS reaches it through
 the local API's owner-only discovery file and the bearer-authenticated
 `POST /control` route. Commands dispatch before logging and the instance lock on every OS,
 so they never compete with the running app for its files. Opt-ins stay
 explicit settings: no command turns Meetings on as a side effect.
 
-`hex transcribe` is one command that doesn't use `/control`. It opens the
-file here and decodes its first audio, so a file Hex can't read is refused
+`gospell transcribe` is one command that doesn't use `/control`. It opens the
+file here and decodes its first audio, so a file GoSpell can't read is refused
 before anything transcribes: WAV through hound (every sample read once up
 front, so a truncated WAV is refused), everything else through Symphonia, and
 Opus through opuscule (`transcription/pieces/media.rs`). It then
@@ -147,9 +147,9 @@ sends the recording one piece at a time to `POST /transcriptions`
 (`Content-Type: audio/wav`), choosing the endpoint once
 (`control/cli/embedded.rs`): the running app's discovery file, so the app
 transcribes it with the model the request names, every piece on its dictation
-engine's loaded copy when it holds that model; or, with no Hex running, an
-embedded `hex service --embedded` child it starts in its own process group,
-reads one ready line from, and ends on success, failure, and Ctrl-C. A Hex
+engine's loaded copy when it holds that model; or, with no GoSpell running, an
+embedded `gospell service --embedded` child it starts in its own process group,
+reads one ready line from, and ends on success, failure, and Ctrl-C. A GoSpell
 that runs but answers the wrong API version or token is an error, never a
 reason to start a second service. Pieces are at most 30 s
 (`transcription/pieces.rs`), decoded and resampled incrementally and
@@ -164,7 +164,7 @@ capture's words read its `audio.wav` through the same reader
 (`capture_host/words.rs`), so an hours-long capture is transcribed one piece
 at a time without holding the session.
 
-`hex completions` also never reaches `/control`: it prints a script
+`gospell completions` also never reaches `/control`: it prints a script
 generated at runtime from the top-level `Cli` of the OS running it
 (`src/main.rs` on macOS, `src/linux.rs`, `src/windows.rs`, each flattening
 `ControlCli`), so every command and flag in this tree is in the script. Only
@@ -180,8 +180,8 @@ the OS lacks
 go to the meeting recorder (`meeting/runtime`) as the tray's items do, and
 `meetings delete` calls the pane's own delete (`meeting/delete`);
 `window story` answers `unsupported`; Windows sends every `annotate`
-command to the running Hex. `hex history`, `hex meetings list|show|search`, and
-`hex mcp` read files on every OS.
+command to the running GoSpell. `gospell history`, `gospell meetings list|show|search`, and
+`gospell mcp` read files on every OS.
 
 `dictation start --print` is macOS's: the listener
 stores the command's reply with the recording (`recognition::Hotkeys::print_capture`)
@@ -204,7 +204,7 @@ Sources: [control.rs](../../src/control.rs) (protocol, status, quit rules),
 [control/host.rs](../../src/control/host.rs) (the Linux and Windows host),
 [control/settings.rs](../../src/control/settings.rs) (settings registry),
 [control/cli.rs](../../src/control/cli.rs),
-[control/cli/launch.rs](../../src/control/cli/launch.rs) (`hex start` and
+[control/cli/launch.rs](../../src/control/cli/launch.rs) (`gospell start` and
 restart's relaunch), and
 [control/cli/human.rs](../../src/control/cli/human.rs) (clap, output, exit codes,
 logs), [macos_rune/control.rs](../../src/macos_rune/control.rs) (the macOS host),
@@ -221,12 +221,12 @@ and `model_selection` (remembered hints, wildcard-language validation); `control
 `every_persisted_setting_has_a_cli_key`, value parsing, shortcut conflicts,
 and zero volume (`enabling_tones_restores_a_nonzero_level` covers enabling a
 saved zero); `control::cli::tests` pin
-exit codes and output; `control::cli::launch::tests` pin `hex start`'s `open`
-arguments; `control::cli::completions::tests` pin the Tab completion for hex gate
+exit codes and output; `control::cli::launch::tests` pin `gospell start`'s `open`
+arguments; `control::cli::completions::tests` pin the Tab completion for gospell gate
 and that every shell gets a script naming the command tree, and the
 `the_cli_prints_completion_scripts` tests in `linux.rs`, macOS's `main.rs`, and
 `windows.rs` each generate bash, zsh, and fish from that OS's own top-level
-`Cli`; `desktop::onboarding::tests::relaunch_forwards_only_the_hex_environment`
+`Cli`; `desktop::onboarding::tests::relaunch_forwards_only_the_gospell_environment`
 pins restart's; `macos_rune::control::tests` check that `model use` prepares
 its exact selection installed-only;
 `dictation::audio::tests::marked_captures_are_intentional_without_a_hold`
@@ -274,7 +274,7 @@ reads as gone at once, a live one only at the timeout); macOS restarts itself
 and never takes the watch, so it has no such test. Check Windows runs it under
 nextest, so the handle-based wait is exercised there too.
 
-Observed (Oct 30, apollo, an isolated data root and `hex service` without a
+Observed (Oct 30, apollo, an isolated data root and `gospell service` without a
 display): status, settings get/set (and refusing `show_dock_icon`), vocabulary
 add/list/remove, model list/use/status, history clear, window hide,
 check-for-updates, commands check, quit, start, and restart all answered as
@@ -292,7 +292,7 @@ recording, so expect to verify it by hand (a locked recording finished by the
 shortcut, by `stop`, and by `stop --print`) before trusting it. A CLI volume
 change does not preview a tone as the window does. Onboarding
 permission prompts, calendar connection, and meeting deletion or renaming have
-no command. `hex restart`'s relaunch has no end-to-end test on any OS: the
+no command. `gospell restart`'s relaunch has no end-to-end test on any OS: the
 process wait it uses is unit-tested on Linux and Windows
 (`local_api::discovery::exit_watch_tests::waiting_for_a_process_reports_whether_it_exited`;
 macOS never takes the watch), and the handoff from the old process's exit to
@@ -300,7 +300,7 @@ the new one's instance claim has only been read, so
 verify a Windows restart and a login-launch restart by hand before trusting
 it. Linux and Windows dictation through the CLI has not run with a
 microphone, and meeting recording through the CLI has not run on Linux or
-Windows. `hex transcribe` was observed on macOS (Nov 13, Apple Silicon): with
+Windows. `gospell transcribe` was observed on macOS (Nov 13, Apple Silicon): with
 the app running (no child) and stopped (an embedded child, on an empty data
 root), WAV, AIFF, M4A AAC-LC, HE-AAC, ALAC, CAF AAC, FLAC, MP3, Ogg Opus, MP4,
 MOV, and fragmented MP4 each printed the spoken transcript; a 31-minute M4A

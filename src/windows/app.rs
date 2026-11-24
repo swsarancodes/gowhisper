@@ -1,4 +1,4 @@
-//! The Windows listener host, which outlives the window while Hex hides in
+//! The Windows listener host, which outlives the window while GoSpell hides in
 //! the tray, and the single-instance claim for the login session. The tray
 //! and the window are `windows_rune`.
 
@@ -41,7 +41,7 @@ struct RunningListener {
     /// Saved settings the listener applies in place.
     updates: mpsc::Sender<Box<AppSettings>>,
     swap_failures: Receiver<crate::transcription::local_transcriber::SwapFailed>,
-    /// The tray's and `hex` commands, handled as the shortcut would be.
+    /// The tray's and `gospell` commands, handled as the shortcut would be.
     commands: mpsc::Sender<crate::windows::dictation::ListenerCommand>,
 }
 
@@ -103,22 +103,22 @@ pub(crate) struct WindowsDesktopHost {
     dictations: crate::dictation::service::DictationQueue,
 }
 
-/// Names the event that marks the running Hex app in this login session.
-const APP_INSTANCE_EVENT: &str = r"Local\anomaly.hex.app";
+/// Names the event that marks the running GoSpell app in this login session.
+const APP_INSTANCE_EVENT: &str = r"Local\com.goml.gospell.app";
 
-/// The data root `HEX_APPLICATION_SUPPORT_DIR` names, unless it is the
+/// The data root `GOSPELL_APPLICATION_SUPPORT_DIR` names, unless it is the
 /// default one, which keeps the default event.
 fn custom_root() -> Option<std::path::PathBuf> {
     let canonical = |path: std::path::PathBuf| path.canonicalize().unwrap_or(path);
-    let root = canonical(std::env::var_os("HEX_APPLICATION_SUPPORT_DIR")?.into());
-    let default = dirs::data_dir().map(|data| canonical(data.join("hex")));
+    let root = canonical(std::env::var_os("GOSPELL_APPLICATION_SUPPORT_DIR")?.into());
+    let default = dirs::data_dir().map(|data| canonical(data.join("gospell")));
     (default.as_ref() != Some(&root)).then_some(root)
 }
 
 /// The instance event for a data root: [`APP_INSTANCE_EVENT`] for the
 /// default one, and its own event for another root that
-/// `HEX_APPLICATION_SUPPORT_DIR` names, so a copy of Hex with its own data,
-/// such as a benchmark, neither signals nor yields to the person's Hex.
+/// `GOSPELL_APPLICATION_SUPPORT_DIR` names, so a copy of GoSpell with its own data,
+/// such as a benchmark, neither signals nor yields to the person's GoSpell.
 fn instance_event_name(custom_root: Option<&std::path::Path>) -> String {
     use sha2::{Digest, Sha256};
     match custom_root {
@@ -136,7 +136,7 @@ fn instance_event_name(custom_root: Option<&std::path::Path>) -> String {
     }
 }
 
-/// Ownership of the one Hex app in this login session (per data root).
+/// Ownership of the one GoSpell app in this login session (per data root).
 ///
 /// Windows does not bring a running app forward when it is launched again, so
 /// a Start menu launch while the login item runs in the tray would start a
@@ -146,7 +146,7 @@ fn instance_event_name(custom_root: Option<&std::path::Path>) -> String {
 pub(crate) struct AppInstance(HANDLE);
 
 impl AppInstance {
-    /// Returns `None` when a Hex app already runs in this session, after
+    /// Returns `None` when a GoSpell app already runs in this session, after
     /// asking it to show its window unless this launch is a hidden (login)
     /// launch, which must never pop up an app that is already running.
     pub(crate) fn claim(start_hidden: bool) -> Result<Option<Self>> {
@@ -156,7 +156,7 @@ impl AppInstance {
         let event = unsafe { CreateEventW(std::ptr::null(), 0, 0, name.as_ptr()) };
         if event.is_null() {
             return Err(eyre!(
-                "could not create the Hex instance event: {}",
+                "could not create the GoSpell instance event: {}",
                 std::io::Error::last_os_error()
             ));
         }
@@ -165,7 +165,7 @@ impl AppInstance {
             return Ok(Some(Self(event)));
         }
         if !start_hidden {
-            tracing::info!("Hex is already running; showing its window");
+            tracing::info!("GoSpell is already running; showing its window");
             // SAFETY: `event` is a valid handle owned by this function. A
             // launched app may take the foreground; pass that right on so
             // the running app can activate its window.
@@ -174,10 +174,10 @@ impl AppInstance {
                 SetEvent(event);
             }
         } else {
-            // A hidden launch (`hex start`, `hex restart`, a login launch)
+            // A hidden launch (`gospell start`, `gospell restart`, a login launch)
             // only yields, so nothing else records that it came and went:
             // say why here, or a lost relaunch leaves no trace at all.
-            tracing::info!("Hex is already running; this hidden launch exits");
+            tracing::info!("GoSpell is already running; this hidden launch exits");
         }
         // SAFETY: `event` is a valid handle owned by this function.
         unsafe { CloseHandle(event) };
@@ -186,11 +186,11 @@ impl AppInstance {
 
     /// Calls `on_launch` whenever a later launch signals the event, until it
     /// returns false. The handle stays open until the process exits, keeping
-    /// this process the session's Hex app.
+    /// this process the session's GoSpell app.
     pub(crate) fn forward_launches(self, on_launch: impl Fn() -> bool + Send + 'static) {
         let event = self.0 as usize;
         let spawned = std::thread::Builder::new()
-            .name("hex-relaunch".into())
+            .name("gospell-relaunch".into())
             .spawn(move || {
                 // SAFETY: the handle is never closed while the process runs.
                 while unsafe { WaitForSingleObject(event as HANDLE, INFINITE) } == WAIT_OBJECT_0 {
@@ -200,7 +200,7 @@ impl AppInstance {
                 }
             });
         if let Err(error) = spawned {
-            tracing::warn!(%error, "relaunching Hex will not show the running window");
+            tracing::warn!(%error, "relaunching GoSpell will not show the running window");
         }
     }
 }
@@ -305,7 +305,7 @@ impl WindowsDesktopHost {
             || crate::desktop::onboarding::completion_recorded()
     }
 
-    /// Handles one window or tray request; returns `true` when Hex should quit.
+    /// Handles one window or tray request; returns `true` when GoSpell should quit.
     pub(crate) fn handle(&mut self, request: Request) -> bool {
         match request {
             Request::Desktop(action) => return self.dispatch(action),
@@ -372,7 +372,10 @@ impl WindowsDesktopHost {
             | DesktopAction::ConfirmUpdateSwitch
             | DesktopAction::WindowFocused => {
                 if let Err(error) = self.updater.act(&action) {
-                    self.error = Some(tr_fill("Could not restart Hex: {}", &format!("{error:#}")));
+                    self.error = Some(tr_fill(
+                        "Could not restart GoSpell: {}",
+                        &format!("{error:#}"),
+                    ));
                 }
             }
             // Windows saves shortcuts from the window.
@@ -469,7 +472,7 @@ impl WindowsDesktopHost {
 
     /// Follows the foreground app while switching is on, and starts the
     /// installed-only preparation of a mode's speech choice once it is due.
-    /// Hex's own window and a moment with no window in front name no mode,
+    /// GoSpell's own window and a moment with no window in front name no mode,
     /// so they leave the last match and any switch it scheduled alone. The
     /// host cannot see a listener recording, so a due switch is held only
     /// while the shared engine's dictation streams or finishes run.
@@ -615,8 +618,8 @@ impl WindowsDesktopHost {
         }
     }
 
-    /// Enable and Disable also decide whether Hex listens at its next launch,
-    /// so a disabled Hex stays disabled after a restart (#575).
+    /// Enable and Disable also decide whether GoSpell listens at its next launch,
+    /// so a disabled GoSpell stays disabled after a restart (#575).
     fn remember_listening(&mut self, enabled: bool) {
         if self.settings.enable_on_launch == enabled {
             return;
@@ -757,7 +760,7 @@ impl WindowsDesktopHost {
     }
 
     /// True once Restart to update has handed off to the new version, after
-    /// the updater's final check; Hex then quits so it can take the named
+    /// the updater's final check; GoSpell then quits so it can take the named
     /// event.
     pub(crate) fn update_restarted(&mut self) -> bool {
         match self.updater.take_restart() {
@@ -766,7 +769,10 @@ impl WindowsDesktopHost {
                 true
             }
             Some(Err(error)) => {
-                self.error = Some(tr_fill("Could not restart Hex: {}", &format!("{error:#}")));
+                self.error = Some(tr_fill(
+                    "Could not restart GoSpell: {}",
+                    &format!("{error:#}"),
+                ));
                 false
             }
             None => false,
@@ -782,7 +788,7 @@ impl WindowsDesktopHost {
             self.checking = false;
             let result = result.and_then(|selection| {
                 crate::transcription::models::validate(&selection).map_err(|e| e.to_string())?;
-                // Only a preparation that changes what Hex runs replaces the
+                // Only a preparation that changes what GoSpell runs replaces the
                 // saved choice: a check of that same model, or of a lost
                 // import's fallback, leaves the saved selection alone.
                 if selection == self.runtime_selection() {
@@ -911,7 +917,7 @@ impl WindowsDesktopHost {
         }
     }
 
-    /// Where `hex` dictation commands go: the running listener, once its
+    /// Where `gospell` dictation commands go: the running listener, once its
     /// session started (a listener still loading its model would replay
     /// them late).
     pub(crate) fn listener_commands(
@@ -969,9 +975,9 @@ impl Drop for WindowsDesktopHost {
     }
 }
 
-/// The foreground application's executable stem, or `None` when Hex owns the
+/// The foreground application's executable stem, or `None` when GoSpell owns the
 /// foreground window or none is focused: Labs › Switch model with app matches
-/// applications only, never Hex's own window.
+/// applications only, never GoSpell's own window.
 pub(crate) fn foreground_other_process_stem() -> Option<String> {
     use windows_sys::Win32::System::Threading::GetCurrentProcessId;
     use windows_sys::Win32::UI::WindowsAndMessaging::{
@@ -1053,16 +1059,16 @@ mod tests {
     #[test]
     fn an_isolated_data_root_has_its_own_instance_event() {
         assert_eq!(instance_event_name(None), APP_INSTANCE_EVENT);
-        let isolated = instance_event_name(Some(std::path::Path::new(r"C:\bench\home\hex")));
-        assert!(isolated.starts_with(r"Local\anomaly.hex.app."));
+        let isolated = instance_event_name(Some(std::path::Path::new(r"C:\bench\home\gospell")));
+        assert!(isolated.starts_with(r"Local\com.goml.gospell.app."));
         assert_eq!(isolated.len(), APP_INSTANCE_EVENT.len() + 17);
         assert_eq!(
             isolated,
-            instance_event_name(Some(std::path::Path::new(r"c:\Bench\Home\HEX")))
+            instance_event_name(Some(std::path::Path::new(r"c:\Bench\Home\GOSPELL")))
         );
         assert_ne!(
             isolated,
-            instance_event_name(Some(std::path::Path::new(r"C:\bench\other\hex")))
+            instance_event_name(Some(std::path::Path::new(r"C:\bench\other\gospell")))
         );
     }
 }

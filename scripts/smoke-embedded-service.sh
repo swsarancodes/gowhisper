@@ -2,7 +2,7 @@
 set -eu
 
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-runtime=$(mktemp -d "${TMPDIR:-/tmp}/hex-embedded.XXXXXX")
+runtime=$(mktemp -d "${TMPDIR:-/tmp}/gospell-embedded.XXXXXX")
 lease="$runtime/host-lease"
 endpoint="$runtime/endpoint.json"
 stderr="$runtime/service.log"
@@ -20,8 +20,8 @@ trap cleanup EXIT INT TERM
 
 cargo build --manifest-path "$root/Cargo.toml"
 mkfifo "$lease"
-HEX_APPLICATION_SUPPORT_DIR="$runtime/support" \
-  "$root/target/debug/hex" service --embedded \
+GOSPELL_APPLICATION_SUPPORT_DIR="$runtime/support" \
+  "$root/target/debug/gospell" service --embedded \
   <"$lease" >"$endpoint" 2>"$stderr" &
 pid=$!
 exec 3>"$lease"

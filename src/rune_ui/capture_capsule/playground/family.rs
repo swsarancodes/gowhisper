@@ -8,7 +8,7 @@
 //! The voice is drawn three ways (the story's variants): Dot scope's braid,
 //! from its real simulation and HUD Lab's tuning, bars, and a line. Only
 //! the capture adds the screen cue, a red dot or a small screen (each
-//! loop shows the other), so "Hex is listening" and "Hex is
+//! loop shows the other), so "GoSpell is listening" and "GoSpell is
 //! recording your screen" read apart at a glance. A prototype: the real
 //! HUD and capsule don't place or draw this way yet.
 
@@ -48,7 +48,7 @@ const FLOAT_GAP: f32 = hud_placement::TOP_OFFSET as f32;
 /// The island's room under the notch.
 const ISLAND: f32 = ISLAND_PAD as f32;
 
-const DESTINATIONS: [&str; 3] = ["#design", "Linear · HEX", "Notes"];
+const DESTINATIONS: [&str; 3] = ["#design", "Linear · GOSPELL", "Notes"];
 
 /// How much of each screen's top middle the story shows, in points.
 const CROP: (f32, f32) = (480.0, 236.0);
@@ -79,6 +79,14 @@ enum Step {
     CaptureWorking,
     Choosing { chosen: bool },
     Sent,
+}
+
+/// The family draws the classic dot field whatever look the HUD uses.
+fn dot_field(tuning: dot_scope::Tuning) -> dot_scope::Tuning {
+    dot_scope::Tuning {
+        look: dot_scope::Look::Dots,
+        ..tuning
+    }
 }
 
 fn step_at(t: f64) -> Step {
@@ -160,7 +168,7 @@ impl Family {
             slow: false,
             t: 0.0,
             last: None,
-            scope: Scope::new(dot_scope::lab()),
+            scope: Scope::new(dot_field(dot_scope::lab())),
             stage: None,
             reduced: Cell::new(false),
         }
@@ -219,7 +227,7 @@ fn poll(s: &mut Family, now: f64, _: &mut Tx) -> bool {
     let step = step_at(s.t);
     let reduced = s.reduced.get();
     if step != before && matches!(step, Step::Dictating | Step::Capturing) {
-        s.scope.tune(dot_scope::lab());
+        s.scope.tune(dot_field(dot_scope::lab()));
         s.scope.restart(reduced);
     }
     let stage = match step {

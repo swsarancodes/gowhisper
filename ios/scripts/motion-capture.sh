@@ -7,21 +7,21 @@ set -uo pipefail
 cd "${0:A:h}/.."
 : "${SIM_UDID:?}"
 tag=${1:-after}
-out=${LEASE_OUT:-${TMPDIR:-/tmp}/hex-motion}
-dd=${SIM_DD:-${TMPDIR:-/tmp}/hex-motion-dd}
+out=${LEASE_OUT:-${TMPDIR:-/tmp}/gospell-motion}
+dd=${SIM_DD:-${TMPDIR:-/tmp}/gospell-motion-dd}
 mkdir -p "$out"
 command -v xcodegen >/dev/null || brew install xcodegen
 scripts/fetch-cleanup-model.sh || exit 66
 xcodegen generate >/dev/null || exit 67
-xcodebuild build -project HEXMobile.xcodeproj -scheme HEXMobile -destination "id=$SIM_UDID" \
+xcodebuild build -project GoSpellMobile.xcodeproj -scheme GoSpellMobile -destination "id=$SIM_UDID" \
   -derivedDataPath "$dd" -quiet > "$out/build.log" 2>&1 || { grep -E "error:" "$out/build.log" | head -20; exit 65; }
-app=$(find "$dd/Build/Products" -maxdepth 2 -name 'HEX.app' -path '*iphonesimulator*' | head -1)
+app=$(find "$dd/Build/Products" -maxdepth 2 -name 'GOSPELL.app' -path '*iphonesimulator*' | head -1)
 [[ -d $app ]] || { echo "no app"; exit 68; }
 xcrun simctl boot "$SIM_UDID" 2>/dev/null
 xcrun simctl bootstatus "$SIM_UDID" -b >/dev/null
 xcrun simctl status_bar "$SIM_UDID" override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 2>/dev/null
 xcrun simctl install "$SIM_UDID" "$app" || exit 69
-bundle=anomaly.hex.mobile
+bundle=com.goml.gospell.mobile
 docs="$(xcrun simctl get_app_container "$SIM_UDID" $bundle data)/Documents"
 
 run() { # name seconds args...

@@ -158,7 +158,7 @@ enum OutputJob {
     Skipped {
         sequence: u64,
     },
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     Recent {
         ticket: OutputTicket,
         request: crate::paste::recent::Request,
@@ -181,7 +181,7 @@ impl OutputJob {
         match self {
             Self::PreparePaste => u64::MAX,
             Self::Skipped { sequence } => *sequence,
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Self::Recent { ticket, .. } => ticket.sequence(),
             Self::Completed { ticket, .. } => ticket.sequence(),
             Self::Paste { ticket, .. } => ticket.sequence(),
@@ -191,7 +191,7 @@ impl OutputJob {
     fn disarm_ticket(self) {
         match self {
             Self::PreparePaste | Self::Skipped { .. } => {}
-            #[cfg(hex_capture)]
+            #[cfg(gospell_capture)]
             Self::Recent { ticket, .. } => ticket.disarm(),
             Self::Completed { ticket, .. } => ticket.disarm(),
             Self::Paste { ticket, .. } => ticket.disarm(),
@@ -246,7 +246,7 @@ struct WorkerState {
     /// Labs › Return to app: the app in front when the capture started,
     /// which its output returns to (macOS).
     return_to: Option<i32>,
-    /// Whether the dictation shortcut, rather than `hex dictation`, started
+    /// Whether the dictation shortcut, rather than `gospell dictation`, started
     /// the capture now recording (Labs › YOLO mode).
     started_by_shortcut: bool,
 }
@@ -279,7 +279,7 @@ impl DictationWorker {
         let (_, selection) = crate::app_settings::transcription_selection();
         // Labs › Free memory when idle parks a GGUF model at launch too:
         // the first dictation reloads it, so memory stays free until then.
-        // Apple Speech holds no model of Hex's and stays loaded.
+        // Apple Speech holds no model of GoSpell's and stays loaded.
         let parked = crate::labs::unload_idle().is_some()
             && validate(&selection).is_ok_and(|definition| definition.runtime.is_gguf());
         let engine = if parked {
@@ -354,7 +354,7 @@ impl DictationWorker {
 
     /// Labs › Return to app (macOS): remembers the app in front as this
     /// capture starts, so its paste can bring it back. Read only while the
-    /// lab is on, and never Hex itself.
+    /// lab is on, and never GoSpell itself.
     pub fn remember_return_to_app(&self) {
         let return_to = crate::paste::return_to_app::capture_start();
         let mut state = self.state.lock().unwrap_or_else(|error| error.into_inner());
@@ -362,14 +362,14 @@ impl DictationWorker {
     }
 
     /// Records who started the capture now recording: a dictation shortcut,
-    /// or a `hex dictation` command. Only a shortcut's paste may send
+    /// or a `gospell dictation` command. Only a shortcut's paste may send
     /// (Labs › YOLO mode).
     pub fn set_started_by_shortcut(&self, by_shortcut: bool) {
         let mut state = self.state.lock().unwrap_or_else(|error| error.into_inner());
         state.started_by_shortcut = by_shortcut;
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     pub(crate) fn started_by_shortcut(&self) -> bool {
         self.state
             .lock()
@@ -544,7 +544,7 @@ impl DictationWorker {
     }
 
     pub fn paste_last(&self) -> Result<(), &'static str> {
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         if crate::paste::recent::enabled() {
             return self.paste_recent(crate::paste::recent::Request {
                 id: None,
@@ -559,7 +559,7 @@ impl DictationWorker {
         self.enqueue_paste(kind, |ticket| OutputJob::Paste { ticket, kind })
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     pub(crate) fn paste_recent(
         &self,
         request: crate::paste::recent::Request,
@@ -672,7 +672,7 @@ fn run_output_worker(
         for job in ready {
             let event = match job {
                 OutputJob::PreparePaste | OutputJob::Skipped { .. } => continue,
-                #[cfg(hex_capture)]
+                #[cfg(gospell_capture)]
                 OutputJob::Recent { ticket, request } => {
                     let result = request
                         .insert(&mut paster, history.as_ref())
@@ -784,11 +784,11 @@ fn process_job_text(
     )
 }
 
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 mod words;
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 pub use words::transcribe_with_words;
-#[cfg(all(test, hex_capture))]
+#[cfg(all(test, gospell_capture))]
 use words::{WORD_CHUNK_SAMPLES, transcribe_in_chunks};
 
 /// Waits for each accepted job's transcript in submission order, then hands
@@ -992,7 +992,7 @@ fn finish_output(
     match job {
         OutputJob::PreparePaste => unreachable!("paste preparation bypasses ordered output"),
         OutputJob::Skipped { .. } => unreachable!("skipped sequences never reach finish_output"),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         OutputJob::Recent { .. } => unreachable!("a recent paste uses its own insertion adapter"),
         OutputJob::Completed {
             ticket,
@@ -1357,11 +1357,12 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "requires HEX_COHERE_MODEL and HEX_COHERE_FIXTURES synthetic audio"]
+    #[ignore = "requires GOSPELL_COHERE_MODEL and GOSPELL_COHERE_FIXTURES synthetic audio"]
     fn cohere_long_form_keeps_all_sections_with_and_without_pauses() {
-        let model_path = PathBuf::from(std::env::var_os("HEX_COHERE_MODEL").expect("model path"));
+        let model_path =
+            PathBuf::from(std::env::var_os("GOSPELL_COHERE_MODEL").expect("model path"));
         let fixtures =
-            PathBuf::from(std::env::var_os("HEX_COHERE_FIXTURES").expect("fixture path"));
+            PathBuf::from(std::env::var_os("GOSPELL_COHERE_FIXTURES").expect("fixture path"));
         let selection = TranscriptionSelection {
             model: TranscriptionModelId::CohereTranscribe,
             language: "en".into(),
@@ -1509,7 +1510,7 @@ mod tests {
                     recording: None,
                 })),
             },
-            &mut |_, _| Err(eyre!("clipboard changed while Hex was preserving it")),
+            &mut |_, _| Err(eyre!("clipboard changed while GoSpell was preserving it")),
             &mut last_transcript,
             None,
         );
@@ -1528,7 +1529,7 @@ mod tests {
     fn paste_last_reinserts_a_signed_dictation_standalone() {
         for (signed, expected) in [(true, "standalone"), (false, "continue")] {
             let mut last_transcript = Some(LastDictation::new(
-                "we ship friday\nSent from Hex".to_string(),
+                "we ship friday\nSent from GoSpell".to_string(),
                 signed,
             ));
             let mut mode = None;
@@ -1538,7 +1539,7 @@ mod tests {
                     kind: PasteKind::LastTranscript,
                 },
                 &mut |text, paste_mode| {
-                    assert_eq!(text, "we ship friday\nSent from Hex");
+                    assert_eq!(text, "we ship friday\nSent from GoSpell");
                     mode = Some(match paste_mode {
                         PasteMode::Standalone => "standalone",
                         PasteMode::Continue => "continue",
@@ -1564,7 +1565,7 @@ mod tests {
             (TranscriptionTarget::RawCopyOnlyPaste, HistoryKind::Raw),
         ] {
             let directory = std::env::temp_dir().join(format!(
-                "hex-parakeet-salvage-{}-{target:?}",
+                "gospell-parakeet-salvage-{}-{target:?}",
                 std::process::id()
             ));
             let _ = std::fs::remove_dir_all(&directory);
@@ -1667,7 +1668,7 @@ mod tests {
         )));
 
         let directory =
-            std::env::temp_dir().join(format!("hex-parakeet-yolo-{}", std::process::id()));
+            std::env::temp_dir().join(format!("gospell-parakeet-yolo-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&directory);
         std::fs::create_dir_all(&directory).unwrap();
         let history = History::new(crate::history::HistoryStore::open(
@@ -1778,13 +1779,13 @@ mod tests {
     /// blocks, the last 200 ms held back as the release tail) and compares
     /// the stream's release latency and text with whole-clip transcription.
     #[test]
-    #[ignore = "requires HEX_STREAM_MODEL (Unified English GGUF) and HEX_STREAM_WAVS (comma-separated)"]
+    #[ignore = "requires GOSPELL_STREAM_MODEL (Unified English GGUF) and GOSPELL_STREAM_WAVS (comma-separated)"]
     fn metal_stream_tracks_offline_transcription() {
         use crate::transcription::engine::{Offline, Source, TranscriptionEngine};
         use crate::transcription::{Transcriber, WarmTranscriber};
 
         let selection = TranscriptionSelection::default();
-        let path = PathBuf::from(std::env::var("HEX_STREAM_MODEL").unwrap());
+        let path = PathBuf::from(std::env::var("GOSPELL_STREAM_MODEL").unwrap());
         let mut model = Parakeet::load_from(&path, false, Some(&selection)).unwrap();
         model
             .session
@@ -1794,13 +1795,13 @@ mod tests {
             Box::new(model),
         )))
         .unwrap();
-        // `HEX_STREAM_LIVE_TEXT=0` replays without reading live text.
-        let engine = if std::env::var("HEX_STREAM_LIVE_TEXT").is_ok_and(|value| value == "0") {
+        // `GOSPELL_STREAM_LIVE_TEXT=0` replays without reading live text.
+        let engine = if std::env::var("GOSPELL_STREAM_LIVE_TEXT").is_ok_and(|value| value == "0") {
             engine
         } else {
             engine.with_live_text()
         };
-        let speed = std::env::var("HEX_STREAM_SPEED")
+        let speed = std::env::var("GOSPELL_STREAM_SPEED")
             .ok()
             .and_then(|speed| speed.parse::<f64>().ok())
             .unwrap_or(4.0);
@@ -1824,7 +1825,7 @@ mod tests {
                 .filter(|word| !word.is_empty())
                 .collect::<Vec<_>>()
         };
-        for path in std::env::var("HEX_STREAM_WAVS").unwrap().split(',') {
+        for path in std::env::var("GOSPELL_STREAM_WAVS").unwrap().split(',') {
             let mut reader = WavReader::open(path).unwrap();
             let rate = reader.spec().sample_rate;
             let channels = usize::from(reader.spec().channels);
@@ -1952,7 +1953,7 @@ mod tests {
         }
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     #[test]
     fn chunked_word_transcription_keeps_word_times_across_chunks() {
         use crate::transcription::{Transcript, TranscriptSegment};
@@ -2014,7 +2015,7 @@ mod tests {
         assert_eq!(merged.segments[2].start_ms, third_ms);
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     #[test]
     fn word_chunk_cap_never_exceeds_whisper_max_audio_chunk_samples() {
         let whisper_cap =
@@ -2035,7 +2036,7 @@ mod tests {
         assert!(sizes.iter().all(|&len| len > 0 && len <= whisper_cap));
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     #[test]
     fn word_transcription_is_a_foreground_request_on_the_shared_engine() {
         use crate::transcription::engine::Command as EngineCommand;
@@ -2097,9 +2098,9 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "requires HEX_STUTTER_FIXTURE and the installed Parakeet model"]
+    #[ignore = "requires GOSPELL_STUTTER_FIXTURE and the installed Parakeet model"]
     fn tdt_decoder_does_not_repeat_single_letter_tokens() {
-        let path = PathBuf::from(std::env::var("HEX_STUTTER_FIXTURE").unwrap());
+        let path = PathBuf::from(std::env::var("GOSPELL_STUTTER_FIXTURE").unwrap());
         let mut reader = WavReader::open(path).unwrap();
         let sample_rate = reader.spec().sample_rate;
         let samples = reader

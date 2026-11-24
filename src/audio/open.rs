@@ -1,5 +1,5 @@
 //! Resolving the configured microphone and opening it: `--device`, the saved
-//! microphone, else the system default, with the stand-in rules that keep Hex
+//! microphone, else the system default, with the stand-in rules that keep GoSpell
 //! Microphone, a lid-closed built-in microphone, or a Bluetooth headset from
 //! recording the wrong input.
 
@@ -79,7 +79,7 @@ pub(super) enum InputTarget {
     Named(usize),
     /// The OS's default input.
     SystemDefault,
-    /// A real input standing in for a default that is Hex Microphone, the
+    /// A real input standing in for a default that is GoSpell Microphone, the
     /// built-in microphone with the lid closed, a passed-over Bluetooth
     /// headset, or missing: the built-in microphone while the lid is open,
     /// else the first usable one listed, never a virtual input or an
@@ -106,9 +106,9 @@ pub(super) struct InputPlan {
     pub(super) selection: Selection,
 }
 
-/// Resolves the input Hex captures from: `--device` exactly as named, else
-/// the saved microphone while it is listed, else the system default. Hex
-/// never captures from its own virtual microphone, so a default that is Hex
+/// Resolves the input GoSpell captures from: `--device` exactly as named, else
+/// the saved microphone while it is listed, else the system default. GoSpell
+/// never captures from its own virtual microphone, so a default that is GoSpell
 /// Microphone (or none) falls back to a real input. With the lid closed, the
 /// built-in microphone is switched off in hardware though still listed, so
 /// it is passed over the same way. With `avoid_bluetooth`, a Bluetooth
@@ -125,15 +125,15 @@ pub(super) fn resolve_input(
     transport: impl Fn(usize) -> Transport,
     route: Route,
 ) -> std::result::Result<InputPlan, String> {
-    let is_hex = crate::audio::hex_microphone::is_hex_virtual_device_name;
+    let is_gospell = crate::audio::gospell_microphone::is_gospell_virtual_device_name;
     let position = |name: &str| names.iter().position(|listed| listed == name);
     let is_built_in = |index: usize| transport(index) == Transport::BuiltIn;
     let avoided = |index: usize| route.avoid_bluetooth && transport(index) == Transport::Bluetooth;
     let off = |index: usize| route.lid_closed && is_built_in(index);
     if let Some(name) = device_override {
-        if is_hex(name) {
+        if is_gospell(name) {
             return Err(format!(
-                "Hex cannot capture from its own virtual microphone: {name}"
+                "GoSpell cannot capture from its own virtual microphone: {name}"
             ));
         }
         return position(name)
@@ -143,7 +143,7 @@ pub(super) fn resolve_input(
             })
             .ok_or_else(|| format!("microphone is unavailable: {name}"));
     }
-    let selection = match selected.filter(|name| !is_hex(name)) {
+    let selection = match selected.filter(|name| !is_gospell(name)) {
         Some(name) => match position(name) {
             Some(index) if off(index) => Selection::LidClosed,
             Some(index) => {
@@ -158,7 +158,7 @@ pub(super) fn resolve_input(
     };
     // ALSA names a default even with no devices listed.
     let default_usable = !names.is_empty()
-        && default.is_some_and(|name| !is_hex(name) && !position(name).is_some_and(off));
+        && default.is_some_and(|name| !is_gospell(name) && !position(name).is_some_and(off));
     let default_avoided = default.and_then(position).is_some_and(avoided);
     if default_usable && !default_avoided {
         return Ok(InputPlan {
@@ -171,7 +171,7 @@ pub(super) fn resolve_input(
     // silence while its app is idle, and the iPhone prompts and can fail.
     let usable = || {
         (0..names.len()).filter(|&index| {
-            !is_hex(&names[index])
+            !is_gospell(&names[index])
                 && !off(index)
                 && !matches!(transport(index), Transport::Virtual | Transport::Continuity)
         })
@@ -310,7 +310,7 @@ pub(super) fn open_configured_input(request: &OpenRequest) -> Result<Opened> {
                 using = %name,
                 lid_closed = route.lid_closed,
                 avoid_bluetooth = route.avoid_bluetooth,
-                "the system default input is Hex Microphone, off with the lid closed, Bluetooth, or missing; using another microphone"
+                "the system default input is GoSpell Microphone, off with the lid closed, Bluetooth, or missing; using another microphone"
             );
         }
         match plan.selection {
@@ -408,7 +408,7 @@ pub fn open_named_input(device: &str) -> Result<AudioInput> {
 }
 
 /// Opens the input dictation would open now: the saved microphone, else the
-/// system default, passing over Hex Microphone and (as set) a Bluetooth
+/// system default, passing over GoSpell Microphone and (as set) a Bluetooth
 /// default. For a level meter while dictation's own is closed.
 #[cfg(target_os = "macos")]
 pub fn open_dictation_input(selected_device: Option<&str>) -> Result<AudioInput> {

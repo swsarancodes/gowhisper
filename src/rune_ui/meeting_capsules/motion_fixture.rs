@@ -21,7 +21,7 @@ fn fixture_levels(frame: usize) -> [f32; 2] {
 fn recording_motion_frames() {
     use crate::rune_ui::offscreen;
     use std::fmt::Write;
-    let Some(folder) = std::env::var_os("HEX_PILL_FRAMES") else {
+    let Some(folder) = std::env::var_os("GOSPELL_PILL_FRAMES") else {
         return;
     };
     let folder = std::path::PathBuf::from(folder);
@@ -42,7 +42,14 @@ fn recording_motion_frames() {
             rune_hud::{Painter, Target, dot_scope::Tuning, hud_placement::Layout},
         };
         let start = Instant::now();
-        let mut hud = IndicatorModel::new(Tuning::default(), start);
+        // The capsule's field is measured against the HUD's classic dots.
+        let mut hud = IndicatorModel::new(
+            Tuning {
+                look: crate::rune_hud::dot_scope::Look::Dots,
+                ..Tuning::default()
+            },
+            start,
+        );
         hud.handle(Event::Started, start, false);
         rt.state.waveform = Some(Box::new(waveform::Listening::new(start)));
         let mut ink = waveform::Ink::default();
@@ -56,7 +63,10 @@ fn recording_motion_frames() {
         let mut trace = String::from("frame,hovered,key,x,y,w,h\n");
         for frame in 0..366 {
             // Put the fixture on the same second at each event, independent of GPU speed.
-            if let State::Recording { recording: shown, .. } = &mut rt.state.state {
+            if let State::Recording {
+                recording: shown, ..
+            } = &mut rt.state.state
+            {
                 shown.started = Instant::now() - Duration::from_secs(258 + frame as u64 / 60);
             }
             if frame % 60 == 0 {
@@ -82,11 +92,17 @@ fn recording_motion_frames() {
             }
             rt.frame(1.0 / 60.0);
             for elem in rt.elements() {
-                if let Some(key @ ("pill" | "elapsed" | "copy-prompt" | "meeting-listening-field")) =
-                    elem.key.as_deref()
+                if let Some(
+                    key @ ("pill" | "elapsed" | "copy-prompt" | "meeting-listening-field"),
+                ) = elem.key.as_deref()
                 {
                     let [x, y, w, h] = elem.rect;
-                    writeln!(trace, "{frame},{},{key},{x},{y},{w},{h}", rt.state.hovered()).unwrap();
+                    writeln!(
+                        trace,
+                        "{frame},{},{key},{x},{y},{w},{h}",
+                        rt.state.hovered()
+                    )
+                    .unwrap();
                 }
             }
             {
@@ -165,7 +181,10 @@ fn a_light_host_draws_the_dark_recording_from_the_first_frame() {
 /// recolour.
 fn hold_clock(rt: &mut Runtime<Capsule>) {
     rt.update(|capsule, tx| {
-        if let State::Recording { recording: shown, .. } = &mut capsule.state {
+        if let State::Recording {
+            recording: shown, ..
+        } = &mut capsule.state
+        {
             shown.started = Instant::now() - Duration::from_secs(258);
         }
         tx.instant();
@@ -511,10 +530,7 @@ fn row_swipes_do_not_move_the_panel_or_fire_actions_but_small_clicks_work() {
                     shifts.try_recv().is_err() && commands.try_recv().is_err(),
                     "{key} {phase}"
                 );
-                assert!(
-                    rt.state.live.copied.is_none(),
-                    "{key} {phase}"
-                );
+                assert!(rt.state.live.copied.is_none(), "{key} {phase}");
             }
         }
         if phase == 0 {
@@ -726,7 +742,10 @@ fn a_long_recording_keeps_its_timer_and_stop_inside_each_corner() {
             let (mut rt, received, _) = runtime(live_recording("fixture"), false, true, RECORDING);
             rt.update(move |c, tx| {
                 c.corner = corner;
-                if let State::Recording { recording: shown, .. } = &mut c.state {
+                if let State::Recording {
+                    recording: shown, ..
+                } = &mut c.state
+                {
                     shown.started = Instant::now() - Duration::from_secs(sec);
                     shown.warning = warning.then_some(meeting::TrackWarning::DigitalSilence);
                 }

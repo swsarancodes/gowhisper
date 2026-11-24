@@ -1,17 +1,17 @@
-# Hex website
+# GoSpell website
 
-`https://anoma.ly/hex` is the one Hex site (dev: `https://dev.anoma.ly/hex`).
+`https://gospell.goml.io` is the one GoSpell site (dev: `https://dev.gospell.goml.io`).
 `bun run dev` starts Vite. `bun run build [--mode dev]` checks TypeScript and
-builds Cloudflare Build Output with base `/hex/`; `bun run check:downloads`
+builds Cloudflare Build Output with base `/gospell/`; `bun run check:downloads`
 checks that every download link serves a file. `cloudflare.config.ts` defines
 both Workers. CI deploys them, never a laptop: Site builds without secrets and
 `.github/release/deploy-site.sh` deploys the verified Build Output
 (`cf deploy --prebuilt --mode <mode>`), refusing any Worker, route, or binding
 other than this config's (docs/releasing.md). `worker.ts` serves the
-site and, at `/hex/files/`, the release files: the installers and legacy
+site and, at `/gospell/files/`, the release files: the installers and legacy
 appcast built with the site, the dev notes from the Release workflow's
 `dev-notes` branch, and the frozen 2.3.1 feeds and artifacts read from
-`hex-production-files`. It 301s other hosts and plain HTTP to the canonical
+`gospell-production-files`. It 301s other hosts and plain HTTP to the canonical
 host.
 
 The download section (`src/Download.tsx`) is one install switcher and nothing
@@ -22,13 +22,13 @@ switch inside a row where it has variants (x64/ARM64 for the Windows installer
 and the Linux binary, which the Linux packages follow too; Debian, Fedora, Nix,
 and AUR for the Linux package), and the download button or copyable command.
 All three stacks share one grid cell, so switching tabs never moves the page.
-An Intel Mac sees that Hex requires Apple silicon instead of a download. It
+An Intel Mac sees that GoSpell requires Apple silicon instead of a download. It
 selects the visitor's OS and architecture on first paint and refines them with
 UA client hints. Versions, URLs, and commands live in `src/release.ts`; file
-links name `/hex/download/<target>`, which the Worker sends to the stable
+links name `/gospell/download/<target>`, which the Worker sends to the stable
 release once there is one and to the newest dev build until then. The AUR
 package appears from the first build after a stable release, which pushes
-`hex-bin`. Add
+`gospell-bin`. Add
 `?platform=mac|mac-intel|windows-x64|windows-arm64|linux|linux-arm64|mobile`
 to see each default. The hero's key and its "Hold …" line follow the selected
 tab, so clicking Windows reads Alt and clicking Linux reads Alt+Space; until a
@@ -66,20 +66,20 @@ Regenerate the idle still after changing the head:
 
 ```sh
 VITE_SHOUT_CAPTURE=1 bunx vite --port 5531
-HEX_SITE_URL=http://127.0.0.1:5531 bun run generate:poster
+GOSPELL_SITE_URL=http://127.0.0.1:5531 bun run generate:poster
 ```
 
 ## Performance
 
-`perf/hex.bench.ts` is a [strobe](https://github.com/anomalyco/strobe) bench: load to
+`perf/gospell.bench.ts` is a [strobe](https://github.com/anomalyco/strobe) bench: load to
 the live head, the idle head for 8 s, and the first 20 s of the show after a click
-on the key. `strobe.json` builds the site and serves the Build Output under `/hex/`
+on the key. `strobe.json` builds the site and serves the Build Output under `/gospell/`
 with `perf/serve.ts`. strobe builds and serves both variants with this checkout's
 `strobe.json` and `perf/`, so any commit works as the base. From the repository root:
 
 ```sh
-strobe bench site/perf/hex.bench.ts --base origin/dev --head .
-strobe bench site/perf/hex.bench.ts --head . --check            # each case once, pass or fail
+strobe bench site/perf/gospell.bench.ts --base origin/dev --head .
+strobe bench site/perf/gospell.bench.ts --head . --check            # each case once, pass or fail
 strobe report experiment <exp_…> --format pr --update-pr <n>     # the results block in PR n
 ```
 
@@ -96,23 +96,23 @@ during a load.
 ## Social image
 
 The Open Graph and Twitter image is `public/og.png` (1200 × 630): the app icon,
-the name, and one line. `scripts/og/hex-icon.png` is the 1024 px icon exported
-from the built app (`iconutil -c iconset Hex.app/Contents/Resources/AppIcon.icns`).
+the name, and one line. `scripts/og/gospell-icon.png` is the 1024 px icon exported
+from the built app (`iconutil -c iconset GoSpell.app/Contents/Resources/AppIcon.icns`).
 Regenerate with `bun run generate:og`, bump the `?v=` on both image tags in
 `index.html`, rebuild, deploy, and fetch the published PNG.
 
-The Labs pages (`/hex/labs`, `/hex/labs/<id>`) each have their own card,
+The Labs pages (`/gospell/labs`, `/gospell/labs/<id>`) each have their own card,
 drawn at build by `scripts/labs.ts` with satori and resvg (no browser): the
-icon, "Hex Labs", the lab's title and line, and its OSes. Their `?v=` is a
+icon, "GoSpell Labs", the lab's title and line, and its OSes. Their `?v=` is a
 hash of what the card shows. `src/labs.json` comes from the app's Labs
-registry; never edit it by hand (`HEX_UPDATE_LABS_JSON=1 scripts/check
+registry; never edit it by hand (`GOSPELL_UPDATE_LABS_JSON=1 scripts/check
 labs::web` from the repository root rewrites it).
 
 Messages also plays `public/og.mp4` (`og:video`) inline on a loop in place of the
 image; other apps keep the PNG. It's a 4.5 s, 1200 × 630, 60 fps silent H.264
 loop: the icon speaks and the words pile up under it
-(`scripts/og-video/hex-pour.js`, matter.js physics, deterministic per frame so
-the last frame meets the first). `bun run generate:og-video [hex-line|hex-key]`
+(`scripts/og-video/gospell-pour.js`, matter.js physics, deterministic per frame so
+the last frame meets the first). `bun run generate:og-video [gospell-line|gospell-key]`
 renders it through Chromium and ffmpeg; bump the `?v=` on both `og:video` tags
 after changing it. The Worker answers Range requests for `.mp4`, which Safari
 and AVFoundation need.

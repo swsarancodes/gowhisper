@@ -9,7 +9,7 @@
 
 use std::time::Duration;
 
-/// How long after a paste Hex waits before restoring the previous clipboard.
+/// How long after a paste GoSpell waits before restoring the previous clipboard.
 /// Nothing acknowledges that the target read the paste; Windows remote desktop
 /// clients override this with a longer window.
 pub(crate) const CLIPBOARD_RESTORE_DELAY: Duration = Duration::from_millis(500);
@@ -19,7 +19,7 @@ pub(crate) const CLIPBOARD_RESTORE_DELAY: Duration = Duration::from_millis(500);
 pub(crate) enum RestoreDecision<S> {
     /// A newer paste, copy, or `keep` superseded this generation.
     Superseded,
-    /// Another application changed the clipboard after Hex pasted.
+    /// Another application changed the clipboard after GoSpell pasted.
     ChangedExternally,
     /// Nothing was saved to restore (for example, an unreadable format).
     NothingToRestore,
@@ -47,7 +47,7 @@ impl<S, M> Default for ClipboardRestore<S, M> {
 impl<S, M> ClipboardRestore<S, M> {
     /// Registers a committed paste whose pre-write and post-write clipboard
     /// marks can be compared directly (macOS changeCount, Windows sequence
-    /// number). When `previous_mark` matches the last paste Hex wrote, the
+    /// number). When `previous_mark` matches the last paste GoSpell wrote, the
     /// earlier paste's original snapshot is preserved instead of adopting the
     /// transient dictation text.
     #[cfg_attr(target_os = "linux", allow(dead_code))]

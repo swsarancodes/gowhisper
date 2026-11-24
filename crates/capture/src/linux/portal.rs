@@ -21,8 +21,8 @@ const SCREEN_CAST: &str = "org.freedesktop.portal.ScreenCast";
 const REQUEST: &str = "org.freedesktop.portal.Request";
 const SESSION: &str = "org.freedesktop.portal.Session";
 const CALL_TIMEOUT: Duration = Duration::from_secs(5);
-/// Hex's app id, named by the desktop entry the host installs (`anomaly.hex.desktop`).
-const APP_ID: &str = "anomaly.hex";
+/// GoSpell's app id, named by the desktop entry the host installs (`com.goml.gospell.desktop`).
+const APP_ID: &str = "com.goml.gospell";
 /// How long the desktop's picker may wait for a choice.
 const PICK_TIMEOUT: Duration = Duration::from_secs(120);
 const SOURCE_MONITOR: u32 = 1;
@@ -90,7 +90,7 @@ impl Portal {
             .member("Response")
             .build()?;
         let responses = MessageStream::for_match_rule(rule, &connection, None).await?;
-        // A host app has no app id of its own; registering one (Hex's
+        // A host app has no app id of its own; registering one (GoSpell's
         // desktop entry) is what lets the portal keep its screen choice.
         // Older portals lack the registry, and then ask every time.
         let _ = tokio::time::timeout(
@@ -106,7 +106,7 @@ impl Portal {
         .await;
         let sender = connection
             .unique_name()
-            .ok_or_else(|| anyhow!("the session bus gave Hex no name"))?
+            .ok_or_else(|| anyhow!("the session bus gave GoSpell no name"))?
             .trim_start_matches(':')
             .replace('.', "_");
         Ok(Self {
@@ -119,7 +119,7 @@ impl Portal {
 
     fn token(&mut self) -> String {
         self.next += 1;
-        format!("hex{}_{}", std::process::id(), self.next)
+        format!("gospell{}_{}", std::process::id(), self.next)
     }
 
     /// Calls a ScreenCast method whose answer comes as a `Request.Response`, and waits for it.

@@ -37,7 +37,7 @@ pub use self::gates::*;
 pub use self::group::Group;
 
 /// Where people send feedback on Labs features.
-pub const FEEDBACK_URL: &str = "https://github.com/anomalyco/hex/issues/new";
+pub const FEEDBACK_URL: &str = "https://github.com/goml/gospell/issues/new";
 
 /// Who a Labs feature is for.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -48,7 +48,7 @@ pub enum Audience {
     Dev,
 }
 
-/// An OS Hex runs on.
+/// An OS GoSpell runs on.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Os {
     Macos,
@@ -347,7 +347,7 @@ fn encode_where(settings: &LabsSettings, reaches: impl Fn(Feature) -> bool) -> S
     bank
 }
 
-/// The names of the features on, for `hex status`.
+/// The names of the features on, for `gospell status`.
 pub fn active_names(settings: &AppSettings) -> Vec<String> {
     Feature::available()
         .filter(|feature| feature.on(settings))
@@ -355,7 +355,7 @@ pub fn active_names(settings: &AppSettings) -> Vec<String> {
         .collect()
 }
 
-/// Logs the switches to process.log; call once logging is up in a long-lived Hex.
+/// Logs the switches to process.log; call once logging is up in a long-lived GoSpell.
 pub fn log_launch() {
     tracing::info!(
         live_text = live_text(),

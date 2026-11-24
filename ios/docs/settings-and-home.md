@@ -1,27 +1,27 @@
 # Settings and Home
 
-Part of [Hex for iPhone](../README.md).
+Part of [GoSpell for iPhone](../README.md).
 
 Home's single screen and the four Settings pages, the experiments list,
 and every `--snap-state` scene the app and the keyboard render.
 
-## Settings (`ContentView`, `HEXMobile/Settings/`)
+## Settings (`ContentView`, `GoSpellMobile/Settings/`)
 
 Home fits one screen: the
-Hex header, one status line ("Ready" with a check, or "Finish setup · 1 step ›"),
+GoSpell header, one status line ("Ready" with a check, or "Finish setup · 1 step ›"),
 Dictate, and four rows that each open a short page, then **iOS Settings ↗**
-(Hex's page in iOS Settings) and **Run setup again**, and last **Privacy
+(GoSpell's page in iOS Settings) and **Run setup again**, and last **Privacy
 policy**, **Support** and **Acknowledgements**. Privacy policy (App Review
-5.1.1(i)) and Support open in Safari inside Hex (`HexLinks`, one base URL:
-`https://dev.anoma.ly/hex` until the production site serves
-`anoma.ly/hex/privacy`). Each row has a one-line description at most. While Home or its
-setup sheet shows (and Hex is active), Home reads the setup state once a second
-(`KeyboardSetupMonitor.refresh`), as well as when Hex comes to the foreground and when the
-keyboard reports Full Access, so a change made with Hex still in front (the keyboard's Allow
-Paste flag in one of Hex's own fields, a keyboard added from Settings beside Hex in iPad
+5.1.1(i)) and Support open in Safari inside GoSpell (`GoSpellLinks`, one base URL:
+`https://dev.gospell.goml.io` until the production site serves
+`gospell.goml.io/privacy`). Each row has a one-line description at most. While Home or its
+setup sheet shows (and GoSpell is active), Home reads the setup state once a second
+(`KeyboardSetupMonitor.refresh`), as well as when GoSpell comes to the foreground and when the
+keyboard reports Full Access, so a change made with GoSpell still in front (the keyboard's Allow
+Paste flag in one of GoSpell's own fields, a keyboard added from Settings beside GoSpell in iPad
 Split View) shows within a second; on a Settings page it doesn't run. Home's speech model
 card opens Settings › Dictation at Speech model in keyboard; the page opened from Home's
-list starts at the top. The pages, one file each in `HEXMobile/Settings/`
+list starts at the top. The pages, one file each in `GoSpellMobile/Settings/`
 (`DictationSettingsPage`, `KeyboardSettingsPage`, `PrivacySettingsPage`,
 `ExperimentsSettingsPage`):
 
@@ -41,9 +41,9 @@ list starts at the top. The pages, one file each in `HEXMobile/Settings/`
   the dictation bar, so testers who turned that experiment off keep the bar;
   an iPad follows the same choice, where until build 117 it always showed the bar), with
   Auto-start (Never, On switch by default, or Always) below it while the dictation bar is
-  chosen, and Languages, Hex key and Number row (off by default) while Full is; under
+  chosen, and Languages, GoSpell key and Number row (off by default) while Full is; under
   **Typing**, only while Full is chosen, Auto-capitalization, Autocorrect (with Spatial
-  autocorrect below it while it's on), Swipe typing, Suggest swear words and Vocabulary (Hex's
+  autocorrect below it while it's on), Swipe typing, Suggest swear words and Vocabulary (GoSpell's
   custom vocabulary list, how many words it holds); under **Feedback**, Key pop-ups (Full
   only), Haptics (the dictation bar uses it too; Strength below it while it's on: Light, the
   default until you choose, Medium or Strong) and Emoji (Clear emoji history while it's on,

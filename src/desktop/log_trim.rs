@@ -1,6 +1,6 @@
-//! Keeps Hex's diagnostic logs (`live.ndjson`, `process.log`) bounded.
+//! Keeps GoSpell's diagnostic logs (`live.ndjson`, `process.log`) bounded.
 //!
-//! Every Hex process appends to the same files, so a log is compacted in
+//! Every GoSpell process appends to the same files, so a log is compacted in
 //! place rather than renamed: once it passes `MAX_BYTES`, its oldest lines
 //! are dropped so about `KEEP_BYTES` remain, cut at a line boundary. Other
 //! processes keep appending to the same file, where a rename would leave them
@@ -44,7 +44,7 @@ pub fn start(log_dir: &Path) {
 
 /// Older builds wrote each dictation's text and page addresses into
 /// `live.ndjson`, and meeting titles, capture summaries, and scripts' output
-/// into `process.log`. Truncating rather than deleting keeps any Hex still
+/// into `process.log`. Truncating rather than deleting keeps any GoSpell still
 /// appending to them writing to the files everyone reads.
 fn clear_old_logs(log_dir: &Path) {
     let marker = log_dir.join(CLEARED_MARKER);
@@ -151,7 +151,7 @@ mod tests {
 
     fn directory(name: &str) -> std::path::PathBuf {
         let directory =
-            std::env::temp_dir().join(format!("hex-log-trim-{name}-{}", std::process::id()));
+            std::env::temp_dir().join(format!("gospell-log-trim-{name}-{}", std::process::id()));
         let _ = fs::remove_dir_all(&directory);
         fs::create_dir_all(&directory).unwrap();
         directory

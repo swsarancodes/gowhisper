@@ -1,4 +1,4 @@
-// The `@hex/commands` module scripts import. `hex.d.ts` types it.
+// The `@goml/gospell-commands` module scripts import. `gospell.d.ts` types it.
 
 const frozen = (value) => Object.freeze(value)
 
@@ -28,4 +28,4 @@ export function choice(input) {
 
 export const union = (...members) => frozen({ type: "union", members })
 
-export const defineHexConfig = (config) => config
+export const defineGoSpellConfig = (config) => config

@@ -1,5 +1,5 @@
-// Hex Labs on the web: a page per lab at /hex/labs/<id>, the index at
-// /hex/labs, and each lab's social card. labs.json comes from the Rust Labs
+// GoSpell Labs on the web: a page per lab at /gospell/labs/<id>, the index at
+// /gospell/labs, and each lab's social card. labs.json comes from the Rust Labs
 // registry (src/labs/web.rs in the app), so a lab's title, line, group, and
 // OSes are never copied by hand; scripts/labs.ts writes the pages at build.
 import { DEV_DOWNLOAD_PATH, withBase } from "./base"
@@ -23,8 +23,8 @@ export type Channel = { stable: string } | { dev: true }
 
 const OS_NAMES: Record<Os, string> = { macos: "Mac", windows: "Windows", linux: "Linux" }
 
-// The dev build's download per OS: the Worker's /hex/download/dev/<target>
-// redirects, and /hex/download/dev the Mac's.
+// The dev build's download per OS: the Worker's /gospell/download/dev/<target>
+// redirects, and /gospell/download/dev the Mac's.
 const DEV_DOWNLOADS: Record<Os, string> = {
   macos: DEV_DOWNLOAD_PATH,
   windows: withBase("/download/dev/windows-x64-setup"),
@@ -61,7 +61,7 @@ export function newestFirst(labs: Lab[]): Lab[] {
     .map(({ lab }) => lab)
 }
 
-// The `hex labs …` names a stable version's Rust source knows: its
+// The `gospell labs …` names a stable version's Rust source knows: its
 // `Feature::name` strings, which every lab id is.
 export function inSource(lab: Lab, source: string): boolean {
   return source.includes(`"${lab.id}"`)
@@ -123,8 +123,8 @@ const MARK = `<svg aria-hidden="true" viewBox="0 0 64 64"><path d="M32 4 57 18.5
 export type Meta = { title: string; description: string; url: string; image: string; imageAlt: string }
 
 function head(origin: string, meta: Meta, style: string): string {
-  const url = `${origin}${meta.url.slice("/hex".length)}`
-  const image = `${origin}${meta.image.slice("/hex".length)}`
+  const url = `${origin}${meta.url.slice("/gospell".length)}`
+  const image = `${origin}${meta.image.slice("/gospell".length)}`
   const tags = [
     `<meta charset="utf-8">`,
     `<meta name="viewport" content="width=device-width, initial-scale=1">`,
@@ -133,7 +133,7 @@ function head(origin: string, meta: Meta, style: string): string {
     `<meta name="description" content="${escape(meta.description)}">`,
     `<link rel="canonical" href="${escape(url)}">`,
     `<meta property="og:type" content="website">`,
-    `<meta property="og:site_name" content="Hex">`,
+    `<meta property="og:site_name" content="GoSpell">`,
     `<meta property="og:locale" content="en_US">`,
     `<meta property="og:title" content="${escape(meta.title)}">`,
     `<meta property="og:description" content="${escape(meta.description)}">`,
@@ -154,7 +154,7 @@ function head(origin: string, meta: Meta, style: string): string {
   return tags.join("\n")
 }
 
-// A static page in the Labs pages' look: the Hex mark and a crumb, then the body.
+// A static page in the Labs pages' look: the GoSpell mark and a crumb, then the body.
 // The iPhone pages (src/iphone.ts) use it too, with their own crumb and styles.
 export function shell(origin: string, meta: Meta, body: string, page: { crumb: { href: string; label: string }; style?: string } = LABS): string {
   return `<!doctype html>
@@ -163,7 +163,7 @@ export function shell(origin: string, meta: Meta, body: string, page: { crumb: {
 ${head(origin, meta, page.style ?? "")}
 </head>
 <body>
-<header><a href="${withBase("/")}">${MARK}<span>Hex</span></a><span class="crumb">/</span><a class="crumb" href="${page.crumb.href}">${escape(page.crumb.label)}</a></header>
+<header><a href="${withBase("/")}">${MARK}<span>GoSpell</span></a><span class="crumb">/</span><a class="crumb" href="${page.crumb.href}">${escape(page.crumb.label)}</a></header>
 <main>
 ${body}
 </main>
@@ -172,34 +172,34 @@ ${body}
 `
 }
 
-function getHex(lab: Lab, channel: Channel): { href: string; label: string; where: string } {
+function getGoSpell(lab: Lab, channel: Channel): { href: string; label: string; where: string } {
   if ("stable" in channel) {
-    return { href: withBase("/"), label: "Get Hex", where: `In Hex ${escape(channel.stable)} and later.` }
+    return { href: withBase("/"), label: "Get GoSpell", where: `In GoSpell ${escape(channel.stable)} and later.` }
   }
   const [first, ...rest] = lab.oses
   const others = rest.map((os) => `<a href="${DEV_DOWNLOADS[os]}">${OS_NAMES[os]}</a>`)
   return {
     href: DEV_DOWNLOADS[first],
-    label: `Get Hex Dev for ${OS_NAMES[first]}`,
+    label: `Get GoSpell Dev for ${OS_NAMES[first]}`,
     where: `In the Dev build, not yet in a stable release.${others.length ? ` Dev build for ${others.join(" or ")}.` : ""}`,
   }
 }
 
 // The deep link opens Settings › Labs on the lab's card. Only the Mac app
-// registers hex://, so labs Mac doesn't have offer the command alone.
+// registers gospell://, so labs Mac doesn't have offer the command alone.
 export function renderLab(lab: Lab, channel: Channel, origin: string): string {
-  const description = `${sentence(lab.summary)} A Hex Labs feature for ${osList(lab.oses)}.`
-  const get = getHex(lab, channel)
+  const description = `${sentence(lab.summary)} A GoSpell Labs feature for ${osList(lab.oses)}.`
+  const get = getGoSpell(lab, channel)
   const mac = lab.oses.includes("macos")
-  const open = mac ? `<a class="button button--primary" href="hex://labs/${escape(lab.id)}">Open in Hex</a>` : ""
+  const open = mac ? `<a class="button button--primary" href="gospell://labs/${escape(lab.id)}">Open in GoSpell</a>` : ""
   const getClass = mac ? "button--secondary" : "button--primary"
-  const first = mac ? "No Hex yet? Get it first, then come back and press Open in Hex." : `Turn it on in Settings › Labs.`
-  const body = `<p class="eyebrow">Hex Labs · ${escape(lab.groupTitle)} · ${escape(osList(lab.oses))}</p>
+  const first = mac ? "No GoSpell yet? Get it first, then come back and press Open in GoSpell." : `Turn it on in Settings › Labs.`
+  const body = `<p class="eyebrow">GoSpell Labs · ${escape(lab.groupTitle)} · ${escape(osList(lab.oses))}</p>
 <h1>${escape(lab.title)}</h1>
 <p class="summary">${escape(sentence(lab.summary))}</p>
 <div class="actions">${open}<a class="button ${getClass}" href="${get.href}">${escape(get.label)}</a></div>
 <p class="note">${get.where}</p>
-<p class="note">${first} Or run <code>hex labs on ${escape(lab.id)}</code>.</p>
+<p class="note">${first} Or run <code>gospell labs on ${escape(lab.id)}</code>.</p>
 <section class="about">
 <p>Labs are features we're trying out, each off until you turn it on in Settings › Labs.</p>
 <p><a href="${INDEX_PATH}">Every lab</a></p>
@@ -207,11 +207,11 @@ export function renderLab(lab: Lab, channel: Channel, origin: string): string {
   return shell(
     origin,
     {
-      title: `${lab.title} · Hex Labs`,
+      title: `${lab.title} · GoSpell Labs`,
       description,
       url: pagePath(lab),
       image: cardPath(lab),
-      imageAlt: `Hex Labs: ${lab.title}. ${cardLine(lab.summary)}`,
+      imageAlt: `GoSpell Labs: ${lab.title}. ${cardLine(lab.summary)}`,
     },
     body,
   )
@@ -224,7 +224,7 @@ export function renderIndex(labs: Lab[], origin: string): string {
         `<li><a href="${pagePath(lab)}"><span class="title">${escape(lab.title)}</span><span class="line">${escape(sentence(lab.summary))}</span><span class="meta">${escape(lab.groupTitle)} · ${escape(osList(lab.oses))}</span></a></li>`,
     )
     .join("\n")
-  const body = `<h1>Hex Labs</h1>
+  const body = `<h1>GoSpell Labs</h1>
 <p class="index-intro">Features we're trying out, newest first. Each is off until you turn it on in Settings › Labs.</p>
 <ol>
 ${items}
@@ -232,11 +232,11 @@ ${items}
   return shell(
     origin,
     {
-      title: "Hex Labs",
-      description: "Features Hex is trying out, each off until you turn it on in Settings › Labs.",
+      title: "GoSpell Labs",
+      description: "Features GoSpell is trying out, each off until you turn it on in Settings › Labs.",
       url: INDEX_PATH,
       image: INDEX_CARD_PATH,
-      imageAlt: "Hex Labs: features Hex is trying out.",
+      imageAlt: "GoSpell Labs: features GoSpell is trying out.",
     },
     body,
   )

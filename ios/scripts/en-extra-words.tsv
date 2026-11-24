@@ -1,4 +1,4 @@
-# Chat and tech words for the English typing model (build-typing-model.py), written for Hex
+# Chat and tech words for the English typing model (build-typing-model.py), written for GoSpell
 # by its developers: ours, not copied from any corpus, dictionary or other keyboard.
 # Each line: word<TAB>tier. Tier 1 costs 10 nats (about the model's 2,000th word), tier 2
 # 12, tier 3 13.5; a word the books already have only gets commoner. Lowercase a-z and '

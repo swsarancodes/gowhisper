@@ -250,7 +250,7 @@ fn separator(p: Paint, key: String) -> El {
 }
 
 /// A folder as a label for the row that chooses it: a path under the home
-/// folder reads from `~` ("~/Pictures/Hex Shots"), else it reads whole.
+/// folder reads from `~` ("~/Pictures/GoSpell Shots"), else it reads whole.
 pub(super) fn folder_label(folder: &std::path::Path) -> String {
     crate::app_paths::home_dir()
         .and_then(|home| {
@@ -304,7 +304,7 @@ pub(super) fn nested(row: El) -> El {
 
 /// One numbered step of a how-to card: the number, the title with the
 /// step's keys beside it when it has any, and the description under them.
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 pub(super) fn step_row(
     p: Paint,
     key: &str,
@@ -879,7 +879,7 @@ pub(super) enum ButtonKind {
     Danger,
 }
 
-/// Builds push buttons at Hex's sizes, which keep tighter padding and
+/// Builds push buttons at GoSpell's sizes, which keep tighter padding and
 /// corners than the kit's `ControlSize`s of the same height.
 pub(super) trait PushSize {
     /// 28 pt, the kit's Large height.
@@ -1216,7 +1216,7 @@ pub(super) fn keycaps(p: Paint, key: &str, parts: &[String]) -> El {
 
 /// The width [`keycaps`] draws `parts` at, with `measure` giving a
 /// legend's width.
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 pub(super) fn keycaps_width(parts: &[String], measure: impl Fn(&str, TextStyle) -> f32) -> f32 {
     let size = KeySize::Small;
     let caps: f32 = parts
@@ -1362,13 +1362,13 @@ impl Highlight {
 }
 
 pub(super) static PLAY: rune::Icon = rune::Icon {
-    name: "hex-play",
+    name: "gospell-play",
     view: 20.0,
     body: r#"<path d="M6.5 5.1v9.8c0 .5.5.8.9.5l7.6-4.9c.4-.2.4-.8 0-1L7.4 4.6c-.4-.3-.9 0-.9.5Z" fill="currentColor"/>"#,
 };
 
 pub(super) static PAUSE: rune::Icon = rune::Icon {
-    name: "hex-pause",
+    name: "gospell-pause",
     view: 20.0,
     body: r#"<rect x="5.5" y="4.5" width="3" height="11" rx="1" fill="currentColor"/><rect x="11.5" y="4.5" width="3" height="11" rx="1" fill="currentColor"/>"#,
 };

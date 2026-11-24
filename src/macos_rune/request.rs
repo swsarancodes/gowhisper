@@ -27,7 +27,7 @@ pub(crate) enum Request {
     },
     /// The menu bar's model list: only installed models, never a download.
     SelectInstalledModel(TranscriptionModelId),
-    /// `hex model use`: this exact selection, installed only, never a download.
+    /// `gospell model use`: this exact selection, installed only, never a download.
     UseInstalledSelection(TranscriptionSelection),
     /// Snapshot from the main-thread TIS observer, not a shortcut event.
     InputSourceChanged(Option<String>),
@@ -42,10 +42,10 @@ pub(crate) enum ShortcutTarget {
     #[default]
     Dictation,
     PasteLast,
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     Capture,
     /// Labs › Annotate last 15 seconds shortcut.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     CaptureReplay,
     RawDictation,
     /// Labs › Second dictation shortcut.

@@ -823,7 +823,7 @@ fn voice_prompt_fallback(
     }
 }
 
-/// One generation's text and the model that wrote it, when Hex named one
+/// One generation's text and the model that wrote it, when GoSpell named one
 /// (`None` when OpenCode's own default model answered).
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct Generated {
@@ -926,7 +926,7 @@ fn observed(
 
 /// What a processing log line names for the model that ran: the named model
 /// that answered, or on failure the one the request asked for; OpenCode's own
-/// default when no model was named and it answered; and Hex's automatic
+/// default when no model was named and it answered; and GoSpell's automatic
 /// choice when no named model answered at all.
 fn model_label(observation: &ProcessingObservation) -> &str {
     match observation.model.as_deref() {
@@ -937,7 +937,7 @@ fn model_label(observation: &ProcessingObservation) -> &str {
 }
 
 /// What a processing log line names when the request named no model and
-/// Hex's automatic ranked choice had no model answer.
+/// GoSpell's automatic ranked choice had no model answer.
 const AUTOMATIC_MODEL: &str = "automatic";
 
 /// What a processing log line names when the request asked for no model:
@@ -961,7 +961,7 @@ pub struct ModelCatalog {
 }
 
 impl ModelCatalog {
-    /// Whether an unset model key gets Hex's own ranked pick instead of
+    /// Whether an unset model key gets GoSpell's own ranked pick instead of
     /// OpenCode's default model. [`build_model_catalog`] sets the default
     /// from the ranked list exactly when this is true.
     pub fn automatic_default(&self) -> bool {

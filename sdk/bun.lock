@@ -3,17 +3,17 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "hex-sdk-workspace",
+      "name": "gospell-sdk-workspace",
       "devDependencies": {
         "@changesets/cli": "^3.0.3",
       },
     },
     "service-darwin-arm64": {
-      "name": "@hex-ai/service-darwin-arm64",
+      "name": "@goml/gospell-service-darwin-arm64",
       "version": "0.0.0",
     },
     "typescript": {
-      "name": "@kitlangton/hex",
+      "name": "@goml/gospell",
       "version": "0.3.1",
       "devDependencies": {
         "@types/node": "^24.19.1",
@@ -116,7 +116,7 @@
 
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.28.1", "", { "os": "win32", "cpu": "x64" }, "sha512-bm4Mowrv+GXMlpWX++EcXw/iLyd1o3+bJkC2DkWXYVvgZCqD/bSj9ctZeAMC3cIxgjRVR2Dufaiu4YPxr5gW1A=="],
 
-    "@hex-ai/service-darwin-arm64": ["@hex-ai/service-darwin-arm64@workspace:service-darwin-arm64"],
+    "@goml/gospell-service-darwin-arm64": ["@goml/gospell-service-darwin-arm64@workspace:service-darwin-arm64"],
 
     "@jridgewell/resolve-uri": ["@jridgewell/resolve-uri@3.1.2", "", {}, "sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw=="],
 
@@ -124,7 +124,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
-    "@kitlangton/hex": ["@kitlangton/hex@workspace:typescript"],
+    "@goml/gospell": ["@goml/gospell@workspace:typescript"],
 
     "@manypkg/find-root": ["@manypkg/find-root@3.1.0", "", { "dependencies": { "@manypkg/tools": "^2.1.0" } }, "sha512-BcSqCyKhBVZ5YkSzOiheMCV41kqAFptW6xGqYSTjkVTl9XQpr+pqHhwgGCOHQtjDCv7Is6EFyA14Sm5GVbVABA=="],
 

@@ -70,9 +70,11 @@ impl Listening {
     pub(super) fn new(now: Instant) -> Self {
         // Same optical size, pitch, voice response and shader as dictation;
         // just fewer columns to leave room for the timer.
+        // The meeting capsule keeps the classic dot field.
         let tuning = Tuning {
             width: WIDTH,
             columns: 31.0,
+            look: crate::rune_hud::dot_scope::Look::Dots,
             ..Tuning::default()
         };
         let mut model = IndicatorModel::new(tuning, now);

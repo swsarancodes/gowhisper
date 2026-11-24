@@ -1,32 +1,32 @@
-# Managing Hex in an organization
+# Managing GoSpell in an organization
 
-Administrators can turn Hex features off on managed Macs with a configuration
-profile. Served at https://anoma.ly/hex/docs/admin.
+Administrators can turn GoSpell features off on managed Macs with a configuration
+profile. Served at https://gospell.goml.io/docs/admin.
 
 These keys are **macOS only**. Windows reads only `DisableUpdates` (a DWORD
-under `HKLM` or `HKCU\SOFTWARE\Policies\Anomaly\Hex`), and Linux reads none.
+under `HKLM` or `HKCU\SOFTWARE\Policies\GoML\GoSpell`), and Linux reads none.
 
 ## Keys
 
-All keys are Booleans in the `anomaly.hex` preference domain. A key counts only
+All keys are Booleans in the `com.goml.gospell` preference domain. A key counts only
 when a configuration profile forces it (`CFPreferencesAppValueIsForced`), so a
-value someone writes with `defaults write` locks nothing. Hex reads them at
-launch; a changed profile applies after Hex relaunches.
+value someone writes with `defaults write` locks nothing. GoSpell reads them at
+launch; a changed profile applies after GoSpell relaunches.
 
 | Key | Effect |
 | --- | --- |
-| `DisableMeetings` | No meeting detection, recording, transcription, or notes. Meetings recorded before stay readable with `hex meetings` and `hex mcp`. |
+| `DisableMeetings` | No meeting detection, recording, transcription, or notes. Meetings recorded before stay readable with `gospell meetings` and `gospell mcp`. |
 | `DisableAnnotate` | Annotate (captures) is off. |
 | `DisableOpenCodeProcessing` | No OpenCode requests: mode rewrites, meeting notes and titles, and sending captures to OpenCode sessions. |
-| `DisableTransforms` | No transforms at all, built in or from `hex.config.ts`; the config is never loaded. |
-| `RestrictTransformsToLoopback` | Transforms stay on, but `fetch` reaches only this Mac and `node:child_process` (`exec`, `execFile`) is refused. Every host name, redirects included, must resolve to loopback addresses only (`127.0.0.0/8`, `::1`); the check runs on the resolved addresses Hex connects to, and the system proxy is bypassed. Use it with a local, authenticated model proxy. |
+| `DisableTransforms` | No transforms at all, built in or from `gospell.config.ts`; the config is never loaded. |
+| `RestrictTransformsToLoopback` | Transforms stay on, but `fetch` reaches only this Mac and `node:child_process` (`exec`, `execFile`) is refused. Every host name, redirects included, must resolve to loopback addresses only (`127.0.0.0/8`, `::1`); the check runs on the resolved addresses GoSpell connects to, and the system proxy is bypassed. Use it with a local, authenticated model proxy. |
 | `DisableLabs` | Every Labs feature is off. |
-| `DisableUpdates` | Hex never checks for, downloads, or installs updates. |
+| `DisableUpdates` | GoSpell never checks for, downloads, or installs updates. |
 
 A locked feature reads as off everywhere: the window shows its setting off
-and disabled with "Managed by your organization", and `hex settings set`,
-`hex labs on`, the local API, shortcuts, and background work all refuse it.
-Hex never rewrites the person's own settings, so removing the profile brings
+and disabled with "Managed by your organization", and `gospell settings set`,
+`gospell labs on`, the local API, shortcuts, and background work all refuse it.
+GoSpell never rewrites the person's own settings, so removing the profile brings
 back what they had chosen.
 
 ## Sample profile
@@ -37,9 +37,9 @@ back what they had chosen.
 <plist version="1.0">
 <dict>
   <key>PayloadDisplayName</key>
-  <string>Hex</string>
+  <string>GoSpell</string>
   <key>PayloadIdentifier</key>
-  <string>com.example.hex</string>
+  <string>com.example.gospell</string>
   <key>PayloadType</key>
   <string>Configuration</string>
   <key>PayloadUUID</key>
@@ -50,9 +50,9 @@ back what they had chosen.
   <array>
     <dict>
       <key>PayloadType</key>
-      <string>anomaly.hex</string>
+      <string>com.goml.gospell</string>
       <key>PayloadIdentifier</key>
-      <string>com.example.hex.settings</string>
+      <string>com.example.gospell.settings</string>
       <key>PayloadUUID</key>
       <string>9A1C2E3F-0000-4000-8000-000000000002</string>
       <key>PayloadVersion</key>
@@ -73,8 +73,8 @@ back what they had chosen.
 
 Replace the identifiers and UUIDs with your own and leave out the keys you
 don't need. Most MDM tools (Jamf, Kandji, Intune, Mosyle) accept the inner
-dictionary as a custom settings payload for the `anomaly.hex` domain.
+dictionary as a custom settings payload for the `com.goml.gospell` domain.
 
-To check what Hex sees on a Mac: `hex labs` lists Labs features as `managed`,
-`hex settings get meetings.enabled` reports it as not writable, and Hex's
+To check what GoSpell sees on a Mac: `gospell labs` lists Labs features as `managed`,
+`gospell settings get meetings.enabled` reports it as not writable, and GoSpell's
 `process.log` names the locks at launch.

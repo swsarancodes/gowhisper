@@ -190,7 +190,7 @@ impl Models {
         models
     }
 
-    /// [`Models::fixture`] listing only a model Hex doesn't recommend, so an
+    /// [`Models::fixture`] listing only a model GoSpell doesn't recommend, so an
     /// unset key really gets OpenCode's own default.
     #[cfg(all(test, target_os = "linux"))]
     pub(super) fn fixture_unranked() -> Self {
@@ -457,7 +457,7 @@ pub(super) fn rows(ui: &Ui, p: Paint, target: Target, layer: &mut Vec<El>) -> Ve
     rows
 }
 
-/// The popover's unset entry: Hex's automatic ranked pick while the catalog
+/// The popover's unset entry: GoSpell's automatic ranked pick while the catalog
 /// lists a ranked model, else OpenCode's own default model.
 fn default_entry_label(catalog: &ModelCatalog) -> &'static str {
     if catalog.automatic_default() {

@@ -39,7 +39,7 @@ impl SettingsFile {
     fn new(data: &[u8]) -> Self {
         let sequence = crate::app_settings::SETTINGS_TEMP_SEQUENCE.fetch_add(1, Ordering::Relaxed);
         let directory = std::env::temp_dir().join(format!(
-            "hex-settings-recovery-{}-{sequence}",
+            "gospell-settings-recovery-{}-{sequence}",
             std::process::id()
         ));
         fs::create_dir_all(&directory).unwrap();
@@ -194,7 +194,7 @@ fn saved_mode_choices_and_five_shortcuts_survive_an_unrelated_edit() {
     }
 }
 
-/// The embedded service `hex transcribe` and the TypeScript SDK start reads
+/// The embedded service `gospell transcribe` and the TypeScript SDK start reads
 /// the saved vocabulary, its boost, and the Labs switches with the decode a
 /// launch uses, writing nothing back. They produce the expected bias.
 #[test]
@@ -345,7 +345,7 @@ fn unreadable_launch_shows_a_note() {
 }
 
 #[test]
-fn unset_retention_saves_a_shape_older_hex_can_read() {
+fn unset_retention_saves_a_shape_older_gospell_can_read() {
     // The meeting field in 46c3c762 was non-optional, defaulting to Forever.
     #[derive(Deserialize)]
     struct OldMeetings {
@@ -398,7 +398,7 @@ fn saved_keys_are_sorted_at_every_level() {
     for (key, value) in [
         ("sound_effect_volume", "0.37"),
         ("recording_duck_volume", "0.2"),
-        ("hex_microphone_strength", "1.0"),
+        ("gospell_microphone_strength", "1.0"),
     ] {
         let line = format!("\"{key}\": {value}");
         assert!(
@@ -840,7 +840,7 @@ fn malformed_json_uses_defaults_and_refuses_to_be_replaced() {
     assert!(message.contains("isn't valid JSON"), "{message}");
     assert!(message.contains("line 4 column 1"), "{message}");
     assert!(
-        message.contains("Fix or remove it, then restart Hex"),
+        message.contains("Fix or remove it, then restart GoSpell"),
         "{message}"
     );
     assert!(message.contains("Nothing was saved"), "{message}");
@@ -853,11 +853,11 @@ fn malformed_json_uses_defaults_and_refuses_to_be_replaced() {
     let error = modified.write_to(&file.path).unwrap_err();
     let message = format!("{error:#}");
     assert!(
-        message.contains("couldn't be read when Hex loaded it"),
+        message.contains("couldn't be read when GoSpell loaded it"),
         "{message}"
     );
     assert!(
-        message.contains("Restart Hex to load the fixed file"),
+        message.contains("Restart GoSpell to load the fixed file"),
         "{message}"
     );
     assert_eq!(fs::read(&file.path).unwrap(), b"{}");
@@ -888,11 +888,11 @@ fn stale_defaults_cannot_replace_a_file_fixed_while_the_process_runs() {
     let error = stale.write_to(&file.path).unwrap_err();
     let message = format!("{error:#}");
     assert!(
-        message.contains("couldn't be read when Hex loaded it"),
+        message.contains("couldn't be read when GoSpell loaded it"),
         "{message}"
     );
     assert!(
-        message.contains("Restart Hex to load the fixed file"),
+        message.contains("Restart GoSpell to load the fixed file"),
         "{message}"
     );
     assert_eq!(fs::read(&file.path).unwrap(), fixed);
@@ -905,7 +905,7 @@ fn stale_defaults_cannot_replace_a_file_fixed_while_the_process_runs() {
     let (read, _) = AppSettings::read_from(&file.path).unwrap();
     assert_eq!(read.sound_effect_volume, 0.37);
     let error = stale.write_to(&file.path).unwrap_err();
-    assert!(format!("{error:#}").contains("couldn't be read when Hex loaded it"));
+    assert!(format!("{error:#}").contains("couldn't be read when GoSpell loaded it"));
     assert_eq!(fs::read(&file.path).unwrap(), fixed);
     assert!(file.backups().is_empty());
 
@@ -927,7 +927,7 @@ fn non_object_json_uses_defaults_and_refuses_to_be_replaced() {
         let message = format!("{error:#}");
         assert!(message.contains("must be a JSON object"), "{message}");
         assert!(
-            message.contains("Fix or remove it, then restart Hex"),
+            message.contains("Fix or remove it, then restart GoSpell"),
             "{message}"
         );
         assert_eq!(fs::read(&file.path).unwrap(), original);
@@ -941,7 +941,7 @@ fn a_broken_settings_file_is_named_at_launch_with_its_parse_error() {
     let note = launch_note(&file.path).unwrap();
     assert!(note.contains("started with defaults"), "{note}");
     assert!(note.contains("Your file wasn't changed"), "{note}");
-    assert!(note.contains("then restart Hex"), "{note}");
+    assert!(note.contains("then restart GoSpell"), "{note}");
     assert!(note.contains("line 4 column 1"), "{note}");
 
     let file = SettingsFile::new(b"[]");

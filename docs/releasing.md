@@ -1,11 +1,11 @@
-# Releasing Hex
+# Releasing GoSpell
 
 One run of the **Release** workflow (`.github/workflows/release.yml`)
-builds, signs, and publishes every platform from one commit to the Anomaly
-release service (`anomalyco/release`, `https://anoma.ly/release`). Hex's
+builds, signs, and publishes every platform from one commit to the GoML
+release service (`anomalyco/release`, `https://goml.io/release`). GoSpell's
 names on the service are in [`plans/release-service.md`](plans/release-service.md).
-The service's dev stage, `https://dev.anoma.ly/release`, is only for testing
-the release service itself: Hex never publishes to it or reads from it. Builds
+The service's dev stage, `https://dev.goml.io/release`, is only for testing
+the release service itself: GoSpell never publishes to it or reads from it. Builds
 are tested before stable on the production service's `dev` channel.
 
 Like OpenCode's release, building is split from everything that holds a
@@ -33,10 +33,10 @@ Release (push to dev: dev channel; workflow_dispatch on dev: channel check | dev
 ├─ plan                     .github/release/plan.sh: version, channel, tag, notes
 ├─ build                    build-desktop.yml: Linux x64 + ARM64 (Ubuntu 24.04) executables, .deb,  [build]
 │                           .rpm (installed and run on Ubuntu and Fedora); Windows x64 + ARM64
-├─ build-macos              Hex.app as anomaly.hex, ad-hoc signed (HEX_RELEASE_UNSIGNED)             [build]
+├─ build-macos              GoSpell.app as com.goml.gospell, ad-hoc signed (GOSPELL_RELEASE_UNSIGNED)             [build]
 ├─ sign-macos               Developer ID inside-out, notarize + staple, ZIP + DMG (sign-macos.sh)     [release]
 ├─ verify-macos             validate-app.sh, Gatekeeper, updater requirement, launch                 [build]
-├─ sign-windows             Azure Artifact Signing of both hex.exe, Authenticode check                [release]
+├─ sign-windows             Azure Artifact Signing of both gospell.exe, Authenticode check                [release]
 ├─ setup-engine             windows-setup-engine.yml (signed runs): the unsigned setup engine      [build]
 │                           ISCC asks to sign
 ├─ sign-windows-engine      Azure Artifact Signing of that setup engine (Smart App Control)            [release]
@@ -72,7 +72,7 @@ stable release, run **Deploy** (`deploy.yml`) from `production`.
 - Windows: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`,
   `AZURE_TRUSTED_SIGNING_ENDPOINT`, `AZURE_TRUSTED_SIGNING_ACCOUNT_NAME`,
   `AZURE_TRUSTED_SIGNING_CERTIFICATE_PROFILE`, with a federated credential for
-  `repo:anomalyco/hex:environment:release` (docs/windows-signing.md).
+  `repo:goml/gospell:environment:release` (docs/windows-signing.md).
 
 ### Release tags
 
@@ -91,9 +91,9 @@ Repository admins can still change rulesets.
 ## The release service
 
 The service authorizes the publish jobs by their GitHub OIDC token alone:
-`registry/hex.json` in `anomalyco/release` admits repository `anomalyco/hex`
+`registry/gospell.json` in `anomalyco/release` admits repository `goml/gospell`
 (by name and id) and workflow `.github/workflows/release.yml` running
-from `dev` in the `release` environment. The production service has one Hex
+from `dev` in the `release` environment. The production service has one GoSpell
 publisher for artifact `desktop`:
 
 ```ts
@@ -113,17 +113,17 @@ production site.
 
 | Environment | Branches | Reviewers | Used by | AWS role |
 | --- | --- | --- | --- | --- |
-| `release` | `dev` | none | Release sign and publish jobs, aur-check | `role/github/hex-release` |
-| `dev` | `dev` | none | Deploy, from `dev` | `role/github/hex-dev` |
-| `production` | `production` | none | Deploy, from `production` | `role/github/hex-production` |
+| `release` | `dev` | none | Release sign and publish jobs, aur-check | `role/github/gospell-release` |
+| `dev` | `dev` | none | Deploy, from `dev` | `role/github/gospell-dev` |
+| `production` | `production` | none | Deploy, from `production` | `role/github/gospell-production` |
 
 `release` signs and ships builds; `dev` and `production` hold everything the
 repo runs in that stage.
 
 `publish` uploads each file under its own name with its SHA-256 (files over
 95 MiB in 90 MiB parts), then posts the release naming each target by file
-and hash, with distributions `direct`, `aur` (`hex-bin`), `deb-x64`,
-`deb-arm64`, `rpm-x64`, `rpm-arm64`, `brew` (`anomalyco/tap/hex`), and `nix`.
+and hash, with distributions `direct`, `aur` (`gospell-bin`), `deb-x64`,
+`deb-arm64`, `rpm-x64`, `rpm-arm64`, `brew` (`goml/tap/gospell`), and `nix`.
 It then downloads every published URL and compares it with the local bytes.
 Package-manager entries gain a version only once that package manager serves
 it: `nix` and the `deb`/`rpm` kinds at publish (the flake builds the release
@@ -134,10 +134,10 @@ clients check HTTPS, each file's size and SHA-256, and the OS code signature
 
 ## Homebrew
 
-`packaging/homebrew/hex.rb` is the cask `anomalyco/tap/hex`: the `anomaly.hex`
+`packaging/homebrew/gospell.rb` is the cask `goml/tap/gospell`: the `com.goml.gospell`
 app from the release's `macos-arm64-dmg` file URL and SHA-256, `auto_updates
-true` (Hex updates any writable `Hex.app` itself), a livecheck on the stable
-manifest, and zap paths for the new identity and the shared `hex` data folder.
+true` (GoSpell updates any writable `GoSpell.app` itself), a livecheck on the stable
+manifest, and zap paths for the new identity and the shared `gospell` data folder.
 The `homebrew-stage` job renders it on a macOS runner and runs `brew style`
 and `brew audit --cask --strict --online` in a local copy of the tap, without
 secrets; the `homebrew` job pushes that verified file with the tap deploy key
@@ -149,8 +149,8 @@ secrets; the `homebrew` job pushes that verified file with the tap deploy key
   every platform as `0.0.0-dev-<run number>` in `release` and publishes
   nothing anywhere: a dry run of the build and packaging.
 - `dev` publishes a build of `dev` to the production service's `dev`
-  channel (`https://anoma.ly/release/hex/desktop/dev.json`), which installs
-  set to the Dev update channel follow and `https://anoma.ly/hex/download/dev`
+  channel (`https://goml.io/release/gospell/desktop/dev.json`), which installs
+  set to the Dev update channel follow and `https://gospell.goml.io/download/dev`
   links. Every push to `dev` runs it, except pushes that change only `docs/`,
   `site/`, or Markdown; a running dev release always finishes, and only the newest push that lands meanwhile waits to run next (GitHub drops the ones between), and
   `gh workflow run release.yml --ref dev -f channel=dev`
@@ -160,8 +160,8 @@ secrets; the `homebrew` job pushes that verified file with the tap deploy key
   (`scripts/release-dev-notes.sh`); once the build is published they replace
   `dev-notes.json` on the one-commit `dev-notes` branch
   (`.github/release/publish-dev-notes.sh`, GITHUB_TOKEN only), which
-  `https://anoma.ly/hex/files/dev-notes.json`, the changelog at
-  `https://anoma.ly/hex/dev` (the dev release's `notes_url`), and the app's
+  `https://gospell.goml.io/files/dev-notes.json`, the changelog at
+  `https://gospell.goml.io/dev` (the dev release's `notes_url`), and the app's
   Restart to update read. A one-commit branch, not a bucket: the file changes
   without a credential and the site Worker serves it. The
   version is `0.0.0-dev-<run number>`, as OpenCode numbers its dev builds.
@@ -169,10 +169,10 @@ secrets; the `homebrew` job pushes that verified file with the tap deploy key
   current release and installs follow it, so a dev build below 2.3.1 is fine,
   and a rollback is making an earlier release current (the service's
   `promote` with a history `sequence`, or Make current in its admin panel).
-  Every build is stamped with its channel (`HEX_BUILD_CHANNEL`); an install
+  Every build is stamped with its channel (`GOSPELL_BUILD_CHANNEL`); an install
   whose Update channel setting names another channel offers that channel's
   current release ("Switch to Stable 2.3.1") and switches only once the user
-  confirms. Source, local (`HEX_LOCAL_BUILD=1`) and test builds never check or offer
+  confirms. Source, local (`GOSPELL_LOCAL_BUILD=1`) and test builds never check or offer
   a switch. The first build after this change, 2.3.2-dev.<run> on
   2026-10-27, carried the new client to installs whose older client took only
   higher versions; every build since is `0.0.0-dev-<run>`. It publishes only signed builds, because the
@@ -187,7 +187,7 @@ secrets; the `homebrew` job pushes that verified file with the tap deploy key
   run finishing.
 - `stable`, dispatched from `dev` (`gh workflow run release.yml
   --ref dev -f channel=stable`), publishes the crate
-  version from `Cargo.toml` to `https://anoma.ly/release`, the AUR, and
+  version from `Cargo.toml` to `https://goml.io/release`, the AUR, and
   Homebrew. It needs every platform signed and `docs/releases/<version>.md`,
   and refuses a version already tagged `v<version>` or `app-v<version>`.
   Tags trigger nothing. Only last, once every platform and the release
@@ -212,7 +212,7 @@ fast-forward from `dev`.
    `scripts/check-onboarding.sh` on that commit and give Dax its result and
    scene images with the go/no-go; stable releases need his explicit go-ahead.
 2. Let the push to `dev` publish its dev-channel build
-   (`https://anoma.ly/release/hex/desktop/dev.json`) and try it on an install
+   (`https://goml.io/release/gospell/desktop/dev.json`) and try it on an install
    set to the Dev update channel.
 3. Confirm the reviewed commit is still the tip of `dev`. Dispatch Release on
    `dev` with `channel: stable` and check the run's SHA. After publishing,
@@ -225,14 +225,14 @@ fast-forward from `dev`.
    the release, push it, deploy the old hosts' redirect, and publish the
    item for 2.3.1 Macs (both below, "Transition from Kit's hosting").
 
-The first Anomaly-signed macOS release also changes the bundle ID to
-`anomaly.hex` (docs/plans/macos-signing.md). Its notes must tell Mac users
+The first GoML-signed macOS release also changes the bundle ID to
+`com.goml.gospell` (docs/plans/macos-signing.md). Its notes must tell Mac users
 that macOS sees a new app: grant Microphone, Accessibility, and (for
 meetings) Screen & System Audio Recording once more, removing any
-stale Hex entry in System Settings first; turn Launch at login on again; and
-point `DisableUpdates` profiles at `anomaly.hex`. Settings, history, and
+stale GoSpell entry in System Settings first; turn Launch at login on again; and
+point `DisableUpdates` profiles at `com.goml.gospell`. Settings, history, and
 models do not carry over from 2.3.1 on any OS: 2.3.1 kept them in
-`voice-control`, and Hex now reads only `hex` and imports nothing. Decide how
+`voice-control`, and GoSpell now reads only `gospell` and imports nothing. Decide how
 2.3.1 installs reach it first (same doc, "Existing installs").
 
 Versions are display text and never compared: each channel has one current
@@ -240,16 +240,16 @@ release, which installs follow.
 
 ## Hosting
 
-Hex lives under one path on anoma.ly (no subdomains) until a vanity domain
+GoSpell lives under one path on goml.io (no subdomains) until a vanity domain
 exists. `site/cloudflare.config.ts` defines both environments; `--mode`
 picks one:
 
 ```ts
 cloudflare.config.ts (cf deploy --prebuilt --mode <mode>, from CI only)
-├─ production: Worker hex-production-site  routes anoma.ly/hex, anoma.ly/hex/*         bucket hex-production-files
-└─ dev:        Worker hex-dev-site         routes dev.anoma.ly/hex, dev.anoma.ly/hex/* bucket hex-production-files
+├─ production: Worker gospell-production-site  routes gospell.goml.io, gospell.goml.io/*         bucket gospell-production-files
+└─ dev:        Worker gospell-dev-site         routes dev.gospell.goml.io, dev.gospell.goml.io/* bucket gospell-production-files
 
-https://anoma.ly/hex/                      the site; downloads read the service's stable manifest at build time
+https://gospell.goml.io/                      the site; downloads read the service's stable manifest at build time
 ├─ download/dev                            302 to the dev channel's macos-arm64-dmg, read per request
 ├─ dev                                     the dev builds' changelog, rendered per request from the dev-notes branch
 ├─ install-linux.sh, install-windows.ps1   the installers, copied from .github/release/ at build time
@@ -259,22 +259,22 @@ https://anoma.ly/hex/                      the site; downloads read the service'
    └─ *-update.json, releases/…                             frozen 2.3.1 history, read-only from the bucket
 ```
 
-Both Workers bind `hex-production-files` because the frozen 2.3.1 history is
+Both Workers bind `gospell-production-files` because the frozen 2.3.1 history is
 the same for both and is only read; CI holds no R2 credential. The bucket's
 old `install-linux.sh`, `install-windows.ps1`, `appcast.xml`, and
 `dev-notes.json` objects are no longer read once this is deployed; delete
 them after the cutover. The site's
 download links come from `site/scripts/release-data.ts`, which reads the
 stable manifest of the mode's service when the site builds; until the
-service has a stable Hex release they name the frozen 2.3.1 downloads. The
+service has a stable GoSpell release they name the frozen 2.3.1 downloads. The
 installers fetch the stable manifest, download their target, check its size
 and SHA-256, and write the direct-install receipt.
 
-`/hex/download/dev` is the permanent team link to the newest Mac dev build:
+`/gospell/download/dev` is the permanent team link to the newest Mac dev build:
 the Worker reads its host's service `dev.json` on every request and redirects
 to the `macos-arm64-dmg` file, or answers 404 with a plain message when no dev
 release (or no Mac build of it) exists. The release service is another Worker
-on the anoma.ly zone, so the site Worker sets the `global_fetch_strictly_public`
+on the goml.io zone, so the site Worker sets the `global_fetch_strictly_public`
 compatibility flag for that fetch to reach it. A DMG install updates itself
 from the dev channel because it was built for that channel; installs from
 the stable link switch in Settings › General › Update channel, after
@@ -300,9 +300,9 @@ The site's Worker code and assets come from repository code anyone with push
 access can merge, so `.github/release/deploy-site.sh` treats the artifact as
 untrusted: it deploys only the Build Output files, and only if the root config
 is a non-preview build of that mode and the Worker config is exactly that
-mode's Worker (`hex-dev-site` or `hex-production-site`), its two `anoma.ly`
+mode's Worker (`gospell-dev-site` or `gospell-production-site`), its two `goml.io`
 routes, `workersDev`/`previewUrls` off, and the bindings `ASSETS`, `FILES`
-(`hex-production-files`, read for the frozen history), and `CANONICAL_HOST`.
+(`gospell-production-files`, read for the frozen history), and `CANONICAL_HOST`.
 Any other Worker name, route, binding, key, Worker, or Container is refused: a
 binding would give the Worker access to another resource, and the token can
 write every Worker. A change to those parts of `site/cloudflare.config.ts`
@@ -310,21 +310,21 @@ therefore needs the matching change in `deploy-site.sh` (Dax).
 
 Set once by hand on the anomaly account, because the config only binds them:
 the files bucket (`cf deploy` provisions only unnamed bindings; a missing
-named bucket fails the deploy) and an anoma.ly `http_config_settings` rule that
-turns off Browser Integrity Check for `/hex/files/` on both hosts (it returned
+named bucket fails the deploy) and an goml.io `http_config_settings` rule that
+turns off Browser Integrity Check for `/gospell/files/` on both hosts (it returned
 403 to Python's default user agent). The site build serves the installers and
 the appcast; the bucket only holds the frozen 2.3.1 feeds and artifacts, which
 the Worker reads and never writes.
 
 One short-lived token, minted per deploy:
 
-- `deploy` runs in `<mode>`, assumes `role/github/hex-<mode>`
+- `deploy` runs in `<mode>`, assumes `role/github/gospell-<mode>`
   (a 15-minute session, only a step output that the token step alone
   receives; cf never sees it), then runs `.github/release/cloudflare-token.sh`, which SigV4-POSTs to the
   token issuer in [anomalyco/secrets](https://github.com/anomalyco/secrets)
   and receives a 15-minute account-owned token with Individual Workers Editor
-  on that mode's Worker only (`hex-dev-site` or `hex-production-site`) and
-  Workers Routes Write (zone `anoma.ly`), pinned to the runner's request IP,
+  on that mode's Worker only (`gospell-dev-site` or `gospell-production-site`) and
+  Workers Routes Write (zone `goml.io`), pinned to the runner's request IP,
   at most ten live at once. The script masks it before writing
   `steps.cloudflare-token.outputs.token`, and only the Deploy step receives it
   as `CLOUDFLARE_API_TOKEN`. It has no R2 access: deploying a binding needs
@@ -333,60 +333,60 @@ One short-lived token, minted per deploy:
   always written on deploy, and `cf` then needs Routes Write on the zone,
   which Cloudflare does not scope per route.
 - Once `production` is promoted and its site deploys from the `production`
-  environment, revoke the legacy `hex-site-deploy` token and drop any
-  remaining site permissions from the `hex.release` issuer stage.
+  environment, revoke the legacy `gospell-site-deploy` token and drop any
+  remaining site permissions from the `gospell.release` issuer stage.
 
 ## Old clients (2.3.1 and earlier)
 
-`https://anoma.ly/hex/files/` keeps serving the 2.3.1
+`https://gospell.goml.io/files/` keeps serving the 2.3.1
 `linux-update.json`, `windows-update.json`, `windows-aarch64-update.json`,
-and their files from `hex-production-files`, frozen: nothing updates them
+and their files from `gospell-production-files`, frozen: nothing updates them
 anymore, and those installs see no update on their own. The site Worker reads
-the bucket binding; no CI job writes it. The new Hex is effectively a new
+the bucket binding; no CI job writes it. The new GoSpell is effectively a new
 app (new updater, and on macOS a new bundle ID), so:
 
-- **macOS:** the appcast at `/hex/files/appcast.xml` is
+- **macOS:** the appcast at `/gospell/files/appcast.xml` is
   `packaging/macos/legacy-appcast.xml`, served by the site build: one
-  informational item that tells 2.3.1 users to download the new Hex from
-  https://anoma.ly/hex (no enclosure, so Sparkle installs nothing). Edit that
+  informational item that tells 2.3.1 users to download the new GoSpell from
+  https://gospell.goml.io (no enclosure, so Sparkle installs nothing). Edit that
   file and push; Deploy serves it. Superseded (Kit, 2026-11-02): the 2.3.1
   and Swift feeds offer the released ZIP itself, signed with their old Sparkle
-  key, so Install Update moves those Macs onto the new Hex
+  key, so Install Update moves those Macs onto the new GoSpell
   (docs/plans/swift-app-handoff.md, "Legacy Update"). Keep `SUPublicEDKey` in
   `app/Info.plist`.
 - **Windows signer:** the updater accepts only a Valid Authenticode signature
   whose signer is `AUTHENTICODE_SIGNER` in `src/updater/windows.rs` (OpenCode's
-  Artifact Signing subject). Check the first Azure-signed Hex build's subject
+  Artifact Signing subject). Check the first Azure-signed GoSpell build's subject
   against it before a stable release; unsigned builds never update.
 - **Linux and Windows:** the feeds stay at 2.3.1; the site and README tell
-  users to reinstall. `HEX_RELEASE_SIGNING_KEY` (the ed25519 key 2.3.1's
+  users to reinstall. `GOSPELL_RELEASE_SIGNING_KEY` (the ed25519 key 2.3.1's
   feeds were signed with) now signs every Linux executable Release publishes
   (`.github/release/sign-linux.sh`).
 
 ### Transition from Kit's hosting
 
-Releases up to 2.3.1 compiled `https://downloads.hex.kitlangton.dev` (Kit's
-personal `hex-releases` bucket; the website and installers used the `.com`
-alias); later 2.3.x builds compiled `https://anoma.ly/hex/files`. Builds on
-the release service compile `https://anoma.ly/release`.
+Releases up to 2.3.1 compiled `https://downloads.gospell.goml.io` (Kit's
+personal `gospell-releases` bucket; the website and installers used the `.com`
+alias); later 2.3.x builds compiled `https://gospell.goml.io/files`. Builds on
+the release service compile `https://goml.io/release`.
 
-- `hex-production-files` was seeded with byte copies of every object the old
+- `gospell-production-files` was seeded with byte copies of every object the old
   bucket served (the 2.3.1 feeds and artifacts, installers, the appcast, DMGs, Sparkle
   ZIPs, and Setup.exe installers).
-- Both hosts are custom domains of `hex-releases` in Kit's personal
+- Both hosts are custom domains of `gospell-releases` in Kit's personal
   Cloudflare account and serve the bucket directly until the redirect is
   deployed. The redirect is the Worker in `packaging/legacy-downloads/`
-  (`hex-legacy-downloads`, routes `downloads.hex.kitlangton.dev/*` and
-  `downloads.hex.kitlangton.com/*` → `https://anoma.ly/hex/files/<path>`,
+  (`gospell-legacy-downloads`, routes `downloads.gospell.goml.io/*` and
+  `downloads.gospell.goml.io/*` → `https://gospell.goml.io/files/<path>`,
   302, path and query preserved). Deploy it with Kit's personal Wrangler
-  login, before the appcast at `/hex/files/appcast.xml` gains the notice, so
+  login, before the appcast at `/gospell/files/appcast.xml` gains the notice, so
   old installs reach it on either host:
 
   ```sh
   bunx wrangler@latest deploy --config packaging/legacy-downloads/wrangler.jsonc
   ```
 
-  It changes no bytes old installs get (`hex-production-files` holds copies
+  It changes no bytes old installs get (`gospell-production-files` holds copies
   of everything the bucket served), so it may go up before the notice.
   Sparkle and the Linux/Windows updaters (curl `--location`, HTTPS-only
   redirects, since the first updater) follow it, so those installs read the
@@ -404,9 +404,9 @@ the release service compile `https://anoma.ly/release`.
 
 Release secrets live in AWS Secrets Manager (account `anomaly-secrets`), managed from
 [anomalyco/secrets](https://github.com/anomalyco/secrets). Jobs in the `release` environment
-(limited to the `dev` branch, with no required reviewer) assume `role/github/hex-release` with
-GitHub OIDC and fetch only what they use. That role can read `hex/release/*` and the shared Apple, AUR and Homebrew
-secrets. Set a value with `bun set hex release <NAME>` in that repo.
+(limited to the `dev` branch, with no required reviewer) assume `role/github/gospell-release` with
+GitHub OIDC and fetch only what they use. That role can read `gospell/release/*` and the shared Apple, AUR and Homebrew
+secrets. Set a value with `bun set gospell release <NAME>` in that repo.
 
 Credentials are step-scoped. `configure-aws-credentials` runs with
 `output-env-credentials: false`, so the 15-minute AWS session is only a step output, passed
@@ -420,38 +420,38 @@ jobs that run repository code.
 | Secret | Use |
 | --- | --- |
 | (none) | publishing to the release service: the job's GitHub OIDC token |
-| `hex/release/CLOUDFLARE_API_TOKEN` | legacy `hex-site-deploy` token; see Hosting for retirement |
-| `shared/AUR_SSH_KEY` | pushes `hex-bin`; one key for every Anomaly AUR package (`github-actions-hex-aur`) |
-| `shared/HOMEBREW_TAP_DEPLOY_KEY` | pushes `Casks/hex.rb`; one deploy key on `anomalyco/homebrew-tap` for every app (`anomaly-release`) |
+| `gospell/release/CLOUDFLARE_API_TOKEN` | legacy `gospell-site-deploy` token; see Hosting for retirement |
+| `shared/AUR_SSH_KEY` | pushes `gospell-bin`; one key for every GoML AUR package (`github-actions-gospell-aur`) |
+| `shared/HOMEBREW_TAP_DEPLOY_KEY` | pushes `Casks/gospell.rb`; one deploy key on `anomalyco/homebrew-tap` for every app (`anomaly-release`) |
 | vars `AZURE_*` | Authenticode (docs/windows-signing.md); not secrets, `azure/login` uses OIDC |
 | `shared/APPLE_SIGNING_CERTIFICATE`, `shared/APPLE_NOTARY_KEY`, vars `APPLE_NOTARY_*` | macOS signing and notarization (docs/plans/macos-signing.md) |
-| `hex/release/RELEASE_SIGNING_KEY` | ed25519 PEM; signs each Linux executable (`<target>-sig`), public key `.github/release/linux-signing.pub` and `src/updater/linux.rs` |
+| `gospell/release/RELEASE_SIGNING_KEY` | ed25519 PEM; signs each Linux executable (`<target>-sig`), public key `.github/release/linux-signing.pub` and `src/updater/linux.rs` |
 | `SPARKLE_ED_PRIVATE_KEY` | old 2.3.1 appcast key; unused, kept for old clients |
 
 `dev` and `production` hold no secrets. Their roles,
-`role/github/hex-dev` and `role/github/hex-production`, can read only their own
-empty `hex/<mode>/*` folder; the site deploy only mints a 15-minute Cloudflare token for
+`role/github/gospell-dev` and `role/github/gospell-production`, can read only their own
+empty `gospell/<mode>/*` folder; the site deploy only mints a 15-minute Cloudflare token for
 its own Worker from the token issuer (`.github/release/cloudflare-token.sh`).
 
 ## Linux packages
 
-- **Direct install** (`curl -fsSL https://anoma.ly/hex/files/install-linux.sh | sh`,
+- **Direct install** (`curl -fsSL https://gospell.goml.io/files/install-linux.sh | sh`,
   copied from `.github/release/install-linux.sh` at the site build and served
   by the site Worker; stable, or dev until there is a stable release): the
   user-local version layout plus the `install.json` receipt; it updates
   itself from the service's manifest and the window offers "Update" (restart
   into the staged version). Deploy runs the installer test before it
   deploys and compares the served bytes with `.github/release/` afterwards.
-- **AUR** `hex-bin` (`packaging/aur`, staged by `scripts/release-aur.sh`, pushed by `.github/release/push-aur.sh`):
-  `/usr/bin/hex`, the desktop entry, and the systemd user unit
-  `/usr/lib/systemd/user/hex.service`, from the release service's
+- **AUR** `gospell-bin` (`packaging/aur`, staged by `scripts/release-aur.sh`, pushed by `.github/release/push-aur.sh`):
+  `/usr/bin/gospell`, the desktop entry, and the systemd user unit
+  `/usr/lib/systemd/user/gospell.service`, from the release service's
   `linux-x64` (`x86_64`) or `linux-arm64` (`aarch64`) file. Not a prebuilt of the official `extra/hex` (a hex dump tool
   that installs `/usr/bin/hx`), so it neither provides nor conflicts with it;
   its description says so. Maintained under Dax's AUR account.
-- **.deb and .rpm** `hex` (`packaging/linux/nfpm.yaml`, built by
+- **.deb and .rpm** `gospell` (`packaging/linux/nfpm.yaml`, built by
   `scripts/package-linux.sh` with nfpm in the build jobs): the same three
   files as the AUR package, for x64 and arm64, published as
-  `linux-<arch>-deb` and `linux-<arch>-rpm` (`hex.deb`, `hex.rpm`). There is no
+  `linux-<arch>-deb` and `linux-<arch>-rpm` (`gospell.deb`, `gospell.rpm`). There is no
   apt or dnf repository: the release service's `deb-<arch>`/`rpm-<arch>`
   distributions carry the command that downloads the stable package from its
   alias link and installs it with `apt` or `dnf`. Dependencies name Ubuntu
@@ -463,7 +463,7 @@ its own Worker from the token issuer (`.github/release/cloudflare-token.sh`).
   `source-build` marker; the checkout updates it.
 
 An executable outside the user-local layout that the user does not own and
-pacman, dpkg, or rpm owns (`/usr/bin/hex`), or that lives in the Nix store,
+pacman, dpkg, or rpm owns (`/usr/bin/gospell`), or that lives in the Nix store,
 never self-updates; Settings says
 "Updated by your package manager". Source installs say "Updated from your
 source checkout".
@@ -477,6 +477,6 @@ current Arch). `.github/release/check-glibc-floor.sh` fails the build if the
 executable needs a newer symbol, and the build installs the `.deb` and runs
 the executables on Debian 12. ARM64 keeps the Vulkan backend like x64; ggml's CPU
 kernels stay portable (`GGML_NATIVE=OFF`, baseline ARMv8-A). There is no
-AppImage: the bare executable already runs without installing, and Hex's
+AppImage: the bare executable already runs without installing, and GoSpell's
 systemd user unit and updater want a stable executable path that an AppImage
 does not have.

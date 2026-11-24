@@ -1,10 +1,10 @@
 # Typing logs (Record typing logs)
 
-Part of [Hex for iPhone](../README.md).
+Part of [GoSpell for iPhone](../README.md).
 
 Settings › Privacy › Advanced › **Record typing logs** (off by default, asks for
 consent in a dialog before it turns on, App Group key
-`experiments.typingLogs`) makes Hex's keyboard write raw logs of everything it
+`experiments.typingLogs`) makes GoSpell's keyboard write raw logs of everything it
 sees: every touch with its position and timing, the key it pressed, what that
 did to the text, the text around the cursor, and dictations. They are for
 testing and training keyboard prediction and per-user touch models on a Mac.
@@ -21,7 +21,7 @@ averages and is unchanged.
 ## Files
 
 - `TypingLogs/yyyy-MM-dd.ndjson` in the App Group container
-  (`group.anomaly.hex.mobile`), one per local day (Gregorian date in the
+  (`group.com.goml.gospell.mobile`), one per local day (Gregorian date in the
   iPhone's time zone). Each event goes to the file of the day its `t` falls in.
 - NDJSON: one JSON object per line, UTF-8, `\n` after every line.
 - Kept 14 days (today and the 13 before). Older files are deleted when the
@@ -54,7 +54,7 @@ Every line starts with these, in this order:
 Units and spaces:
 
 - Positions and sizes are points in the keyboard view's coordinates: origin at
-  the top-left of Hex's keyboard view (the suggestion strip's top edge), x to
+  the top-left of GoSpell's keyboard view (the suggestion strip's top edge), x to
   the right, y down. The strip is `y` 0–44 in portrait, the keys below it.
 - A rect is `[x, y, width, height]`. Insets are `[top, left, bottom, right]`.
   Points have 2 decimals, ms 3.
@@ -62,7 +62,7 @@ Units and spaces:
   backspace removes.
 - A key id is the character itself for character keys (always one character:
   `"a"`, `"7"`, `"@"`; letters lowercase) and a word for the others: `shift`,
-  `delete`, `space`, `return`, `hex`, `globe`, `layer:numbers`,
+  `delete`, `space`, `return`, `gospell`, `globe`, `layer:numbers`,
   `layer:symbols`, `layer:letters`.
 
 ## Events
@@ -72,7 +72,7 @@ Units and spaces:
 The keyboard appeared (`trigger`: `appear`), the field changed while it showed
 (`field`), or the experiment was turned on while it showed (`enabled`).
 
-- `surface`: `full` (Hex's keys) or `bar` (the dictation bar; no touches).
+- `surface`: `full` (GoSpell's keys) or `bar` (the dictation bar; no touches).
 - `document`: `UITextDocumentProxy.documentIdentifier`, which changes with the
   field. The host app is not knowable from a keyboard and is never guessed.
 - `traits`: `keyboardType`, `returnKeyType`, `autocapitalization`,
@@ -84,11 +84,11 @@ The keyboard appeared (`trigger`: `appear`), the field changed while it showed
   started (may be before layout; `layout` lines carry the real size),
   `orientation` (`portrait`/`landscape`), `appearance` (`light`/`dark`).
 - `device` (`iPhone17,1`; `Simulator:…` in the simulator), `system`
-  (`iOS 26.1`), `version` and `build` of Hex, `locale`, `languages` (first
+  (`iOS 26.1`), `version` and `build` of GoSpell, `locale`, `languages` (first
   four preferred), `keyboardLanguage` (the keyboard's `primaryLanguage`),
   `inputMode` (the field's input mode language), `fullAccess`.
-- `settings`: `autocorrect` (Hex's), `spatialAutocorrect`, `key_popups`, `haptics`, `learnHowIType`, `cleanupTagger`,
-  `hexKeyPlacement`, `dictationLanguage` (BCP 47, or `automatic`), `keyboardLayout`
+- `settings`: `autocorrect` (GoSpell's), `spatialAutocorrect`, `key_popups`, `haptics`, `learnHowIType`, `cleanupTagger`,
+  `gospellKeyPlacement`, `dictationLanguage` (BCP 47, or `automatic`), `keyboardLayout`
   (`en`/`nb`/`es`/`de`, empty for the dictation bar), `style` (dictation style).
 
 A `context` line follows at once with the text already in the field.
@@ -124,7 +124,7 @@ Written when the key layout or shift changes, and when a session starts.
 - `layer` (`letters`/`numbers`/`symbols`), `shift` (`off`/`on`/`locked`),
   `shiftHeld` (only when true), `field` (`text`/`url`/`email`), `orientation`,
   `width`, `height` (the keys' layout), `view` `[w, h]`, `safeArea`,
-  `horizontalInset` (landscape), `globe`, `hexPlacement`, `language`
+  `horizontalInset` (landscape), `globe`, `gospellPlacement`, `language`
   (`en`/`nb`/`es`/`de`), `letters` (`own`/`qwerty`/`qwertz`/`azerty`/`dvorak`,
   Settings › Keyboard › Languages › Layout).
 - The first time a hash appears in a day's file the line also has:
@@ -135,7 +135,7 @@ Written when the key layout or shift changes, and when a session starts.
     slots (left, centre, right),
   - `keys`: `[{id, label, row, frame, hitFrame}]`. `frame` is the drawn keycap,
     `hitFrame` the touch target; hit frames tile the key area (row 0 to 3) with
-    no gaps. The Hex key in the strip has row `-1`.
+    no gaps. The GoSpell key in the strip has row `-1`.
 
   Later lines with the same hash in that file say `"repeat": true` instead, so
   look the keys up by hash. Every touch's hash appears in full earlier in the
@@ -241,26 +241,26 @@ Taps that aren't text: `action`:
 - `language_swipe` (`id`, `step`: 1 the next language, -1 the one before) and
   `keyboard_language` (`language`: the layout it switched to), with two or more
   keyboard languages;
-- `hex_key` (`dictation`: `warm`, `keyboard`, `open_hex`), `hex_menu`, `style`
-  (`style`, `from`: `hex_menu` or `recording_panel`),
-  `dictation_language` (`language`: BCP 47 or `automatic`, from the Hex menu),
-  `dictation_stop` (`from: hex_key_release` when lifting a push-to-talk hold
+- `gospell_key` (`dictation`: `warm`, `keyboard`, `open_gospell`), `gospell_menu`, `style`
+  (`style`, `from`: `gospell_menu` or `recording_panel`),
+  `dictation_language` (`language`: BCP 47 or `automatic`, from the GoSpell menu),
+  `dictation_stop` (`from: gospell_key_release` when lifting a push-to-talk hold
   ends it), `dictation_cancel`;
 - `next_keyboard` (strip chip), `globe`, `undo_dictation` (`applied: false` when
   the text had changed), `touches_cancelled` (`count`).
 
 ### `dictation`
 
-Hex inserted a dictation (from the full keyboard or the dictation bar).
+GoSpell inserted a dictation (from the full keyboard or the dictation bar).
 
 - `source`: `keyboard` (in-keyboard dictation) or `app` (a warm session or a
-  handoff to Hex). `resultID`, `style`.
+  handoff to GoSpell). `resultID`, `style`.
 - Each step, when it ran (a step that didn't run is missing): `engine`, `locale`
   (in-keyboard) or `language` (the app), `recordedMS`, `transcribeMS`, `raw`
   (as heard), `fixed` (after Learn how I type's fixes), `spelled` (after custom
   vocabulary, app), `tagged` (after Clean up what I say), `cleaned` (after
   Apple Intelligence, app), `translated`, `formatted` (after the style, app).
-- `text`: the transcript Hex delivered; `inserted`: what went into the field
+- `text`: the transcript GoSpell delivered; `inserted`: what went into the field
   (with the spacing `TranscriptFormatter.insertionText` added).
 
 A `context` line follows.

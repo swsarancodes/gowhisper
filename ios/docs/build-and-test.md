@@ -1,6 +1,6 @@
 # Build and test
 
-Part of [Hex for iPhone](../README.md).
+Part of [GoSpell for iPhone](../README.md).
 
 Prerequisites: Xcode 26+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen) 2.46.0+.
 
@@ -8,14 +8,14 @@ Prerequisites: Xcode 26+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen) 2
 cd ios
 scripts/fetch-cleanup-model.sh   # the cleanup tagger's Core ML model, kept out of git
 xcodegen generate
-xcodebuild test -project HEXMobile.xcodeproj -scheme HEXMobile -destination "id=<SIM_UDID>"
+xcodebuild test -project GoSpellMobile.xcodeproj -scheme GoSpellMobile -destination "id=<SIM_UDID>"
 ```
 
 The emoji index files are generated and committed: after changing
 `scripts/emoji-aliases-en.txt` or the sources, run `scripts/build-emoji-data.py`
 (it downloads the pinned Unicode and CLDR files, or reads them from `--sources`).
 
-The cleanup tagger's model (`HEXKeyboard/CleanupTagger/HexCleanupTagger.mlpackage`,
+The cleanup tagger's model (`GoSpellKeyboard/CleanupTagger/GoSpellCleanupTagger.mlpackage`,
 25 MB) is a GitHub release asset (`ios-model-cleanup-tagger-1`), not a git file.
 `fetch-cleanup-model.sh` downloads it and checks its SHA-256; Xcode Cloud runs it
 from `ci_scripts/ci_post_clone.sh`. A new model gets a new release tag and hash.
@@ -27,12 +27,12 @@ key plane, Swipe typing or taps with Spatial autocorrect, then the engine's spac
 opt-in, one test per mode, and the datasets below are not vendored, so convert a recording
 to one of the two JSON shapes first. `xcodebuild` passes environment variables to the test
 runner only when they are prefixed with `TEST_RUNNER_`, and strips the prefix, so
-`TEST_RUNNER_HEX_SWIPE_REPLAY` becomes `HEX_SWIPE_REPLAY`:
+`TEST_RUNNER_GOSPELL_SWIPE_REPLAY` becomes `GOSPELL_SWIPE_REPLAY`:
 
 ```sh
-TEST_RUNNER_HEX_SWIPE_REPLAY=/path/swipes.json xcodebuild test \
-  -project HEXMobile.xcodeproj -scheme HEXMobile -destination "id=<SIM_UDID>" \
-  -only-testing:HEXMobileTests/TypingReplayTests
+TEST_RUNNER_GOSPELL_SWIPE_REPLAY=/path/swipes.json xcodebuild test \
+  -project GoSpellMobile.xcodeproj -scheme GoSpellMobile -destination "id=<SIM_UDID>" \
+  -only-testing:GoSpellMobileTests/TypingReplayTests
 ```
 
 Swipe recordings are `{"sentences":[{"source":String,"session":String,"words":[String],
@@ -45,11 +45,11 @@ one, so gestures keep the person's gaps; without it each begins 0.5 s after the 
 lift, longer than the two windows the replay's clock drives that a lift leaves open (the
 double-space period and the strip's touch guard). A start that would put a finger down before
 the previous one came up is moved to that lift, in both modes, and `clamped` counts those. A
-gesture recorded as one point is a tap. Hex's second and third letter rows are offset half a
+gesture recorded as one point is a tap. GoSpell's second and third letter rows are offset half a
 column and one and a half columns, as the format assumes. Tap recordings replace `gestures`
 with `taps`, one `{x, y, t}` per touch, each array holding that touch's samples (a tap is
 usually one) on the sentence's clock; y > 1 is the space bar, x 0.25…0.75 across it.
-`TEST_RUNNER_HEX_TAP_REPLAY=/path/taps.json` does the same for taps, with Spatial
+`TEST_RUNNER_GOSPELL_TAP_REPLAY=/path/taps.json` does the same for taps, with Spatial
 autocorrect reading each word on its space.
 
 Both report a line per source inside `TYPING-REPLAY … TYPING-REPLAY-END`: total words,
@@ -80,10 +80,10 @@ tap's words compare an apostrophe only when the recorded word has one; a swipe's
 only, because a swipe's path runs over letter keys and cannot draw one. The decoder's own
 median and p90 milliseconds close the line, though a swipe's preview decode can overlap its
 timed final decode, so a `decode-ms` sample may include that overlap; the words are
-unaffected. `HEX_REPLAY_LIMIT` caps sentences per source; `HEX_REPLAY_OUT` writes each
+unaffected. `GOSPELL_REPLAY_LIMIT` caps sentences per source; `GOSPELL_REPLAY_OUT` writes each
 sentence's intended and typed words (prefix both with `TEST_RUNNER_` too).
 
-The test with no recording checks Hex's key geometry against the grid and runs clean
+The test with no recording checks GoSpell's key geometry against the grid and runs clean
 gestures through the same mapping to type the right words; it cannot catch a converter that
 emits wrong coordinates.
 

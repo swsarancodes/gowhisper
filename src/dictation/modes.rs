@@ -57,7 +57,7 @@ impl ModeRuntime {
     }
 
     /// [`Self::process`] with a cancellation flag the stages check, for work
-    /// that ends early when Hex quits.
+    /// that ends early when GoSpell quits.
     pub fn process_cancellable(
         &self,
         raw_text: &str,
@@ -313,8 +313,8 @@ mod tests {
             let processing = &mut settings.dictation_processing;
             processing.default_mode.replacements =
                 vec![crate::dictation::text_replacements::TextReplacement {
-                    matched_phrase: "hex".into(),
-                    output: "Hex".into(),
+                    matched_phrase: "gospell".into(),
+                    output: "GoSpell".into(),
                 }];
             processing.modes = vec![DictationMode {
                 replacements: vec![crate::dictation::text_replacements::TextReplacement {
@@ -331,14 +331,14 @@ mod tests {
         let transformations = crate::personal_commands::TransformationClient::default();
 
         let processed = runtime.process(
-            "Use open code in hex.",
+            "Use open code in gospell.",
             "en",
             &context,
             &transformations,
             crate::dictation::processor::Source::Dictation,
         );
 
-        assert_eq!(processed.text, "Use OpenCode in Hex.");
+        assert_eq!(processed.text, "Use OpenCode in GoSpell.");
         assert!(processed.observation.is_none());
     }
 
@@ -368,7 +368,7 @@ mod tests {
 
     #[test]
     fn saved_post_processing_enables_the_global_rewrite() {
-        let path = std::env::temp_dir().join(format!("hex-970-{}.json", std::process::id()));
+        let path = std::env::temp_dir().join(format!("gospell-970-{}.json", std::process::id()));
         std::fs::write(
             &path,
             br#"{"dictation_processing":{"default_mode":{"post_processing":{"enabled":true,"prompt":"Fix it.","model":"opencode/big-pickle","deadline_seconds":30}}}}"#,
@@ -433,7 +433,7 @@ mod tests {
             Some("x.com")
         );
         assert_eq!(
-            canonical_host("github.com/hex/pull/1").as_deref(),
+            canonical_host("github.com/gospell/pull/1").as_deref(),
             Some("github.com")
         );
         assert_eq!(

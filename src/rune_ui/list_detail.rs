@@ -88,13 +88,13 @@ pub(super) fn group(p: Paint, key: &str, label: &str, first: bool) -> El {
 
 /// A folded section's chevron, pointing at its label.
 pub(super) static FOLDED: Icon = Icon {
-    name: "hex-fold-closed",
+    name: "gospell-fold-closed",
     view: 16.0,
     body: r#"<path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>"#,
 };
 /// An open section's chevron, pointing down at its content.
 pub(super) static UNFOLDED: Icon = Icon {
-    name: "hex-fold-open",
+    name: "gospell-fold-open",
     view: 16.0,
     body: r#"<path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>"#,
 };

@@ -1,13 +1,13 @@
-//! `hex transcribe <file>`: a saved recording through the running Hex's
-//! local API, or with no Hex running through an embedded service this
+//! `gospell transcribe <file>`: a saved recording through the running GoSpell's
+//! local API, or with no GoSpell running through an embedded service this
 //! command starts and stops ([`super::embedded`]). Nothing is pasted, saved
 //! to History, or processed, and this process never loads a model.
 //!
 //! A file of any length is read in pieces of at most 30 s
 //! ([`crate::transcription::pieces`]) and their text is joined with one space:
-//! a piece that short can run on the running Hex's dictation engine's loaded
+//! a piece that short can run on the running GoSpell's dictation engine's loaded
 //! copy when it holds the model, instead of its service loading a second one,
-//! and Hex keeps one piece rather than the whole file in memory.
+//! and GoSpell keeps one piece rather than the whole file in memory.
 
 use std::path::Path;
 use std::time::Duration;
@@ -57,7 +57,7 @@ fn transcribe(
         Err(error) => {
             return ControlReply::error(
                 "failed",
-                format!("couldn't read Hex's settings: {error:#}"),
+                format!("couldn't read GoSpell's settings: {error:#}"),
             );
         }
     };
@@ -72,7 +72,7 @@ fn transcribe(
     run_pieces(&endpoint, file, &mut pieces, &selection, json)
 }
 
-/// The file and the model, both checked before Hex is asked or a model is
+/// The file and the model, both checked before GoSpell is asked or a model is
 /// loaded or downloaded: the file opens, its audio is found and its first
 /// block decodes, and a WAV's every sample reads. The samples are read piece
 /// by piece later.
@@ -89,7 +89,7 @@ fn prepare_job(
     Ok((pieces, selection))
 }
 
-/// The refusal for a file Hex cannot read, before any transcription runs, or
+/// The refusal for a file GoSpell cannot read, before any transcription runs, or
 /// for one that stopped reading partway.
 fn refused(file: &Path, error: PieceError) -> ControlReply {
     let name = file.display();
@@ -107,7 +107,7 @@ fn refused(file: &Path, error: PieceError) -> ControlReply {
         PieceError::Damaged { at_ms } => ControlReply::error(
             "unsupported",
             format!(
-                "{name} is damaged at {}; Hex couldn't decode its audio past there",
+                "{name} is damaged at {}; GoSpell couldn't decode its audio past there",
                 minute_second(at_ms)
             ),
         ),
@@ -117,26 +117,26 @@ fn refused(file: &Path, error: PieceError) -> ControlReply {
         ),
         PieceError::Incomplete => ControlReply::error(
             "unsupported",
-            format!("{name} is truncated or corrupt; Hex couldn't read all of its audio"),
+            format!("{name} is truncated or corrupt; GoSpell couldn't read all of its audio"),
         ),
         PieceError::NotMedia => ControlReply::error(
             "unsupported",
-            format!("{name} isn't an audio or video file Hex can read"),
+            format!("{name} isn't an audio or video file GoSpell can read"),
         ),
         PieceError::NoAudioTrack => {
             ControlReply::error("unsupported", format!("{name} has no audio track"))
         }
         PieceError::UnsupportedCodec(codec) => ControlReply::error(
             "unsupported",
-            format!("{name}'s audio is {codec}, which Hex can't decode"),
+            format!("{name}'s audio is {codec}, which GoSpell can't decode"),
         ),
         PieceError::Audio(AudioError::Unsupported) => ControlReply::error(
             "unsupported",
-            format!("{name} is a WAV whose sample rate or channels Hex can't decode"),
+            format!("{name} is a WAV whose sample rate or channels GoSpell can't decode"),
         ),
         PieceError::Audio(_) => ControlReply::error(
             "unsupported",
-            format!("{name} isn't a WAV file Hex can read"),
+            format!("{name} isn't a WAV file GoSpell can read"),
         ),
     }
 }
@@ -147,7 +147,7 @@ fn minute_second(ms: u64) -> String {
 }
 
 /// Each piece goes to the endpoint in turn with the model the request names.
-/// A piece of at most 30 s runs on the running Hex's dictation engine's
+/// A piece of at most 30 s runs on the running GoSpell's dictation engine's
 /// loaded copy when it holds that model, so no second copy loads and
 /// dictation can run between pieces. A model that isn't downloaded is
 /// offered once at a terminal, then the same piece is sent again.
@@ -215,7 +215,7 @@ fn run_pieces(
             if length > MAX_TRANSCRIPT {
                 return ControlReply::error(
                     "resource-exhausted",
-                    format!("{name}'s transcript is longer than Hex prints"),
+                    format!("{name}'s transcript is longer than GoSpell prints"),
                 );
             }
             texts.push(text);
@@ -232,14 +232,14 @@ fn show_progress(name: &str, pieces: &Pieces) {
     });
 }
 
-/// One piece's transcript, trimmed, or the refusal for an answer Hex cannot
+/// One piece's transcript, trimmed, or the refusal for an answer GoSpell cannot
 /// read.
 fn transcript(body: &[u8]) -> std::result::Result<String, ControlReply> {
     match serde_json::from_slice::<Transcript>(body) {
         Ok(Transcript { transcript }) => Ok(transcript.trim().to_owned()),
         Err(_) => Err(ControlReply::error(
             "failed",
-            "Hex sent an unreadable transcript",
+            "GoSpell sent an unreadable transcript",
         )),
     }
 }
@@ -263,65 +263,75 @@ fn refusal(status: u16, code: &str, model: &str) -> ControlReply {
     match code {
         "unknown-model" => ControlReply::error(
             "unknown-model",
-            format!("Hex doesn't know `{model}`; run `hex model list`"),
+            format!("GoSpell doesn't know `{model}`; run `gospell model list`"),
         ),
         "unsupported-model" => ControlReply::error(
             "model-unavailable",
-            format!("Hex can't use `{model}`; run `hex model list` to see what it has"),
+            format!("GoSpell can't use `{model}`; run `gospell model list` to see what it has"),
         ),
-        "invalid-request" => ControlReply::error("failed", "Hex refused the request; update Hex"),
+        "invalid-request" => {
+            ControlReply::error("failed", "GoSpell refused the request; update GoSpell")
+        }
         "unsupported-audio" | "invalid-audio" => ControlReply::error(
             "failed",
-            "Hex couldn't read the audio it was sent; update Hex",
+            "GoSpell couldn't read the audio it was sent; update GoSpell",
         ),
-        "length-required" => ControlReply::error("failed", "Hex refused the upload; update Hex"),
+        "length-required" => {
+            ControlReply::error("failed", "GoSpell refused the upload; update GoSpell")
+        }
         "resource-exhausted" => ControlReply::error(
             "resource-exhausted",
-            "Hex says the audio is too large or too long to transcribe",
+            "GoSpell says the audio is too large or too long to transcribe",
         ),
         "model-not-ready" => ControlReply::error("model-unavailable", not_ready(model)),
-        "queue-full" => {
-            ControlReply::error("busy", "Hex is busy with another transcription; try again")
-        }
+        "queue-full" => ControlReply::error(
+            "busy",
+            "GoSpell is busy with another transcription; try again",
+        ),
         "upload-timeout" => {
-            ControlReply::error("failed", "Hex timed out reading the audio; try again")
+            ControlReply::error("failed", "GoSpell timed out reading the audio; try again")
         }
-        "cancelled" => ControlReply::error("failed", "Hex cancelled the transcription; try again"),
+        "cancelled" => {
+            ControlReply::error("failed", "GoSpell cancelled the transcription; try again")
+        }
         "service-gone" => ControlReply::error(
             "unavailable",
-            "Hex's transcription service stopped; try again",
+            "GoSpell's transcription service stopped; try again",
         ),
         "model-load-failed" => ControlReply::error(
             "failed",
-            format!("Hex couldn't load `{model}`; try again or pick another model"),
+            format!("GoSpell couldn't load `{model}`; try again or pick another model"),
         ),
         "transcription-failed" => {
-            ControlReply::error("failed", "Hex couldn't transcribe it; try again")
+            ControlReply::error("failed", "GoSpell couldn't transcribe it; try again")
         }
         _ => match status {
-            401 => ControlReply::error("failed", "Hex rejected the request; restart Hex"),
-            408 => ControlReply::error("failed", "Hex timed out reading the audio; try again"),
+            401 => ControlReply::error("failed", "GoSpell rejected the request; restart GoSpell"),
+            408 => ControlReply::error("failed", "GoSpell timed out reading the audio; try again"),
             409 => ControlReply::error("model-unavailable", not_ready(model)),
             413 => ControlReply::error(
                 "resource-exhausted",
-                "Hex says the audio is too large to transcribe",
+                "GoSpell says the audio is too large to transcribe",
             ),
-            429 => ControlReply::error("busy", "Hex is busy with another transcription; try again"),
+            429 => ControlReply::error(
+                "busy",
+                "GoSpell is busy with another transcription; try again",
+            ),
             _ if code.is_empty() || code.starts_with("http-") => {
-                ControlReply::error("failed", format!("Hex answered HTTP {status}"))
+                ControlReply::error("failed", format!("GoSpell answered HTTP {status}"))
             }
-            _ => ControlReply::error("failed", format!("Hex answered HTTP {status} ({code})")),
+            _ => ControlReply::error("failed", format!("GoSpell answered HTTP {status} ({code})")),
         },
     }
 }
 
-/// An imported model has no `hex model install` id, so it is checked where it
+/// An imported model has no `gospell model install` id, so it is checked where it
 /// was imported instead.
 fn not_ready(model: &str) -> String {
     if model.starts_with("custom-") {
-        format!("`{model}` isn't ready; check it in Hex's model picker")
+        format!("`{model}` isn't ready; check it in GoSpell's model picker")
     } else {
-        format!("`{model}` isn't downloaded; run `hex model install {model}`")
+        format!("`{model}` isn't downloaded; run `gospell model install {model}`")
     }
 }
 
@@ -341,7 +351,7 @@ mod tests {
     /// parallel in one process and share `TMPDIR`.
     fn temp(name: &str) -> std::path::PathBuf {
         std::env::temp_dir().join(format!(
-            "hex-transcribe-cli-{name}-{}.wav",
+            "gospell-transcribe-cli-{name}-{}.wav",
             std::process::id()
         ))
     }
@@ -477,25 +487,25 @@ mod tests {
     }
 
     #[test]
-    fn a_refusal_follows_hexs_code_rather_than_its_status() {
+    fn a_refusal_follows_gospells_code_rather_than_its_status() {
         let (code, message) = error(refusal(415, "unsupported-audio", "parakeet_v2"));
         assert_eq!(code, "failed");
-        assert!(message.contains("update Hex"), "{message}");
+        assert!(message.contains("update GoSpell"), "{message}");
 
         let (code, message) = error(refusal(400, "unknown-model", "parakeet_v2"));
         assert_eq!(code, "unknown-model");
-        assert!(message.contains("hex model list"), "{message}");
+        assert!(message.contains("gospell model list"), "{message}");
 
         let (code, message) = error(refusal(409, "model-not-ready", "parakeet_v2"));
         assert_eq!(code, "model-unavailable");
         assert!(
-            message.contains("hex model install parakeet_v2"),
+            message.contains("gospell model install parakeet_v2"),
             "{message}"
         );
 
         let (code, message) = error(refusal(409, "model-not-ready", "custom-ab12ab12ab12ab12"));
         assert_eq!(code, "model-unavailable");
-        assert!(!message.contains("hex model install"), "{message}");
+        assert!(!message.contains("gospell model install"), "{message}");
 
         let (code, message) = error(refusal(429, "queue-full", "parakeet_v2"));
         assert_eq!(code, "busy");
@@ -568,7 +578,7 @@ mod tests {
         ));
         assert_eq!(code, "unsupported");
         assert!(
-            message.contains("isn't a WAV file Hex can read"),
+            message.contains("isn't a WAV file GoSpell can read"),
             "{message}"
         );
     }
@@ -580,7 +590,7 @@ mod tests {
             (PieceError::NoAudioTrack, "has no audio track"),
             (
                 PieceError::UnsupportedCodec("Apple Lossless".into()),
-                "audio is Apple Lossless, which Hex can't decode",
+                "audio is Apple Lossless, which GoSpell can't decode",
             ),
             (PieceError::Damaged { at_ms: 61_000 }, "damaged at 1:01"),
             (

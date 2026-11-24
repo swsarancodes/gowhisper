@@ -85,7 +85,7 @@ pub struct MeetingSettings {
     /// (Same as meetings), and is left out of the file.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub audio_retention: Option<MeetingRetention>,
-    /// A recording Hex started on its own stops once its call app has left
+    /// A recording GoSpell started on its own stops once its call app has left
     /// the microphone and gone quiet for 30 s (macOS).
     pub stop_when_call_ends: bool,
     /// How finished meetings are written to `output_folder`.
@@ -224,7 +224,7 @@ impl MeetingRetention {
 #[serde(default)]
 pub struct CalendarSettings {
     /// Set once the user clicks Connect calendar and macOS grants access;
-    /// Hex never asks for calendar access before that.
+    /// GoSpell never asks for calendar access before that.
     pub connected: bool,
     /// Calendars left out of reminders, by EventKit identifier. Every
     /// calendar is included by default, so new ones are too.
@@ -274,7 +274,7 @@ impl CalendarSettings {
     }
 }
 
-/// The common call services Hex names, by provider key (the app's
+/// The common call services GoSpell names, by provider key (the app's
 /// canonical bundle ID, or the website host for browser services) and
 /// English name.
 pub const KNOWN_MEETING_PROVIDERS: [(&str, &str); 8] = [
@@ -288,7 +288,7 @@ pub const KNOWN_MEETING_PROVIDERS: [(&str, &str); 8] = [
     ("com.hnc.Discord", "Discord"),
 ];
 
-/// The other call services Hex names and offers, by the same provider keys.
+/// The other call services GoSpell names and offers, by the same provider keys.
 pub const MORE_MEETING_PROVIDERS: [(&str, &str); 10] = [
     ("org.whispersystems.signal-desktop", "Signal"),
     ("ru.keepcoder.Telegram", "Telegram"),
@@ -302,7 +302,7 @@ pub const MORE_MEETING_PROVIDERS: [(&str, &str); 10] = [
     ("web.groupme.com", "GroupMe"),
 ];
 
-/// What Hex does when it detects a call from a provider. Shown as Ask each
+/// What GoSpell does when it detects a call from a provider. Shown as Ask each
 /// time, Always record, and Don't offer; the stored names predate
 /// those and stay so older builds can read the file.
 #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
@@ -433,7 +433,7 @@ pub fn meetings_enabled() -> bool {
 pub fn meetings_off_reason() -> &'static str {
     match crate::labs::Feature::Meetings.managed() {
         Some(lock) => lock.refusal(),
-        None => "Meetings are off; turn them on with `hex settings set meetings.enabled on`",
+        None => "Meetings are off; turn them on with `gospell settings set meetings.enabled on`",
     }
 }
 
@@ -470,7 +470,7 @@ pub fn meeting_default_policy() -> MeetingPolicy {
 
 /// [`MeetingSettings::retention`] for the running meeting controller.
 /// The retention the user chose, `None` until they choose. A process that
-/// never loaded settings (`hex mcp`, `hex meetings`) reads it from
+/// never loaded settings (`gospell mcp`, `gospell meetings`) reads it from
 /// `settings.json` without migrating or writing anything.
 pub fn meeting_retention() -> Option<MeetingRetention> {
     match MEETING_RETENTION.load(Ordering::Acquire) {

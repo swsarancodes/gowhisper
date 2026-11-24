@@ -465,7 +465,7 @@ fn notes_are_read_and_their_absence_is_explicit() {
 #[test]
 fn a_held_lock_marks_the_meeting_in_progress() {
     let root = std::env::temp_dir().join(format!(
-        "hex-meeting-query-{}-{}",
+        "gospell-meeting-query-{}-{}",
         std::process::id(),
         crate::desktop::events::now_ms()
     ));
@@ -575,7 +575,7 @@ fn queries_never_write_to_the_meetings_folder() {
 
 #[test]
 fn incomplete_final_publication_stays_a_draft_until_explicit_recovery() {
-    let root = std::env::temp_dir().join(format!("hex-publication-{}", std::process::id()));
+    let root = std::env::temp_dir().join(format!("gospell-publication-{}", std::process::id()));
     let directory = root.join(STANDUP);
     fs::create_dir_all(&directory).unwrap();
     for entry in fs::read_dir(fixtures().join(STANDUP)).unwrap() {
@@ -611,7 +611,7 @@ fn incomplete_final_publication_stays_a_draft_until_explicit_recovery() {
 
 #[test]
 fn pending_final_keeps_an_expired_draft_visible_even_in_a_warm_query_cache() {
-    let root = std::env::temp_dir().join(format!("hex-read-admission-{}", std::process::id()));
+    let root = std::env::temp_dir().join(format!("gospell-read-admission-{}", std::process::id()));
     let directory = root.join(STANDUP);
     fs::create_dir_all(&directory).unwrap();
     for entry in fs::read_dir(fixtures().join(STANDUP)).unwrap() {
@@ -852,7 +852,7 @@ fn chapters_list_spans_and_lines_and_say_when_there_are_none() {
              2. 03:00–06:30 · Motion lint\n   A lint that flags animations which snap instead of easing.\n\
              3. 06:30–09:00 · Chat app name\n   Picking a name for the chat app.\n\
              \nModel-written names that may be wrong. Read a chapter with get_transcript (start and \
-             end as shown) or `hex meetings show 1790003000000-1005 --chapter N`.\n"
+             end as shown) or `gospell meetings show 1790003000000-1005 --chapter N`.\n"
         ),
         "{text}"
     );
@@ -881,7 +881,8 @@ fn chapters_list_spans_and_lines_and_say_when_there_are_none() {
 
 #[test]
 fn imported_meetings_render_speaker_consistently_across_export_query_chapters_and_search() {
-    let root = std::env::temp_dir().join(format!("hex-imported-markdown-{}", std::process::id()));
+    let root =
+        std::env::temp_dir().join(format!("gospell-imported-markdown-{}", std::process::id()));
     let _ = fs::remove_dir_all(&root);
     let id = "1790004000000-2001";
     let dir = root.join(id);

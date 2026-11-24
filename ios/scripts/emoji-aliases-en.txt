@@ -1,4 +1,4 @@
-# Hex's own chat words for emoji: written for Hex, not Unicode data.
+# GoSpell's own chat words for emoji: written for GoSpell, not Unicode data.
 # word<TAB>emoji, best first
 lol	😂 🤣 😆
 lmao	🤣 😂 💀

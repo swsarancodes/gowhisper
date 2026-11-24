@@ -128,7 +128,8 @@ mod tests {
     use crate::history::{HistoryRetention, HistoryStore, now_ms};
     #[test]
     fn recovery_is_text_only_and_clear_or_retention_changes_reject_late_results() {
-        let root = std::env::temp_dir().join(format!("hex-recovery-fence-{}", std::process::id()));
+        let root =
+            std::env::temp_dir().join(format!("gospell-recovery-fence-{}", std::process::id()));
         std::fs::create_dir(&root).unwrap();
         let history = History::new(HistoryStore::open(
             root.join("history.json"),

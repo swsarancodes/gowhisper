@@ -1,10 +1,10 @@
-package local.hex.bench;
+package local.gospell.bench;
 
 import java.io.File;
 import java.util.*;
-import ly.anoma.hex.keyboard.KeyboardLetters;
-import ly.anoma.hex.keyboard.LetterFeedback;
-import ly.anoma.hex.typing.TypingModel;
+import com.goml.gospell.keyboard.KeyboardLetters;
+import com.goml.gospell.keyboard.LetterFeedback;
+import com.goml.gospell.typing.TypingModel;
 
 /** Export the production model vocabulary and its hold-only letters on the actual layout. */
 public final class GateLexicon {

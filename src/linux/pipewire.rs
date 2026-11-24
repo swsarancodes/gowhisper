@@ -1,4 +1,4 @@
-//! The one `pw-cat` flag whose meaning changed under Hex's two Linux audio
+//! The one `pw-cat` flag whose meaning changed under GoSpell's two Linux audio
 //! paths: `--raw`.
 //!
 //! Up to PipeWire 1.2, `pw-cat` (and its `pw-record` symlink) treats `-` as

@@ -83,7 +83,7 @@ pub(super) fn entries(ui: &Ui) -> Vec<Entry> {
             "raw-dictation",
             false,
             tr("Dictate without processing"),
-            tr("Pastes your words as Hex heard them"),
+            tr("Pastes your words as GoSpell heard them"),
         );
     }
     add(g, "transcription", false, tr("Speech model"), "");
@@ -153,7 +153,7 @@ pub(super) fn entries(ui: &Ui) -> Vec<Entry> {
         "sound-set",
         true,
         tr("Sounds"),
-        tr("Preview the tones Hex plays when you dictate."),
+        tr("Preview the tones GoSpell plays when you dictate."),
     );
     add(g, "interface-language", true, tr("Interface language"), "");
     if settings::updates_itself(ui) {

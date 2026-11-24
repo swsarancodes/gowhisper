@@ -1,4 +1,4 @@
-//! `"Hex is ready"`'s Launch at login ask: one button that turns the real
+//! `"GoSpell is ready"`'s Launch at login ask: one button that turns the real
 //! login item on (`SMAppService` on macOS) and pops into a check, with a
 //! line that changes its tune once it is on.
 
@@ -56,7 +56,7 @@ impl LoginAsk {
     }
 }
 
-/// The ask's copy inputs: where Hex lives, and whether its shortcut taps to
+/// The ask's copy inputs: where GoSpell lives, and whether its shortcut taps to
 /// start rather than holds.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct LoginCopy {
@@ -150,10 +150,10 @@ fn burst(p: Paint, ask: &LoginAsk, now: f64, reduced: bool) -> Option<El> {
     )
 }
 
-/// The page's launch-at-login ask: `"Open Hex when your Mac starts?"`, or
-/// the computer's own words where Hex lives in a tray or an app launcher,
+/// The page's launch-at-login ask: `"Open GoSpell when your Mac starts?"`, or
+/// the computer's own words where GoSpell lives in a tray or an app launcher,
 /// with a button and a line under it. The button is the page's main action
-/// only when it is `alone`: beside Start using Hex it is a neutral one.
+/// only when it is `alone`: beside Start using GoSpell it is a neutral one.
 pub(crate) fn login_ask<S: 'static>(
     p: Paint,
     ask: &LoginAsk,

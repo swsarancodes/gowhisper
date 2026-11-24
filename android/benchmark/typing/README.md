@@ -16,7 +16,7 @@ Use a language code instead of `all` for one language. A language with hold-only
 
 - **Noisy taps:** word edit distance on the original 2,000 sentences, before and after decoding. WER is edits / reference words; reduction is (raw edits − decoded edits) / raw edits (minimum 70%).
 - **Correct words changed:** replay the intended spelling, including spaces and apostrophes, on key centres. Letters available only by long press use the IME's explicit-letter path. Count reference words no longer present on a minimum-edit alignment (maximum 0.5%). Compare final sentence output, so revisions of the preceding word count. Input preserves the original reference capitals. Scoring still ignores case-only differences so the metric measures spelling changes, directly comparable with the previous lowercase-input gate.
-- **Accents restored:** type each eligible reference on centres, substituting only letters a typist would otherwise have to hold. The [per-language mappings](accent-keys.json) are checked at runtime against the model alphabet, [KeyboardLetters.rows](../../app/src/main/java/ly/anoma/hex/keyboard/KeyboardLetters.kt) and [LetterFeedback.options](../../app/src/main/java/ly/anoma/hex/keyboard/LetterFeedback.kt). Dedicated letters (ñ, ä/ö/ü, å/ø/æ) remain literal. The default substitute is the key itself; a data entry can specify the hold key and a different typed sequence. German ß is reached by holding s but is typed as **ss** when omitted (Straße → Strasse). English's model alphabet has no hold-only letter and skips this metric.
+- **Accents restored:** type each eligible reference on centres, substituting only letters a typist would otherwise have to hold. The [per-language mappings](accent-keys.json) are checked at runtime against the model alphabet, [KeyboardLetters.rows](../../app/src/main/java/com/goml/gospell/keyboard/KeyboardLetters.kt) and [LetterFeedback.options](../../app/src/main/java/com/goml/gospell/keyboard/LetterFeedback.kt). Dedicated letters (ñ, ä/ö/ü, å/ø/æ) remain literal. The default substitute is the key itself; a data entry can specify the hold key and a different typed sequence. German ß is reached by holding s but is typed as **ss** when omitted (Straße → Strasse). English's model alphabet has no hold-only letter and skips this metric.
 - **Which restorations count:** compare complete affected words on the final minimum-edit alignment. “Unambiguous” means the plain spelling is absent from both HXTM vocabulary and the language’s shipped `.valid` list. With at least 50 such occurrences, 85% must be restored, including out-of-vocabulary targets. Below 50 the observed counts remain in JSON but do not decide the gate. “Ambiguous” means both spellings are listed; report restoration with no threshold. If only the plain spelling is listed, JSON reports that third bucket separately. The clean replay also reports **ambiguous harm**: switches between different listed spellings with the same plain form, divided by all correctly typed members of those families in the 2,000 clean sentences. Those switches are already in “correct words changed”, not an additional threshold. A zero denominator is shown as a dash, not a 0% success rate.
 - **Critical cases:** type each [named input](critical-cases.json) on centres, finish with space, and compare the entire sentence. Every case must pass, including valid ambiguous spellings that should remain literal.
 
@@ -26,7 +26,7 @@ The six `<lang>.tsv.gz` files in [held-out/](held-out/) contain **only the exist
 
 Sentences: [Tatoeba](https://tatoeba.org/), [CC BY 2.0 FR](https://creativecommons.org/licenses/by/2.0/fr/) or CC0 where released as such. Punctuation is normalized as in the original generators; the clean references retain the source sentence’s case. For noisy taps, the generators’ intended word-end indices identify exactly which tap had Shift, even across an omitted separator or apostrophe. Shift changes the case of the actual letter hit, never the hit key or coordinates. All 12,000 references and noisy strings lowercase to the original fixtures. ID and contributor are from the [per-language detailed exports](https://downloads.tatoeba.org/exports/per_language/) (2026-11-21); `\N` means Tatoeba lists no owner. Each source is at `https://tatoeba.org/en/sentences/show/<ID>`. The accent replay takes the first 500 eligible references in the fixed test order. German originally excluded ß and only five Bokmål references contain é. For those two alone, [accent-de.tsv](held-out/accent-de.tsv) and [accent-nb.tsv](held-out/accent-nb.tsv) add 500 and 53 attributed references **only to the accent replay**, never the noisy/clean comparison or model input. From the same detailed export: retain 3–14 words in the benchmark alphabet (plus ß for German), require a hold-only letter and a listed contributor, normalize as the existing generator does, exclude reference text in that language's existing dev/test split, keep the first of each normalized sentence, then shuffle in export order with Python seed 2374 and take up to the remaining quota. All 53 qualifying Bokmål additions are included; its two unambiguous word occurrences skip the threshold. The two models were built from Google Books (de) and NB N-gram/Ordbank (nb), not these Tatoeba supplements.
 
-**Polish** (`pl.tsv.gz`, same format) is made by [polish_set.py](polish_set.py) as [synthetic_sets.py](synthetic_sets.py) makes German's and Italian's: 2,300 sentences of 3–14 words in a–z and ą ć ę ł ń ó ś ź ż from Tatoeba's detailed Polish export (2026-11-22), shuffled with seed 23, the last 2,000 kept as the test split (10,735 reference words, 4,071 with a Polish letter), each tap sampled from the English benchmark's measured offsets (seed 20261125) on QWERTY at 39.5 pt, Hex's Polish letter rows. Polish's letters have no key of their own on Hex's iOS Polish layout (each is held on its base letter), so they are typed as their base key, ł as l (rerunning the script on a later export can pick other sentences: the committed file is the set); references keep the source's case and the contributor column is the export's. Android has no Polish model, so `quality-gate.py` doesn't gate it; iOS does (`ios/scripts/typing-gate.py run … pl`, the keyboard's `pl.hextm` and `pl.valid`), with Polish's accent keys (ą→a, ć→c, ę→e, ł→l, ń→n, ó→o, ś→s, ź→z, ż→z) and five critical cases ("to jest zolw" → "to jest żółw", "nie mam czasu", "bartek ma kota", "wiem ze tak" → "wiem że tak", "ide ze szkoly" → "idę ze szkoły") in [accent-keys.json](accent-keys.json) and [critical-cases.json](critical-cases.json); `quality-gate.py` takes a configured language without an Android model. On it: 85.98% fewer errors than raw taps, 0.22% of correct words changed, 95.46% of unambiguous marks restored, 5/5.
+**Polish** (`pl.tsv.gz`, same format) is made by [polish_set.py](polish_set.py) as [synthetic_sets.py](synthetic_sets.py) makes German's and Italian's: 2,300 sentences of 3–14 words in a–z and ą ć ę ł ń ó ś ź ż from Tatoeba's detailed Polish export (2026-11-22), shuffled with seed 23, the last 2,000 kept as the test split (10,735 reference words, 4,071 with a Polish letter), each tap sampled from the English benchmark's measured offsets (seed 20261125) on QWERTY at 39.5 pt, GoSpell's Polish letter rows. Polish's letters have no key of their own on GoSpell's iOS Polish layout (each is held on its base letter), so they are typed as their base key, ł as l (rerunning the script on a later export can pick other sentences: the committed file is the set); references keep the source's case and the contributor column is the export's. Android has no Polish model, so `quality-gate.py` doesn't gate it; iOS does (`ios/scripts/typing-gate.py run … pl`, the keyboard's `pl.gospelltm` and `pl.valid`), with Polish's accent keys (ą→a, ć→c, ę→e, ł→l, ń→n, ó→o, ś→s, ź→z, ż→z) and five critical cases ("to jest zolw" → "to jest żółw", "nie mam czasu", "bartek ma kota", "wiem ze tak" → "wiem że tak", "ide ze szkoly" → "idę ze szkoły") in [accent-keys.json](accent-keys.json) and [critical-cases.json](critical-cases.json); `quality-gate.py` takes a configured language without an Android model. On it: 85.98% fewer errors than raw taps, 0.22% of correct words changed, 95.46% of unambiguous marks restored, 5/5.
 
 ### The same gate on iOS
 
@@ -36,11 +36,11 @@ Sentences: [Tatoeba](https://tatoeba.org/), [CC BY 2.0 FR](https://creativecommo
 python3 scripts/typing-gate.py run --destination 'id=<SIM_UDID>' en es de fr it
 ```
 
-It writes `ios/build/typing-gate/input.json`, then runs the opt-in `HEXMobileTests/TypingGateReplayTests` once per language (one fresh process each, so one language's dictionary state never meets another's), and prints the same table as `quality-gate.py`. `typing-quality.json` there has the counts, critical outputs and failed checks. The test skips unless `HEX_TYPING_GATE` is set, so an ordinary `xcodebuild test` doesn't run it. `prepare` and `score` run the two halves separately.
+It writes `ios/build/typing-gate/input.json`, then runs the opt-in `GoSpellMobileTests/TypingGateReplayTests` once per language (one fresh process each, so one language's dictionary state never meets another's), and prints the same table as `quality-gate.py`. `typing-quality.json` there has the counts, critical outputs and failed checks. The test skips unless `GOSPELL_TYPING_GATE` is set, so an ordinary `xcodebuild test` doesn't run it. `prepare` and `score` run the two halves separately.
 
-- **Reduction:** the noisy taps were made on the synthetic layout above (402 pt; iOS's measured one for English and Spanish). Each tap is moved onto Hex's layout from the key it hit. Hex's rows are shorter, so a tap that would land outside Hex's letter keys or on 123, shift or delete goes to the nearest letter or space bar instead.
+- **Reduction:** the noisy taps were made on the synthetic layout above (402 pt; iOS's measured one for English and Spanish). Each tap is moved onto GoSpell's layout from the key it hit. GoSpell's rows are shorter, so a tap that would land outside GoSpell's letter keys or on 123, shift or delete goes to the nearest letter or space bar instead.
 - **Correct words changed:** each reference is typed at the key centres. A letter without a key of its own is picked from its key's long-press menu, and an apostrophe without a key comes from the 123 page; French's apostrophe key (#2354) is tapped.
-- **Accents restored:** each reference is typed with `accent-keys.json`'s substitutes and bucketed by `<lang>.hextm` and `<lang>.valid` as on Android. iOS ships no `.valid` lists yet, so the Android ones are read.
+- **Accents restored:** each reference is typed with `accent-keys.json`'s substitutes and bucketed by `<lang>.gospelltm` and `<lang>.valid` as on Android. iOS ships no `.valid` lists yet, so the Android ones are read.
 - **Critical cases:** typed at the key centres.
 - **Capitals (iOS report, no threshold):** the three numbers ignore case, so iOS also types each reference all lowercase at the key centres, leaving the keyboard's shift as it is (it capitalises a sentence's start). After a sentence's first word, it counts the reference words with a capital (names, "I") that come out with it (**names kept**), and the words without one that gain one (**capital added**).
 
@@ -90,7 +90,7 @@ The replay also counts what the suggestion strip offers, as iOS's harness does: 
 | … and the validity lists | 13,219 / 2,350 / 4,685 | 12,401 / 2,113 / 3,566 | 12,949 / 1,678 / 6,019 | 11,994 / 2,166 / 5,150 |
 | iOS at fc867484, with #2244 | 13,253 / 2,289 / 3,234 | 12,364 / 2,076 / 2,901 | — | — |
 
-French and Italian strip hits (word / next / after two letters): 11,979 / 2,272 / 4,248 of 13,661 / 11,430 / 9,950, and 11,028 / 1,712 / 3,638 of 12,025 / 9,788 / 8,981, with their own words for the strip between words (iPhone Hex's lists). A word typed with its elision ("l'homme") can't be a strip hit once its apostrophe is typed: the strip then reads "homme".
+French and Italian strip hits (word / next / after two letters): 11,979 / 2,272 / 4,248 of 13,661 / 11,430 / 9,950, and 11,028 / 1,712 / 3,638 of 12,025 / 9,788 / 8,981, with their own words for the strip between words (iPhone GoSpell's lists). A word typed with its elision ("l'homme") can't be a strip hit once its apostrophe is typed: the strip then reads "homme".
 
 The replay types French's apostrophe as the keyboard does: the AZERTY key sits on the letter rows, so a touch on it goes to the likelier neighbour as a letter's does ("u'e" -> "une"), and a touch near it can type it ("jnetais" -> "j'étais"). Right after an elided article or pronoun the apostrophe counts as the likeliest key (`TypingWord.likelierKey`): the books split "l'" and "d'" off, so the word list alone would send "l'" to "ln".
 
@@ -137,7 +137,7 @@ The production IME scores **actual** key centres. Android’s rows are shorter t
 
 ## Checks in an external editor
 
-The Studio sent touch events to Hex’s visible keys and suggestion strip, then read the separate editor’s text. With Wi-Fi off and airplane mode on:
+The Studio sent touch events to GoSpell’s visible keys and suggestion strip, then read the separate editor’s text. With Wi-Fi off and airplane mode on:
 
 | Layout | Typed and completed with a model suggestion | Space-triggered correction |
 |---|---|---|
@@ -149,18 +149,18 @@ Automatic on a fresh install displayed English, followed the system locale to Es
 
 ## Models and licences
 
-All four HXTM v3 assets are uncompressed and memory-mapped from the APK; Gradle verifies the [pinned hashes](../../app/src/main/assets/typing/SHA256SUMS). There is no SymSpell data. German and Bokmål have the same binary format as the iOS files; the Studio checked them with the Swift model reader as well as the Android IME. The two new files are also in the iOS checkout’s `ios/HEXKeyboard/TypingModel/` folder, local commit `230a437e`. The Swift reader round-tripped every spelling and every stored pair cost. This verifies file compatibility, not iOS device behavior.
+All four HXTM v3 assets are uncompressed and memory-mapped from the APK; Gradle verifies the [pinned hashes](../../app/src/main/assets/typing/SHA256SUMS). There is no SymSpell data. German and Bokmål have the same binary format as the iOS files; the Studio checked them with the Swift model reader as well as the Android IME. The two new files are also in the iOS checkout’s `ios/GoSpellKeyboard/TypingModel/` folder, local commit `230a437e`. The Swift reader round-tripped every spelling and every stored pair cost. This verifies file compatibility, not iOS device behavior.
 
 | Language | Words | Word pairs | Source of counts | Source of spelling |
 |---|---:|---:|---|---|
-| English | 86,247 | 417,182 | Google Books v3, 24 unigram / 589 bigram shards | SCOWL 2020.12.07, plus contractions and Hex's own [chat and tech words](en-extra-words.tsv) |
+| English | 86,247 | 417,182 | Google Books v3, 24 unigram / 589 bigram shards | SCOWL 2020.12.07, plus contractions and GoSpell's own [chat and tech words](en-extra-words.tsv) |
 | Spanish | 110,000 | 326,366 | Google Books v3, 3 / 73 shards; existing model unchanged | RLA-ES Hunspell |
 | German | 95,000 | 368,534 | Google Books v3, all 8 / 181 German shards | German alphabetic corpus spellings |
 | Bokmål | 95,000 | 370,560 | NB N-gram 2026 book unigrams and bigrams, language `nob` | Norsk ordbank, Bokmål full forms |
 | French | 99,974 | 380,439 | Google Books v3, all 6 / 115 French shards | French corpus spellings, with the books' elided forms |
 | Italian | 99,996 | 371,292 | Google Books v3, all 2 / 60 Italian shards | Italian corpus spellings, with the books' elided forms |
 
-English was rebuilt with the shared builder from the same 24 unigram and 589 bigram shards and SCOWL. Run with the earlier rules, the same counts reproduce the earlier `en.hextm` byte for byte (SHA-256 `14370569…c4028`), so the new file (`c23e9c54…df30`) differs only by two additions. Google Books splits "don't" into "do" and "n't", so its own count of the contraction is tiny ("don't" cost 14.4 nats, "it's" 16.2, and SCOWL lists "I'm", "I'll", "I've" and "I'd" only with a capital, so they were missing): each contraction in the builder's `CONTRACTIONS` now counts as often as its expansion's pair ("do not") when that is commoner, and the missing ones are added in lowercase. And [en-extra-words.tsv](en-extra-words.tsv), 166 chat and tech words written for Hex ("app", "lol", "csv"), joins the vocabulary at its tier's cost (10, 12 or 13.5 nats), a word the books have only getting commoner. Both join before pairs are counted. `en.valid` and `en.capitals` are rebuilt from the new model (their builders also reproduce the earlier files from the earlier model); `build-capitals.py` holds Hex's own words at 94% like SCOWL's lowercase words, so "plz" and "okie" are never capitalised. English gate before → after: iOS (`ios/scripts/typing-gate.py`) 773 → 734 word errors (83.5% → 84.4% fewer than raw taps, correct words changed 0.27% → 0.26%), Android (`quality-gate.py`) 718 → 680 (84.7% → 85.5%, 0.32% both), critical cases passing.
+English was rebuilt with the shared builder from the same 24 unigram and 589 bigram shards and SCOWL. Run with the earlier rules, the same counts reproduce the earlier `en.gospelltm` byte for byte (SHA-256 `14370569…c4028`), so the new file (`c23e9c54…df30`) differs only by two additions. Google Books splits "don't" into "do" and "n't", so its own count of the contraction is tiny ("don't" cost 14.4 nats, "it's" 16.2, and SCOWL lists "I'm", "I'll", "I've" and "I'd" only with a capital, so they were missing): each contraction in the builder's `CONTRACTIONS` now counts as often as its expansion's pair ("do not") when that is commoner, and the missing ones are added in lowercase. And [en-extra-words.tsv](en-extra-words.tsv), 166 chat and tech words written for GoSpell ("app", "lol", "csv"), joins the vocabulary at its tier's cost (10, 12 or 13.5 nats), a word the books have only getting commoner. Both join before pairs are counted. `en.valid` and `en.capitals` are rebuilt from the new model (their builders also reproduce the earlier files from the earlier model); `build-capitals.py` holds GoSpell's own words at 94% like SCOWL's lowercase words, so "plz" and "okie" are never capitalised. English gate before → after: iOS (`ios/scripts/typing-gate.py`) 773 → 734 word errors (83.5% → 84.4% fewer than raw taps, correct words changed 0.27% → 0.26%), Android (`quality-gate.py`) 718 → 680 (84.7% → 85.5%, 0.32% both), critical cases passing.
 
 French and Italian go through the same German adapter: every untagged shard of the language, 1980–2019, spellings from the corpus alone. The books keep many elisions as one token ("c'est", "qu'il", Italian "dell'anno"; French "l'" and "d'" are split off), so those stay words with their apostrophe, which the decoder reads without it being typed. The same letters run together without the apostrophe, ten times rarer ("cest", "quil", 26 French and 4 Italian forms), are left out so space puts it back. A word typed right after an elided article or pronoun ("l'", "qu'", "dell'") is read as a word of its own (`TypingWord.startsWord`).
 
@@ -189,7 +189,7 @@ Lower cut-offs kept a few more rare words for far more bytes (Spanish at 1,000: 
 
 The separate [never-suggest list](../../app/src/main/assets/typing/never-suggest.tsv) is
 adapted from Shutterstock's [LDNOOBW revision 5faf2ba](https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/tree/5faf2ba42d7b1c0977169ec3611df25a3c08eb13),
-**CC BY 4.0**. Hex reviewed the English, Spanish, German and Norwegian lists for keyboard use:
+**CC BY 4.0**. GoSpell reviewed the English, Spanish, German and Norwegian lists for keyboard use:
 
 - Keep identity slurs always suppressed. Common profanity and obscene slang are opt-in.
   Add common missing forms explicitly, including plurals, verb inflections and spelling
@@ -231,21 +231,21 @@ adapted from Shutterstock's [LDNOOBW revision 5faf2ba](https://github.com/LDNOOB
 
    ```sh
    mkdir -p "$T/models" "$T/source"
-   python3 benchmark/typing/build-typing-model.py en "$T/source/en" "$T/models/en.hextm"
-   python3 benchmark/typing/build-layout-model.py de "$T/source/de" "$T/models/de.hextm"
-   python3 benchmark/typing/build-layout-model.py nb "$T/source/nb" "$T/models/nb.hextm"
-   python3 benchmark/typing/build-layout-model.py fr "$T/source/fr" "$T/models/fr.hextm"
-   python3 benchmark/typing/build-layout-model.py it "$T/source/it" "$T/models/it.hextm"
+   python3 benchmark/typing/build-typing-model.py en "$T/source/en" "$T/models/en.gospelltm"
+   python3 benchmark/typing/build-layout-model.py de "$T/source/de" "$T/models/de.gospelltm"
+   python3 benchmark/typing/build-layout-model.py nb "$T/source/nb" "$T/models/nb.gospelltm"
+   python3 benchmark/typing/build-layout-model.py fr "$T/source/fr" "$T/models/fr.gospelltm"
+   python3 benchmark/typing/build-layout-model.py it "$T/source/it" "$T/models/it.gospelltm"
    curl -fsSL https://downloads.sourceforge.net/project/wordlist/SCOWL/2020.12.07/scowl-2020.12.07.tar.gz -o "$T/source/scowl.tar.gz"
    python3 benchmark/typing/build-valid-words.py en "$T/source/scowl.tar.gz" \
-     app/src/main/assets/typing/en.hextm "$T/models/en.valid"
+     app/src/main/assets/typing/en.gospelltm "$T/models/en.valid"
    for lang in es de fr it; do  # the counts build-capitals.py caches; German's are counted here first
-     python3 benchmark/typing/build-valid-words.py $lang app/src/main/assets/typing/$lang.hextm "$T/capitals/$lang" "$T/models/$lang.valid"
+     python3 benchmark/typing/build-valid-words.py $lang app/src/main/assets/typing/$lang.gospelltm "$T/capitals/$lang" "$T/models/$lang.valid"
    done
-   python3 benchmark/typing/build-valid-words.py nb app/src/main/assets/typing/nb.hextm "$T/source/nb-valid" "$T/models/nb.valid"
-   python3 benchmark/typing/build-capitals.py en app/src/main/assets/typing/en.hextm "$T/capitals/en" \
+   python3 benchmark/typing/build-valid-words.py nb app/src/main/assets/typing/nb.gospelltm "$T/source/nb-valid" "$T/models/nb.valid"
+   python3 benchmark/typing/build-capitals.py en app/src/main/assets/typing/en.gospelltm "$T/capitals/en" \
      "$T/models/en.capitals" "$T/source/scowl.tar.gz"
    for lang in es fr it; do
-     python3 benchmark/typing/build-capitals.py $lang app/src/main/assets/typing/$lang.hextm "$T/capitals/$lang" "$T/models/$lang.capitals"
+     python3 benchmark/typing/build-capitals.py $lang app/src/main/assets/typing/$lang.gospelltm "$T/capitals/$lang" "$T/models/$lang.capitals"
    done
    ```

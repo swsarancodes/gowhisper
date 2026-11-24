@@ -3,7 +3,7 @@
 //! Orukeet, and Fluid Speech Pro): its languages, measured peak memory, the
 //! credit word for word with source and licence links, the publisher's
 //! notice, and a folded table of the publisher's own benchmarks, labelled as
-//! not measured in Hex.
+//! not measured in GoSpell.
 
 use rune::{El, col, row, text};
 use rune_kit::{Button, ButtonVariant, ControlSize};
@@ -109,7 +109,7 @@ pub(super) fn section(ui: &Ui, p: Paint, model: &ModelDefinition) -> Option<El> 
         .child(line(
             p,
             "experimental",
-            tr("Experimental: Hex has run it only on Linux (Vulkan) so far.").to_owned(),
+            tr("Experimental: GoSpell has run it only on Linux (Vulkan) so far.").to_owned(),
         ))
         .child(
             text(details.attribution)
@@ -131,10 +131,10 @@ pub(super) fn section(ui: &Ui, p: Paint, model: &ModelDefinition) -> Option<El> 
 }
 
 /// The publisher's benchmarks, folded until asked for, with their
-/// conditions beside them. They rank nothing in Hex.
+/// conditions beside them. They rank nothing in GoSpell.
 fn published(ui: &Ui, p: Paint, details: &ModelDetails) -> El {
     let open = ui.picker.details.published;
-    let label = tr("Published benchmarks; not measured in Hex");
+    let label = tr("Published benchmarks; not measured in GoSpell");
     let disclosure = Button::new(label)
         .variant(ButtonVariant::Ghost)
         .control_size(ControlSize::Small)

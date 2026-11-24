@@ -1,11 +1,11 @@
-//! The single descriptor table for Hex's shortcut slots (`HotkeySlot`) and
+//! The single descriptor table for GoSpell's shortcut slots (`HotkeySlot`) and
 //! the shared platform/Labs acceptance rules every surface (the Settings
-//! recorder, `hex settings set`, and load-time repair) enforces.
+//! recorder, `gospell settings set`, and load-time repair) enforces.
 
 use super::hotkeys::hotkey_conflicts;
 use super::{AppSettings, HotkeyBinding, HotkeyKey};
 
-/// A shortcut Settings and `hex settings` record.
+/// A shortcut Settings and `gospell settings` record.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum HotkeySlot {
     Dictation,
@@ -13,10 +13,10 @@ pub enum HotkeySlot {
     RawDictation,
     /// Labs › Transform typed text's shortcut (Linux).
     TypedText,
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     Capture,
     /// Labs › Annotate last 15 seconds shortcut (macOS 27+).
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     CaptureReplay,
     /// Labs › Second dictation shortcut.
     SecondDictation,
@@ -35,7 +35,7 @@ pub enum HotkeySlot {
 /// Metadata and field accessors for one named `HotkeySlot`.
 pub struct SlotDescriptor {
     pub slot: HotkeySlot,
-    /// The `hex settings` key for this slot.
+    /// The `gospell settings` key for this slot.
     #[cfg_attr(not(test), allow(dead_code))]
     pub key: &'static str,
     pub get: fn(&AppSettings) -> Option<&HotkeyBinding>,
@@ -165,7 +165,7 @@ impl HotkeySlot {
                     }
             },
         },
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         SlotDescriptor {
             slot: Self::Capture,
             key: "capture.hotkey",
@@ -181,7 +181,7 @@ impl HotkeySlot {
                 s.capture_on() || (cfg!(target_os = "macos") && candidate == Self::ScreenshotRecord)
             },
         },
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         SlotDescriptor {
             slot: Self::CaptureReplay,
             key: "capture.replay_hotkey",
@@ -214,11 +214,11 @@ impl HotkeySlot {
     /// One of Annotate's own capture shortcuts: its capture, and its 15 s
     /// replay.
     pub fn is_annotate_capture(self) -> bool {
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         {
             matches!(self, Self::Capture | Self::CaptureReplay)
         }
-        #[cfg(not(hex_capture))]
+        #[cfg(not(gospell_capture))]
         {
             let _ = self;
             false
@@ -406,7 +406,7 @@ pub fn check_shortcut_policy(
     {
         return Err(ShortcutRefusal::NeedsMicrophoneKeyLab);
     }
-    // macOS reads the microphone key at Hex's own session tap, before the
+    // macOS reads the microphone key at GoSpell's own session tap, before the
     // annotated-session tap Screenshots' keys go through, so a shot never sees
     // it however the labs are set.
     if cfg!(target_os = "macos")

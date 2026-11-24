@@ -8,20 +8,20 @@
 #
 #   publish-github-release.sh <dist>
 #
-# Environment: HEX_VERSION, HEX_RELEASE_COMMIT, HEX_RELEASE_TAG,
-# HEX_RELEASE_SOURCE (a checkout of the commit with docs/releases/), GH_TOKEN.
+# Environment: GOSPELL_VERSION, GOSPELL_RELEASE_COMMIT, GOSPELL_RELEASE_TAG,
+# GOSPELL_RELEASE_SOURCE (a checkout of the commit with docs/releases/), GH_TOKEN.
 set -eu
 
-repo=${HEX_RELEASE_REPO:-anomalyco/hex}
+repo=${GOSPELL_RELEASE_REPO:-goml/gospell}
 [ $# -eq 1 ] || {
   echo "Usage: $0 <dist>" >&2
   exit 1
 }
 dist=$1
-version=${HEX_VERSION:?Set HEX_VERSION}
-commit=${HEX_RELEASE_COMMIT:?Set HEX_RELEASE_COMMIT}
-tag=${HEX_RELEASE_TAG:?Set HEX_RELEASE_TAG}
-source=${HEX_RELEASE_SOURCE:?Set HEX_RELEASE_SOURCE}
+version=${GOSPELL_VERSION:?Set GOSPELL_VERSION}
+commit=${GOSPELL_RELEASE_COMMIT:?Set GOSPELL_RELEASE_COMMIT}
+tag=${GOSPELL_RELEASE_TAG:?Set GOSPELL_RELEASE_TAG}
+source=${GOSPELL_RELEASE_SOURCE:?Set GOSPELL_RELEASE_SOURCE}
 # Only a stable X.Y.Z release is ever Latest; dev builds and prereleases never
 # reach this script.
 printf '%s\n' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || {
@@ -36,7 +36,7 @@ printf '%s\n' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || {
 temporary=$(mktemp -d)
 trap 'rm -rf "$temporary"' EXIT HUP INT TERM
 
-assets=$(cd "$dist" && { ls hex-*.zip hex-*.dmg hex-*.exe hex-*.com hex-*-linux-* 2>/dev/null || true; })
+assets=$(cd "$dist" && { ls gospell-*.zip gospell-*.dmg gospell-*.exe gospell-*.com gospell-*-linux-* 2>/dev/null || true; })
 [ -n "$assets" ] || {
   echo "No release files in $dist." >&2
   exit 1
@@ -53,7 +53,7 @@ if [ "$tagged" != "$commit" ]; then
   exit 1
 fi
 if ! gh release view "$tag" -R "$repo" --json name >/dev/null 2>&1; then
-  gh release create "$tag" -R "$repo" --verify-tag --title "Hex $version" \
+  gh release create "$tag" -R "$repo" --verify-tag --title "GoSpell $version" \
     --notes-file "$notes" --latest=true
 fi
 gh release view "$tag" -R "$repo" --json assets > "$temporary/release.json"

@@ -1,9 +1,9 @@
 # Windows Authenticode signing
 
-Windows releases are Authenticode-signed with Anomaly's Azure Artifact Signing
+Windows releases are Authenticode-signed with GoML's Azure Artifact Signing
 (formerly Trusted Signing) account from GitHub Actions. Signing is separate
 from the release service: Authenticode is what Windows and SmartScreen check,
-and Hex's updater checks it again (with the manifest's SHA-256) before
+and GoSpell's updater checks it again (with the manifest's SHA-256) before
 installing an update.
 
 ## Pipeline
@@ -12,11 +12,11 @@ installing an update.
 
 ```ts
 build (build-desktop.yml; x64 and ARM64 runners)   // compiles; no environment or secrets
-└── build-windows-<arch>: hex-<v>-windows-<x64|arm64>.exe (+ SHA256SUMS, digest output)
+└── build-windows-<arch>: gospell-<v>-windows-<x64|arm64>.exe (+ SHA256SUMS, digest output)
 sign-windows (release env, .github/release only)
 ├── verify the artifacts' digests
 ├── azure/login (OIDC, no client secret)
-├── artifact-signing-action: both hex.exe     // SHA-256, RFC 3161 timestamp
+├── artifact-signing-action: both gospell.exe     // SHA-256, RFC 3161 timestamp
 └── verify-authenticode.ps1                   // every exe Valid + timestamped
 setup-engine (windows-setup-engine.yml)        // signed runs only; no secrets
 └── build-windows-installer.ps1 -ExtractSignedEngine: uninst-<inno>-<hash>.e32
@@ -24,7 +24,7 @@ sign-windows-engine (release env)              // signs that setup engine
 installers (windows-installers.yml)            // no secrets
 ├── build-windows-installer.ps1 -SignedEngineDir // Inno embeds the signed bytes
 └── test-windows-installer.ps1 on native x64 and ARM64, -SignedEngine
-sign-windows-installers (release env)          // signs and checks both hex-setup-*.exe
+sign-windows-installers (release env)          // signs and checks both gospell-setup-*.exe
 publish                                       // stable requires the signatures
 ```
 
@@ -35,7 +35,7 @@ publish                                       // stable requires the signatures
   and writes "not Authenticode-signed" to its summary; everything else still
   runs, including the installer tests.
 - Setup runs from a copy of its engine that it extracts to `%TEMP%` at launch,
-  and the uninstaller it writes (`hex\uninstall\unins000.exe`) is another copy
+  and the uninstaller it writes (`gospell\uninstall\unins000.exe`) is another copy
   of the same engine. Neither is the outer Setup.exe, so signing that exe
   afterwards does not sign them, and Windows 11 Smart App Control
   (VerifiedAndReputableDesktop) blocks the unsigned copy: setup aborts with
@@ -46,7 +46,7 @@ publish                                       // stable requires the signatures
   job has no credentials, so the engine is signed in its own passes, and only
   when Windows is signed (`setup-engine` waits for `sign-windows`):
 
-1. `setup-engine` compiles `packaging/windows/hex.iss` with
+1. `setup-engine` compiles `packaging/windows/gospell.iss` with
    `SignedUninstaller=yes` and a `SignedUninstallerDir`. With no SignTool
    configured, ISCC writes the unsigned `uninst-<inno version>-<hash>.e32`
    there and aborts as a compile failure (exit 2), asking for that file to be
@@ -83,13 +83,13 @@ Setup.exe (signed after compile)
 - Test builds and any run without the Azure values compile the installer once
   with no `SignedUninstaller` define: unchanged, unsigned, and no engine pass
   at all.
-- Self-updates download `hex.exe` through Hex itself, so SmartScreen is not
+- Self-updates download `gospell.exe` through GoSpell itself, so SmartScreen is not
   involved there either. The manifest's SHA-256 and the Authenticode check
   protect it.
 
 ## Configuration
 
-The workflow uses OpenCode's names. In anomalyco/hex, these are `release`
+The workflow uses OpenCode's names. In goml/gospell, these are `release`
 environment secrets:
 
 - `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`: the Entra app
@@ -101,9 +101,9 @@ environment secrets:
 
 The identity needs a federated credential with issuer
 `https://token.actions.githubusercontent.com`, subject
-`repo:anomalyco/hex:environment:release`, and audience
+`repo:goml/gospell:environment:release`, and audience
 `api://AzureADTokenExchange`. It also needs the *Artifact Signing Certificate
-Profile Signer* role on the profile. Luke (Hona) owns Anomaly's Azure
+Profile Signer* role on the profile. Luke (Hona) owns GoML's Azure
 self-service setup.
 
 ## SmartScreen reputation
@@ -115,7 +115,7 @@ self-service setup.
 - SmartScreen builds reputation per publisher identity, not per certificate.
   The daily certificate rotation does not reset it. A new publisher can still
   show "Windows protected your PC" on early downloads until enough installs
-  build reputation. The warning then names Anomaly Innovations, Inc. instead
+  build reputation. The warning then names GoML instead
   of "Unknown publisher".
 - Smart App Control checks the setup engine's signature every time setup runs
   rather than a reputation, so the engine's signature only has to be valid and

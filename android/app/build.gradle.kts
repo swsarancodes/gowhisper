@@ -46,8 +46,8 @@ val prepareSpeechModel by tasks.registering {
 }
 
 // Resolve the key relative to its private properties file, never to a checked-in path.
-val uploadProperties = providers.environmentVariable("HEX_ANDROID_KEYSTORE_PROPERTIES").orNull
-    ?.let(::file) ?: File(System.getProperty("user.home"), ".config/hex-android/keystore.properties")
+val uploadProperties = providers.environmentVariable("GOSPELL_ANDROID_KEYSTORE_PROPERTIES").orNull
+    ?.let(::file) ?: File(System.getProperty("user.home"), ".config/gospell-android/keystore.properties")
 val upload = Properties().apply {
     if (uploadProperties.isFile) uploadProperties.inputStream().use(::load)
 }
@@ -61,12 +61,12 @@ val requireUploadKey by tasks.registering {
 }
 
 android {
-    namespace = "ly.anoma.hex"
+    namespace = "com.goml.gospell"
     compileSdk = 36
     ndkVersion = "27.2.12479018"
 
     defaultConfig {
-        applicationId = "ly.anoma.hex"
+        applicationId = "com.goml.gospell"
         minSdk = 31
         targetSdk = 36
         versionCode = 5
@@ -74,7 +74,7 @@ android {
         ndk { abiFilters += "arm64-v8a" }
         externalNativeBuild.cmake {
             arguments += listOf("-DANDROID_STL=c++_static", "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON")
-            targets += "hexspeech"
+            targets += "gospellspeech"
         }
     }
     externalNativeBuild.cmake {
@@ -101,7 +101,7 @@ android {
     }
     packaging.resources.excludes += "DebugProbesKt.bin"
     buildFeatures { compose = true }
-    androidResources { noCompress += listOf("bin", "hextm", "valid", "capitals") }
+    androidResources { noCompress += listOf("bin", "gospelltm", "valid", "capitals") }
     sourceSets["main"].assets.srcDir(modelAssets)
     // The same plain-text Android policy ships in Settings and in the Play listing drafts.
     sourceSets["main"].assets.srcDir(rootProject.file("play/policy"))
@@ -126,7 +126,7 @@ val verifyInter by tasks.registering {
 // Pin the licensed HXTM files. An older prototype word-pair list cannot slip into an APK.
 val verifyTypingModels by tasks.registering {
     val dir = file("src/main/assets/typing")
-    val names = listOf("en.hextm", "es.hextm", "de.hextm", "nb.hextm", "fr.hextm", "it.hextm", "en.valid",
+    val names = listOf("en.gospelltm", "es.gospelltm", "de.gospelltm", "nb.gospelltm", "fr.gospelltm", "it.gospelltm", "en.valid",
         "es.valid", "de.valid", "nb.valid", "fr.valid", "it.valid",
         "en.capitals", "es.capitals", "de.capitals", "fr.capitals", "it.capitals")
     val manifest = dir.resolve("SHA256SUMS")

@@ -8,7 +8,7 @@ use hound::{SampleFormat, WavSpec, WavWriter};
 
 use super::PARAKEET_SAMPLE_RATE as SAMPLE_RATE;
 
-const RETENTION_ENV: &str = "HEX_RETAIN_DICTATION_AUDIO";
+const RETENTION_ENV: &str = "GOSPELL_RETAIN_DICTATION_AUDIO";
 
 /// Retains a transcribed clip as `dictation-<ms>.wav`.
 pub fn persist(samples: &[f32]) {
@@ -106,8 +106,10 @@ mod tests {
 
     #[test]
     fn diagnostic_recordings_are_owner_only_and_bounded() {
-        let directory =
-            std::env::temp_dir().join(format!("hex-dictation-diagnostics-{}", std::process::id()));
+        let directory = std::env::temp_dir().join(format!(
+            "gospell-dictation-diagnostics-{}",
+            std::process::id()
+        ));
         let _ = fs::remove_dir_all(&directory);
         persist_at(&directory, &[0.25; 16_000], Kind::Transcribed, 1).unwrap();
         std::thread::sleep(std::time::Duration::from_millis(2));
@@ -132,7 +134,7 @@ mod tests {
     #[test]
     fn near_silent_recordings_are_marked_and_share_the_bound() {
         let directory = std::env::temp_dir().join(format!(
-            "hex-dictation-diagnostics-near-silent-{}",
+            "gospell-dictation-diagnostics-near-silent-{}",
             std::process::id()
         ));
         let _ = fs::remove_dir_all(&directory);

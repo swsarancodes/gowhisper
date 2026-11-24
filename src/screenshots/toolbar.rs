@@ -39,7 +39,7 @@ pub(super) fn open() -> bool {
     toolbar::forget_menu();
     // Off the tap's thread: the permission and the microphones take a moment.
     let spawned = std::thread::Builder::new()
-        .name("hex-record-toolbar".into())
+        .name("gospell-record-toolbar".into())
         .spawn(move || {
             if crate::capture_host::permission_state(CaptureNeed::ScreenRecording, true).is_some() {
                 if super::front().toolbar_permission_denied(id) {
@@ -203,13 +203,13 @@ fn start(kind: RecordKind, at: Option<[f64; 2]>) {
     }
 }
 
-/// The input devices a recording can open, less Hex Microphone.
+/// The input devices a recording can open, less GoSpell Microphone.
 fn microphones() -> Vec<String> {
     match crate::audio::input_devices() {
         Ok(devices) => devices
             .names
             .into_iter()
-            .filter(|name| !crate::audio::hex_microphone::is_hex_virtual_device_name(name))
+            .filter(|name| !crate::audio::gospell_microphone::is_gospell_virtual_device_name(name))
             .collect(),
         Err(error) => {
             tracing::warn!(%error, "could not list microphones for the recording toolbar");

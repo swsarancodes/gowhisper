@@ -629,13 +629,13 @@ mod tests {
         include_str!("../rune_ui/onboarding_kit/versus.rs"),
         include_str!("../rune_ui/output.rs"),
         include_str!("../rune_ui/screenshot_thumbnail.rs"),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         include_str!("../rune_ui/screenshot_thumbnail/card.rs"),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         include_str!("../rune_ui/captures.rs"),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         include_str!("../rune_ui/screenshot_thumbnail/editor.rs"),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         include_str!("../rune_ui/screenshot_thumbnail/editor/view.rs"),
         include_str!("../screenshots.rs"),
         include_str!("../rune_ui/picker.rs"),
@@ -643,29 +643,29 @@ mod tests {
         include_str!("../rune_ui/picker/facts.rs"),
         include_str!("../rune_ui/picker/list.rs"),
         include_str!("../rune_ui/platform_settings.rs"),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         include_str!("../rune_ui/scrawl.rs"),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         include_str!("../rune_ui/capture_capsule/mod.rs"),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         include_str!("../rune_ui/capture_capsule/flow.rs"),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         include_str!("../rune_ui/capture_capsule/flow/step.rs"),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         include_str!("../rune_ui/capture_capsule/list_view.rs"),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         include_str!("../rune_ui/capture_capsule/flow/routes.rs"),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         include_str!("../rune_ui/capture_capsule/flow/done.rs"),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         include_str!("../rune_ui/capture_capsule/flow/press.rs"),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         include_str!("../rune_ui/capture_capsule/flow/words.rs"),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         include_str!("../rune_ui/capture_capsule/surface.rs"),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         include_str!("../rune_ui/capture_capsule/undo_ring.rs"),
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         include_str!("../rune_ui/capture_capsule/view.rs"),
         include_str!("../rune_ui/settings.rs"),
         include_str!("../rune_ui/shortcut_mode.rs"),

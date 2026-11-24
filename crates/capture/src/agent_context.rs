@@ -1038,7 +1038,7 @@ mod tests {
         };
         let overlay = WindowEntry {
             layer: 25,
-            ..window(9, "Hex")
+            ..window(9, "GoSpell")
         };
         b.windows = vec![
             WindowSnapshot {
@@ -1064,7 +1064,7 @@ mod tests {
             all.contains("· 0:04 OpenCode window closed “The whole window closes.”"),
             "{all}"
         );
-        assert!(!all.contains("Secret") && !all.contains("Hex"), "{all}");
+        assert!(!all.contains("Secret") && !all.contains("GoSpell"), "{all}");
     }
 
     #[test]

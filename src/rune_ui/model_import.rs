@@ -187,7 +187,7 @@ pub(super) fn poll(ui: &mut Ui) -> bool {
                 let (sender, receiver) = channel();
                 let wake = wake(ui.modes.waker.clone());
                 let started = std::thread::Builder::new()
-                    .name("hex-model-import".into())
+                    .name("gospell-model-import".into())
                     .spawn(move || {
                         let canceled = AtomicBool::new(false);
                         let result = if in_place {
@@ -257,14 +257,14 @@ pub(super) fn status_note(model: &ModelDefinition) -> Option<String> {
     }
 }
 
-/// General's notice when the saved model is an import that can't run: Hex
+/// General's notice when the saved model is an import that can't run: GoSpell
 /// keeps the choice and runs the default model until it is fixed.
 pub(super) fn selection_notice(ui: &Ui) -> Option<String> {
     let model = crate::transcription::models::definition(ui.settings.transcription.model);
     let fallback = &crate::transcription::models::definition(custom_models::fallback().model).name;
     if model.id == TranscriptionModelId::ParakeetUltra && !model.available() {
         return Some(tr_named(
-            "{model} needs Labs › Parakeet Ultra, so Hex uses {fallback} until you turn it on or choose another model",
+            "{model} needs Labs › Parakeet Ultra, so GoSpell uses {fallback} until you turn it on or choose another model",
             &[("model", model.name.as_ref()), ("fallback", fallback)],
         ));
     }
@@ -280,14 +280,14 @@ pub(super) fn selection_notice(ui: &Ui) -> Option<String> {
     // only a ready import can be waiting on its Labs toggle.
     let notice = match custom_models::status(id) {
         Status::Ready if custom_models::uses_k_quants(id) && !crate::labs::k_quant_models() => {
-            "{model} needs Labs › Smaller model files, so Hex uses {fallback} until you turn it on or choose another model"
+            "{model} needs Labs › Smaller model files, so GoSpell uses {fallback} until you turn it on or choose another model"
         }
         Status::Ready => return None,
         Status::Missing => {
-            "{model} is missing, so Hex uses {fallback} until you import it again or choose another model"
+            "{model} is missing, so GoSpell uses {fallback} until you import it again or choose another model"
         }
         Status::Changed => {
-            "{model} changed since it was added, so Hex uses {fallback} until you check it again in the speech model picker or choose another model"
+            "{model} changed since it was added, so GoSpell uses {fallback} until you check it again in the speech model picker or choose another model"
         }
     };
     Some(tr_named(
@@ -369,7 +369,7 @@ pub(super) fn actions(ui: &Ui, p: Paint, model: &ModelDefinition, removable: boo
         ];
     }
     let mut actions = Vec::new();
-    // Missing or changed: check Hex's copy again, or import the file again.
+    // Missing or changed: check GoSpell's copy again, or import the file again.
     let status = custom_models::status(id);
     let in_place = in_place(id);
     if status == Status::Changed {
@@ -439,7 +439,7 @@ pub(super) fn actions(ui: &Ui, p: Paint, model: &ModelDefinition, removable: boo
     actions
 }
 
-/// Rehashes Hex's copy on a worker; a match makes the import ready again.
+/// Rehashes GoSpell's copy on a worker; a match makes the import ready again.
 fn repair(ui: &mut Ui, id: CustomModelId) {
     if !ui.live() || ui.picker.import.busy() {
         return;
@@ -450,7 +450,7 @@ fn repair(ui: &mut Ui, id: CustomModelId) {
     let (sender, receiver) = channel();
     let wake = wake(ui.modes.waker.clone());
     let started = std::thread::Builder::new()
-        .name("hex-model-repair".into())
+        .name("gospell-model-repair".into())
         .spawn(move || {
             let result = custom_models::repair(id, &AtomicBool::new(false))
                 .map(|()| id)
@@ -476,7 +476,7 @@ fn save_name(ui: &mut Ui) {
     }
 }
 
-/// The first press arms Remove, as Delete does; the second removes Hex's copy.
+/// The first press arms Remove, as Delete does; the second removes GoSpell's copy.
 fn remove(ui: &mut Ui, id: CustomModelId) {
     let model = TranscriptionModelId::Custom(id);
     if ui.picker.deletion != Some(model) {

@@ -3,7 +3,7 @@
 //! time on a worker thread, and the toast that says how each went.
 //!
 //! A file dropped anywhere on the window with an extension this build reads
-//! is queued; a drop Hex can't use says what it can read instead. A drag
+//! is queued; a drop GoSpell can't use says what it can read instead. A drag
 //! over the window shows the hint. Wayland reports no file drags, so the
 //! card's button opens the native file dialog for the same queue. With the
 //! lab off the window has no drop target and none of this shows.
@@ -82,11 +82,11 @@ enum Event {
 /// The last toast: what the window says about a drop until it is dismissed.
 #[derive(Clone, Debug)]
 pub(super) enum Notice {
-    /// Files Hex can't read, so nothing was transcribed.
+    /// Files GoSpell can't read, so nothing was transcribed.
     Rejected,
     /// A transcript saved at this path.
     Saved(PathBuf),
-    /// A file Hex could not transcribe, and why.
+    /// A file GoSpell could not transcribe, and why.
     Failed { name: String, error: String },
     /// The native file dialog could not open.
     Chooser(String),
@@ -289,7 +289,7 @@ pub(super) fn on(ui: &Ui) -> bool {
 }
 
 /// The window root's file drop target: the whole window takes a file this
-/// build reads, says what Hex reads for one it can't, and shows the hint
+/// build reads, says what GoSpell reads for one it can't, and shows the hint
 /// while a drag is over it. The lab off sets none of these.
 pub(super) fn drop_target(root: El) -> El {
     root.on_drop_files(|ui: &mut Ui, files, tx| dropped(ui, files, tx))
@@ -459,7 +459,7 @@ pub(super) fn overlay(ui: &Ui, p: Paint) -> Option<El> {
 }
 
 /// The hint over the whole window while a file drag is on it: what dropping
-/// does, or what Hex reads instead.
+/// does, or what GoSpell reads instead.
 fn hint(ui: &Ui, p: Paint) -> Option<El> {
     let accepted = match ui.drop.drag {
         Drag::None => return None,
@@ -472,7 +472,7 @@ fn hint(ui: &Ui, p: Paint) -> Option<El> {
             Some(formats().to_owned()),
         )
     } else {
-        (tr_fill("Hex can transcribe {} files", formats()), None)
+        (tr_fill("GoSpell can transcribe {} files", formats()), None)
     };
     let ink = if accepted { p.accent() } else { p.danger() };
     let mut card = col()
@@ -575,12 +575,12 @@ fn running(p: Paint, job: &Job, queued: usize) -> El {
 }
 
 /// The last drop's outcome: a transcript saved, a file that failed, a drop
-/// Hex can't read, or a file dialog that did not open.
+/// GoSpell can't read, or a file dialog that did not open.
 fn finished(p: Paint, notice: &Notice) -> El {
     match notice {
         Notice::Rejected => Toast::new(
             "drop-transcribe-rejected",
-            tr_fill("Hex can transcribe {} files", formats()),
+            tr_fill("GoSpell can transcribe {} files", formats()),
         )
         .on_close(dismiss)
         .build(p.k),
@@ -659,7 +659,7 @@ fn worker(
     reporter: Reporter,
 ) {
     let spawned = std::thread::Builder::new()
-        .name("hex-transcribe-file".into())
+        .name("gospell-transcribe-file".into())
         .spawn({
             let reporter = Reporter {
                 events: reporter.events.clone(),

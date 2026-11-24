@@ -2,14 +2,14 @@
 
 # Sourced by the app and helper packagers. Print only the selected identity so
 # callers can capture it without mixing diagnostics into codesign arguments.
-hex_codesign_identity() {
+gospell_codesign_identity() {
   team_id=$1
-  identity=${HEX_CODESIGN_IDENTITY:-}
+  identity=${GOSPELL_CODESIGN_IDENTITY:-}
   if [ -z "$identity" ]; then
     identity=$(security find-identity -v -p codesigning | sed -n "s/.*\"\(Developer ID Application:.*($team_id)\)\"/\1/p" | head -1)
   fi
   if [ -z "$identity" ]; then
-    echo "No Developer ID signing identity found for team $team_id. Set HEX_CODESIGN_IDENTITY." >&2
+    echo "No Developer ID signing identity found for team $team_id. Set GOSPELL_CODESIGN_IDENTITY." >&2
     return 1
   fi
   case "$identity" in
@@ -24,28 +24,28 @@ hex_codesign_identity() {
 
 # Submit one artifact and wait. A local notarytool keychain profile wins;
 # otherwise CI authenticates with an App Store Connect API key file.
-hex_notarize() {
-  if [ -n "${HEX_NOTARY_PROFILE:-}" ]; then
-    xcrun notarytool submit "$1" --keychain-profile "$HEX_NOTARY_PROFILE" --wait
+gospell_notarize() {
+  if [ -n "${GOSPELL_NOTARY_PROFILE:-}" ]; then
+    xcrun notarytool submit "$1" --keychain-profile "$GOSPELL_NOTARY_PROFILE" --wait
   else
     xcrun notarytool submit "$1" \
-      --key "${HEX_NOTARY_KEY:?Set HEX_NOTARY_PROFILE, or HEX_NOTARY_KEY with HEX_NOTARY_KEY_ID and HEX_NOTARY_ISSUER}" \
-      --key-id "${HEX_NOTARY_KEY_ID:?Set HEX_NOTARY_KEY_ID to the App Store Connect API key ID}" \
-      --issuer "${HEX_NOTARY_ISSUER:?Set HEX_NOTARY_ISSUER to the App Store Connect issuer ID}" \
+      --key "${GOSPELL_NOTARY_KEY:?Set GOSPELL_NOTARY_PROFILE, or GOSPELL_NOTARY_KEY with GOSPELL_NOTARY_KEY_ID and GOSPELL_NOTARY_ISSUER}" \
+      --key-id "${GOSPELL_NOTARY_KEY_ID:?Set GOSPELL_NOTARY_KEY_ID to the App Store Connect API key ID}" \
+      --issuer "${GOSPELL_NOTARY_ISSUER:?Set GOSPELL_NOTARY_ISSUER to the App Store Connect issuer ID}" \
       --wait
   fi
 }
 
-hex_version() {
-  printf '%s\n' "${HEX_VERSION:-$(cargo metadata --no-deps --format-version 1 --manifest-path "$1/Cargo.toml" | jq -r '.packages[] | select(.name == "hex") | .version')}"
+gospell_version() {
+  printf '%s\n' "${GOSPELL_VERSION:-$(cargo metadata --no-deps --format-version 1 --manifest-path "$1/Cargo.toml" | jq -r '.packages[] | select(.name == "gospell") | .version')}"
 }
 
 # CFBundleVersion: the run number of a dev build (0.0.0-dev-N), else from
-# X.Y.Z (a prerelease shares its release's number). Hex's updater compares
+# X.Y.Z (a prerelease shares its release's number). GoSpell's updater compares
 # neither; it follows the channel's current release.
-hex_build_number() {
-  if [ -n "${HEX_BUILD_NUMBER:-}" ]; then
-    printf '%s\n' "$HEX_BUILD_NUMBER"
+gospell_build_number() {
+  if [ -n "${GOSPELL_BUILD_NUMBER:-}" ]; then
+    printf '%s\n' "$GOSPELL_BUILD_NUMBER"
     return
   fi
   case "$1" in

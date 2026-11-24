@@ -40,7 +40,7 @@ impl Shortcut {
 }
 
 /// Per-capture output metadata for whichever shortcut machine is recording:
-/// whether Output processing is skipped (`raw`), and whether a `hex dictation
+/// whether Output processing is skipped (`raw`), and whether a `gospell dictation
 /// start --print` command owns its transcript (`print`). Lives on `Hotkeys`
 /// only while a capture is active so neither fact can outlive a recording or
 /// leak into a later dictation.
@@ -360,7 +360,7 @@ impl Hotkeys {
         });
     }
 
-    /// Attaches a `hex dictation start --print`'s reply to the recording it
+    /// Attaches a `gospell dictation start --print`'s reply to the recording it
     /// just started, which answers it instead of pasting or copying (preserving
     /// `raw` if started with `--raw --print`).
     pub(super) fn keep_print(&mut self, print: PrintReply) {
@@ -431,7 +431,7 @@ impl Hotkeys {
         }
     }
 
-    /// Clears the active capture and answers any print-only recording that Hex
+    /// Clears the active capture and answers any print-only recording that GoSpell
     /// itself ends without a transcript (a microphone loss, a suspended
     /// shortcut, a closed listener), so its command never waits for the cap.
     pub(super) fn fail_print(&mut self, why: &str) {
@@ -441,7 +441,7 @@ impl Hotkeys {
     }
 
     /// Clears the active capture and answers any print-only recording that
-    /// `hex dictation cancel` discards.
+    /// `gospell dictation cancel` discards.
     pub(super) fn cancel_capture(&mut self) {
         if let Some(print) = self.active.take().and_then(|active| active.print) {
             print.send(PrintedTranscript::Cancelled);
@@ -590,7 +590,7 @@ mod tests {
         assert!(!hotkeys.any_recording());
     }
 
-    /// A `hex dictation start --print` recording is finished by the shortcut
+    /// A `gospell dictation start --print` recording is finished by the shortcut
     /// itself, and its reply goes with the capture to transcription.
     #[test]
     fn a_printing_start_follows_the_shortcut_that_finishes_it() {
@@ -705,8 +705,8 @@ mod tests {
         ));
     }
 
-    /// Raw and print compose cleanly (`hex dictation start --raw --print` or
-    /// `hex dictation start --raw` + `stop --print`), and ending a raw capture
+    /// Raw and print compose cleanly (`gospell dictation start --raw --print` or
+    /// `gospell dictation start --raw` + `stop --print`), and ending a raw capture
     /// clears `raw` so it never leaks to the next dictation.
     #[test]
     fn raw_and_print_compose_on_the_active_capture_and_clear_on_end() {

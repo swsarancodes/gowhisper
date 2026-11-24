@@ -1,25 +1,25 @@
 # Keyboard
 
-Part of [Hex for iPhone](../README.md).
+Part of [GoSpell for iPhone](../README.md).
 
-The full keyboard (`HEXKeyboard`) and its dictation bar: keys and
+The full keyboard (`GoSpellKeyboard`) and its dictation bar: keys and
 gestures, autocorrect and the typing models, learning, languages and
 layouts, geometry, the iPhone Duo and iPad, emoji, and the Dot Scope.
 Dictation itself is in [dictation.md](dictation.md).
 
-## Full keyboard Hex key (Settings › Keyboard › Full, the default)
+## Full keyboard GoSpell key (Settings › Keyboard › Full, the default)
 
 A tap, or a
 still hold of 0.35 s, starts dictation: in a warm session, else inside
-the keyboard (in-keyboard dictation, iOS 26+), else by opening Hex.
+the keyboard (in-keyboard dictation, iOS 26+), else by opening GoSpell.
 In-keyboard dictation uses the keyboard's own speech model, so it also
-dictates while Hex's isn't ready (a first download, Continue without a
-model, a failed preparation); only without it does the Hex key open Hex
+dictates while GoSpell's isn't ready (a first download, Continue without a
+model, a failed preparation); only without it does the GoSpell key open GoSpell
 to finish setup (`DictationRoute`).
 In-keyboard dictation listens from touch-down, so a tap's or hold's first
 words are kept; moving
 more than 10 pt first opens the style menu, dropping that capture; releasing over a row picks it, and releasing elsewhere leaves
-the menu open for taps (`HexKeyGesture`). VoiceOver activation dictates,
+the menu open for taps (`GoSpellKeyGesture`). VoiceOver activation dictates,
 and the **Dictation styles** action opens the menu.
 
 ## Auto-start
@@ -29,30 +29,30 @@ lets the dictation bar start dictating by itself as it shows, as a tap on **Dict
 would, 0.8 s after it appears (after the first frame and the launch's optional work),
 only while idle, outside number pads and the emoji panel, and only where it dictates
 without leaving the field (a warm session or in-keyboard dictation, never by opening
-Hex). **Never**, **On switch** (the default) or **Always**. iOS doesn't tell a
+GoSpell). **Never**, **On switch** (the default) or **Always**. iOS doesn't tell a
 keyboard whether you switched to it or a field opened with it, so On switch guesses
 (`KeyboardSwitchGuess`): the keyboard comes back in the field it last hid in
 (`documentIdentifier`), and the field's app didn't go to the background
 (`NSExtensionHostDidEnterBackground`) from 2 s before that hide on. Switching to
-another keyboard and back in one field starts; a field that opens with Hex already
-chosen doesn't. Known gap: the first switch to Hex in a field another keyboard opened
+another keyboard and back in one field starts; a field that opens with GoSpell already
+chosen doesn't. Known gap: the first switch to GoSpell in a field another keyboard opened
 is another document, so it doesn't start. Unproven on a device: whether
 `documentIdentifier` stays the same across a keyboard switch and changes when a field
 is focused again, which the guess relies on.
 
 ## Push to talk
 
-Holding still for 0.35 s on the full keyboard's Hex key
+Holding still for 0.35 s on the full keyboard's GoSpell key
 or the dictation bar's **Dictate** starts dictation at once with a light
 haptic (Settings › Keyboard › Haptics), and lifting the finger finishes it as
 **Done** does; a quick tap still starts it and **Done** finishes it. On
-the Hex key, sliding more than 10 pt before the hold fires opens the menu
+the GoSpell key, sliding more than 10 pt before the hold fires opens the menu
 instead, and once dictation has started, moving the finger changes
 nothing. Push to talk needs dictation in the keyboard (a warm session or
-in-keyboard dictation); a hold that opens Hex is only a tap. The full
+in-keyboard dictation); a hold that opens GoSpell is only a tap. The full
 keyboard's bar takes the same hold (0.4 s, Apple's long press) anywhere no
-word is: an empty slot, beside the Hex key, or a bar with nothing in it,
-through the Hex key's own path (`HexKeyGesture`, `hexKeyHeld`), but not
+word is: an empty slot, beside the GoSpell key, or a bar with nothing in it,
+through the GoSpell key's own path (`GoSpellKeyGesture`, `gospellKeyHeld`), but not
 while the bar shows the Full Access hint or a notice. A tap there does nothing,
 a slide cancels it, and a word's slot keeps its tap and its hold (Add to
 vocabulary). The bar's Paste is plain text on the words' line, and Paste and
@@ -62,7 +62,7 @@ from Messages only in an empty one-time-code field with a number pad or with
 autocorrection set either way (as WebKit sets it on Safari's
 `autocomplete="one-time-code"`): a chat box that marks itself one-time-code
 keeps its suggestions. On a number pad, or with only Apple's keyboards
-beside Hex, it switches to the next keyboard; elsewhere (Emoji or another
+beside GoSpell, it switches to the next keyboard; elsewhere (Emoji or another
 third-party keyboard on, where that switch lands on them about half the
 time) a tap opens iOS's keyboard list, as the globe's hold does, to pick
 Apple's. Where Apple's keyboard is split (the Duo unfolded and upright, where the
@@ -70,15 +70,15 @@ switch can end the app) it always opens the list. It needs no Full Access, which
 Allow Paste (read ≥ 0.3 s) or refuses a paste read, the strip shows a
 tappable two-line notice (`Paste without asking` / `Paste from Other Apps ›
 Allow` with a **Settings** chip that routes through
-`hex-dictation://keyboard/paste-settings` straight into `Settings › Apps ›
-Hex`), and Hex records `keyboard.clipboard.allowPastePrompted` in the App
+`gospell-dictation://keyboard/paste-settings` straight into `Settings › Apps ›
+GoSpell`), and GoSpell records `keyboard.clipboard.allowPastePrompted` in the App
 Group so Home, Settings › Keyboard, and Setup surface the same one-tap Open
 Settings banner once iOS has created that row. A later fast cross-app paste
-(ignoring Hex's own copies via `markOwnedCopy`) or tapping dismiss clears
+(ignoring GoSpell's own copies via `markOwnedCopy`) or tapping dismiss clears
 it. With Full Access, when the keyboard appears while it would dictate English
-with Hex's speech model but the model isn't downloaded, the strip shows
-`New speech model` / `Downloads in Hex on Wi-Fi` with an **Open Hex** chip
-that opens Hex as it is, where the download starts on Wi-Fi
+with GoSpell's speech model but the model isn't downloaded, the strip shows
+`New speech model` / `Downloads in GoSpell on Wi-Fi` with an **Open GoSpell** chip
+that opens GoSpell as it is, where the download starts on Wi-Fi
 (`KeyboardParakeetNotice`): at most once a day and three times in all, never
 again once tapped or put away with its ✕ (counts in the App Group), gone as
 soon as you type or dictate, and never in a password or one-time-code field.
@@ -89,7 +89,7 @@ Turning off Speech model in keyboard (Settings › Dictation) stops it too.
 On by default (an
 unset switch reads on; turning it off is saved and stays off), and
 shown whether or not the full keyboard is on. It learns only from typing and
-dictating with Hex, on this iPhone, never from what you write elsewhere. A
+dictating with GoSpell, on this iPhone, never from what you write elsewhere. A
 private journal in the App Group (`typing-journal.json`) that never stores
 what you write: per-key tap offsets, and word-level pairs with counts and at
 most one word of context on each side. Only plain text fields that allow
@@ -111,8 +111,8 @@ autocorrect count (`TypingJournal.allows`). Nothing leaves the iPhone.
   down twice never applies again (`TypingLearning`, read by `AutocorrectEngine`).
 - **Dictation:** from the full keyboard and the dictation bar alike, the
   keyboard remembers each dictation by the text around it
-  (`DictationEditTracker`), finds it again after edits through Hex's keys and
-  on `textDidChange`, and diffs it word by word against what Hex inserted and
+  (`DictationEditTracker`), finds it again after edits through GoSpell's keys and
+  on `textDidChange`, and diffs it word by word against what GoSpell inserted and
   the raw transcript the app or in-keyboard dictation sends with it
   (`DictationEditInference.swift`). It settles after 60 s, when the keyboard
   goes away or the field changes, on a Send return key, or when the host
@@ -120,7 +120,7 @@ autocorrect count (`TypingJournal.allows`). Nothing leaves the iPhone.
   rewritten when more than half changed, undone, deleted, or redictated when
   deleted and dictated again within 20 s) and its pairs: substitutions,
   insertions, deletions, words cleanup dropped that you added back, and
-  fillers Hex left that you deleted, each as heard, inserted, and final words.
+  fillers GoSpell left that you deleted, each as heard, inserted, and final words.
   New writing before or after a dictation, changes that aren't plausibly the
   same words, edges the host's cut-short context can't show, and translated
   dictations teach nothing.
@@ -132,7 +132,7 @@ autocorrect count (`TypingJournal.allows`). Nothing leaves the iPhone.
   word) and following the original's case unless the fix has capitals. Its
   meant words join the Apple Speech hints after custom vocabulary's.
   Typing insights lists these dictation fixes with a switch each and the share of
-  dictations kept and edited; Delete what Hex learned erases everything,
+  dictations kept and edited; Delete what GoSpell learned erases everything,
   including what a running keyboard still holds.
 - **Per language (Settings › Experiments › Learn each language separately):**
   Off by default (`experiments.learnPerLanguage`, App Group). Every correction and
@@ -145,7 +145,7 @@ autocorrect count (`TypingJournal.allows`). Nothing leaves the iPhone.
   language (`keyboard.learnedWords.<code>`), started from the shared
   `keyboard.learnedWords` list the first time that language is used; bilingual
   autocorrect's partner keeps its own list and its own fixes. Where fingers land and
-  Adaptive touch stay shared. Delete what Hex learned erases the shared list and every
+  Adaptive touch stay shared. Delete what GoSpell learned erases the shared list and every
   language's. Two limits: a dictation fix you kept as heard in one language still
   counts against that fix in every language, and retyped words and picked suggestions
   are tagged with the keyboard's main language, never the bilingual partner's.
@@ -161,7 +161,7 @@ or the double-space period, which still types ". "), and autocorrect and swipe t
 capital you didn't type: "i" stays "i", "im" becomes "i'm", "mary" stays "mary" and
 "mondya" becomes "monday", as Apple's keyboard does with Auto-Capitalization off (seen on
 the iOS 27.2 simulator). Words you typed with a capital, and your own spellings (text
-replacements, Contacts names, words you kept, fixes Hex learned, your vocabulary), keep
+replacements, Contacts names, words you kept, fixes GoSpell learned, your vocabulary), keep
 theirs; shift and caps lock work as before. The strip offers no capital you didn't type
 either (TestFlight build 56: "even with auto-capitalization off, many suggested words are
 capitalized"): a spelling guess or completion iOS knows capitalised ("Mandy", "Monday")
@@ -180,7 +180,7 @@ strip for English, Spanish and French (France): each tap is scored against every
 Gaussian around the key (shifted by Learn how I type's tap offsets when it has 20
 or more taps on a letter), words are found with a beam search over a memory-mapped
 word list and over your own words (Contacts names and other `UILexicon` terms,
-one-word text replacements, words you kept, fixes Hex learned), a word-pair language
+one-word text replacements, words you kept, fixes GoSpell learned), a word-pair language
 model weighs them by the word before, a missed space is tried by splitting the taps,
 accented letters read from their base key (é from e), and what you typed is replaced
 only when the best reading beats it by a margin (more when what you typed is a word,
@@ -196,24 +196,24 @@ Shortcuts, learned fixes, contractions, and words you kept still come first. Oth
 layouts (Norsk, Deutsch, Italiano, Français (Canada), Français (Suisse), Português, Polski, Română, Русский, Українська, Ελληνικά) keep the dictionary
 engine in their own language, and Srpski (no iOS dictionary) none, never the English
 model, except as bilingual autocorrect's second language (below). The
-models (`HEXKeyboard/TypingModel/en.hextm` and `es.hextm`, about 3.6 MB each) are
+models (`GoSpellKeyboard/TypingModel/en.gospelltm` and `es.gospelltm`, about 3.6 MB each) are
 built from Google Books Ngram v3 by `scripts/build-typing-model.py` (see
 Acknowledgements below); English's contractions count as often as the words they stand
-for ("do not"), and it adds Hex's own chat and tech words (`scripts/en-extra-words.tsv`),
-byte-identical to Android's `en.hextm`; `de.hextm` is the German model Android builds and ships
+for ("do not"), and it adds GoSpell's own chat and tech words (`scripts/en-extra-words.tsv`),
+byte-identical to Android's `en.gospelltm`; `de.gospelltm` is the German model Android builds and ships
 (`android/benchmark/typing/build-layout-model.py`), the same v3 format and, on iOS,
-off until the experiment below is turned on. `fr.hextm` is Android's French model, built
+off until the experiment below is turned on. `fr.gospelltm` is Android's French model, built
 the same way from Google Books v3's French shards (corpus spellings, with the books'
 elided forms such as "c'est") and byte-identical to
-`android/app/src/main/assets/typing/fr.hextm` (its `SHA256SUMS` hash). On the held-out
+`android/app/src/main/assets/typing/fr.gospelltm` (its `SHA256SUMS` hash). On the held-out
 French replay (2,000 Tatoeba sentences typed on AZERTY, scored as
 `android/benchmark/typing/quality-gate.py` does) it makes 76.4% fewer word errors than
 the raw taps (35.3% with `UITextChecker` alone), changes 0.10% of correctly typed words
 (0.56%) and restores 81.1% of the accents left out where the plain spelling is in neither
 the model nor `fr.valid` (78.7%), short of the gate's 85%. Canada's and Switzerland's French don't read it yet (`fr-CA`, `fr-CH`).
-Beside a model, a language with its own word list (`HEXKeyboard/TypingModel/<code>.valid`,
+Beside a model, a language with its own word list (`GoSpellKeyboard/TypingModel/<code>.valid`,
 Android's `android/benchmark/typing/build-valid-words.py` output: today French's) takes what
-is a word from the model and that list alone, not from `UITextChecker` (`HexWordList`,
+is a word from the model and that list alone, not from `UITextChecker` (`GoSpellWordList`,
 memory-mapped and searched in place; `SystemTextChecker.ownWords`), and a missing system
 dictionary no longer turns its model off (`AutocorrectEngine.hasWords`). `UITextChecker`
 still gives guesses and completions while it is in that language. Beside the list, the
@@ -224,7 +224,7 @@ word typed all lowercase, so it takes its capital as `UITextChecker` gives one (
 German's `de.capitals` is read in place through the same reader (`GermanCapitals`). With `fr.valid` French
 restores 86.1% of the accents the gate counts (81.1% with `UITextChecker`). English, Spanish
 and German keep `UITextChecker`: their own lists moved a gate number the wrong way.
-Polish reads `pl.hextm` (150,000 words, 184,327 pairs, 3.60 MB) and `pl.valid` (525,084 words,
+Polish reads `pl.gospelltm` (150,000 words, 184,327 pairs, 3.60 MB) and `pl.valid` (525,084 words,
 8.29 MB), both built by `scripts/build-typing-model.py pl` from NKJP's n-grams, ParlaMint and
 PoliMorf (Settings › Acknowledgements). Its letters are held on their base keys, so the model
 puts them back ("zolw" -> "żółw", "wiem ze" -> "wiem że"). iOS's own Polish dictionary is no
@@ -242,8 +242,8 @@ takes "cos", "troche", "beda" as its words) and English is unchanged.
 
 Off by default (`experiments.germanSpatialAutocorrect`, App Group), and only while
 Spatial autocorrect is on too. With both on, the Deutsch layout reads taps with
-`HEXKeyboard/TypingModel/de.hextm`, byte-identical to
-`android/app/src/main/assets/typing/de.hextm` and the hash its `SHA256SUMS` lists: the
+`GoSpellKeyboard/TypingModel/de.gospelltm`, byte-identical to
+`android/app/src/main/assets/typing/de.gospelltm` and the hash its `SHA256SUMS` lists: the
 word list feeds the decoder, the letter odds and the strip, and a bilingual partner may
 read German taps too. German's model is lowercase throughout, so a noun takes its capital
 from the list beside it, whether the decoder corrected it or it was typed right ("hsus"
@@ -260,13 +260,13 @@ counts miss ("filme", "rolle", "presse", "pumpe", "campe", "pflanze", "beichte",
 "taufe"); and every two-letter "word", a chat abbreviation ("gl", "rn") rather than a
 noun. The determiner list includes "in" ("in Ruhe", "in Frage") but not "ohne" ("ohne
 essen" is a verb). The list is
-`HEXKeyboard/TypingModel/de.capitals`, built by `scripts/build-german-capitals.py`
+`GoSpellKeyboard/TypingModel/de.capitals`, built by `scripts/build-german-capitals.py`
 from the same Google Books shards: for each model word it compares the 1980–2019 counts
 of the all-lowercase and first-letter-capitalised spellings and lists
 `word<TAB>percent` for the words at least 50% capitalised and seen at least 40 times,
 leaving out pronouns and possessives capitalised for other reasons (`FUNCTION_WORDS`:
 "sie", "ihr", "mein", and the rest). Rebuild it from `ios/` with
-`python3 scripts/build-german-capitals.py HEXKeyboard/TypingModel/de.hextm HEXKeyboard/TypingModel/de.capitals`;
+`python3 scripts/build-german-capitals.py GoSpellKeyboard/TypingModel/de.gospelltm GoSpellKeyboard/TypingModel/de.capitals`;
 it streams the eight shards through curl and gzip four at a time, caches each shard's
 counts under `scripts/.build-german-capitals`, keeps their merged per-token counts there
 so a rule change renders without streaming again, and applies the caps after counting.
@@ -301,14 +301,14 @@ that baseline), and its word-level learning carries on.
   memory for at most two words and 30 s, and are dropped when the cursor moves, the
   host changes the text, the field or the keyboard's size changes.
 - **What it keeps:** sums per physical key in four rotating bins of 200 labelled taps,
-  for each context (letters, posture, orientation, split, Hex key side, width) and one
+  for each context (letters, posture, orientation, split, GoSpell key side, width) and one
   of two grip profiles: offsets in keycaps (so a new key plane of the same size keeps
   them), shrunk toward the row and the keyboard, at most 0.3 keycap and 0.05 per
   update, fixed spread. No letters, words, times or sequences: 23,588 bytes, in a file
   in the keyboard's own container with Full Access (protected, excluded from backup,
   never in the App Group or its exports, written in batches off the main thread), in
   memory only without it. Settings shows that it resets without Full Access, Learning (n of 400 taps) or
-  Active from counts the keyboard reports; Reset touch learning, and Delete what Hex
+  Active from counts the keyboard reports; Reset touch learning, and Delete what GoSpell
   learned, bump a reset generation that drops it from memory and disk (the file is
   the keyboard's, so it goes the next time the keyboard runs) and that a write
   queued before can't undo.
@@ -324,8 +324,8 @@ that baseline), and its word-level learning carries on.
 Like Apple's
 keyboard, the strip and autocorrect never offer slurs, and offer swear words only
 with Suggest swear words on (off by default; App Store rating 4+). The list
-(`HEXShared/FullKeyboard/never-suggest.tsv`: layout, `slur` or `swear`, spelling or
-two-word expression; `*` lines apply to every layout) is LDNOOBW as curated for Hex
+(`GoSpellShared/FullKeyboard/never-suggest.tsv`: layout, `slur` or `swear`, spelling or
+two-word expression; `*` lines apply to every layout) is LDNOOBW as curated for GoSpell
 for Android, entry for entry the same as `android/app/src/main/assets/typing/never-suggest.tsv`
 (see Acknowledgements below); change both together. `OffensiveWords` is checked when a
 suggestion is looked up: `UITextChecker`'s guesses and completions, learned fixes, and
@@ -370,7 +370,7 @@ keyboard a swipe reads across the middle between the halves: its points are read
 the right half pushed against the left and the middle shrunk to one key's gap
 (`KeyboardLayout.joinedForSwipe`), so either half's G and V is the one letter, as for
 Spatial autocorrect's taps. Taps, holds for accents, slides
-shorter than a key, delete's word slide, the space bar's trackpad, 123 and the Hex key
+shorter than a key, delete's word slide, the space bar's trackpad, 123 and the GoSpell key
 work as before: no swipe starts on them, and none once an accent menu is open. A swipe
 that lifts on the key it went down on, never more than 1.6 key pitches from it, is a
 tap that slid: its letter goes in as a tap's would ("a" dragged a little too far and
@@ -399,7 +399,7 @@ share a path; on the held-out test sentences (typical fingers, 390 pt) top-1 is 
 in English and 94.2% in Spanish (94.9 and 90.9 without the turns and pauses), and on
 held-out words that share a path 96.0% and 94.5% (85.1 and 81.2); a decode takes
 0.91 ms at the median and 2.85 ms at p99 on an M5 Max (experiment folder
-2026-11-20-hex-swipe-typing, results/2026-11-21). Record typing logs keeps a swipe's
+2026-11-20-gospell-swipe-typing, results/2026-11-21). Record typing logs keeps a swipe's
 touch moves and a `swipe_end` line (points, decode time, readings) for fitting it to
 real fingers.
 Known gaps in these languages:
@@ -422,11 +422,11 @@ App Group, `TypingLogSettings.turnOffOnce`, run by the app and the keyboard at l
 turned it off for everyone who had it on, keeping the logs already recorded.
 Its description says what it records, and
 turning it on asks first in a dialog (App Review 2.5.14): each tap and the
-text you type or dictate with Hex, including the text around the cursor,
+text you type or dictate with GoSpell, including the text around the cursor,
 for 14 days, on this iPhone, to export or delete, never password, code or
 card fields. **Turn On** turns it on; **Cancel** leaves it off. Turning it
 off doesn't ask. For testing and training prediction and
-per-user touch models: the keyboard writes every touch on Hex's keys (raw
+per-user touch models: the keyboard writes every touch on GoSpell's keys (raw
 position, radius, `UITouch` timestamp, the key it resolved to), every layout
 with each key's frame and touch target, what each key did to the text
 (inserts, deletes, autocorrections and undos, suggestion picks, double-space
@@ -463,7 +463,7 @@ Spanish's). English and Deutsch together are its "English & German" keyboard the
 English's long presses, English added to the German keyboard keeps its layout, QWERTZ –
 Deutsch's ü ö ä keys or, on QWERTZ, ten keys a row with ä ö ü and ß held. Apple and
 Gboard switch with a long press on the globe, but a Face ID
-iPhone shows no globe in a third-party keyboard and Hex's space-bar slide is its cursor
+iPhone shows no globe in a third-party keyboard and GoSpell's space-bar slide is its cursor
 trackpad, so this follows SwiftKey: with two or more languages the cursor slides once the
 space bar was held still for 0.35 s (the hold that starts Apple's trackpad, below), a slide
 before that is a swipe, and one shorter than 24 pt types a space
@@ -471,7 +471,7 @@ before that is a swipe, and one shorter than 24 pt types a space
 The globe key is unchanged. The keyboard comes back in the language it was left in, in
 every app and field, as Apple's keyboards do (black box: a switch in Messages held in
 Safari and back; `settings.keyboardLanguages.current`; without Full Access an iPhone may
-keep it only while the keyboard runs). The input mode says what it types: Hex sets
+keep it only while the keyboard runs). The input mode says what it types: GoSpell sets
 `UIInputViewController.primaryLanguage` to the language's BCP 47 identifier
 (`KeyboardLanguage.inputModeLanguage`) as the language changes (unit-tested), meant to
 make the host spell and autocorrect in the language typing; Apple documents it as
@@ -484,7 +484,7 @@ the runtime language is unverified. **Dictation follows the keyboard:** with
 two or more languages and Dictation language on Automatic, dictation is in the language
 the space bar shows, in the iPhone's region where Apple Speech has it
 (`LanguageSettings.keyboardDictationLanguage`,
-`KeyboardLanguage.dictationLanguage`; none for Srpski), in the keyboard and in Hex,
+`KeyboardLanguage.dictationLanguage`; none for Srpski), in the keyboard and in GoSpell,
 which prepares the new language between dictations (TestFlight build 56: with the
 keyboard on Español, dictation stayed English and Spanish came out "incomprehensible").
 Spanish is the iPhone's Spanish, not always Spain's: a region Apple has keeps it
@@ -589,7 +589,7 @@ simulator), both its own rows with the ´ and ˇ keys, Z and Y swapped on the se
 "QWERTZ – Magyar" and "QWERTY – Magyar", the standard Hungarian QWERTZ with every accented
 vowel on a held key, Z and Y swapped on the second (Apple's own Hungarian layout list wasn't
 read on a simulator for this change); Srpski
-QWERTZ (Hex's, though Apple now adds it as QWERTY), QWERTY, AZERTY. Norsk, Русский, Українська and Ελληνικά keep their
+QWERTZ (GoSpell's, though Apple now adds it as QWERTY), QWERTY, AZERTY. Norsk, Русский, Українська and Ελληνικά keep their
 one layout (Apple also offers a phonetic "Russian – QWERTY", not built). The plain
 layouts are the same 26 letters in every language, with the language's bottom row and
 123 pages; only the letters move (`KeyboardLetterLayout`, `KeyboardLanguage.letterRows(_:)`).
@@ -625,7 +625,7 @@ first of the two's keys, above),
 Deutsch (QWERTZ with `ü`, `ö ä`), Italiano and Português on the English letters
 (Apple's keyboards for them are QWERTY), Français (France) on Apple's "AZERTY – French" (rows of
 10, 10 and 7 keys: W to N and the apostrophe key, a letter wide and centred between shift
-and delete at their English size, as on Apple's; Hex's keycaps fall on Apple's to the pixel on
+and delete at their English size, as on Apple's; GoSpell's keycaps fall on Apple's to the pixel on
 an iPhone 17 Pro and SE, upright and turned, iOS 27.2 simulator). The apostrophe key
 (`FrenchTyping`) shows ’ right after a letter and types the apostrophe, curled as the field
 curls quotes (l’homme, qu’il), and holds ' ’ ‘ `; anywhere else it shows and types ´ (never a
@@ -650,7 +650,7 @@ backtick); before iOS 27 (26.2 to 26.5 simulators) Russian's 11, 11 and 9, `йц
 standard Polish layout is, on the English letters; it matches the system keyboard's
 observed long-press options: Polish's own letter right after the base on A, C, E, L, N, O,
 S and Z, so ą ć ę ł ń ó ś ż, with ź after ż, and nothing on U, I or Y; its currency key
-is €, held for € $ £ ¥ ₩ ₽ and no zł, which Hex holds on the #+= page's €), Română (QWERTY
+is €, held for € $ £ ¥ ₩ ₽ and no zł, which GoSpell holds on the #+= page's €), Română (QWERTY
 on the English letters, as Apple's iPhone Romanian keyboard is: ă and â held on A, î on I,
 ș on S and ț on T right after the base, the comma-below ș and ț (U+0219, U+021B), never the
 cedilla ş ţ, and nothing on the other letters; Apple's Romanian layout with keys of its own
@@ -691,11 +691,11 @@ Automatic follows the dictation language (Hebrew, Cyrillic Serbian and other
 languages without a layout get English; Serbian only in Latin script, `sr-Latn`);
 before any dictation language is known, the first iPhone
 keyboard, then preferred language, that has a layout. It doesn't read back the input mode
-Hex reports (`primaryLanguage`), which is derived from this choice, and Hex's own entry
+GoSpell reports (`primaryLanguage`), which is derived from this choice, and GoSpell's own entry
 among the iPhone's keyboards says `mul` (the extension's Info.plist `PrimaryLanguage`),
-so iOS lists Hex as multilingual ("multilingue", where it said "anglais") and neither
-Automatic nor "On this iPhone" takes it for English. With `en-US` there, Hex listed above
-Apple's French keyboard typed QWERTY on a French iPhone without Full Access, or before Hex
+so iOS lists GoSpell as multilingual ("multilingue", where it said "anglais") and neither
+Automatic nor "On this iPhone" takes it for English. With `en-US` there, GoSpell listed above
+Apple's French keyboard typed QWERTY on a French iPhone without Full Access, or before GoSpell
 had first resolved a dictation language, and Languages offered English "On this iPhone"
 (TestFlight build 140, iOS 27.2 simulator). Rows of 11 keys narrow
 only the letters: shift, delete and the bottom row keep their English sizes,
@@ -708,7 +708,7 @@ callout read from the accessibility tree; `KeyboardLanguage.letterHolds` and
 `symbolHolds`, `AccentCatalog`): a key the system keyboard holds nothing on holds
 nothing (Spanish Z, Serbian E), letters with their own key drop out (Norwegian A has no
 å or æ, and Æ and Ø offer Ä and Ö; Spanish N offers only ń), German keeps ß on a held
-S, and Hex's callout shows the options in the system's left-to-right order with the base
+S, and GoSpell's callout shows the options in the system's left-to-right order with the base
 letter at the end under the thumb, in one row where the system wraps a long list
 (English A) into two. Autocorrect and suggestions use the layout's
 `UITextChecker` dictionary (`nb`, `es`, `de`, `it`, `fr`, `pt_BR` then
@@ -746,11 +746,11 @@ kr in Norwegian).
 
 On an iPhone the suggestion strip is Apple's prediction bar,
 as thick as Apple's (iOS 26.5 and 27.2 simulators, iPhone 17 Pro, Air, 17 Pro Max and SE,
-upright and turned, light and dark, beside Hex in the same field): 44 pt from the
+upright and turned, light and dark, beside GoSpell in the same field): 44 pt from the
 keyboard's top edge in every state (suggestions, Undo dictation, Paste, the Full Access
 hint, the recording bar, the emoji panel's top row), with Apple's 8 pt
 under it upright (6 pt turned), so row 1's keycaps start 52 pt down (50 turned), the keys
-stay on Apple's rows, and where iOS adds nothing above the keyboard Hex is exactly as tall
+stay on Apple's rows, and where iOS adds nothing above the keyboard GoSpell is exactly as tall
 as Apple's keyboard: 253 pt on an iPhone 17 or 17 Pro, 260 pt on an SE, 272 pt on an Air or
 Pro Max (`KeyboardMetrics.withAppleBar`). On an 844 to 874 pt iPhone from iOS 27 Apple's
 43 pt row 4 ends 4 pt below where iOS ends a third-party keyboard's view, so those 4 pt come
@@ -760,28 +760,28 @@ takes taps down to the view's bottom edge. The gap between rows 3 and 4 is the s
 across its width (row 3's keys whose middle is over it end at their keycaps), as on Apple's
 keyboard, whose space bar takes taps up to 2.5 pt into row 3's keycaps (iOS 27.2); over 123,
 emoji, return and the rest the gap splits, so a low m or delete above return never sends
-return (Hex's rows sit 1 to 3 pt above Apple's, so a finger trained on Apple's lands lower on
-Hex's row 3). Apple's space bar takes taps 13 pt below its
-keycap, down to its own key plane's end; the 17 pt under Hex's view belong to iOS's globe band
+return (GoSpell's rows sit 1 to 3 pt above Apple's, so a finger trained on Apple's lands lower on
+GoSpell's row 3). Apple's space bar takes taps 13 pt below its
+keycap, down to its own key plane's end; the 17 pt under GoSpell's view belong to iOS's globe band
 and never reach a third-party keyboard. The 17 pt band iOS adds above a third-party
 keyboard in some fields (Notes, Spotlight, a re-tapped Safari field; on iOS 26 even a plain
-first-focused text view) is an exception Hex doesn't design for: there Hex is 17 pt taller
-than Apple's. Inside the bar Hex draws what Apple's does: the words, SF 17 pt, centred 25 pt
+first-focused text view) is an exception GoSpell doesn't design for: there GoSpell is 17 pt taller
+than Apple's. Inside the bar GoSpell draws what Apple's does: the words, SF 17 pt, centred 25 pt
 down; a pending autocorrection in Apple's bubble, its whole cell across and a 38 pt capsule
 from 6 pt down to the bar's bottom; 1 × 24 pt dividers between filled cells, hidden beside the
-bubble; and the Hex key in a 59 pt cell of its own at its end of the bar, as Apple's writing
+bubble; and the GoSpell key in a 59 pt cell of its own at its end of the bar, as Apple's writing
 tools icon has at the other (a TestFlight screenshot, iPhone 17 Pro Max, iOS 27.2.1), with a
 divider between it and the word beside it; the three cells share the rest. iOS 18 is
 unmeasured and keeps the 38 pt strip it had (247, 254 and 266 pt). Apple's keyboard draws other rows before iOS 27 (iOS 26.2 and
-26.5 simulators, iPhone 12, 16, 17 Pro, Air and 17 Pro Max, beside Hex in the same field):
+26.5 simulators, iPhone 12, 16, 17 Pro, Air and 17 Pro Max, beside GoSpell in the same field):
 the same keycaps, but upright its panel is 7 pt taller under the keys on an 844 to 874 pt
-iPhone and 2 pt shorter on a 900 pt or taller one, so on iOS 26 Hex's rows sit 7 pt higher
+iPhone and 2 pt shorter on a 900 pt or taller one, so on iOS 26 GoSpell's rows sit 7 pt higher
 (row 4 whole, 260 pt) or 2 pt lower (270 pt) to stay on Apple's (`KeyboardMetrics.appleRowsAreIOS26`);
 the SE is the same on both. iOS 18 is unmeasured (the Studio has no iOS 18 simulator) and
-keeps the iOS 27 rows Hex drew there before.
+keeps the iOS 27 rows GoSpell drew there before.
 Turned, the bar is 44 pt with 6 pt to row 1 and the keyboard 204 pt (32 pt keycaps on a 40 pt pitch); on iOS
 26 Apple's turned keycaps are 27.33 pt on a 35.33 pt pitch ending 4 pt above the bottom, and
-Hex's are too, 187.33 pt in all (iOS 18, unmeasured, keeps 204 pt) (the SE keeps iOS 27's turned keys for now: Apple's turned SE
+GoSpell's are too, 187.33 pt in all (iOS 18, unmeasured, keeps 204 pt) (the SE keeps iOS 27's turned keys for now: Apple's turned SE
 on iOS 26 is its upright keyboard across the whole screen).
 Where iOS gives the keyboard a shorter view than it asks for (Spotlight on an iPhone
 17 Pro Max, iOS 27.3, TestFlight: about 20 pt short), the rows fit the height it has:
@@ -796,10 +796,10 @@ upright, starting as far in from the screen's side as Apple's. Folded, the cover
 screen was measured beside Apple's keyboard on a Duo: its keycaps start 18.5 pt in
 (54.5 px of 1375 at 2.95 px per point), and row 4 stands on row 3's columns: 123
 from the edge to a gap before z, the globe on z (without it, space starts there),
-space up to return, and return from a gap after m to the edge. A Hex key right of
+space up to return, and return from a gap after m to the edge. A GoSpell key right of
 space takes m's column, where Apple's dictation key is; left of space it follows the
 globe and emoji. Its labels are 0.875 of the iPhone's there, as Apple's are: its 123
-is 70 px wide folded against Hex's 80 at 2.95 px per point. The unfolded postures are
+is 70 px wide folded against GoSpell's 80 at 2.95 px per point. The unfolded postures are
 measured in the simulator.
 
 ## Number row (full keyboard, iPhone)
@@ -830,7 +830,7 @@ iOS 26.5 and 27.2 simulators). Upright on an iPhone (and on a floating iPad keyb
 row stands on Apple's columns: 123 (and emoji) to z's right edge, the space bar from x, a
 letter-wide `.`, and a return 1.75 keys' pitch wide to the edge, so the bar ends a quarter
 pitch sooner than in a text field (Apple's: 6.7–99.3, 105.3–287, 293–326.7 and 332.3–395.7 pt
-on a 402 pt iPhone; Hex's within 0.5 pt). Turned, and on the Duo folded and split, it takes
+on a 402 pt iPhone; GoSpell's within 0.5 pt). Turned, and on the Duo folded and split, it takes
 the URL and email fields' row, the `.` a letter wide beside the bar. A docked iPad keeps its
 text row, as Apple's does (its `.` stays on row 3, iPad mini, iPadOS 27.2). Only that key
 changes: everything else treats the field as text (`KeyboardFieldKind.takesWords`), so
@@ -838,7 +838,7 @@ autocorrect, swipe typing, suggestions, smart punctuation, the emoji key and emo
 shortcodes, Learn how I type and Adaptive touch work as the field's own traits allow, as
 they did before, and the Paste and Code chips read the field's content type as everywhere
 else. Holding the `.` offers `.` and `…` (the symbol pages' list); Apple's offers
-`.us .edu .com .net .org` there and in email fields, which Hex doesn't yet. Unit tests
+`.us .edu .com .net .org` there and in email fields, which GoSpell doesn't yet. Unit tests
 (`KeyboardLayoutTests`, `FullKeyboardEngineTests`, `ShiftStateMachineTests`) and simulator
 screenshots beside Apple's in Safari; no physical iPhone run checks it.
 
@@ -852,7 +852,7 @@ and the period ends where it used to end, the bar moving inward at both ends; on
 split keyboard the comma takes from the left half's bar and the period from the right
 half's, each bar keeping its inner edge. Neither is added unless the bar still holds a
 letter-wide space after them (on an upright iPhone showing both the globe and emoji keys
-with the Hex key beside space there isn't room, so they're skipped). They type `,` and `.`
+with the GoSpell key beside space there isn't room, so they're skipped). They type `,` and `.`
 with shift on too (they have no shifted symbols). The 123 and #+= pages, a URL, email or web
 search field (each keeps its own `.`, so there is never a second one), an iPad, and English's Dvorak letters while Dvorak
 punctuation puts both on row 1 are unchanged. Off, every layout is key for key the one it
@@ -865,7 +865,7 @@ The strip above the keys shows the words the engine
 offers as you type, the emoji of the word being typed, and after a space the finished
 word's emoji (Emoji below). Settings › Experiments ›
 Hide word suggestions (off by default, `experiments.hideWordSuggestions`, App Group) stops
-the suggestions: the strip keeps its height, the Hex key, Undo, status, notices and the Paste
+the suggestions: the strip keeps its height, the GoSpell key, Undo, status, notices and the Paste
 chip, but shows no typing or next-word suggestions, swipe readings, typed or finished-word
 emoji, or the chip that keeps what you typed while a correction is still ahead (keep literal).
 Autocorrect still corrects on space, and the chip that puts back what it replaced (`.revert`)
@@ -876,7 +876,7 @@ exactly as it did.
 A word that changes rolls to the new one, but only once the keyboard is on screen
 (`KeyboardStripView.appearing`, cleared by `FullKeyboardView.keyboardDidAppear` and set again
 by `prepareForField`). iOS hands the field's traits over as it brings the keyboard in, after
-the first words were chosen without them, so on every switch to Hex "the" became "The" and
+the first words were chosen without them, so on every switch to GoSpell "the" became "The" and
 "I'm" became "I’m" in a roll the person saw (iPhone and iPad, iOS 26.5 and 27.2 simulators);
 changes before then just show. One frame of the switch is iOS's: on iOS 26 (26.5 simulator,
 iPhone and iPad mini) it sizes every third-party keyboard's view taller for about 25 ms as it
@@ -885,25 +885,25 @@ that is a plain grey view; iOS 27.2 doesn't.
 
 ## Background (full keyboard and dictation bar)
 
-Hex draws nothing behind its keys, so
+GoSpell draws nothing behind its keys, so
 the keyboard's background is iOS's own glass panel: the same colour as the band iOS adds
 above a third-party keyboard and the globe row under it, over any app or wallpaper, with
-or without that band (no step at Hex's edges on an iPhone 17 Pro, iOS 27.2, in Notes,
+or without that band (no step at GoSpell's edges on an iPhone 17 Pro, iOS 27.2, in Notes,
 Safari on a light page and Spotlight over a wallpaper, and in the iOS 27.0 and 27.2
 simulators, light and dark). One case gets a cover, because iOS can leave Apple's keyboard
 under a third-party one. In a field that takes focus as its screen appears and has an
-input accessory view, opened with Hex, switching to Apple's keyboard never tells Hex it
-disappeared and keeps its view; switching back puts a new Hex over both, and Apple's keys
-show through Hex's translucent ones (every switch in the iOS 27.0 and 27.2 simulators,
+input accessory view, opened with GoSpell, switching to Apple's keyboard never tells GoSpell it
+disappeared and keeps its view; switching back puts a new GoSpell over both, and Apple's keys
+show through GoSpell's translucent ones (every switch in the iOS 27.0 and 27.2 simulators,
 under a bare clear keyboard extension too; one TestFlight report, build 56, iPhone 17,
-iOS 27.0.1; never in Notes, Safari or Spotlight on an iPhone 17 Pro). Hex can't see the
+iOS 27.0.1; never in Notes, Safari or Spotlight on an iPhone 17 Pro). GoSpell can't see the
 app's views, but it can see its own earlier keyboard still on screen in the same field
 (`KeyboardsOnScreen`), and only then draws a thin blurred material under itself
 (`KeyboardBackdropView`), through which Apple's keys are an even, slightly lighter tone
 with no shapes. Opened with Apple's keyboard, or focused by a tap, the same field frees
-Hex as usual and nothing is left behind. Until build 117 the material was always on: 5 to
+GoSpell as usual and nothing is left behind. Until build 117 the material was always on: 5 to
 9 off the glass in dark mode and neutral grey where the glass takes a wallpaper's tint, so
-Hex showed as a panel of another colour inside iOS's panel, with a seam under iOS's band.
+GoSpell showed as a panel of another colour inside iOS's panel, with a seam under iOS's band.
 
 ## Split keyboard (iPhone Duo)
 
@@ -918,7 +918,7 @@ against Apple's English split only; AZERTY, QWERTZ, Russian and the rest follow 
 rule unchecked), and every page (123, #+=). Spatial autocorrect reads taps as on the
 unsplit keyboard (`KeyboardLayout.unsplitX`), so either G is one key. Apple's split
 follows its own Split Keyboard preference, which a keyboard extension can't read, so
-Hex splits whenever the Duo is in that posture (the iOS 27.2 simulator has Apple's off
+GoSpell splits whenever the Duo is in that posture (the iOS 27.2 simulator has Apple's off
 until `KeyboardShouldSplitInDefaultContext` is set). Settings › Experiments › Join the
 keyboard when unfolded (off by default, `experiments.joinKeyboardWhenUnfolded`, App
 Group) draws one joined keyboard there instead: unfoldedWide's own 39 pt rows on a
@@ -937,7 +937,7 @@ with tab, caps lock and the 13-inch's number row, are a later step): delete ends
 return row 2, a shift key opens and closes row 3, after the letters Apple's two-symbol keys
 (, and ! then . and ?; AZERTY , and ?, . and !, ' and :), the shifted symbol drawn over the
 one a tap types and typed with shift (`KeyboardKey.shifted`), and the bottom row the globe,
-123, the Hex key where Apple's dictation key is (whatever Settings › Hex key says: the strip
+123, the GoSpell key where Apple's dictation key is (whatever Settings › GoSpell key says: the strip
 is all suggestions), the space bar, emoji (or 123 when Emoji is off) where Apple's second
 123 is, and the hide-keyboard key. The letter keys are as wide as the longest row allows
 with its delete or return at least 1.236 and 1.24 letters wide (English 54.5 pt, French
@@ -946,7 +946,7 @@ many letters as row 1, as AZERTY's does), the left shift is a letter wide (1.061
 and delete, return and the right shift take what's left; the bottom row's keys are the same
 in every language. The 123 and #+= pages follow Apple's: digits and delete, @ # $ & * ( ) '
 " (€ £ ¥ _ ^ [ ] { } on #+=) and return, a page key either side of % - + = / ; : and the two
-two-symbol keys (§ | ~ … \ < > ! ? on #+=), and row 4 as the letters' with ABC; Hex has no
+two-symbol keys (§ | ~ … \ < > ! ? on #+=), and row 4 as the letters' with ABC; GoSpell has no
 undo or redo key there, so ABC takes the room of Apple's undo and second ABC.
 German is QWERTZ without ü, ö and ä as Apple's iPad German is, holding them on u, o and a.
 Measured against Apple's iPad mini in English, German and French (every key within a point);
@@ -963,11 +963,11 @@ classes, which an iPad keeps regular either way. Above the rows the strip is App
 bar with the words centred, and above it 44 pt stay clear, as the dictation bar keeps them:
 iPadOS always adds its own 55 pt bar above a docked keyboard (undo, redo, paste; empty in
 Windowed Apps), and in some apps it draws that bar over the keyboard's top instead (Notes on
-an iPad mini, iPadOS 26.6, TestFlight). So Hex is taller than Apple's (353 against 282 pt
+an iPad mini, iPadOS 26.6, TestFlight). So GoSpell is taller than Apple's (353 against 282 pt
 on the mini and 11-inch upright). Docked, the labels keep their upright sizes turned, and
 keys show no balloons, as Apple's don't.
 Floating (iPadOS makes every keyboard 320 pt wide, with no bar above and its own globe and
-dictation band below), Hex is Apple's floating keyboard: 26 × 38.25 pt keys on a 54.3 pt
+dictation band below), GoSpell is Apple's floating keyboard: 26 × 38.25 pt keys on a 54.3 pt
 pitch, 35.5 pt shift and delete, 123, space and return on row 3's columns, and the strip
 where Apple's bar is, 271 pt in all as Apple's; it shows no globe of its own there.
 iPadOS grants a custom keyboard any height it asks for (up to 900 pt tried); one that asks
@@ -979,7 +979,7 @@ Measured with a scratch build logging every touch and layout (iPadOS 27.2 simula
 at once): taps 100, 200, 400 and 800 ms after the keyboard appeared, 100 launches each, all
 went in on an 11-inch docked (400 of 400) and floating (399; one second tap never reached the
 keyboard), as on an iPhone 17 Pro (399; one first tap at 100 ms typed the key above). Launched
-into a turn, at the same moment after launch Hex takes taps sooner than Apple's keyboard
+into a turn, at the same moment after launch GoSpell takes taps sooner than Apple's keyboard
 (1.4 s: 75 of 80 against 2 of 80; from 1.6 s both every one); earlier the keyboard is still
 sliding in. Docked, a held key's accents show in Apple's iPad cells, half a key wide and
 53 pt tall, two rows once there are more than five (`AccentMenu.padArrangement`,
@@ -1048,9 +1048,9 @@ the hold began, and past it the point waits (iOS 27.2 simulator: 20, 40 and 60 p
 moved 2 lines, and coming back took up to two lines of travel). The rows are a guess: no
 context or callback shows where a field wraps (the context is the cursor's sentence in a
 UITextView and in WKWebView). Where the field is as wide as the keyboard less 40 pt, as a
-full-width text view on an iPhone, a row is a line and Hex moves as many lines as Apple's;
+full-width text view on an iPhone, a row is a line and GoSpell moves as many lines as Apple's;
 where it's narrower, a row is more than a line and up and down skip lines (iOS 27.2
-simulator, 20 / 40 / 60 pt up: Apple's 1 / 2 / 3 lines, Hex's 2 / 5 / 7 in a field half the
+simulator, 20 / 40 / 60 pt up: Apple's 1 / 2 / 3 lines, GoSpell's 2 / 5 / 7 in a field half the
 width; on the Duo's cover screen an app gets 382 pt of the 466 while the keyboard spans 452,
 so even a full-width field skips one going down). The keys blank to keycaps 60%
 of the way to the backdrop, as Apple's, with no haptic while it moves. Apple's second-finger
@@ -1072,12 +1072,12 @@ puts the cursor at the range's end with `adjustTextPosition` and deletes its cha
 one (a 👍🏽 is one); Cut copies then deletes; Copy copies and puts the cursor at the end;
 Delete and Cut leave it at the range's start; Cancel changes nothing; and any other key
 dismisses the actions without acting. Dictate leaves the range in place and starts the
-keyboard's usual dictation there (the warm Hex session or in-keyboard dictation). When its
+keyboard's usual dictation there (the warm GoSpell session or in-keyboard dictation). When its
 words are about to insert and the field still shows the range unchanged (the same field, and
 the text around it), they replace it; otherwise they insert at the cursor as any dictation
 would, with the range left alone. Cancelling or hearing nothing leaves the range untouched.
-Where dictation would open Hex instead (no Full Access, or the keyboard can't dictate here),
-tapping Dictate dismisses the actions and opens Hex (or shows the Full Access hint) with the
+Where dictation would open GoSpell instead (no Full Access, or the keyboard can't dictate here),
+tapping Dictate dismisses the actions and opens GoSpell (or shows the Full Access hint) with the
 text left in place. An empty range ends like a normal
 trackpad lift. Delete and Cut ask the host to delete once per Character: in a script whose
 host removes one code point per call (some Devanagari and Thai clusters), the last code
@@ -1116,7 +1116,7 @@ each delete repeat), its strip, and the dictation bar's keys ask for the system 
 touch-down (`UIDevice.playInputClick`), which plays only because the keyboard's root view
 (`KeyboardInputView`) adopts `UIInputViewAudioFeedback`: the full keyboard view adopted it
 before, as a subview, and never clicked. It follows Settings › Sounds & Haptics › Keyboard
-Feedback › Sound, with no setting of Hex's. Apple's keyboard has other sounds for delete and
+Feedback › Sound, with no setting of GoSpell's. Apple's keyboard has other sounds for delete and
 the modifier keys, but the click is the only keyboard sound a keyboard may play, so every key
 gets it. In the iOS 27.2 simulator each press reaches the system click (system sound 1104,
 in the keyboard's log) with Full Access or without, and none with the Sound switch off; on
@@ -1197,7 +1197,7 @@ under the finger and a light tick for each new one (`EmojiCategoryBar`); scrolli
 grid moves the chip. The row reads the last eight words (the newest counts most), their plurals
 and endings, letters held down ("lmaooo"), phrases ("new year") and the word still
 being typed, matched against Unicode's CLDR names and keywords for the layout's
-language and English and against Hex's own chat words ("congrats", "bday"), one
+language and English and against GoSpell's own chat words ("congrats", "bday"), one
 emoji per family ("woman running", "man running"); your emoji break ties and fill
 the rest (`EmojiSuggester`). Search (the magnifier) types with the letter keys into
 a field in the strip, results above it, by name first. Holding an emoji with skin
@@ -1205,9 +1205,9 @@ tones offers five; the one you pick is typed and kept for that emoji. While a wo
 names an emoji is typed ("smile" → 😊, "fuego" → 🔥 on the Spanish layout), the strip
 offers that one emoji: in the next empty slot, else in place of the right slot's runner-up
 word, else the centre's. A word names an emoji when it is the emoji's whole name or one of
-Hex's chat words, in the layout's language or English, plurals and endings too, never a
+GoSpell's chat words, in the layout's language or English, plurals and endings too, never a
 prefix ("smil") or a word only part of several names ("face", "hand"). "heart" is one of
-Hex's chat words, so it offers ❤️ though 45 emoji share it. A phrase is offered at the word
+GoSpell's chat words, so it offers ❤️ though 45 emoji share it. A phrase is offered at the word
 that names it ("thumbs" → 👍), not at its last word ("thumbs up"): the strip reads one word. The emoji never
 takes the place of what you typed, a revert, the word space will put in, or your own
 words, and isn't offered while space would put in another word, for a swiped word, or in a
@@ -1217,11 +1217,11 @@ space in the word's place ("smile" → "😊 "); Delete then takes the space and
 offers the word back, as after an autocorrection, and Learn how I type records nothing
 (`FullKeyboardEngine.acceptEmoji`). Testers describe Apple's keyboard doing this on an
 iPhone; in the iOS 26.5 and 27.2 simulators it offers no emoji for "smile", "pizza" or
-"love", before or after the space, so the slot follows Hex's strip, not a measurement.
+"love", before or after the space, so the slot follows GoSpell's strip, not a measurement.
 After a space, an empty strip offers the finished word's own emoji ("pizza " → 🍕),
 never in place of word suggestions, and a tap adds it after the word. The App Group keeps a use count per emoji that halves every 10
 days and each emoji's skin tone, no words (`EmojiUsageStore`); Clear emoji history
-empties it. The index is `HEXShared/FullKeyboard/Emoji/emoji-index-<lang>.txt`,
+empties it. The index is `GoSpellShared/FullKeyboard/Emoji/emoji-index-<lang>.txt`,
 built by `scripts/build-emoji-data.py` from Unicode's emoji-test.txt 18.0 and CLDR
 49 (Unicode License v3, `LICENSE-Unicode.txt` beside it, which permits commercial
 use with the notice) and `scripts/emoji-aliases-en.txt` (its chat words apply on every
@@ -1231,9 +1231,9 @@ binary-searches it in place (about 0.7 MB on the heap), loading it on the first
 emoji key press or word typed in a field that takes emoji. Emoji newer than 15.1 are listed only where the
 emoji font draws them. Nothing leaves the iPhone.
 
-## GPU Dot Scope (`HEXShared/DotScope.swift`, `DotScopeShader.metal`)
+## GPU Dot Scope (`GoSpellShared/DotScope.swift`, `DotScopeShader.metal`)
 
-Both `HEXMobile` and `HEXKeyboard` render Hex's desktop menu-bar braided
+Both `GoSpellMobile` and `GoSpellKeyboard` render GoSpell's desktop menu-bar braided
 oscilloscope (`src/dot_scope.rs`, `src/rune_hud.wgsl`) at native display
 refresh via `CAMetalLayer` + `CADisplayLink`, pausing at 0% CPU/GPU once
 settled in idle. The keyboard extension mounts it only while a capture or
@@ -1245,7 +1245,7 @@ compiled on first use, which only the app shows. Both layers turn off the Metal
 Performance HUD (Settings › Developer › Graphics HUD), which would draw its frame
 rate under the home well's Dictate pill, unless launched with `MTL_HUD_ENABLED=1`. Lock Screen / Dynamic
 Island Live Activities render a
-matching `Canvas` dot-matrix badge (`HexDotMatrixBadge`) because WidgetKit
+matching `Canvas` dot-matrix badge (`GoSpellDotMatrixBadge`) because WidgetKit
 archives static view snapshots rather than hosting live `CAMetalLayer`s.
 Meter polling stays alive through a temporary non-recording state of the
 same capture; it resumes app levels and keyboard snapshots when the recorder

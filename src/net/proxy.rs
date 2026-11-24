@@ -54,7 +54,7 @@ pub fn proxy_for(url: &str) -> Option<ureq::Proxy> {
     match ureq::Proxy::new(&proxy) {
         Ok(proxy) => Some(proxy),
         Err(error) => {
-            tracing::warn!(%error, proxy = %redact(&proxy), "ignoring a proxy Hex can't use");
+            tracing::warn!(%error, proxy = %redact(&proxy), "ignoring a proxy GoSpell can't use");
             None
         }
     }
@@ -196,8 +196,8 @@ pub(crate) enum SystemEntry {
     Other(String),
 }
 
-/// The first entry Hex can use (#1235): a direct entry ends the search, and
-/// kinds Hex can't use (a PAC file it doesn't evaluate, SOCKS) are passed
+/// The first entry GoSpell can use (#1235): a direct entry ends the search, and
+/// kinds GoSpell can't use (a PAC file it doesn't evaluate, SOCKS) are passed
 /// over for the next one, as a manual proxy listed after a PAC.
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 pub(crate) fn first_usable(entries: &[SystemEntry]) -> Option<String> {
@@ -207,7 +207,7 @@ pub(crate) fn first_usable(entries: &[SystemEntry]) -> Option<String> {
             SystemEntry::Http(None) => {}
             SystemEntry::Other(kind) if kind == "kCFProxyTypeNone" => return None,
             SystemEntry::Other(kind) => {
-                tracing::info!(kind, "passing over a system proxy entry Hex can't use");
+                tracing::info!(kind, "passing over a system proxy entry GoSpell can't use");
             }
         }
     }

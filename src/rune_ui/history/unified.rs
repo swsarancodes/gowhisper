@@ -53,7 +53,7 @@ struct Sources {
 }
 
 /// Merge on owner paths, not labels, ids from a different index, or text.
-/// A legacy library annotation and a ready Hex receipt for the same bundle
+/// A legacy library annotation and a ready GoSpell receipt for the same bundle
 /// produce one row with the completion timestamp.
 type FileRows = (Vec<Listed>, BTreeMap<PathBuf, Receipt>);
 fn capture_rows(s: &Sources, now: u64) -> FileRows {

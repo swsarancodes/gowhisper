@@ -1,6 +1,6 @@
 # Meetings (beta)
 
-Record a call locally: Hex captures the other participants (system audio) and
+Record a call locally: GoSpell captures the other participants (system audio) and
 you (microphone) as separate tracks, transcribes them on this Mac, and saves a
 Markdown transcript with `You` and `Them` turns. Recording starts automatically
 only for calls answered Always record (Meetings › Settings › Calls), and
@@ -31,7 +31,7 @@ Labs > Meetings switch (macOS)                       // meetings.opt-in; off by 
 │   menu-bar items, call detection
 │   Settings view: When a call starts, After a meeting, Export, Advanced ▸
 │   ├── System Audio Recording                  // meetings.permission; asked only now
-│   │   ├── Untrusted row shown / Allow -> retired Hex IDs cleared (`ScreenCapture` + `AudioCapture`)
+│   │   ├── Untrusted row shown / Allow -> retired GoSpell IDs cleared (`ScreenCapture` + `AudioCapture`)
 │   │   ├── Allow -> macOS prompt the first time (tour's permission_control)
 │   │   ├── Decided before -> Privacy pane + drag guide ("System Audio Recording Only")
 │   │   ├── Asked -> pulse; TCC preflight re-read on each poll, no reopen needed
@@ -40,7 +40,7 @@ Labs > Meetings switch (macOS)                       // meetings.opt-in; off by 
 │   │   └── Granted -> the Allow pill morphs into a green Allowed; moves to Advanced
 │   ├── After a meeting -> Summaries, Keep meetings, Keep audio (Same as
 │   │   meetings by default)
-│   ├── Export -> Transcript folder (~/Documents/Hex Meetings; Reveal opens
+│   ├── Export -> Transcript folder (~/Documents/GoSpell Meetings; Reveal opens
 │   │   the folder itself; choose another folder; its error shows here),
 │   │   Descriptive meeting file names, Separate notes file (both off;
 │   │   meetings.export.*)
@@ -88,14 +88,14 @@ Labs > Meetings switch (macOS)                       // meetings.opt-in; off by 
 │       │       │       automatically while it is the answer or any app or
 │       │       │       website records automatically; its line names the
 │       │       │       grace (AUTO_STOP_GRACE, 30 s)
-│       │       ├── Apps and websites -> every app and website Hex has seen
+│       │       ├── Apps and websites -> every app and website GoSpell has seen
 │       │       │   a call in, newest first, then those with a saved answer
 │       │       │   it hasn't seen since; each row: icon, name, last seen
 │       │       │   (Today, Yesterday, weekday, else date) and its answer.
 │       │       │   Rows that follow the default read dimmed; Don't offer
 │       │       │   rows stay listed
 │       │       │   └── nothing yet -> "Apps and websites show up here after
-│       │       │       Hex sees a call in them."
+│       │       │       GoSpell sees a call in them."
 │       │       └── Done / Escape -> close (Escape closes an open row menu
 │       │           first)
 │       │       // checks: the_calls_sheet_saves_the_default_and_each_answer,
@@ -112,8 +112,8 @@ Labs > Meetings switch (macOS)                       // meetings.opt-in; off by 
            the pane leaves the sidebar
 
 Debug builds -> Always in the sidebar (DEVELOPER_FEATURES_ENABLED)
-Agents -> hex mcp (read-only MCP server; works whether or not Meetings is on)
-Subtitles -> hex meetings show <id> --srt | --vtt   // always on (#633; graduated from Labs)
+Agents -> gospell mcp (read-only MCP server; works whether or not Meetings is on)
+Subtitles -> gospell meetings show <id> --srt | --vtt   // always on (#633; graduated from Labs)
              one cue per transcript entry (You / Them), timed by entry offsets,
              not word timings (docs/transcript-cli.md; no export button in the
              window yet)
@@ -215,7 +215,7 @@ System audio                                      // meetings.system-audio
     recording, every active output is heard. While a detected call app has
     no playback session yet, or its sessions can't be read, every output is
     heard until the 2 s check finds the app's outputs. When none of the
-    app's outputs open, Hex hears every output and stops following the app
+    app's outputs open, GoSpell hears every output and stops following the app
     for that source. Silence while nothing plays is padded on resume. A
     route check every 2 s reopens on a changed output list while hearing
     every one, or when the app's outputs move (by endpoint id): a changed
@@ -309,7 +309,7 @@ Offer capsule can't open (Linux; GNOME on Wayland opens no interactive
 Files -> Reveal files opens the recording folder itself (Explorer and
     xdg-open open it); Reveal Markdown additionally appears while the
     exported .md exists and selects it (Explorer gets `/select,"<path>"`,
-    with the switch outside the quotes so a folder such as `Hex Meetings`
+    with the switch outside the quotes so a folder such as `GoSpell Meetings`
     stays one path) or opens the folder holding it (xdg-open); Delete moves
     to the freedesktop Trash or the Recycle Bin
     // checks: explorer_opens_a_folder_itself_without_the_select_switch;
@@ -318,7 +318,7 @@ Files -> Reveal files opens the recording folder itself (Explorer and
 
 The pane's Start recording, Stop & transcribe, Rename, Delete, Reveal, and
 Summarize run in the window's own process there. Until
-[#566](https://github.com/anomalyco/hex/issues/566) they went to the OS host,
+[#566](https://github.com/goml/gospell/issues/566) they went to the OS host,
 which ignored meeting requests, so a deleted recording stayed listed and no
 error showed. Check: `pane_requests_reach_the_window_s_own_meetings` in
 [rune_ui/meetings.rs](../../src/rune_ui/meetings.rs); a Recycle Bin delete on
@@ -326,7 +326,7 @@ a real Windows PC has not been observed.
 
 Not on Linux yet: website names for browser calls (Windows reads its
 browsers' windows, macOS their tabs). Not on Linux and Windows yet: Copy
-section from the tray, and the `hex meetings` and `hex mcp` commands (shared-control). Dragging a capsule to
+section from the tray, and the `gospell meetings` and `gospell mcp` commands (shared-control). Dragging a capsule to
 another corner works on Windows, on X11 desktops, and on a capsule floated on
 XWayland (GNOME with Labs › Call recording controls on GNOME), though none of
 that has been tried by hand on a real Windows PC or X11 desktop; only a native
@@ -379,7 +379,7 @@ Signal / Telegram / WeChat / LINE / Webex / Element / Phone call, or a browser c
      The watcher records the provider in the seen list (below).
      ├── Don't offer -> nothing shown; an earlier offer stays snoozed
      ├── Always record -> starts recording, no offer   // meetings.auto-record
-     │   └── a default of Always record starts only calls Hex can
+     │   └── a default of Always record starts only calls GoSpell can
      │       name (not a browser on an unknown page); those are offered
      │   └── recording capsule says "Started automatically" for 10 s; with the
      │       indicator off, a "Recording automatically" capsule with Stop
@@ -473,7 +473,7 @@ The seen list is `seen-calls.json` in the data folder: owner-only, at most
 64 apps and websites (key, name, app ID, last seen), oldest dropped first,
 written by the meeting watcher when it detects a call and read by the window
 only while Meetings › Settings or the Calls sheet shows. It is not a setting:
-not in `settings.json`, with no `hex settings` key. Check:
+not in `settings.json`, with no `gospell settings` key. Check:
 `src/meeting/seen_calls.rs` tests.
 ```
 
@@ -520,15 +520,15 @@ The Webex app is `com.webex.meetingmanager`, `com.cisco.webexmeetingsapp`, or
 Cisco's current `Cisco-Systems.Spark` bundle, and `CiscoCollabHost.exe` is its
 Windows host. Signal, Telegram, WeChat, LINE, Element, Messenger, and GroupMe
 keep WhatsApp's about-20 s threshold because voice notes and clips hold the
-microphone too; Webex and Phone take the normal 2 s. On macOS, where Hex reads
+microphone too; Webex and Phone take the normal 2 s. On macOS, where GoSpell reads
 the browser's page, pages on `voice.google.com` (Google Voice), `messenger.com`,
 `facetime.apple.com` (FaceTime), and `web.groupme.com` are named, and any
 `webex.com` subdomain is Webex, with one `webex.com` provider choice covering
-them all. The Calls sheet lists them once Hex has seen a call in them. A
+them all. The Calls sheet lists them once GoSpell has seen a call in them. A
 FaceTime page gets its own `facetime.apple.com` answer, shown as
 "FaceTime (web)", which does not follow the FaceTime app's. A Webex page's
 `webex.com` answer covers every subdomain. Their answers work as the
-existing services' do. The microphone app list in `hex meeting probe` and the
+existing services' do. The microphone app list in `gospell meeting probe` and the
 logs resolves and merges these apps' helpers under the parent app. Phone calls are not verified on a real
 call: Continuity call audio may be held by `com.apple.avconferenced` instead
 of `com.apple.mobilephone`.
@@ -580,7 +580,7 @@ microphone is queried once a second for 30 s, enough to name the call before
 the 20 s unknown-page threshold; after that it is queried every 30 s, and the
 page remembered from the last answer names the call in between. Answers and
 the remembered page are dropped
-while Hex records, Meetings is off, the browser is snoozed for a call without
+while GoSpell records, Meetings is off, the browser is snoozed for a call without
 a meeting code, or no browser holds
 the microphone; a query in flight at that moment is not repeated beside itself,
 and its answer is discarded. One recording is the exception: an automatic
@@ -590,7 +590,7 @@ the page naming another call can end it (see Record). That read is the newest
 answer alone, never the remembered page, so one glimpse of another call cannot
 be replayed. The call it names is kept when the recording stops: the browser
 never left the microphone, so later reads that still name the ended call or
-none cannot snooze it, and Hex starts the call the page named before the stop.
+none cannot snooze it, and GoSpell starts the call the page named before the stop.
 A read still naming the ended call is taken as that new call (going back to
 the old call in that window is recorded under the new call's name), and the
 new recording keeps the ended code, so its page naming it never ends it.
@@ -598,11 +598,11 @@ When a browser's page is found for a run already
 under way (the first pass had no answer yet), the run keeps counting, now
 toward the known service's 2 s. When no answer names a page, the last page a browser showed while
 it held the microphone names the call for 60 s (`BrowserPageMemory`), so the
-site survives a failed query, Hex being in front, or the 30 s between slow
+site survives a failed query, GoSpell being in front, or the 30 s between slow
 queries. Safari, Chrome, Firefox and
 Edge expose no URL, so their calls are unnamed unless the foreground context
 says otherwise. Banshee has no recognised room path, so any `banshee.app` page
-counts; it appears in the Calls sheet once Hex sees a call there. Not observed: the
+counts; it appears in the Calls sheet once GoSpell sees a call there. Not observed: the
 new tab query against a live Brave with a Banshee call (the script compiles, and
 the thread and memory are unit-tested with fake queries); the Banshee URL shape
 was not available, so the host rule is a guess at "any page".
@@ -626,7 +626,7 @@ address does; with neither, the call stays a plain "<browser> call detected". No
 observed on a real Windows Meet or Teams call.
 
 On 2026-10-21 Brave opened the microphone for 3-6 s at a time on
-problems.kitlangton.com (board voice notes) and each burst got a "Browser call
+problems.goml.io (board voice notes) and each burst got a "Browser call
 call detected" offer; that is what the 20 s browser threshold prevents.
 A second Banshee call on 2026-10-26 got no offer in the 30 s before Kit started
 recording by hand: the "about 20 s" threshold was 40 loop observations, and each
@@ -643,7 +643,7 @@ Checks: `a_slow_loop_still_offers_an_unknown_browser_call_after_about_20_seconds
 `a_slow_loop_still_ends_a_snooze_after_a_minute`,
 `a_stalled_loop_does_not_count_the_gap_as_time_on_the_microphone`,
 `banshee_is_offered_after_about_two_seconds`,
-`the_site_is_resolved_while_hex_is_in_front`,
+`the_site_is_resolved_while_gospell_is_in_front`,
 `a_page_seen_minutes_ago_no_longer_names_the_call`,
 `a_remembered_page_belongs_to_its_browser_and_its_call`,
 `finding_the_page_keeps_the_run_toward_the_known_threshold`,
@@ -720,7 +720,7 @@ native window stay put. Reduce motion fades between resting widths instead.
 motions, English and French, the rounded input region and the three 8 pt
 clearances at the end action. `the_offer_has_no_default_key_and_names_each_focus_target`
 checks the Rune actions (native panels do not take keyboard focus).
-`HEX_DETECTED_OFFERS=<folder>` with the `detected_offer_sheet` test renders
+`GOSPELL_DETECTED_OFFERS=<folder>` with the `detected_offer_sheet` test renders
 the production view for each detected source on a GPU, using synthetic detector
 inputs and the rendering computer's installed app icons. No network or call is needed.
 
@@ -756,8 +756,8 @@ Brave WebRTC `getUserMedia({audio: true})` reproduction on Pro confirmed
 `NSRunningApplication == nil` before parent/bundle resolution and resolved to
 `com.brave.Browser` and `com.tinyspeck.slackmacgap` afterward.
 
-The capsules have no `--snap` scene. `HEX_CAPSULE_SNAPS=<folder> cargo test
---bin hex capsule_snapshots` renders the offer, its choices, the
+The capsules have no `--snap` scene. `GOSPELL_CAPSULE_SNAPS=<folder> cargo test
+--bin gospell capsule_snapshots` renders the offer, its choices, the
 calendar reminders, the automatic-recording states, the recording pill (at
 rest, open, copied, silent, from a bottom corner) and the finished meeting
 panel in light and dark on a Mac with a GPU.
@@ -789,13 +789,13 @@ Lead time reached (or Mac wakes within 5 min of the start)   // meetings.reminde
      │   ├── Not now -> close; this call is not offered when detected
      │   ├── Join & record (only with a link) -> open the link, then record
      │   └── Record -> recording titled "Design sync" with its attendees
-     └── Service set to Always record: "Starts in 1 min · Hex records automatically"
+     └── Service set to Always record: "Starts in 1 min · GoSpell records automatically"
          ├── Don't record -> close; the detected call neither offers nor auto-records
          └── Join (only with a link) -> open the link; Always record starts on detection
   -> Closes 60 s after the start (at least 30 s after showing); withdrawn if the
      meeting is cancelled, moved, or reminders are turned off. One at a time: an
      overlapping meeting's reminder waits until this one is answered or closes.
-     Waits while Hex records; a recording that starts closes it.
+     Waits while GoSpell records; a recording that starts closes it.
 Detected call during a calendar meeting on the same service
   -> recording takes the calendar title and attendees
 ```
@@ -803,7 +803,7 @@ Detected call during a calendar meeting on the same service
 Settings persist as `meetings.calendar` (`connected`, `excluded_calendars`,
 `remind`, `lead_minutes`) in `settings.json`; missing means not connected, so
 files from older builds stay off. Every calendar is included unless excluded.
-Hex never asks for calendar access at launch: only Connect calendar calls
+GoSpell never asks for calendar access at launch: only Connect calendar calls
 `requestFullAccessToEvents` (`NSCalendarsFullAccessUsageDescription`). With
 Meetings off there is no Calendar card, no EventKit read, and no reminder.
 
@@ -1063,7 +1063,7 @@ Record (offer, menu bar "Record Meeting", Meetings pane, or voice command)
      │   moving a copy button away from the pointer.
      │   A recorder failure yields to the Meetings error instead of showing a
      │   finished transcript. Checks: `stop_says_stopping_in_place_and_the_field_cools` and
-     │   `HEX_HUD_REPLAY=<dir> cargo test --bin hex hud_replay_frames` for
+     │   `GOSPELL_HUD_REPLAY=<dir> cargo test --bin gospell hud_replay_frames` for
      │   every frame of the whole path (offscreen Rune).
      │   ├── A title or summary whose words change lets the old words fade
      │   │   out before the new ones fade in, in the same line. Titles that
@@ -1107,9 +1107,9 @@ Record (offer, menu bar "Record Meeting", Meetings pane, or voice command)
      │   though Windows and X11 have not been tried on a real machine; only a
      │   native Wayland capsule returns to the corner it started in)
      ├── Copy agent prompt (first, filled) -> a prompt telling a coding agent
-     │   to read this meeting with `hex meetings show <id> --md`, catch up with
+     │   to read this meeting with `gospell meetings show <id> --md`, catch up with
      │   `--from <mm:ss>` from the last turn copied into it, and search with
-     │   `hex meetings search` (agent_prompt; the hex path is this executable)
+     │   `gospell meetings search` (agent_prompt; the gospell path is this executable)
      ├── Copy all -> the in-call transcript so far as speaker-turn Markdown;
      │   disabled until there is text
      │   └── It reads the Parakeet in-call transcript (TranscriptReader) once a
@@ -1155,12 +1155,12 @@ Panel capsules move like the recording capsule (#1093, graduated from Labs; only
 
 Meetings › Settings › Calls › Stop when the call ends (macOS, off by default; #835;
 meetings.stop_when_call_ends) // meetings.auto-stop
-  Only a recording Hex started on its own (Always record); manual, offered,
+  Only a recording GoSpell started on its own (Always record); manual, offered,
   and calendar recordings are never stopped
   -> The call app counts as present while it holds the microphone OR any of
      its Core Audio processes plays output (WhatsApp keeps the microphone
      while muted; its output stays open until hang-up)
-  -> Both off for about 3 s -> capsule says "Hex stops recording in 30 s
+  -> Both off for about 3 s -> capsule says "GoSpell stops recording in 30 s
      unless you keep recording."
      ├── App back on the microphone or output within 30 s -> its stop is
      │   dropped; once no other automatic stop counts the notice is withdrawn
@@ -1208,7 +1208,7 @@ meetings.stop_when_call_ends) // meetings.auto-stop
      │   to the recorded call during the grace (a hand stop keeps it), while
      │   Meetings is off, and two minutes after the page named the new call
      └── Only calls whose page names a code (Google Meet today): a browser
-         Hex can't read (no Automation, no web area) names one only from a
+         GoSpell can't read (no Automation, no web area) names one only from a
          code-only tab title, and a named title names none, so it keeps the
          absence rule
   -> Off -> exactly as above: microphone only, nothing stops
@@ -1248,13 +1248,13 @@ Meetings > Import audio… (macOS; Labs › Import audio, off by default) // mee
     │   no manifest, and the next launch's sweep removes that folder once its
     │   lock is free
     ├── After final.pending -> next launch finishes it (the pending-finals
-    │   thread), exactly like a recording Hex quit during
+    │   thread), exactly like a recording GoSpell quit during
     └── During the final pass -> Interrupted with final.pending kept, so the
         next launch finishes it
 ```
 
 Proof limits: the decoder now has macOS-only unit tests through
-`hex_meeting_import_decode` (stereo 44.1 kHz float and 16-bit PCM in, mono
+`gospell_meeting_import_decode` (stereo 44.1 kHz float and 16-bit PCM in, mono
 16 kHz float out), but no automated end-to-end run on a real Mac: the native
 picker is not exercised headlessly, and quitting at each mid-import moment is
 reasoned from the shared cleanup scope and `final.pending` rather than observed.
@@ -1267,7 +1267,7 @@ Capture sources (meeting/capture.rs)                // meetings.capture
 │   │   device UID, ahead of the saved device and the default (#1086)
 │   │   ├── App switches input mid-call -> followed within 1 s, same track
 │   │   ├── App reports no input (muted) -> keeps the one it followed
-│   │   └── Not reported, not listed, Hex Microphone, or won't open -> as below
+│   │   └── Not reported, not listed, GoSpell Microphone, or won't open -> as below
 │   │      // a_meeting_follows_the_input_its_call_app_records_from,
 │   │      // a_meeting_finds_the_input_its_call_uses_by_uid; unverified on a real call
 │   ├── System default changes, the Settings microphone changes, or a missing
@@ -1359,7 +1359,7 @@ Capture sources (meeting/capture.rs)                // meetings.capture
 │          // a_dropped_warning_update_is_not_committed_and_is_retried,
 │          // only_an_input_the_call_app_reports_counts_as_held;
 │          // not verified on a live device or call app
-└── System audio -> Core Audio process tap (global, excluding Hex) on a private
+└── System audio -> Core Audio process tap (global, excluding GoSpell) on a private
     aggregate device; no display dependency
     └── Tap not authorized + Screen Recording granted -> ScreenCaptureKit fallback
 
@@ -1374,7 +1374,7 @@ A source fails (display sleep ends SCStream, device unplugged, tap stalls 3 s)
 
 Starting a recording no longer opens the Settings window; failures still do.
 A failure shows "Meeting could not be recorded." above the recordings until
-its close button dismisses it ([#562](https://github.com/anomalyco/hex/issues/562);
+its close button dismisses it ([#562](https://github.com/goml/gospell/issues/562);
 check `a_meeting_recording_error_can_be_dismissed`).
 Checks: `call_end_is_reported_once_per_sustained_absence`,
 `an_ended_call_stops_after_the_grace_unless_it_comes_back_or_is_kept` in
@@ -1496,7 +1496,7 @@ While recording                                      // meetings.rolling
      ├── Backlog over 120 s of audio -> oldest chunks skipped, track marked
      │   incomplete; rebuilt from its WAV after Stop
      └── Model failure -> transcript.rolling.error.txt -> "Live transcript unavailable."
-  -> Every in-call view reads it: Meetings pane, `hex meetings show`, MCP,
+  -> Every in-call view reads it: Meetings pane, `gospell meetings show`, MCP,
      provisional titles (TranscriptReader)
 
 Stop & Transcribe
@@ -1504,14 +1504,14 @@ Stop & Transcribe
   -> Any track that fell behind or failed -> stream its WAV in 1 s blocks
   -> Join on one timeline -> Echo suppression -> Final publication
 
-Hex quits while recording                           // meetings.quit
+GoSpell quits while recording                           // meetings.quit
   -> The drain installs any staged update, then joins the meeting controller;
      capture stops, no chunk starts
   -> WAVs and manifest finalized; Interrupted with its rolling draft and
      final.pending beside the manifest
-Hex quits during Stop & Transcribe's final pass (#1284)
-  -> Same: Interrupted + final.pending, never Failed with "Hex is quitting"
-Hex or Hex's process dies mid-recording (no final.pending)   // meetings.recovery
+GoSpell quits during Stop & Transcribe's final pass (#1284)
+  -> Same: Interrupted + final.pending, never Failed with "GoSpell is quitting"
+GoSpell or GoSpell's process dies mid-recording (no final.pending)   // meetings.recovery
   -> Next launch selects every unlocked folder whose manifest is Starting,
      Recording, or Transcribing, or Interrupted with no error and no published
      final transcript; a final.pending or recovery.attempt marker is finished
@@ -1530,7 +1530,7 @@ Hex or Hex's process dies mid-recording (no final.pending)   // meetings.recover
   -> final.pending -> the same next-launch final pass as a quit
 Any of the above, next launch, Meetings on, no recording, engine up (or 30 s)
   -> A pass stops between meetings if a recording starts, and is offered
-     again when Hex is next idle
+     again when GoSpell is next idle
   -> Full-WAV final pass -> Complete + Markdown export + notes
   ├── Quit again or model not installed -> stays pending
   └── Other failure -> stays Interrupted with the error and its draft
@@ -1728,7 +1728,7 @@ Other checks:
 `a_copy_cut_holds_when_a_later_chunk_moves_the_words_slightly`,
 `a_track_rebuilt_from_its_wav_after_stop_keeps_the_copies_cuts`,
 `a_copy_waiting_when_capture_ends_is_still_answered`,
-`a_copy_stops_waiting_when_hex_quits`,
+`a_copy_stops_waiting_when_gospell_quits`,
 `a_copy_that_runs_out_of_time_gets_no_reply`,
 `a_copy_waits_out_dictation_and_a_preempted_chunk`,
 `a_copy_reaches_only_the_recording_this_process_runs`,
@@ -1782,7 +1782,7 @@ Finished meeting panel (15 s, kept open while the pointer is over it; it
     │   (the saved corner if there was no pill for this meeting)
     ├── × (Close) -> hide immediately, even under the pointer. Late notes do not
     │   reopen it; the saved meeting and transcript remain in Meetings
-    ├── Copy agent prompt (first) -> `hex meetings show <id> --md` and search
+    ├── Copy agent prompt (first) -> `gospell meetings show <id> --md` and search
     └── Copy all -> Markdown, or speaker turns as a fallback
     (the_ready_panel_copies_the_finished_meeting,
     a_ready_panel_whose_time_ran_out_closes_when_the_pointer_leaves)
@@ -1836,8 +1836,8 @@ Delete… (overflow menu) -> "Trash recording & Markdown" (or "Trash recording")
   // deleting_refuses_a_transcribing_meeting_and_one_still_awaiting_its_final_transcript,
   // deleting_refuses_ids_that_are_not_one_meeting_folder
 
-Agents -> hex meetings delete <id>                 // exact `meetings list --json` id
-  -> the same delete_meeting path the pane uses, through the running Hex
+Agents -> gospell meetings delete <id>                 // exact `meetings list --json` id
+  -> the same delete_meeting path the pane uses, through the running GoSpell
      (control host; docs/cli.md), so both refuse and trash identically
   -> unknown id -> not-found; recording/transcribing/notes/final.pending ->
      meeting-recording/meeting-transcribing/meeting-notes/meeting-final-pending,
@@ -1850,13 +1850,13 @@ Agents -> hex meetings delete <id>                 // exact `meetings list --jso
 ```
 
 Choice: Delete trashes the Markdown copy too, since it holds the transcript;
-a separate notes file Hex tracks goes with it, and all stay recoverable from
+a separate notes file GoSpell tracks goes with it, and all stay recoverable from
 the Trash. Sources:
 [rune_ui/meetings.rs](../../src/rune_ui/meetings.rs), the requests in
 [rune_ui/macos_host.rs](../../src/rune_ui/macos_host.rs), and `RevealTarget` /
 `rename` in [meeting.rs](../../src/meeting.rs) with `delete` / `trash` in
 [meeting/delete.rs](../../src/meeting/delete.rs) (the pane's Delete and
-`hex meetings delete` share it). Checks:
+`gospell meetings delete` share it). Checks:
 `deleting_trashes_the_markdown_then_the_recording_and_refuses_while_recording`,
 `deleting_trashes_a_tracked_notes_file_after_the_transcript`,
 `renaming_updates_the_manifest_and_an_unedited_markdown_heading`,
@@ -1903,14 +1903,14 @@ Meeting controller, Meetings on or off           // meetings.retention
 │   -> the recording folder (audio, transcripts, notes and summary, live
 │      drafts) to the Trash, never removed outright
 │   -> the exported Markdown to the Trash only while its SHA-256 still
-│      matches the copy Hex last wrote (manifest `export_sha256`; Hex's own
+│      matches the copy GoSpell last wrote (manifest `export_sha256`; GoSpell's own
 │      heading and notes rewrites keep it current); an edited copy stays
 │   -> a tracked separate notes file to the Trash only while its SHA-256
 │      matches `notes_export_sha256`; an edited copy stays
 ├── Skips recording, transcribing, writing-notes, and final.pending
 │   meetings; a later pass retries them
-└── Nothing expires while Hex is not running
-Queries (`hex meetings`, `hex mcp`, the pane) -> leave out expired meetings
+└── Nothing expires while GoSpell is not running
+Queries (`gospell meetings`, `gospell mcp`, the pane) -> leave out expired meetings
     at once, before a pass moves them; a process that never loaded settings
     reads `meetings.retention` from settings.json without writing it
 ```
@@ -1939,10 +1939,10 @@ Meeting controller, an audio retention chosen       // meetings.audio_retention
 ├── Interrupted, failed, starting, recording, transcribing, and pending
 │   meetings keep their audio; a later pass retries them
 ├── Forever or omitted -> nothing moves
-└── Nothing expires while Hex is not running
+└── Nothing expires while GoSpell is not running
 Audio gone -> the meeting still lists, opens, searches, exports, and copies
-    its text; transcribing it again (debug `hex meeting transcribe` or
-    `hex meeting echo`) fails saying its audio was deleted, without
+    its text; transcribing it again (debug `gospell meeting transcribe` or
+    `gospell meeting echo`) fails saying its audio was deleted, without
     changing the meeting's status
 ```
 
@@ -1957,7 +1957,7 @@ Checks: `retention_expires_meetings_by_when_they_ended_and_skips_active_ones`,
 `until_one_is_chosen_only_meetings_recorded_since_the_default_expire`,
 `expiry_leaves_a_markdown_copy_the_user_edited`,
 `expiry_trashes_a_notes_file_only_while_its_digest_matches`,
-`hex_rewriting_its_markdown_keeps_it_hexs_and_a_user_edit_does_not`,
+`gospell_rewriting_its_markdown_keeps_it_gospells_and_a_user_edit_does_not`,
 `separate_audio_expiry_covers_only_finished_meetings_older_than_it`,
 `audio_expiry_moves_only_the_wavs_and_records_it`, and
 `audio_expiry_leaves_unfinished_pending_locked_or_annotated_meetings`;
@@ -2013,8 +2013,8 @@ Final publication complete                               // meetings.notes
      ├── Export › Descriptive meeting file names on (off by default) -> after
      │   the block is written, the file is renamed to the final title,
      │   keeping its date and time prefix; a taken name adds " (2)"
-     ├── Heading -> final title, only while it still reads Hex's last title
-     ├── <!-- hex:notes --> ## Summary (one paragraph) above ## Transcript
+     ├── Heading -> final title, only while it still reads GoSpell's last title
+     ├── <!-- gospell:notes --> ## Summary (one paragraph) above ## Transcript
      │   └── Footer names the writer: "Written on this Mac by Apple
      │       Intelligence", "Written by <provider/model> through OpenCode",
      │       "Written by OpenCode's default model", or, for older notes
@@ -2024,7 +2024,7 @@ Final publication complete                               // meetings.notes
      │   beside the transcript: title, date, duration, app, a relative
      │   percent-encoded transcript link (its text Markdown-escaped), summary,
      │   chapters, and its own footer saying the transcript has the details;
-     │   rewritten only while its SHA-256 is still Hex's copy, never recreated
+     │   rewritten only while its SHA-256 is still GoSpell's copy, never recreated
      │   once deleted
      ├── Text outside the block is preserved; changed mid-write -> not written
      └── Missing file -> manifest only
@@ -2066,7 +2066,7 @@ the title, or renaming the meeting renames the file in place to
 its own file is never a collision, a taken name gets `" (2)"`, no copy is made,
 and Reveal, Trash, and retention follow the manifest's new `export_path`. A
 failed rename leaves the old path and never fails the notes or the rename. If
-Hex stops between the file rename and the manifest write, the manifest keeps
+GoSpell stops between the file rename and the manifest write, the manifest keeps
 the old path: Reveal falls back to the recording folder and the Markdown stays
 in the folder untouched. With Export › Separate notes file on, the export is
 `<stem>.transcript.md` and its notes are `<stem>.notes.md`; export chooses a
@@ -2075,7 +2075,7 @@ stem free of both, a descriptive rename moves the pair together (keeping a
 move, and an unedited tracked notes file is re-rendered so its heading and
 transcript link follow notes, a rename, or chapter retitles
 ([meeting/notes_file.rs](../../src/meeting/notes_file.rs)). The transcript
-keeps its own `<!-- hex:notes -->` summary block and footer throughout. A notes
+keeps its own `<!-- gospell:notes -->` summary block and footer throughout. A notes
 file the user deletes stops being tracked and is never written back, even by a
 later regeneration.
 
@@ -2106,9 +2106,9 @@ model): `a_short_transcript_is_sent_whole_in_one_call`,
 menu text in `meeting_menu_offers_one_action_per_state`. The recorder thread,
 manifest write, and menu/pane refresh during a real recording are unexercised.
 
-Real model (debug CLI): `hex meeting summarize <file.md> [--excerpt-chars N]`
+Real model (debug CLI): `gospell meeting summarize <file.md> [--excerpt-chars N]`
 times the provisional title at the point a recording would ask for it, then the
-final title and summary, without saving; `hex meeting summarize <id>` writes
+final title and summary, without saving; `gospell meeting summarize <id>` writes
 them like Regenerate.
 
 Observed (2026-10-15, Mac Studio M2 Max, macOS 27.0.1, context 8,192 tokens,
@@ -2160,7 +2160,7 @@ After final publication, inside the notes thread       // meetings.chapters.refi
   -> Each call first waits (≤30 s) for dictation; a stop or quit ends the pass
      with nothing saved, so the next notes run redoes it
 Copy section (pane, per chapter; menu bar "Copy Section" while recording;
-`hex meetings show --chapter N`)
+`gospell meetings show --chapter N`)
   -> "## <name>\n\n<line>\n\n" + the transcript lines that start inside the
      chapter, joined into turns only within it (one shared function)
 ```
@@ -2177,7 +2177,7 @@ not the default. A boundary pass that changes the title also renames the
 exported Markdown with Export › Descriptive meeting file names on, under the
 same date and time prefix and collision rules as notes.
 
-Read surfaces: `hex meetings chapters <id> [--json]`, `hex meetings show <id>
+Read surfaces: `gospell meetings chapters <id> [--json]`, `gospell meetings show <id>
 --chapter N`, a `## Chapters` list in `show`, `chapters` in `show --json`
 (JSON stays version 1), and MCP `get_chapters`.
 
@@ -2198,7 +2198,7 @@ and CLI give the same section when one speaker's turn crosses a boundary);
 submenu, the recorder writing chapters during a real recording, and the
 `meetings-chapters` scene on a Mac screen are unexercised.
 
-Real model (debug CLI): `hex meeting chapters <file.md>` runs the live passes
+Real model (debug CLI): `gospell meeting chapters <file.md>` runs the live passes
 as a recording would, then the boundary pass, without saving.
 
 Observed (2026-10-23, Mac mini, debug build) on a synthetic 15-minute, three
@@ -2212,19 +2212,19 @@ current one), which is why Rust's name overlap decides.
 
 ### Agent Access (MCP)
 
-The release CLI also supports `hex meetings list`, `show <id|latest>` (with
+The release CLI also supports `gospell meetings list`, `show <id|latest>` (with
 `--from`/`--to` offsets or `--chapter N`), `chapters <id>`, and `search <query>`
 through this query layer. See the [transcript CLI map](transcript-cli.md)
 and [versioned JSON contract](../transcript-cli.md).
 
 ```ts
-hex mcp [--meetings-dir <path>]                     // meetings.mcp; release builds
+gospell mcp [--meetings-dir <path>]                     // meetings.mcp; release builds
 ├── MCP over stdio; independent of the Meetings opt-in (read-only)
 ├── Dispatches before process logging, the instance lock, GUI, and permissions
-│   └── Safe beside the running app; logs only to stderr (HEX_MCP_LOG)
-├── Default folder: Application Support/hex/meetings (hex on older builds)
+│   └── Safe beside the running app; logs only to stderr (GOSPELL_MCP_LOG)
+├── Default folder: Application Support/gospell/meetings (gospell on older builds)
 │   └── --meetings-dir -> any mirrored copy (rsync of that folder)
-├── A copy named hex-meetings-mcp -> always `hex mcp` with the same flags
+├── A copy named gospell-meetings-mcp -> always `gospell mcp` with the same flags
 │   (no subcommand never falls back to listening)
 └── Tools (all readOnlyHint)
     ├── list_meetings(since?, until?, query?, limit?, include_in_progress?)
@@ -2246,7 +2246,7 @@ hex mcp [--meetings-dir <path>]                     // meetings.mcp; release bui
         └── "N. mm:ss–mm:ss · name" + line each, whether boundaries were
             corrected, a get_transcript start/end hint; or "No chapters are
             stored" ("No chapters yet" while recording); never generates any
-Resources: hex-meeting://<id> -> Markdown (metadata, notes, transcript)
+Resources: gospell-meeting://<id> -> Markdown (metadata, notes, transcript)
 ```
 
 Read-only and private: the server opens files for reading only, never writes,
@@ -2283,13 +2283,13 @@ three passages, while a typo of a rare word still finds it. A term's match in a
 passage is its exact stem when present, then the best score, kind, and
 alphabetically first stem, so ties are deterministic. `"Quoted words"` are
 required exact (stemmed) phrases; `fuzzy: false` keeps only exact stems.
-`hex history --search` shares this ranker, counting an entry's raw and final
+`gospell history --search` shares this ranker, counting an entry's raw and final
 text as one document.
 
 Semantic search is not shipped. On-device candidates are Apple NaturalLanguage
 `NLContextualEmbedding` (asset download, macOS 14+) or the older static
 `NLEmbedding` sentence model, through a Swift bridge like `apple_speech`, with a
-cache under `~/Library/Caches/hex/meeting-index` keyed by meeting
+cache under `~/Library/Caches/gospell/meeting-index` keyed by meeting
 fingerprints. Full-text with stemming and fuzzy matching answered the real
 queries below; embeddings wait until a query fails for lack of paraphrase.
 
@@ -2314,7 +2314,7 @@ schemas (including `from`/`to`) and read-only annotations, tools/call including
 stdout carries only JSON-RPC, no Application Support state created).
 
 Observed (2026-10-23, Mac Studio, debug build, live meetings folder, read-only):
-`hex meetings search "images database blob storage media"` dropped from 315 to
+`gospell meetings search "images database blob storage media"` dropped from 315 to
 140 matching passages, with no fuzzy-only hit in the top 25 (before: four,
 through `blog`, `blow`, `believe`, `made`, and `motto`); the top hit remains the
 in-progress meeting's 115:02 passage, and 6 of the top 10 fall in its
@@ -2329,29 +2329,29 @@ meetings without WAVs): first launch of a freshly signed binary 440 ms to
 #### Another Mac's Meetings (Mirror)
 
 ```ts
-Don't: MCP client config runs `ssh pro hex mcp`         // one SSH per client
+Don't: MCP client config runs `ssh pro gospell mcp`         // one SSH per client
   -> 41 OpenCode instances = 41 SSH sessions -> the Pro's sshd reset connections
 
 Do: one periodic pull, then local servers               // meetings.mcp.mirror
 scripts/sync-meetings-mirror.sh (LaunchAgent template, every 120 s,
   ProcessType Background, Nice 10, LowPriorityIO)
 ├── ONE rsync over ssh (BatchMode, ConnectTimeout 5, --timeout 60)
-│   pro:Library/Application Support/hex/meetings/
-│   -> ~/Library/Caches/hex-meetings-mirror/ (0700)
+│   pro:Library/Application Support/gospell/meetings/
+│   -> ~/Library/Caches/gospell-meetings-mirror/ (0700)
 ├── Skips *.wav, *.lock, *.tmp; --delay-updates (files land together at the
 │   end); --delete-delay (meetings trashed on the Pro disappear)
 └── Pro asleep / unreachable -> exit 0 silently; next run retries
-Each MCP client -> local `hex mcp --meetings-dir <mirror>` (no SSH, no lock)
+Each MCP client -> local `gospell mcp --meetings-dir <mirror>` (no SSH, no lock)
 └── No lock in the mirror -> a meeting still recording on the Pro reads as
     `interrupted` with its rolling transcript so far; final once published
 ```
 
-Template: [hex-meetings-mirror.plist](../../scripts/launchd/hex-meetings-mirror.plist)
+Template: [gospell-meetings-mirror.plist](../../scripts/launchd/gospell-meetings-mirror.plist)
 (placeholders for the checkout and home; not installed automatically).
 
 Observed (2026-10-15, Studio pulling from the Pro): one sync 0.44 s, 8 meetings,
 1.0 MB, no WAVs or locks; unreachable host exits 0 at once, unanswered address
-exits 0 after the 5 s connect timeout. `hex-meetings-mcp --meetings-dir` (release
+exits 0 after the 5 s connect timeout. `gospell-meetings-mcp --meetings-dir` (release
 build in `~/.local/bin`) over stdio: first launch of the new binary 378 ms to
 `initialize` (Gatekeeper), then 7 ms; `list_meetings` 3.5–11 ms cold, 0.5 ms
 warm; searches 0.6–1.5 ms; a 48,000-char `get_transcript` 0.6 ms;

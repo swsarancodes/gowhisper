@@ -67,7 +67,7 @@ impl ModelSlot {
 
     /// Unloads a loaded GGUF model, freeing its memory while remembering its
     /// selection and streaming capability to reload. Apple Speech stays loaded
-    /// because it holds no model weights of Hex's.
+    /// because it holds no model weights of GoSpell's.
     pub(super) fn park(&mut self) -> Option<TranscriptionSelection> {
         let Self::Loaded { model, streams } = self else {
             return None;

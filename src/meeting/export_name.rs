@@ -287,7 +287,7 @@ mod tests {
 
     fn folder(name: &str) -> PathBuf {
         let folder = std::env::temp_dir().join(format!(
-            "hex-meeting-file-name-{name}-{}-{}",
+            "gospell-meeting-file-name-{name}-{}-{}",
             std::process::id(),
             crate::desktop::events::now_ms()
         ));

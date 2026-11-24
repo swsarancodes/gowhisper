@@ -59,14 +59,14 @@ pub fn call_developer(
     let (status, body) = post_json("/dev/control", &body, DEVELOPER_CONTROL_TIMEOUT, 64 * 1024)?;
     if status != 200 {
         bail!(
-            "Hex developer control failed: {}",
+            "GoSpell developer control failed: {}",
             error_code(status, &body)
         );
     }
-    serde_json::from_slice(&body).wrap_err("Hex developer response is invalid")
+    serde_json::from_slice(&body).wrap_err("GoSpell developer response is invalid")
 }
 
-/// Sends one `hex` control request to the running app.
+/// Sends one `gospell` control request to the running app.
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 pub fn call_control(
     request: &crate::control::ControlRequest,
@@ -83,17 +83,17 @@ pub fn call_control(
         let code = error_code(status, &body);
         bail!(match code.as_str() {
             "control-unavailable" => {
-                "the running Hex doesn't accept control commands; update Hex".to_string()
+                "the running GoSpell doesn't accept control commands; update GoSpell".to_string()
             }
-            "control-busy" => "Hex is busy with other control commands; try again".into(),
-            "control-timeout" => "Hex didn't answer in time; check `hex status`".into(),
+            "control-busy" => "GoSpell is busy with other control commands; try again".into(),
+            "control-timeout" => "GoSpell didn't answer in time; check `gospell status`".into(),
             "invalid-control-command" => {
-                "the running Hex doesn't know this command; update Hex".into()
+                "the running GoSpell doesn't know this command; update GoSpell".into()
             }
-            _ => format!("Hex refused the request ({code})"),
+            _ => format!("GoSpell refused the request ({code})"),
         });
     }
-    serde_json::from_slice(&body).wrap_err("Hex sent an invalid control reply")
+    serde_json::from_slice(&body).wrap_err("GoSpell sent an invalid control reply")
 }
 
 /// The running app's process id, if its local API is live.
@@ -107,16 +107,16 @@ pub(super) fn live_discovery() -> Result<DiscoveryDocument> {
     let bytes = match fs::read(&path) {
         Ok(bytes) => bytes,
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
-            bail!("Hex is not running")
+            bail!("GoSpell is not running")
         }
         Err(error) => {
             return Err(error).wrap_err_with(|| format!("could not read {}", path.display()));
         }
     };
     let document: DiscoveryDocument =
-        serde_json::from_slice(&bytes).wrap_err("Hex's local API discovery file is invalid")?;
+        serde_json::from_slice(&bytes).wrap_err("GoSpell's local API discovery file is invalid")?;
     if !valid_discovery(&document) || !discovery_is_live(&document) {
-        bail!("Hex is not running");
+        bail!("GoSpell is not running");
     }
     Ok(document)
 }
@@ -141,7 +141,7 @@ fn post(
     Endpoint::of(&document).post(path, content_type, body, read_timeout, max_response)
 }
 
-/// Where one local API answers, and the token it takes: the running Hex's,
+/// Where one local API answers, and the token it takes: the running GoSpell's,
 /// or an embedded service's a client started.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct Endpoint {
@@ -149,19 +149,19 @@ pub(crate) struct Endpoint {
     token: String,
 }
 
-/// What the discovery file says about a running Hex.
+/// What the discovery file says about a running GoSpell.
 #[derive(Debug, Eq, PartialEq)]
 pub(crate) enum Discovered {
-    /// A Hex answers with an API this build speaks.
+    /// A GoSpell answers with an API this build speaks.
     Live(Endpoint),
-    /// No Hex runs: no discovery file, or one a stopped Hex left behind.
+    /// No GoSpell runs: no discovery file, or one a stopped GoSpell left behind.
     Absent,
 }
 
-/// The running Hex's endpoint, or [`Discovered::Absent`] when none runs. A
-/// live Hex this build can't talk to (another API version, a malformed
+/// The running GoSpell's endpoint, or [`Discovered::Absent`] when none runs. A
+/// live GoSpell this build can't talk to (another API version, a malformed
 /// token) or a discovery file that can't be read is an error, so a client
-/// never starts a second service beside a Hex that is running.
+/// never starts a second service beside a GoSpell that is running.
 pub(crate) fn discover() -> Result<Discovered> {
     let path = crate::app_paths::local_api_discovery_file()?;
     let bytes = match fs::read(&path) {
@@ -174,7 +174,7 @@ pub(crate) fn discover() -> Result<Discovered> {
         }
     };
     let document: DiscoveryDocument =
-        serde_json::from_slice(&bytes).wrap_err("Hex's local API discovery file is invalid")?;
+        serde_json::from_slice(&bytes).wrap_err("GoSpell's local API discovery file is invalid")?;
     classify(&document, discovery_is_live(&document))
 }
 
@@ -184,18 +184,18 @@ fn classify(document: &DiscoveryDocument, live: bool) -> Result<Discovered> {
     }
     if document.api_version != API_VERSION {
         bail!(
-            "the running Hex speaks local API version {}, not {API_VERSION}; \
-             update Hex or quit it",
+            "the running GoSpell speaks local API version {}, not {API_VERSION}; \
+             update GoSpell or quit it",
             document.api_version
         );
     }
     if !valid_token(&document.token) {
-        bail!("the running Hex's local API token is malformed; restart Hex");
+        bail!("the running GoSpell's local API token is malformed; restart GoSpell");
     }
     Ok(Discovered::Live(Endpoint::of(document)))
 }
 
-/// The ready line `hex service --embedded` prints on stdout.
+/// The ready line `gospell service --embedded` prints on stdout.
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Ready {
@@ -283,7 +283,7 @@ impl Endpoint {
         use std::io::BufRead as _;
 
         let mut stream = TcpStream::connect_timeout(&self.address, CONNECTION_TIMEOUT)
-            .wrap_err("could not connect to Hex's local API")?;
+            .wrap_err("could not connect to GoSpell's local API")?;
         stream.set_read_timeout(Some(idle))?;
         stream.set_write_timeout(Some(CONNECTION_TIMEOUT))?;
         write!(
@@ -301,21 +301,21 @@ impl Endpoint {
                 .take(max_event as u64 + 1)
                 .read_until(b'\n', line)?;
             if line.len() > max_event {
-                bail!("Hex sent an event that is too large");
+                bail!("GoSpell sent an event that is too large");
             }
             Ok::<_, color_eyre::Report>(read)
         };
         if next_line(&mut reader, &mut line)? == 0 {
-            bail!("Hex didn't answer");
+            bail!("GoSpell didn't answer");
         }
         let status = std::str::from_utf8(&line)
             .ok()
             .and_then(|line| line.split_ascii_whitespace().nth(1))
             .and_then(|status| status.parse::<u16>().ok())
-            .ok_or_else(|| eyre!("Hex's response has no HTTP status"))?;
+            .ok_or_else(|| eyre!("GoSpell's response has no HTTP status"))?;
         loop {
             if next_line(&mut reader, &mut line)? == 0 {
-                bail!("Hex's response is malformed");
+                bail!("GoSpell's response is malformed");
             }
             if line == b"\r\n" || line == b"\n" {
                 break;
@@ -326,7 +326,7 @@ impl Endpoint {
             reader
                 .take(max_event as u64 + 1)
                 .read_to_end(&mut body)
-                .wrap_err("Hex didn't finish answering")?;
+                .wrap_err("GoSpell didn't finish answering")?;
             body.truncate(max_event);
             return Ok((status, body));
         }
@@ -335,7 +335,7 @@ impl Endpoint {
                 continue;
             };
             let value = serde_json::from_slice::<serde_json::Value>(data.trim_ascii())
-                .wrap_err("Hex sent an unreadable event")?;
+                .wrap_err("GoSpell sent an unreadable event")?;
             if event(&value) {
                 break;
             }
@@ -354,7 +354,7 @@ fn send(
     max_response: usize,
 ) -> Result<(u16, Vec<u8>)> {
     let mut stream = TcpStream::connect_timeout(&address, CONNECTION_TIMEOUT)
-        .wrap_err("could not connect to Hex's local API")?;
+        .wrap_err("could not connect to GoSpell's local API")?;
     stream.set_read_timeout(Some(read_timeout))?;
     stream.set_write_timeout(Some(CONNECTION_TIMEOUT))?;
     write!(
@@ -362,7 +362,7 @@ fn send(
         "POST {path} HTTP/1.1\r\nHost: 127.0.0.1\r\nAuthorization: Bearer {token}\r\nContent-Type: {content_type}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
         body.len(),
     )?;
-    // Hex answers before reading a body it rejects (an unknown model, a full
+    // GoSpell answers before reading a body it rejects (an unknown model, a full
     // queue); keep that answer when the connection then resets.
     let upload = stream.write_all(body).and_then(|()| stream.flush());
     let mut response = Vec::new();
@@ -370,15 +370,15 @@ fn send(
         .take(max_response as u64 + 1)
         .read_to_end(&mut response);
     if response.is_empty() {
-        read.wrap_err("Hex didn't answer")?;
-        upload.wrap_err("Hex didn't take the upload")?;
-        bail!("Hex didn't answer");
+        read.wrap_err("GoSpell didn't answer")?;
+        upload.wrap_err("GoSpell didn't take the upload")?;
+        bail!("GoSpell didn't answer");
     }
     if response.len() > max_response {
-        bail!("Hex's response is too large");
+        bail!("GoSpell's response is too large");
     }
     let Some(header_end) = response.windows(4).position(|window| window == b"\r\n\r\n") else {
-        bail!("Hex's response is malformed");
+        bail!("GoSpell's response is malformed");
     };
     let headers = std::str::from_utf8(&response[..header_end])?;
     let status = headers
@@ -386,7 +386,7 @@ fn send(
         .next()
         .and_then(|line| line.split_ascii_whitespace().nth(1))
         .and_then(|status| status.parse::<u16>().ok())
-        .ok_or_else(|| eyre!("Hex's response has no HTTP status"))?;
+        .ok_or_else(|| eyre!("GoSpell's response has no HTTP status"))?;
     Ok((status, response.split_off(header_end + 4)))
 }
 
@@ -397,11 +397,14 @@ pub(crate) fn error_code(status: u16, body: &[u8]) -> String {
         .unwrap_or_else(|| format!("http-{status}"))
 }
 
+/// What every API token starts with; 64 lowercase hex digits follow.
+const TOKEN_PREFIX: &str = "gospell_";
+
 pub(super) fn generate_token() -> Result<String> {
     let mut random = [0_u8; 32];
     getrandom::fill(&mut random).map_err(|error| eyre!("could not generate API token: {error}"))?;
-    let mut token = String::with_capacity(68);
-    token.push_str("hex_");
+    let mut token = String::with_capacity(TOKEN_PREFIX.len() + 64);
+    token.push_str(TOKEN_PREFIX);
     for byte in random {
         use std::fmt::Write as _;
         write!(token, "{byte:02x}").expect("writing to a string cannot fail");
@@ -433,9 +436,9 @@ pub(super) fn valid_discovery(document: &DiscoveryDocument) -> bool {
 }
 
 pub(super) fn valid_token(token: &str) -> bool {
-    token.len() == 68
-        && token.starts_with("hex_")
-        && token[4..]
+    token.len() == TOKEN_PREFIX.len() + 64
+        && token.starts_with(TOKEN_PREFIX)
+        && token[TOKEN_PREFIX.len()..]
             .bytes()
             .all(|byte| byte.is_ascii_hexdigit() && !byte.is_ascii_uppercase())
 }
@@ -463,7 +466,7 @@ pub(super) fn write_discovery(path: &Path, document: &DiscoveryDocument) -> Resu
     }
     let mut options = OpenOptions::new();
     options.write(true).create_new(true);
-    // The token lets any reader drive Hex, so only the owner may read it. On
+    // The token lets any reader drive GoSpell, so only the owner may read it. On
     // Windows the file inherits the per-user Application Support folder's
     // ACL (the user, SYSTEM and Administrators).
     #[cfg(unix)]
@@ -511,7 +514,7 @@ pub(super) fn process_is_alive(pid: u32) -> bool {
     }
 }
 
-/// A running Hex that `hex restart` waits on before it starts the successor.
+/// A running GoSpell that `gospell restart` waits on before it starts the successor.
 ///
 /// The local API removes its discovery file at the start of its shutdown and
 /// the process lives on after that. What that process holds goes at different
@@ -520,7 +523,7 @@ pub(super) fn process_is_alive(pid: u32) -> bool {
 /// the file, when the host's server drops. Waiting for the process covers
 /// both, which is why the local API isn't the signal.
 ///
-/// On Windows the handle is opened while that Hex still runs, so the wait can
+/// On Windows the handle is opened while that GoSpell still runs, so the wait can
 /// only be about that process: looking the pid up again after the wait could
 /// find whatever reused it (the updater's lesson, #513).
 #[cfg(not(target_os = "macos"))]
@@ -607,10 +610,10 @@ impl Drop for ExitWatch {
     }
 }
 
-/// The running Hex, watched from now on, or `None` when none answers or its
+/// The running GoSpell, watched from now on, or `None` when none answers or its
 /// process can't be opened for waiting. The pid comes from the discovery
 /// file, which `running_pid` has just checked is alive and answering, so the
-/// watch is taken while that Hex still runs.
+/// watch is taken while that GoSpell still runs.
 #[cfg(not(target_os = "macos"))]
 pub fn watch_running() -> Option<ExitWatch> {
     ExitWatch::new(running_pid()?)
@@ -625,7 +628,7 @@ mod tests {
 
     use super::{Discovered, DiscoveryDocument, Endpoint, classify, send};
 
-    const TOKEN: &str = "hex_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+    const TOKEN: &str = "gospell_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 
     fn document(api_version: &str, token: &str) -> DiscoveryDocument {
         DiscoveryDocument {
@@ -637,7 +640,7 @@ mod tests {
     }
 
     #[test]
-    fn only_a_stopped_hex_counts_as_absent() {
+    fn only_a_stopped_gospell_counts_as_absent() {
         assert_eq!(
             classify(&document("1", "bad"), false).unwrap(),
             Discovered::Absent,
@@ -648,8 +651,8 @@ mod tests {
             Discovered::Live(_)
         ));
         let other = classify(&document("1", TOKEN), true).unwrap_err();
-        assert!(format!("{other}").contains("update Hex"), "{other}");
-        assert!(classify(&document(super::API_VERSION, "hex_x"), true).is_err());
+        assert!(format!("{other}").contains("update GoSpell"), "{other}");
+        assert!(classify(&document(super::API_VERSION, "gospell_x"), true).is_err());
     }
 
     fn ready(url: &str, pid: u32, api_version: &str, token: &str) -> Vec<u8> {
@@ -667,7 +670,7 @@ mod tests {
         for line in [
             ready("http://127.0.0.1:4100", 8, v, TOKEN),
             ready("http://127.0.0.1:4100", 7, "1", TOKEN),
-            ready("http://127.0.0.1:4100", 7, v, "hex_x"),
+            ready("http://127.0.0.1:4100", 7, v, "gospell_x"),
             ready("http://localhost:4100", 7, v, TOKEN),
             ready("http://127.0.0.1:04100", 7, v, TOKEN),
             ready("http://127.0.0.1:0", 7, v, TOKEN),
@@ -728,7 +731,7 @@ mod tests {
         assert_eq!(kinds, ["downloading", "ok"]);
     }
 
-    /// Hex answers before reading a body it rejects and closes; the answer
+    /// GoSpell answers before reading a body it rejects and closes; the answer
     /// must survive a body too large for the socket buffers.
     #[test]
     fn a_refusal_survives_a_large_upload() {
@@ -757,7 +760,7 @@ mod tests {
         let upload = vec![0_u8; 4 * 1024 * 1024];
         let (status, body) = send(
             address,
-            "hex_test",
+            "gospell_test",
             "/transcriptions?model=parakeet_v2",
             "audio/wav",
             &upload,
@@ -771,7 +774,7 @@ mod tests {
     }
 }
 
-/// The process wait `hex restart` uses, on every OS that takes it. The child
+/// The process wait `gospell restart` uses, on every OS that takes it. The child
 /// half follows `desktop::process_exit`'s pattern: this same test binary,
 /// selected with `--exact`, switched into child mode by an environment
 /// variable.
@@ -783,7 +786,7 @@ mod exit_watch_tests {
 
     use super::ExitWatch;
 
-    const CHILD: &str = "HEX_EXIT_WATCH_CHILD";
+    const CHILD: &str = "GOSPELL_EXIT_WATCH_CHILD";
     const CHILD_TEST: &str = "local_api::discovery::exit_watch_tests::stdin_child";
 
     /// The child half: ends when its stdin closes. The parent holds the pipe
@@ -810,8 +813,8 @@ mod exit_watch_tests {
             .unwrap()
     }
 
-    /// `hex restart` takes the watch while the old Hex runs and needs it to
-    /// report that Hex's exit; a process still running must not read as gone.
+    /// `gospell restart` takes the watch while the old GoSpell runs and needs it to
+    /// report that GoSpell's exit; a process still running must not read as gone.
     #[test]
     fn waiting_for_a_process_reports_whether_it_exited() {
         assert!(ExitWatch::new(0).is_none(), "pid 0 is not a process");

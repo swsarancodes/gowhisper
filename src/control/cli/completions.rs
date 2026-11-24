@@ -1,18 +1,18 @@
-//! `hex completions <shell>`: a completion script for `hex`, generated at
+//! `gospell completions <shell>`: a completion script for `gospell`, generated at
 //! runtime from the same clap definitions the CLI parses, so it stays in sync
 //! with every command and flag instead of being written out by hand. It works
-//! with Hex running or stopped.
+//! with GoSpell running or stopped.
 
 use std::io::Write;
 
 use clap::Command;
 use clap_complete::Shell;
 
-/// `hex completions <shell>`: the script on stdout and nothing else.
+/// `gospell completions <shell>`: the script on stdout and nothing else.
 pub(super) fn run(shell: Shell, mut top_level: Command) -> u8 {
     let script = script(shell, &mut top_level);
     let mut stdout = std::io::stdout().lock();
-    // A reader that stops early (`hex completions bash | head`) is not a
+    // A reader that stops early (`gospell completions bash | head`) is not a
     // failure: a closed pipe has nowhere to write and needs no message.
     match stdout.write_all(&script).and_then(|()| stdout.flush()) {
         Ok(()) => 0,
@@ -22,10 +22,10 @@ pub(super) fn run(shell: Shell, mut top_level: Command) -> u8 {
 }
 
 /// The completion script `shell` runs for `command`'s tree, whose binary is
-/// `hex`.
+/// `gospell`.
 fn script(shell: Shell, command: &mut Command) -> Vec<u8> {
     let mut script = Vec::new();
-    clap_complete::generate(shell, command, "hex", &mut script);
+    clap_complete::generate(shell, command, "gospell", &mut script);
     script
 }
 
@@ -34,11 +34,11 @@ mod tests {
     use super::*;
     use clap::{CommandFactory, Parser, Subcommand};
 
-    /// The shape every OS's top-level `Cli` has: a `hex` command whose
+    /// The shape every OS's top-level `Cli` has: a `gospell` command whose
     /// subcommands are the flattened [`super::super::ControlCli`] beside that
     /// OS's own.
     #[derive(Parser)]
-    #[command(name = "hex")]
+    #[command(name = "gospell")]
     struct Top {
         #[command(subcommand)]
         command: Option<TopCommand>,

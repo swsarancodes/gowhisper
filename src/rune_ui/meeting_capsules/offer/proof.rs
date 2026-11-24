@@ -230,7 +230,7 @@ fn the_offer_has_no_default_key_and_names_each_focus_target() {
 fn detected_offer_sheet() {
     use crate::rune_ui::offscreen;
     use std::fmt::Write;
-    let Some(dir) = std::env::var_os("HEX_DETECTED_OFFERS") else {
+    let Some(dir) = std::env::var_os("GOSPELL_DETECTED_OFFERS") else {
         return;
     };
     let dir = std::path::PathBuf::from(dir);

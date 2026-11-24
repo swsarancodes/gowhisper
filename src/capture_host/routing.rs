@@ -1,7 +1,7 @@
 //! Where a written capture goes among OpenCode sessions: Scrawl's router
-//! (`crates/router`) run in Hex's process with `capture.routing` and
+//! (`crates/router`) run in GoSpell's process with `capture.routing` and
 //! Scrawl's own router folders, so `scrawl router undo`, Scrawl's rule
-//! offers, and its evals see Hex's sends as Scrawl's.
+//! offers, and its evals see GoSpell's sends as Scrawl's.
 //!
 //! The collector starts a [`Look`] at the tab, terminal, and sessions the
 //! moment a capture stops, beside its writing. Once it is written, the
@@ -165,7 +165,7 @@ pub enum RouteDelivery {
 // ---------------------------------------------------------------------------
 // The router.
 
-/// The router with Hex's `capture.routing` and Scrawl's folders under
+/// The router with GoSpell's `capture.routing` and Scrawl's folders under
 /// `~/Library/Application Support/scrawl`. Never reads
 /// `~/.config/scrawl`. Its own log lines name sites and sessions, so they
 /// go to tracing's debug level, except how sends went (`deliver: …`).
@@ -312,7 +312,7 @@ pub(super) enum Job {
     /// The pointer is on the capsule (`true`) or left it: a rule's send
     /// waiting out its Undo window pauses there and resumes after.
     Hold(bool),
-    /// `hex capture send`: any capture, to `to` or where its route or its
+    /// `gospell capture send`: any capture, to `to` or where its route or its
     /// last send says.
     #[cfg_attr(target_os = "windows", allow(dead_code))]
     SendBundle {
@@ -323,12 +323,12 @@ pub(super) enum Job {
     },
 }
 
-/// The running host's route queue, for `hex capture send`, with the
+/// The running host's route queue, for `gospell capture send`, with the
 /// [`Routes`] it belongs to.
 static JOBS: Mutex<Option<(u64, SyncSender<Job>)>> = Mutex::new(None);
 static NEXT_ROUTES: AtomicU64 = AtomicU64::new(0);
 
-/// How long `hex capture send` waits for the send, inside the control
+/// How long `gospell capture send` waits for the send, inside the control
 /// deadline.
 #[cfg_attr(target_os = "windows", allow(dead_code))]
 const CLI_WAIT: Duration = Duration::from_secs(8);
@@ -360,7 +360,7 @@ pub(super) fn send_bundle(
     }
     answer
         .recv_timeout(CLI_WAIT)
-        .unwrap_or_else(|_| Ok("Still sending; `hex capture show` tells how it went".into()))
+        .unwrap_or_else(|_| Ok("Still sending; `gospell capture show` tells how it went".into()))
 }
 
 /// The `capture-route` thread and its queue.
@@ -520,7 +520,7 @@ impl Worker {
         }
     }
 
-    /// `hex capture send`: the newest capture as the capsule's pick, any
+    /// `gospell capture send`: the newest capture as the capsule's pick, any
     /// other straight to `to` or where it last went. `always` (newest only)
     /// also saves a rule for its site or app, as the capsule's ⇧⏎ does.
     fn send_bundle(
@@ -1072,14 +1072,14 @@ fn unreachable_why(error: &str) -> String {
 /// the bundle there first.
 const FILES_UNSEEN: &str = "OpenCode can't see files";
 
-/// OpenCode answered but refused Hex's credentials (HTTP 401 or 403): the
+/// OpenCode answered but refused GoSpell's credentials (HTTP 401 or 403): the
 /// password in its registration was missing or didn't match, as when the
 /// service runs in WSL and writes its registration inside WSL's home.
-const AUTH_REFUSED: &str = "OpenCode needs a password Hex doesn't have";
+const AUTH_REFUSED: &str = "OpenCode needs a password GoSpell doesn't have";
 
 /// What process.log says beside [`AUTH_REFUSED`]; it never names the
 /// password itself.
-const AUTH_HINT: &str = "OpenCode refused Hex's password. Hex reads it from OpenCode's \
+const AUTH_HINT: &str = "OpenCode refused GoSpell's password. GoSpell reads it from OpenCode's \
                          service.json under this user's ~/.local/state/opencode (or \
                          OPENCODE_PASSWORD); on Windows, turn on Labs › OpenCode in WSL \
                          when OpenCode runs there. The capture is saved and copied either way";
@@ -1137,7 +1137,7 @@ fn rules_of(
 
 /// What the capsule calls the thing a rule would match: a site's origin
 /// or an app's bundle ID as they are, and a terminal by its folder's name
-/// ("hex terminal").
+/// ("gospell terminal").
 fn site_of((kind, key): &(RuleKind, String)) -> String {
     match kind {
         RuleKind::Site | RuleKind::App => key.clone(),
@@ -1252,7 +1252,7 @@ fn answer_for(
         }
     };
     let mut answered = match decided {
-        // The router also trusts a page naming its session. In Hex, only the
+        // The router also trusts a page naming its session. In GoSpell, only the
         // user's saved site, terminal or app rule authorizes an automatic send.
         Decided::Judged(smart::Decision::Send { to, instead })
             if matches!(
@@ -1406,7 +1406,7 @@ fn recorded_destination(bundle: &Path) -> Option<Destination> {
         .and_then(|(_, loaded)| loaded.destination)
 }
 
-/// A delivery as a sentence for `hex capture send`.
+/// A delivery as a sentence for `gospell capture send`.
 fn describe(delivery: &RouteDelivery) -> String {
     match delivery {
         RouteDelivery::Sending { to } => format!("Sending to {to}"),
@@ -1912,8 +1912,8 @@ mod tests {
         assert_eq!(unreachable_why(spent), "didn't answer in time");
         let down = "couldn't list sessions: Could not reach server at http://127.0.0.1:4096";
         assert_eq!(unreachable_why(down), "it isn't running");
-        // A service that wants a password Hex doesn't have (#1131: OpenCode
-        // in WSL, Hex on Windows) says so rather than a bare status.
+        // A service that wants a password GoSpell doesn't have (#1131: OpenCode
+        // in WSL, GoSpell on Windows) says so rather than a bare status.
         assert_eq!(
             unreachable_why("couldn't list sessions: 401 Unauthorized"),
             AUTH_REFUSED
@@ -2080,7 +2080,7 @@ mod tests {
 
         fn temp(name: &str) -> PathBuf {
             let dir = std::env::temp_dir().join(format!(
-                "hex-route-{name}-{}-{}",
+                "gospell-route-{name}-{}-{}",
                 std::process::id(),
                 NEXT_ROUTES.fetch_add(1, Ordering::Relaxed)
             ));
@@ -2524,7 +2524,7 @@ mod tests {
                     live(vec![
                         candidate("ses_board", "BOARD", 30),
                         candidate("ses_home", "HOME", 20),
-                        candidate("ses_hex", "HEX", 10),
+                        candidate("ses_gospell", "GOSPELL", 10),
                     ]),
                     smart::Judgement {
                         decision: smart::Decision::Keep {
@@ -2535,19 +2535,19 @@ mod tests {
                 ))
                 .unwrap();
             worker.prepared();
-            assert_eq!(rows(&worker), ["ses_board", "ses_home", "ses_hex"]);
-            // The model picks the last row; meanwhile HEX moved and a new
+            assert_eq!(rows(&worker), ["ses_board", "ses_home", "ses_gospell"]);
+            // The model picks the last row; meanwhile GOSPELL moved and a new
             // session opened.
             let pick = scored_by(
-                "ses_hex",
-                "HEX",
+                "ses_gospell",
+                "GOSPELL",
                 smart::Basis::Clue(smart::Source::Named),
                 "mentioned",
             );
             updates
                 .send(preparation::Update::judged(
                     live(vec![
-                        candidate("ses_hex", "HEX", 40),
+                        candidate("ses_gospell", "GOSPELL", 40),
                         candidate("ses_board", "BOARD", 30),
                         candidate("ses_home", "HOME", 20),
                         candidate("ses_new", "NEW", 50),
@@ -2563,7 +2563,7 @@ mod tests {
             worker.prepared();
             assert_eq!(
                 rows(&worker),
-                ["ses_board", "ses_home", "ses_hex", "ses_new"]
+                ["ses_board", "ses_home", "ses_gospell", "ses_new"]
             );
             let answer = &worker.current.as_ref().unwrap().answer;
             assert!(matches!(answer, RouteAnswer::Guess { .. }), "{answer:?}");
@@ -2927,7 +2927,7 @@ mod tests {
             let base = std::env::temp_dir()
                 .canonicalize()
                 .unwrap()
-                .join(format!("hex-rule-worktree-{}", std::process::id()));
+                .join(format!("gospell-rule-worktree-{}", std::process::id()));
             let (main, worktree) = (base.join("seer"), base.join("worktrees/rune"));
             let gitdir = main.join(".git/worktrees/rune");
             std::fs::create_dir_all(&gitdir).unwrap();
@@ -3146,7 +3146,7 @@ mod tests {
             }
         }
 
-        /// With smart routing, a capture of an app (Hex's own Settings among them) suggests the
+        /// With smart routing, a capture of an app (GoSpell's own Settings among them) suggests the
         /// open session whose checkout is named like the app, and sends nothing until it's
         /// picked, however confident sends may be. The port ladder doesn't read the app.
         #[test]

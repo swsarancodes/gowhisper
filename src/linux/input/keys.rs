@@ -11,7 +11,7 @@ pub(crate) struct Keysym {
     pub(crate) value: u32,
 }
 
-/// Named keys, by every lowercase name Settings or `hex settings` records.
+/// Named keys, by every lowercase name Settings or `gospell settings` records.
 const NAMED: &[(&[&str], &str, u32)] = &[
     (&["space", " "], "space", 0x20),
     (&["enter", "return"], "Return", 0xff0d),

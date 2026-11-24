@@ -2,7 +2,7 @@
 """Convert public datasets of real typing into TypingReplayTests recordings.
 
 The tests read one of two shapes, both in the unit grid described in
-ios/HEXMobileTests/TypingReplayTests.swift. x 0..1 spans the ten columns of the
+ios/GoSpellMobileTests/TypingReplayTests.swift. x 0..1 spans the ten columns of the
 top QWERTY letter row (q's left edge to p's right edge), y 0..1 spans the three
 letter rows, and rows two and three start half and one and a half columns in.
 

@@ -1,4 +1,4 @@
-import { HexError } from "./errors.js"
+import { GoSpellError } from "./errors.js"
 
 const MAX_SSE_EVENT_CHARS = 64 * 1024
 
@@ -12,9 +12,9 @@ export const consumeSse = async (
   onData: (data: string) => boolean | void,
 ): Promise<void> => {
   if (!response.headers.get("content-type")?.toLowerCase().startsWith("text/event-stream")) {
-    throw new HexError("invalid-response", `HEX returned an invalid ${description} content type`)
+    throw new GoSpellError("invalid-response", `GOSPELL returned an invalid ${description} content type`)
   }
-  if (response.body === null) throw new HexError("invalid-response", `HEX returned no ${description} stream`)
+  if (response.body === null) throw new GoSpellError("invalid-response", `GOSPELL returned no ${description} stream`)
 
   const reader = response.body.pipeThrough(new TextDecoderStream()).getReader()
   let line = ""
@@ -44,7 +44,7 @@ export const consumeSse = async (
       if (field === "data") {
         eventChars += value.length + 1
         if (eventChars > MAX_SSE_EVENT_CHARS) {
-          throw new HexError("invalid-response", `HEX ${description} event exceeded its byte limit`)
+          throw new GoSpellError("invalid-response", `GOSPELL ${description} event exceeded its byte limit`)
         }
         data.push(value)
       }
@@ -76,7 +76,7 @@ export const consumeSse = async (
         } else {
           line += character
           if (line.length > MAX_SSE_EVENT_CHARS) {
-            throw new HexError("invalid-response", `HEX ${description} line exceeded its byte limit`)
+            throw new GoSpellError("invalid-response", `GOSPELL ${description} line exceeded its byte limit`)
           }
         }
       }

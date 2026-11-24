@@ -1,4 +1,4 @@
-//! The input and output routes Hex follows: the counters that advance when the
+//! The input and output routes GoSpell follows: the counters that advance when the
 //! OS's devices or its default input change, the CoreAudio and lid listeners
 //! that advance them, and the Bluetooth-avoidance setting that moves the input
 //! route.

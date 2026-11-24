@@ -1,4 +1,4 @@
-//! `"With Hex"`'s payoff, timed from the scene's cheers ([`Cheer`]): your
+//! `"With GoSpell"`'s payoff, timed from the scene's cheers ([`Cheer`]): your
 //! spoken line goes out, tapbacks rain on it, replies cascade in, status
 //! pills and renames pile on, and confetti and fireworks go off around the
 //! conversation ([`super::fireworks`]). Every part is optional per scene.
@@ -42,9 +42,9 @@ impl Said {
     }
 }
 
-/// `"With Hex"`'s beats, in seconds after the shortcut goes down.
+/// `"With GoSpell"`'s beats, in seconds after the shortcut goes down.
 #[derive(Clone, Debug)]
-pub(crate) struct HexBeats {
+pub(crate) struct GoSpellBeats {
     /// Your line leaving the field.
     pub(crate) send: f64,
     /// The boss typing before a first reply.
@@ -60,10 +60,10 @@ pub(crate) struct HexBeats {
     pub(crate) done: f64,
 }
 
-impl HexBeats {
+impl GoSpellBeats {
     /// The scene's cheers laid out after your line goes out at `send`.
     pub(crate) fn plan(script: &'static Script<'static>, send: f64, t: &Timing) -> Self {
-        let mut b = HexBeats {
+        let mut b = GoSpellBeats {
             send,
             dots: None,
             taps: Vec::new(),
@@ -86,7 +86,7 @@ impl HexBeats {
                     }
                 }
                 Cheer::Says { who, text, gap } => {
-                    let gap = gap.unwrap_or(if replied { t.cheer } else { t.hex_reply });
+                    let gap = gap.unwrap_or(if replied { t.cheer } else { t.gospell_reply });
                     if !replied && gap > DOTS_FROM + 0.3 && who != Speaker::You {
                         b.dots = Some((at + DOTS_FROM, at + gap));
                     }
@@ -154,11 +154,11 @@ pub(crate) const MAX_TAPS: usize = 4;
 /// What a scene's payoff breaks, sent `send` seconds after the shortcut.
 #[cfg(test)]
 pub(crate) fn check(script: &'static Script<'static>, send: f64, t: &Timing) -> Vec<String> {
-    let beats = HexBeats::plan(script, send, t);
+    let beats = GoSpellBeats::plan(script, send, t);
     let mut problems = Vec::new();
     if beats.done > MAX_SECS {
         problems.push(format!(
-            "\"With Hex\" runs {:.1} s from the shortcut; keep it under {MAX_SECS} s",
+            "\"With GoSpell\" runs {:.1} s from the shortcut; keep it under {MAX_SECS} s",
             beats.done
         ));
     }
@@ -280,7 +280,7 @@ fn fireworks_slot(mark: u32, key: &str) -> El {
 /// stage of `size`.
 pub(crate) fn effects(
     p: Paint,
-    beats: &HexBeats,
+    beats: &GoSpellBeats,
     t: f64,
     size: [f32; 2],
     reduced: bool,
@@ -338,7 +338,7 @@ mod tests {
     #[test]
     fn every_payoff_fits_in_eight_seconds() {
         for (name, _) in SCENES {
-            let beats = HexBeats::plan(leaked(name), 2.2, &Timing::default());
+            let beats = GoSpellBeats::plan(leaked(name), 2.2, &Timing::default());
             assert!(beats.done <= 8.0, "{name}: {}", beats.done);
             assert!(beats.lines.windows(2).all(|w| w[0].0 <= w[1].0));
         }
@@ -346,11 +346,11 @@ mod tests {
 
     /// The swearing scenes are the only long payoff, and only test and debug
     /// builds carry them: a release build has nothing to plan here.
-    #[cfg(hex_dev_onboarding)]
+    #[cfg(gospell_dev_onboarding)]
     #[test]
     fn the_cheers_cascade_and_the_effects_follow() {
         let t = Timing::default();
-        let beats = HexBeats::plan(leaked("A-incontinence.scene"), 2.0, &t);
+        let beats = GoSpellBeats::plan(leaked("A-incontinence.scene"), 2.0, &t);
         let replies: Vec<f64> = beats
             .lines
             .iter()

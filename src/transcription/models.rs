@@ -261,7 +261,7 @@ pub(crate) fn choices_for_runtime(language: &str) -> Vec<ModelChoice> {
         ],
         // FLEURS Japanese test: Granite Speech 5.0 tied Whisper turbo
         // (5.04% CER against 5.02%) at 2.4 times its speed, without
-        // vocabulary, so it stays unbadged (Hex's run).
+        // vocabulary, so it stays unbadged (GoSpell's run).
         "ja" => &[
             (WhisperLargeV3Turbo, Recommended),
             (SenseVoiceSmall, Fastest),
@@ -283,16 +283,16 @@ pub(crate) fn choices_for_runtime(language: &str) -> Vec<ModelChoice> {
             (WhisperLargeV3Turbo, Vocabulary),
         ],
         // FLEURS Russian test: 5.37% WER against Parakeet v3's 6.52%, and
-        // Whisper turbo's 5.36% at a fifth of its speed (Hex's run).
+        // Whisper turbo's 5.36% at a fifth of its speed (GoSpell's run).
         "ru" => &[(GigaAmV3, Recommended), (WhisperLargeV3Turbo, Vocabulary)],
         // FLEURS Norwegian test: 6.68% WER against Whisper turbo's 8.94%, at
-        // 0.89 times its speed and 60% of its download (Hex's run).
+        // 0.89 times its speed and 60% of its download (GoSpell's run).
         "no" => &[
             (NbWhisperMedium, Recommended),
             (WhisperLargeV3Turbo, Vocabulary),
         ],
         // KBLab's model card figure for the default (standard) checkpoint on
-        // the FLEURS Swedish test at 6.6% WER (Hex hasn't measured any of the
+        // the FLEURS Swedish test at 6.6% WER (GoSpell hasn't measured any of the
         // three in Swedish); Parakeet v3 is the faster, less accurate pick.
         "sv" => &[
             (KbWhisperMedium, Recommended),
@@ -363,13 +363,13 @@ const WHISPER_LANGUAGES: &[&str] = &[
     "ha", "ba", "jw", "su", "yue",
 ];
 
-/// Whether `language` is a code Hex knows: one Settings lists, or one of
+/// Whether `language` is a code GoSpell knows: one Settings lists, or one of
 /// Whisper's, which only models that accept any language support.
 pub fn is_known_language(language: &str) -> bool {
     known_language(language).is_some()
 }
 
-/// `language` as Hex's own `'static` code, when Hex knows it.
+/// `language` as GoSpell's own `'static` code, when GoSpell knows it.
 pub(crate) fn known_language(language: &str) -> Option<&'static str> {
     LANGUAGES
         .iter()
@@ -476,7 +476,7 @@ pub fn is_in_place(model: &ModelDefinition) -> bool {
     !model.id.is_custom() && model_path(model).is_ok_and(|path| in_place(&path) && path.is_file())
 }
 
-/// Whether `path` is outside Hex's own models folder: a found file Hex
+/// Whether `path` is outside GoSpell's own models folder: a found file GoSpell
 /// reads in place and never writes, moves, or deletes.
 fn in_place(path: &Path) -> bool {
     models_dir().is_ok_and(|directory| !path.starts_with(directory))
@@ -517,7 +517,7 @@ pub fn verify_installed(model: &ModelDefinition, canceled: &AtomicBool) -> Resul
         return super::custom_models::verify(id, canceled);
     }
     let path = model_path(model)?;
-    // Receipts for found files live with Hex, never beside the file.
+    // Receipts for found files live with GoSpell, never beside the file.
     if in_place(&path) {
         return super::found_models::adopt_catalog(model, &path, canceled);
     }
@@ -650,7 +650,7 @@ fn delete_set_aside_in(directory: &Path) {
 }
 
 /// Takes the models folder's download lock. While another process holds it
-/// (`hex model install` in a terminal, or another Hex), `waiting` hears every
+/// (`gospell model install` in a terminal, or another GoSpell), `waiting` hears every
 /// attempt, so a caller can report that process's progress.
 fn lock_downloads(directory: &Path, canceled: &AtomicBool, waiting: impl Fn()) -> Result<File> {
     let lock = File::create(directory.join(".download.lock"))?;
@@ -689,7 +689,7 @@ fn artifact_receipt_matches(path: &Path, artifact: &GgufArtifact) -> bool {
         && modified_ns(&metadata).is_some_and(|modified| modified == receipt.modified_ns)
 }
 
-/// `hex model install` on Linux and Windows, and tests.
+/// `gospell model install` on Linux and Windows, and tests.
 #[cfg_attr(target_os = "macos", allow(dead_code))]
 pub fn download_with_progress(
     model: &ModelDefinition,
@@ -713,7 +713,7 @@ pub fn download_with_stage_progress(
     let ModelRuntime::Gguf(artifact) = &model.runtime else {
         bail!("{} is installed and managed by macOS", model.name);
     };
-    // An import has nothing to download: Hex checks its own copy. A catalog
+    // An import has nothing to download: GoSpell checks its own copy. A catalog
     // model another app already downloaded is checked and used where it is.
     let path = if model.id.is_custom() || model_path(model).is_ok_and(|path| in_place(&path)) {
         ModelPreparationStage::Verifying.store(stage);
@@ -829,7 +829,7 @@ fn download_artifact(
     let fetched = crate::net::download(
         &crate::net::Download {
             url: &url,
-            user_agent: &format!("hex/{}", crate::VERSION),
+            user_agent: &format!("gospell/{}", crate::VERSION),
             size: Some(artifact.bytes),
             canceled: Some(canceled),
         },
@@ -1905,7 +1905,7 @@ mod tests {
     fn artifact_verification_checks_size_and_checksum() {
         let model = fixture_model();
         let path = std::env::temp_dir().join(format!(
-            "hex-model-verification-{}-{}",
+            "gospell-model-verification-{}-{}",
             std::process::id(),
             NEXT_TEMP_FILE.fetch_add(1, Ordering::Relaxed)
         ));
@@ -1932,7 +1932,7 @@ mod tests {
             unreachable!("the fixture is a GGUF model");
         };
         let path = std::env::temp_dir().join(format!(
-            "hex-artifact-verification-{}-{}",
+            "gospell-artifact-verification-{}-{}",
             std::process::id(),
             NEXT_TEMP_FILE.fetch_add(1, Ordering::Relaxed)
         ));
@@ -1952,7 +1952,7 @@ mod tests {
     fn verification_receipt_is_invalidated_when_the_artifact_changes() {
         let model = fixture_model();
         let path = std::env::temp_dir().join(format!(
-            "hex-model-receipt-{}-{}",
+            "gospell-model-receipt-{}-{}",
             std::process::id(),
             NEXT_TEMP_FILE.fetch_add(1, Ordering::Relaxed)
         ));
@@ -1970,7 +1970,7 @@ mod tests {
     fn readiness_needs_the_pinned_files_verification_receipt() {
         let model = fixture_model();
         let directory = std::env::temp_dir().join(format!(
-            "hex-model-ready-{}-{}",
+            "gospell-model-ready-{}-{}",
             std::process::id(),
             NEXT_TEMP_FILE.fetch_add(1, Ordering::Relaxed)
         ));
@@ -1978,7 +1978,7 @@ mod tests {
         set_test_models_dir(Some(directory.clone()));
         let path = directory.join("fixture.gguf");
         fs::write(&path, b"hello").unwrap();
-        // A file at the pinned size is installed, but not ready until Hex
+        // A file at the pinned size is installed, but not ready until GoSpell
         // has checked it once and written the receipt.
         assert!(is_installed(&model, "en"));
         assert!(!is_verified(&model));
@@ -1992,7 +1992,7 @@ mod tests {
     #[test]
     fn an_installed_model_does_not_wait_for_the_speech_detector() {
         let directory = std::env::temp_dir().join(format!(
-            "hex-installed-download-{}-{}",
+            "gospell-installed-download-{}-{}",
             std::process::id(),
             NEXT_TEMP_FILE.fetch_add(1, Ordering::Relaxed),
         ));
@@ -2032,7 +2032,7 @@ mod tests {
     fn installed_only_verification_never_downloads_or_replaces_an_invalid_model() {
         let model = fixture_model();
         let directory = std::env::temp_dir().join(format!(
-            "hex-installed-model-{}-{}",
+            "gospell-installed-model-{}-{}",
             std::process::id(),
             NEXT_TEMP_FILE.fetch_add(1, Ordering::Relaxed),
         ));
@@ -2064,7 +2064,7 @@ mod tests {
     )]
     fn removing_a_model_deletes_its_artifacts_unless_a_download_is_active() {
         let directory = std::env::temp_dir().join(format!(
-            "hex-remove-model-{}-{}",
+            "gospell-remove-model-{}-{}",
             std::process::id(),
             NEXT_TEMP_FILE.fetch_add(1, Ordering::Relaxed),
         ));
@@ -2117,7 +2117,7 @@ mod tests {
         }
 
         let directory = std::env::temp_dir().join(format!(
-            "hex-external-download-{}-{}",
+            "gospell-external-download-{}-{}",
             std::process::id(),
             NEXT_TEMP_FILE.fetch_add(1, Ordering::Relaxed),
         ));
@@ -2127,7 +2127,7 @@ mod tests {
             .with_extension("gguf.partial");
         fs::write(&partial, b"hel").unwrap();
         let canceled = Arc::new(AtomicBool::new(false));
-        // Another process (`hex model install` in a terminal) owns the lock
+        // Another process (`gospell model install` in a terminal) owns the lock
         // and is still writing the partial file.
         let held = Held {
             canceled: canceled.clone(),
@@ -2185,7 +2185,7 @@ mod tests {
     #[test]
     fn set_aside_models_are_swept_and_replacing_keeps_the_new_file() {
         let directory = std::env::temp_dir().join(format!(
-            "hex-set-aside-{}-{}",
+            "gospell-set-aside-{}-{}",
             std::process::id(),
             NEXT_TEMP_FILE.fetch_add(1, Ordering::Relaxed),
         ));
@@ -2242,7 +2242,7 @@ mod tests {
             (mapping, view)
         }
         let directory = std::env::temp_dir().join(format!(
-            "hex-mapped-model-{}-{}",
+            "gospell-mapped-model-{}-{}",
             std::process::id(),
             NEXT_TEMP_FILE.fetch_add(1, Ordering::Relaxed),
         ));

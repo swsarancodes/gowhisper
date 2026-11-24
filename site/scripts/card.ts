@@ -12,7 +12,7 @@ const fonts = [
   { name: "Inter", data: font(500), weight: 500 as const, style: "normal" as const },
   { name: "Inter", data: font(600), weight: 600 as const, style: "normal" as const },
 ]
-const icon = `data:image/png;base64,${readFileSync(join(root, "scripts/og/hex-icon.png")).toString("base64")}`
+const icon = `data:image/png;base64,${readFileSync(join(root, "scripts/og/gospell-icon.png")).toString("base64")}`
 
 type Node = { type: string; props: Record<string, unknown> }
 const el = (type: string, style: Record<string, unknown>, children?: unknown, props: Record<string, unknown> = {}): Node => ({
@@ -30,7 +30,7 @@ function titleSize(title: string): number {
   return 72
 }
 
-// The card: the icon and the kicker ("Hex Labs") above, the title big, the
+// The card: the icon and the kicker ("GoSpell Labs") above, the title big, the
 // line, and the footer, on the home page card's black with its soft light.
 export async function card(kicker: string, title: string, line: string, footer: string): Promise<Buffer> {
   const tree = el(

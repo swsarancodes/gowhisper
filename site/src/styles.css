@@ -135,7 +135,7 @@ a {
 }
 
 .keycap:focus-visible {
-  outline: 2px solid #a9b9ff;
+  outline: 2px solid #ff8600;
   outline-offset: 6px;
 }
 
@@ -350,7 +350,7 @@ a {
 }
 
 .sound:focus-visible {
-  outline: 2px solid #a9b9ff;
+  outline: 2px solid #ff8600;
   outline-offset: 2px;
 }
 
@@ -393,7 +393,7 @@ a {
 .command__copy:focus-visible,
 .install button:focus-visible,
 .install a:focus-visible {
-  outline: 2px solid #a9b9ff;
+  outline: 2px solid #ff8600;
   outline-offset: 4px;
 }
 
@@ -710,7 +710,7 @@ button.download:hover {
   font-size: 1rem;
 }
 
-/* The Anomaly copyright, as on opentunnel.xyz and the OpenCode console: the signature sits faintly behind the line. */
+/* The GoML copyright, as on opentunnel.xyz and the OpenCode console: the signature sits faintly behind the line. */
 .site-footer {
   display: flex;
   justify-content: center;

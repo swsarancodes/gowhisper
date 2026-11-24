@@ -1,5 +1,5 @@
 //! The English title and line each Labs card shows. The window translates
-//! them (`desktop::i18n`), and Hex's website builds a page per lab from them
+//! them (`desktop::i18n`), and GoSpell's website builds a page per lab from them
 //! (`labs::web`, `site/src/labs.json`).
 
 use super::Feature;
@@ -99,7 +99,9 @@ impl Feature {
     pub const fn summary(self) -> &'static str {
         match self {
             Self::Meetings => "Record calls and keep a written copy",
-            Self::VoiceFilter => "A Hex Microphone other apps can pick, with live voice filters",
+            Self::VoiceFilter => {
+                "A GoSpell Microphone other apps can pick, with live voice filters"
+            }
             Self::Playground => "Browse scenes and stories in a window",
             Self::LiveText => {
                 "Show your words next to the small recording indicator (Dictation HUD) as you speak, before the text is pasted"
@@ -111,22 +113,22 @@ impl Feature {
                 "When a dictation fails, show the reason next to the small recording indicator (Dictation HUD)"
             }
             Self::LiveTyping => {
-                "On Wayland, show your words in the text box as you speak, then Hex types the text there"
+                "On Wayland, show your words in the text box as you speak, then GoSpell types the text there"
             }
             Self::LiveChapters => "Split a meeting's text into chapters while it records",
             Self::ScreenVocabulary => {
-                "Names in the window you're dictating into help Hex spell them. Never saved"
+                "Names in the window you're dictating into help GoSpell spell them. Never saved"
             }
             Self::LearnFromCorrections => {
-                "When you fix a name in text Hex just pasted, Hex adds the corrected spelling to Vocabulary. It watches only that field, for up to 5 minutes, and never sends it anywhere."
+                "When you fix a name in text GoSpell just pasted, GoSpell adds the corrected spelling to Vocabulary. It watches only that field, for up to 5 minutes, and never sends it anywhere."
             }
             Self::TerminalPaste => "Paste with Ctrl+Shift+V so terminals accept it",
             Self::KeyboardModelSwitching => {
-                "When you switch keyboard language, Hex switches to the speech model you picked for it"
+                "When you switch keyboard language, GoSpell switches to the speech model you picked for it"
             }
             Self::MouseShortcuts => "Use a mouse button, such as a side button, as a shortcut",
             Self::PauseBrowser => {
-                "While dictating with Pause media: YouTube and other tabs, resumed only if Hex paused them"
+                "While dictating with Pause media: YouTube and other tabs, resumed only if GoSpell paused them"
             }
             Self::ShareShortcut => {
                 "Other apps see your dictation key too, so it can also be push-to-talk in apps like Discord"
@@ -142,7 +144,7 @@ impl Feature {
             }
             Self::CopyOnly => "Put the dictation on the clipboard instead of pasting it",
             Self::ReturnToApp => {
-                "If another app comes to the front while you dictate, Hex switches back to the app you started in before pasting. If it can't, nothing is pasted and Paste last dictation has the text."
+                "If another app comes to the front while you dictate, GoSpell switches back to the app you started in before pasting. If it can't, nothing is pasted and Paste last dictation has the text."
             }
             Self::SpokenFormatting => {
                 "Say \"new line\", \"new paragraph\", \"open quote\", or \"close quote\" to insert line breaks and quotation marks"
@@ -191,7 +193,7 @@ impl Feature {
                 "Use Menu, Pause, or Scroll Lock as a shortcut by itself, such as Caps Lock remapped to Menu"
             }
             Self::HistoryStats => {
-                "Add a Stats button to History that summarizes the dictations you kept, with time saved against your typing speed, the hour you dictate most, a year-long heatmap, and all-time totals kept beyond History's retention (counts only, no text). The hex history stats command prints it too"
+                "Add a Stats button to History that summarizes the dictations you kept, with time saved against your typing speed, the hour you dictate most, a year-long heatmap, and all-time totals kept beyond History's retention (counts only, no text). The gospell history stats command prints it too"
             }
             Self::HistoryStatsStrip => {
                 "Show your dictation totals in a compact strip at the top of History. Needs Dictation stats."
@@ -209,23 +211,23 @@ impl Feature {
                 "Add a speech model file without copying it, so several accounts can share one file"
             }
             Self::KQuantModels => {
-                "Add your own speech model files saved in smaller formats (Q6_K, Q5_K, or Q4_K). They take less space, but Hex hasn't checked them, so accuracy may vary."
+                "Add your own speech model files saved in smaller formats (Q6_K, Q5_K, or Q4_K). They take less space, but GoSpell hasn't checked them, so accuracy may vary."
             }
             Self::PickerDownloaded => {
                 "Show only downloaded speech models in the list, with the space they take"
             }
             Self::SectionKeyAlone => {
-                "Use the key left of 1 on ISO keyboards, § or a dead key such as ^, alone as a shortcut; Hex takes it from every app while it's bound"
+                "Use the key left of 1 on ISO keyboards, § or a dead key such as ^, alone as a shortcut; GoSpell takes it from every app while it's bound"
             }
             Self::MicrophoneKeyAlone => {
-                "Use the mic key in F5's spot on Mac laptops as a shortcut; once set, only Hex gets it"
+                "Use the mic key in F5's spot on Mac laptops as a shortcut; once set, only GoSpell gets it"
             }
             Self::KeepRecordings => {
                 "Keep the audio of your dictations in History, so you can turn them into text again with another speech model"
             }
             Self::Appearance => "Use light or dark for the main window instead of the system's",
             Self::HideMenuBarIcon => {
-                "Hide Hex's icon from the menu bar. Shortcuts keep working; open Hex again from Finder or Spotlight for Settings"
+                "Hide GoSpell's icon from the menu bar. Shortcuts keep working; open GoSpell again from Finder or Spotlight for Settings"
             }
             Self::GnomeClipboardRestore => {
                 "Put back what you copied before a dictation, through XWayland. Works only while XWayland is already running"
@@ -255,16 +257,16 @@ impl Feature {
                 "Add an audio file to Meetings and turn it into text on this Mac"
             }
             Self::CapsLockDictation => {
-                "Press Caps Lock to start dictating and again to finish. Hex keeps Caps Lock off and uses its light while it records and writes the text"
+                "Press Caps Lock to start dictating and again to finish. GoSpell keeps Caps Lock off and uses its light while it records and writes the text"
             }
             Self::OpenCodeInWsl => {
                 "Use OpenCode running in your default WSL distribution for rewriting in Modes and the Modes model list. Looking for it can start WSL"
             }
             Self::ApiProcessing => {
-                "Apps that use Hex's local API can ask for text with Global mode's replacements, corrections, rewriting, and transformations applied"
+                "Apps that use GoSpell's local API can ask for text with Global mode's replacements, corrections, rewriting, and transformations applied"
             }
             Self::ApiTimestamps => {
-                "Apps that use Hex's local API can ask when each word or phrase starts and ends"
+                "Apps that use GoSpell's local API can ask when each word or phrase starts and ends"
             }
             Self::SpeakersOnly => {
                 "Apply \"While dictating\" only when sound plays through speakers. Headphones are left alone."
@@ -273,7 +275,7 @@ impl Feature {
                 "Up to four more shortcuts that each dictate like the main one, each with its own mode"
             }
             Self::PauseMenu => {
-                "Add Pause Hex to the menu bar. While paused, Hex ignores its shortcuts so other apps get the keys"
+                "Add Pause GoSpell to the menu bar. While paused, GoSpell ignores its shortcuts so other apps get the keys"
             }
             Self::CalendarMenu => {
                 "Show your next calendar meetings in the menu bar menu. Choosing one with a call link opens it; that click doesn't start a recording."
@@ -282,7 +284,7 @@ impl Feature {
                 "Adds a button to the Calendars row to include or leave out every calendar at once."
             }
             Self::VoicePrompt => {
-                "Say \"rewrite this\" and then what you want; Hex redoes the text with the mode's AI model"
+                "Say \"rewrite this\" and then what you want; GoSpell redoes the text with the mode's AI model"
             }
             Self::CursorContext => {
                 "Rewrite uses the text around the cursor to spell names and terms right and fit where it pastes."
@@ -309,7 +311,7 @@ impl Feature {
                 "Edit each mode's apps, corrections and OpenCode rewrite in a Modes pane"
             }
             Self::DropTranscribe => {
-                "Drop a WAV, MP3, AAC, M4A, MP4, MOV, AIFF, CAF, FLAC, OGG, Opus, WebM, or MKV file on the Hex window to save its transcript as a text file next to it"
+                "Drop a WAV, MP3, AAC, M4A, MP4, MOV, AIFF, CAF, FLAC, OGG, Opus, WebM, or MKV file on the GoSpell window to save its transcript as a text file next to it"
             }
             Self::PasteLastPicker => {
                 "Tap Paste Last to paste the newest dictation or annotation; hold it to pick another"
@@ -318,12 +320,14 @@ impl Feature {
                 "Import terms from a CSV file in the Vocabulary sheet, or save the whole list as one"
             }
             Self::AnnotateAgentTools => {
-                "Adds hex annotate zoom, inspect, frames, and skill so coding agents can read a capture closely"
+                "Adds gospell annotate zoom, inspect, frames, and skill so coding agents can read a capture closely"
             }
             Self::AnnotateAgentInstall => {
-                "Adds an Agents section to the Annotate pane that writes the hex-annotate skill into Claude Code, Codex, OpenCode, or Pi, and on macOS links hex onto PATH"
+                "Adds an Agents section to the Annotate pane that writes the gospell-annotate skill into Claude Code, Codex, OpenCode, or Pi, and on macOS links gospell onto PATH"
             }
-            Self::Signature => "Add a line to the end of each dictation, such as \"Sent from Hex\"",
+            Self::Signature => {
+                "Add a line to the end of each dictation, such as \"Sent from GoSpell\""
+            }
             Self::DictationStyle => {
                 "Format every dictation as Polished, Casual, Notes, or Verbatim, like the iPhone app, without an AI model"
             }

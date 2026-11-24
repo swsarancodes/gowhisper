@@ -84,7 +84,7 @@ impl RecordKind {
         }
     }
 
-    /// The `hex settings` value.
+    /// The `gospell settings` value.
     pub const fn id(self) -> &'static str {
         match self {
             Self::Area => "area",
@@ -122,7 +122,7 @@ impl MaxResolution {
         }
     }
 
-    /// The `hex settings` value.
+    /// The `gospell settings` value.
     pub const fn id(self) -> &'static str {
         match self {
             Self::Original => "original",
@@ -217,7 +217,7 @@ impl ExportSize {
         }
     }
 
-    /// The `hex settings` value.
+    /// The `gospell settings` value.
     pub const fn id(self) -> &'static str {
         match self {
             Self::Original => "original",
@@ -236,7 +236,7 @@ impl ExportSize {
     }
 }
 
-/// The frame rates Settings and `hex settings` offer for screen recordings.
+/// The frame rates Settings and `gospell settings` offer for screen recordings.
 pub const SCREENSHOT_FRAME_RATES: [u32; 2] = [30, 60];
 
 impl ScreenshotSettings {
@@ -263,7 +263,7 @@ impl ScreenshotSettings {
     }
 
     /// How a recording's movie is made.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     pub fn movie_size(&self) -> scrawl_capture::capture::MovieSize {
         scrawl_capture::capture::MovieSize {
             one_x: self.scale_to_1x,
@@ -284,7 +284,7 @@ impl AppSettings {
     /// a reset puts Annotate back on its default and the record shortcut may
     /// be saved there, and when the Lab turns on, since with it off Annotate
     /// may take the record shortcut's key.
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     pub(crate) fn clear_record_shortcut_sharing_capture(&mut self) {
         let shared = self
             .screenshots
@@ -327,9 +327,9 @@ impl AppSettings {
     /// Whether Labs › Screenshots can record: macOS, the Lab on, and
     /// Annotate on, since a recording is an Annotate capture.
     pub fn screenshot_recording_available(&self) -> bool {
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         let capture = self.capture_on();
-        #[cfg(not(hex_capture))]
+        #[cfg(not(gospell_capture))]
         let capture = false;
         cfg!(target_os = "macos") && self.labs.screenshots && capture
     }

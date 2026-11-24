@@ -1,7 +1,7 @@
 //! Vocabulary: a sheet from General's Vocabulary row with one row per term
 //! and its "sounds like" spellings, edited in place and saved when typing
 //! pauses, like a mode's corrections. The boost has no control here; it
-//! stays a setting (`hex settings set vocabulary_boost`).
+//! stays a setting (`gospell settings set vocabulary_boost`).
 
 use std::path::{Path, PathBuf};
 
@@ -120,7 +120,7 @@ impl VocabularyEditor {
     }
 
     /// The rows as saved entries: blank terms are left out and repeated
-    /// terms merge, as `hex vocabulary add` does.
+    /// terms merge, as `gospell vocabulary add` does.
     pub(super) fn project(&self) -> Vec<VocabularyEntry> {
         self.projection().0
     }
@@ -303,7 +303,7 @@ fn choose_export(ui: &mut Ui) {
                     label: tr("CSV files").into(),
                     extensions: &["csv"],
                 }],
-                file_name: "hex-vocabulary.csv".into(),
+                file_name: "gospell-vocabulary.csv".into(),
             },
             directory: crate::app_paths::downloads_dir(),
         },
@@ -752,7 +752,7 @@ mod tests {
     impl Scratch {
         fn new(name: &str) -> Self {
             let directory = std::env::temp_dir().join(format!(
-                "hex-vocabulary-sheet-{}-{name}",
+                "gospell-vocabulary-sheet-{}-{name}",
                 std::process::id()
             ));
             let _ = std::fs::remove_dir_all(&directory);
@@ -1044,13 +1044,13 @@ mod tests {
             },
         ]);
         let scratch = Scratch::new("export");
-        let path = scratch.path("hex-vocabulary");
+        let path = scratch.path("gospell-vocabulary");
         export_chosen(&mut ui, Ok(Some(path.clone())));
         assert_eq!(
             ui.vocabulary.status.as_ref().unwrap().message,
             "Exported 2 terms"
         );
-        let written = scratch.path("hex-vocabulary.csv");
+        let written = scratch.path("gospell-vocabulary.csv");
         assert_eq!(
             std::fs::read_to_string(&written).unwrap(),
             format!("{}\nRune,\"roon, ruin\",,\n\"Dax, Inc.\",,,\n", csv::HEADER)

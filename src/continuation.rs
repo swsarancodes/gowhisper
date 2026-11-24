@@ -8,7 +8,7 @@
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
 
-/// The user's own input since Hex started: its revision changes when they
+/// The user's own input since GoSpell started: its revision changes when they
 /// type, click, or switch windows, which ends a paste continuation.
 #[derive(Clone, Default)]
 pub struct InputActivity(Arc<AtomicU64>);

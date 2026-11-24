@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Vendored from https://anoma.ly/release/client.sh (sha256
+# Vendored from https://goml.io/release/client.sh (sha256
 # f19e3852cca5b675a0871487a035fc5ed42a871df429da10fd688568d1ad526e, 2026-10-29)
 # so the publish job runs only locked code. Update it by copying a reviewed
 # version here. Local change: the manifest fallback and the verification
 # download also retry connection resets (--retry-all-errors), write to a file so
 # a retry cannot append to partial bytes, and fail a stalled transfer.
-# The Anomaly release service client, served at https://anoma.ly/release/client.sh.
+# The GoML release service client, served at https://goml.io/release/client.sh.
 # Runs in a GitHub Actions job with `permissions: id-token: write`; needs bash,
 # curl, jq, split and sha256sum (or shasum). See docs/publishing.md.
 #
@@ -19,10 +19,10 @@
 # parallel (skipping files the service already has), retries with backoff and
 # then publishes. `release.json` holds the release fields (channel, version,
 # notes_url, distributions, …); the client fills in `targets`. RELEASE is the
-# service origin (default https://anoma.ly/release).
+# service origin (default https://goml.io/release).
 set -euo pipefail
 
-RELEASE=${RELEASE:-https://anoma.ly/release}
+RELEASE=${RELEASE:-https://goml.io/release}
 RELEASE=${RELEASE%/}
 SINGLE_LIMIT=$((95 * 1024 * 1024))
 PART_SIZE=90m

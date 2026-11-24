@@ -2,7 +2,7 @@
 //! recording offer, "left the call", the ready transcript, and the recording
 //! capsule. Each is an
 //! interactive Rune overlay, which on macOS is a non-activating `NSPanel`:
-//! its buttons take clicks while the call app keeps focus and Hex never
+//! its buttons take clicks while the call app keeps focus and GoSpell never
 //! activates. An offer that times out only closes; nothing starts or stops
 //! on a timeout, and the call is offered again once its app releases and
 //! retakes the microphone.
@@ -11,7 +11,7 @@
 //! send `ControllerCommand`s back to the controller.
 //!
 //! The recording capsule's "Copy agent prompt" copies instructions that
-//! tell a coding agent which `hex meetings` commands read the meeting, and
+//! tell a coding agent which `gospell meetings` commands read the meeting, and
 //! "Copy all" copies the in-call transcript (Parakeet,
 //! `meeting::TranscriptReader`). The ready panel offers the same two under
 //! the finished meeting's title and summary.
@@ -67,7 +67,7 @@ mod throw;
 mod waveform;
 
 use panel::{
-    agent_prompt, finalizing_window_size, hex_command, ready, ready_window_size, recording,
+    agent_prompt, finalizing_window_size, gospell_command, ready, ready_window_size, recording,
     recording_window_size,
 };
 use screen::primary_screen_size;
@@ -516,10 +516,10 @@ impl Capsule {
                 ..
             } => {
                 let reached = self.live.entries.last().map_or(0, |entry| entry.end_ms);
-                agent_prompt(&hex_command(), id, title, Some(reached))
+                agent_prompt(&gospell_command(), id, title, Some(reached))
             }
             State::Ready { manifest, .. } => agent_prompt(
-                &hex_command(),
+                &gospell_command(),
                 &manifest.id,
                 &meeting::display_title(manifest),
                 None,
@@ -845,14 +845,14 @@ impl MeetingCapsules {
         };
         let panel = overlay(
             app,
-            "Hex meeting",
+            "GoSpell meeting",
             (MEETING_PANEL_WIDTH, MEETING_PANEL_HEIGHT),
             false,
         );
         let pill = Pill {
             handle: overlay(
                 app,
-                "Hex meeting recording",
+                "GoSpell meeting recording",
                 recording_window_size(false, None),
                 true,
             ),
@@ -1241,9 +1241,9 @@ fn view_body(capsule: &Capsule, cx: &mut Cx<Capsule>) -> El {
             p.danger(),
             tr_fill("{} left the call", app),
             if *auto_stop {
-                tr("Hex stops recording in 30 s unless you keep recording.")
+                tr("GoSpell stops recording in 30 s unless you keep recording.")
             } else {
-                tr("Hex is still recording.")
+                tr("GoSpell is still recording.")
             }
             .to_owned(),
             vec![
@@ -1340,7 +1340,7 @@ fn reminder(
         return (
             p.accent(),
             meeting.display_title(),
-            tr_fill("{} · Hex records automatically", &when),
+            tr_fill("{} · GoSpell records automatically", &when),
             actions,
         );
     }
@@ -1851,7 +1851,9 @@ mod tests {
     #[test]
     fn an_always_record_reminder_says_so_and_never_offers_record() {
         let (mut rt, commands, _) = runtime(reminder(true, true), false, true, REMINDER);
-        assert!(texts(&rt).contains(&"Starts in 1 min · Hex records automatically".to_string()));
+        assert!(
+            texts(&rt).contains(&"Starts in 1 min · GoSpell records automatically".to_string())
+        );
         assert!(rt.find("record").is_none());
         assert!(rt.find("join-record").is_none());
         tap(&mut rt, "join");
@@ -2217,7 +2219,7 @@ mod tests {
                 "system": {"file": "system.wav", "samples": 0, "dropped_packets": 0},
                 "microphone": {"file": "microphone.wav", "samples": 0, "dropped_packets": 0},
                 "error": null,
-                "export_path": "/Users/alex/Documents/Hex Meetings/Design sync.md"
+                "export_path": "/Users/alex/Documents/GoSpell Meetings/Design sync.md"
             }))
             .unwrap(),
         ))
@@ -2310,7 +2312,7 @@ mod tests {
         ready.pointer_move(x, y);
         ready.frame(0.0);
         assert!(ready.state.hovered());
-        if let Some(dir) = std::env::var_os("HEX_SUMMARY_SNAPS") {
+        if let Some(dir) = std::env::var_os("GOSPELL_SUMMARY_SNAPS") {
             let dir = std::path::PathBuf::from(dir);
             std::fs::create_dir_all(&dir).unwrap();
             let gpu = rune::render::Gpu::try_new(rune::render::Gpu::instance(), None).unwrap();
@@ -2394,30 +2396,35 @@ mod tests {
     #[test]
     fn the_agent_prompt_names_real_commands() {
         assert_eq!(
-            agent_prompt("hex", "2026-11-10-1430", "Q4 launch sync", Some(258_000)),
-            "Use my Hex meeting \"Q4 launch sync\" as context. It is still recording.\n\n\
-             Read the transcript so far:\n  hex meetings show 2026-11-10-1430 --md\n\n\
+            agent_prompt(
+                "gospell",
+                "2026-11-10-1430",
+                "Q4 launch sync",
+                Some(258_000)
+            ),
+            "Use my GoSpell meeting \"Q4 launch sync\" as context. It is still recording.\n\n\
+             Read the transcript so far:\n  gospell meetings show 2026-11-10-1430 --md\n\n\
              Catch up on what was said since this prompt (the first turn may repeat):\n  \
-             hex meetings show 2026-11-10-1430 --from 04:18 --md\n\n\
+             gospell meetings show 2026-11-10-1430 --from 04:18 --md\n\n\
              Find a topic, then read around the time it came up:\n  \
-             hex meetings search \"<words>\"\n  \
-             hex meetings show 2026-11-10-1430 --from <mm:ss> --to <mm:ss> --md\n"
+             gospell meetings search \"<words>\"\n  \
+             gospell meetings show 2026-11-10-1430 --from <mm:ss> --to <mm:ss> --md\n"
         );
-        let finished = agent_prompt("hex", "m", "Design sync", None);
-        assert!(finished.starts_with("Use my Hex meeting \"Design sync\" as context.\n\n"));
-        assert!(finished.contains("  hex meetings show m --md\n"));
+        let finished = agent_prompt("gospell", "m", "Design sync", None);
+        assert!(finished.starts_with("Use my GoSpell meeting \"Design sync\" as context.\n\n"));
+        assert!(finished.contains("  gospell meetings show m --md\n"));
         assert!(!finished.contains("--from 0"));
     }
 
     #[test]
-    fn hex_commands_quote_paths_with_spaces() {
+    fn gospell_commands_quote_paths_with_spaces() {
         assert_eq!(
-            shell_word("/Applications/Hex.app/Contents/MacOS/hex"),
-            "/Applications/Hex.app/Contents/MacOS/hex"
+            shell_word("/Applications/GoSpell.app/Contents/MacOS/gospell"),
+            "/Applications/GoSpell.app/Contents/MacOS/gospell"
         );
         assert_eq!(
-            shell_word("/Users/alex/Hex Builds/hex"),
-            "'/Users/alex/Hex Builds/hex'"
+            shell_word("/Users/alex/GoSpell Builds/gospell"),
+            "'/Users/alex/GoSpell Builds/gospell'"
         );
         assert_eq!(shell_word("it's"), r"'it'\''s'");
     }
@@ -2451,8 +2458,9 @@ mod tests {
         };
         let (mut rt, commands, _) = runtime(auto, false, true, CALL_ENDED);
         assert!(
-            texts(&rt)
-                .contains(&"Hex stops recording in 30 s unless you keep recording.".to_string())
+            texts(&rt).contains(
+                &"GoSpell stops recording in 30 s unless you keep recording.".to_string()
+            )
         );
         tap(&mut rt, "keep-recording");
         assert!(matches!(
@@ -2463,7 +2471,7 @@ mod tests {
 
         // Without the lab, Keep recording sends nothing.
         let (mut rt, commands, _) = runtime(call_ended(), false, true, CALL_ENDED);
-        assert!(texts(&rt).contains(&"Hex is still recording.".to_string()));
+        assert!(texts(&rt).contains(&"GoSpell is still recording.".to_string()));
         let kept = Arc::new(AtomicU64::new(0));
         let counted = kept.clone();
         rt.state.keep_recording = Some(Arc::new(move || {
@@ -2643,11 +2651,11 @@ mod tests {
     include!("meeting_capsules/pill_tests.rs");
 
     /// No `--snap` scene draws an overlay, so this renders the capsules to
-    /// PNGs in `HEX_CAPSULE_SNAPS` for review; without it, or a GPU, it skips.
+    /// PNGs in `GOSPELL_CAPSULE_SNAPS` for review; without it, or a GPU, it skips.
     #[test]
     fn capsule_snapshots() {
         use rune::render::Gpu;
-        let Some(folder) = std::env::var_os("HEX_CAPSULE_SNAPS") else {
+        let Some(folder) = std::env::var_os("GOSPELL_CAPSULE_SNAPS") else {
             return;
         };
         let Ok(gpu) = Gpu::try_new(Gpu::instance(), None) else {
@@ -2842,7 +2850,7 @@ mod tests {
     }
 
     /// The call-ended, ready, and automatic-recording capsules against
-    /// `tests/golden/meeting-capsule-*.png`; `HEX_UPDATE_GOLDENS=1` rewrites
+    /// `tests/golden/meeting-capsule-*.png`; `GOSPELL_UPDATE_GOLDENS=1` rewrites
     /// them. Without a GPU adapter it skips. Like every golden it is checked
     /// on Linux only: glyph coverage on Metal differs past the tolerance.
     #[test]
@@ -2885,7 +2893,7 @@ mod tests {
                 });
             }
             let (w, h, pixels) = render(&gpu, &mut rt, size);
-            if std::env::var_os("HEX_UPDATE_GOLDENS").is_some() {
+            if std::env::var_os("GOSPELL_UPDATE_GOLDENS").is_some() {
                 rune::render::write_png(&path, w, h, &pixels).unwrap();
                 continue;
             }

@@ -3,8 +3,8 @@
 # channel's notes, written without secrets by scripts/release-dev-notes.sh,
 # and publishes them as dev-notes.json on the one-commit `dev-notes` branch.
 # The site Worker serves that file at
-# https://anoma.ly/hex/files/dev-notes.json and renders
-# https://anoma.ly/hex/dev from it, so a new dev build shows without a site
+# https://gospell.goml.io/files/dev-notes.json and renders
+# https://gospell.goml.io/dev from it, so a new dev build shows without a site
 # deploy and no job needs a bucket credential.
 #
 # The file is untrusted data: the site renders it and the app shows it, so it
@@ -44,7 +44,7 @@ jq -e --arg version "$version" --arg commit "$commit" '
       (keys == ["title", "url"])
       and (.title | text(200))
       and (.url | type == "string"
-        and test("^https://github\\.com/anomalyco/hex/(pull/[0-9]{1,7}|commit/[0-9a-f]{40})$"))))
+        and test("^https://github\\.com/goml/gospell/(pull/[0-9]{1,7}|commit/[0-9a-f]{40})$"))))
 ' "$canonical" > /dev/null || die "The dev notes are not the expected shape for $version ($commit)."
 
 # Replace the branch with one commit that has no parent, so the repository
@@ -66,4 +66,4 @@ if [ -n "$existing" ]; then
 else
   gh api "repos/$repository/git/refs" --method POST -f ref="refs/heads/$branch" -f sha="$published" > /dev/null
 fi
-echo "Published the notes for $version: https://anoma.ly/hex/dev#$version"
+echo "Published the notes for $version: https://gospell.goml.io/dev#$version"

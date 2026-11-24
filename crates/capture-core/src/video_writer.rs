@@ -277,10 +277,10 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "opt-in native memory probe; requires HEX_MEMORY_OUT"]
+    #[ignore = "opt-in native memory probe; requires GOSPELL_MEMORY_OUT"]
     fn headless_encoder_memory() {
-        let out = PathBuf::from(std::env::var("HEX_MEMORY_OUT").unwrap());
-        let pooled = std::env::var("HEX_MEMORY_POOL").as_deref() == Ok("1");
+        let out = PathBuf::from(std::env::var("GOSPELL_MEMORY_OUT").unwrap());
+        let pooled = std::env::var("GOSPELL_MEMORY_POOL").as_deref() == Ok("1");
         std::fs::create_dir_all(&out).unwrap();
         for cycle in 0..=50 {
             let encode = || {

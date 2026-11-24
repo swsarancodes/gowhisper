@@ -1,5 +1,5 @@
 //! The audio at a capture's head a live stream must not take for speech it
-//! missed: Hex's own sounds, and the window before "While dictating" output
+//! missed: GoSpell's own sounds, and the window before "While dictating" output
 //! suppression reaches the microphone (#2338).
 use std::time::Duration;
 
@@ -46,7 +46,7 @@ pub(super) fn effective_through(
         + samples_for(SPEAKER_TO_MIC_MARGIN, PARAKEET_SAMPLE_RATE)
 }
 
-/// Clip samples of Hex's own audio at the capture's head: the pre-roll (a
+/// Clip samples of GoSpell's own audio at the capture's head: the pre-roll (a
 /// retracted double-tap first tone, an earlier dictation's stop tone) through
 /// the press, then the start tone and the margin after it (the grace before a
 /// provisional tone sounds, plus a little latency), and everything through

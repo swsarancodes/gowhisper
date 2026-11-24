@@ -1,6 +1,6 @@
 // The whole recording host in one replay: an offer, Record, the live pill,
 // its panel under the pointer, Stop and the finished meeting, on one runtime
-// and one surface. `HEX_HUD_REPLAY=<dir>` writes every frame and a trace of
+// and one surface. `GOSPELL_HUD_REPLAY=<dir>` writes every frame and a trace of
 // the surface; without it only the trace's claims are checked.
 
 /// One step of a replay's script.
@@ -419,7 +419,7 @@ fn play(
         )
     };
     // The recording is dark in either appearance; the offer follows the host.
-    let dark = std::env::var("HEX_HUD_THEME").as_deref() != Ok("light");
+    let dark = std::env::var("GOSPELL_HUD_THEME").as_deref() != Ok("light");
     let (mut rt, commands, _) = runtime(kind, false, dark, size);
     let width = if matches!(rt.state.state, State::Offer { .. }) {
         rt.state.presentation.window().0
@@ -963,11 +963,11 @@ fn reduced_motion_lands_the_surface_and_only_fades() {
 fn hud_replay_frames() {
     use crate::rune_ui::offscreen;
     use std::fmt::Write;
-    let Some(root) = std::env::var_os("HEX_HUD_REPLAY") else {
+    let Some(root) = std::env::var_os("GOSPELL_HUD_REPLAY") else {
         return;
     };
     let root = std::path::PathBuf::from(root);
-    let only = std::env::var("HEX_HUD_CASE").ok();
+    let only = std::env::var("GOSPELL_HUD_CASE").ok();
     let gpu = rune::render::Gpu::try_new(rune::render::Gpu::instance(), None).unwrap();
     for replay in REPLAYS {
         if only

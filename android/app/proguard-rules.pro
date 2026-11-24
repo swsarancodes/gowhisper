@@ -1,5 +1,5 @@
-# libhexspeech resolves this class and method by their JNI names.
--keep class ly.anoma.hex.speech.Whisper {
+# libgospellspeech resolves this class and method by their JNI names.
+-keep class com.goml.gospell.speech.Whisper {
     native <methods>;
 }
 

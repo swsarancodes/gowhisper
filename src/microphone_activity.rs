@@ -83,7 +83,7 @@ fn deduplicated(
     applications
 }
 
-/// Whether a canonical bundle ID is a browser Hex reads pages from.
+/// Whether a canonical bundle ID is a browser GoSpell reads pages from.
 pub(crate) fn is_browser_id(canonical_bundle_id: Option<&str>) -> bool {
     matches!(
         canonical_bundle_id,
@@ -103,7 +103,7 @@ pub(crate) fn is_browser_id(canonical_bundle_id: Option<&str>) -> bool {
     )
 }
 
-/// One of the browsers Hex knows, or one of their audio helpers.
+/// One of the browsers GoSpell knows, or one of their audio helpers.
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 pub(crate) fn browser_bundle(bundle_id: &str, name: Option<&str>) -> bool {
     is_browser_id(canonical_bundle_id_for(bundle_id, name))
@@ -129,7 +129,7 @@ impl BrowserProcesses {
 }
 
 #[cfg(target_os = "macos")]
-/// The Core Audio process objects of the running browsers, Hex excluded.
+/// The Core Audio process objects of the running browsers, GoSpell excluded.
 pub(crate) fn browser_process_objects(which: BrowserProcesses) -> Result<Vec<AudioObjectID>> {
     objc2::rc::autoreleasepool(|_| {
         let own_pid = std::process::id() as i32;
@@ -227,7 +227,7 @@ pub(crate) fn application_input_devices(canonical_bundle_id: &str) -> Result<Vec
 
 #[cfg(target_os = "macos")]
 /// The process IDs recording from the input device `uid`, read from Core
-/// Audio's process metadata: devices only, never audio samples. Hex's own
+/// Audio's process metadata: devices only, never audio samples. GoSpell's own
 /// process is included; a caller that records excludes itself. A failed
 /// per-process read, including a listed device's UID, fails the whole call,
 /// so a dropped pid is never mistaken for an app that stopped recording.
@@ -295,7 +295,7 @@ const EXECUTABLES: [(&str, &str); 47] = [
     // WhatsApp for Windows, before and after its WinUI rewrite.
     ("whatsapp", "net.whatsapp.WhatsApp"),
     ("whatsapp.root", "net.whatsapp.WhatsApp"),
-    // The apps Hex knows beyond the common ones.
+    // The apps GoSpell knows beyond the common ones.
     ("signal", "org.whispersystems.signal-desktop"),
     ("signal-desktop", "org.whispersystems.signal-desktop"),
     ("telegram", "ru.keepcoder.Telegram"),
@@ -374,7 +374,7 @@ pub(crate) fn canonical_bundle_id_for(bundle_id: &str, name: Option<&str>) -> Op
         ("com.hnc.discord", "com.hnc.Discord"),
         ("com.hnc.discordcanary", "com.hnc.Discord"),
         ("com.hnc.discordptb", "com.hnc.Discord"),
-        // The apps Hex knows beyond the common ones, their Electron helpers and
+        // The apps GoSpell knows beyond the common ones, their Electron helpers and
         // alternative bundle IDs included.
         (
             "org.whispersystems.signal-desktop",
@@ -1201,7 +1201,7 @@ mod tests {
                 Some("app.zen-browser.zen"),
                 true,
             ),
-            ("anomaly.hex", "Hex", None, false),
+            ("com.goml.gospell", "GoSpell", None, false),
             ("zoom", "Zoom", Some("us.zoom.xos"), false),
             (
                 "ms-teams.exe",

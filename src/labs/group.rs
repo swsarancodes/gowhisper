@@ -26,7 +26,7 @@ impl Group {
         Self::Models,
     ];
 
-    /// Its stable id: `hex://labs?category=<id>` and `labs.groups` in
+    /// Its stable id: `gospell://labs?category=<id>` and `labs.groups` in
     /// settings.json.
     pub const fn id(self) -> &'static str {
         match self {

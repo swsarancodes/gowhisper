@@ -39,7 +39,7 @@ pub(super) struct Finishing {
     pub(super) release: ReleaseWait,
     pub(super) print: Option<PrintReply>,
     pub(super) flavour: DictationFlavour,
-    /// A shortcut, not a `hex dictation` command, started the capture.
+    /// A shortcut, not a `gospell dictation` command, started the capture.
     pub(super) by_shortcut: bool,
     /// Labs › Stop phrase: the words that ended this capture, when they did.
     pub(super) stop_phrase: Option<String>,

@@ -126,7 +126,7 @@ pub enum DictationPhase {
     /// window in front could not take one (the Windows desktop or a taskbar),
     /// or Labs › Copy dictation only is on.
     Copied,
-    /// `hex dictation stop --print` received the text instead of a paste.
+    /// `gospell dictation stop --print` received the text instead of a paste.
     Printed,
     Edited,
     VoiceAction,
@@ -383,7 +383,7 @@ impl EventLog {
 impl VoiceEvent {
     /// The event as it is written: what was said stays out of the log. The
     /// log is a plain file kept for diagnosis, never trimmed by History's
-    /// retention or Clear all, and `hex logs` prints it, so dictated words
+    /// retention or Clear all, and `gospell logs` prints it, so dictated words
     /// live only in History.
     fn without_words(&self) -> Self {
         let mut event = self.clone();
@@ -740,7 +740,7 @@ mod tests {
     #[test]
     fn reopening_log_preserves_existing_events() {
         let path = std::env::temp_dir().join(format!(
-            "hex-events-{}-{}.ndjson",
+            "gospell-events-{}-{}.ndjson",
             std::process::id(),
             now_ms()
         ));
@@ -759,7 +759,7 @@ mod tests {
     #[test]
     fn reader_tails_complete_records_and_resets_at_session_boundaries() {
         let path = std::env::temp_dir().join(format!(
-            "hex-event-reader-{}-{}.ndjson",
+            "gospell-event-reader-{}-{}.ndjson",
             std::process::id(),
             now_ms()
         ));
@@ -801,7 +801,7 @@ mod tests {
     fn the_log_is_private() {
         use std::os::unix::fs::PermissionsExt;
         let directory = std::env::temp_dir().join(format!(
-            "hex-private-log-{}-{}",
+            "gospell-private-log-{}-{}",
             std::process::id(),
             now_ms()
         ));
@@ -823,7 +823,7 @@ mod tests {
     #[test]
     fn the_log_never_keeps_what_was_said() {
         let path = std::env::temp_dir().join(format!(
-            "hex-no-words-{}-{}.ndjson",
+            "gospell-no-words-{}-{}.ndjson",
             std::process::id(),
             now_ms()
         ));
@@ -849,7 +849,7 @@ mod tests {
     #[test]
     fn a_reader_starts_over_when_the_log_is_trimmed_under_it() {
         let path = std::env::temp_dir().join(format!(
-            "hex-trimmed-reader-{}-{}.ndjson",
+            "gospell-trimmed-reader-{}-{}.ndjson",
             std::process::id(),
             now_ms()
         ));
@@ -885,7 +885,7 @@ mod tests {
     #[test]
     fn a_bounded_flush_writes_every_queued_event() {
         let path = std::env::temp_dir().join(format!(
-            "hex-bounded-flush-{}-{}.ndjson",
+            "gospell-bounded-flush-{}-{}.ndjson",
             std::process::id(),
             now_ms()
         ));
@@ -902,7 +902,7 @@ mod tests {
     #[test]
     fn reader_streams_large_logs_and_keeps_context_outside_the_retained_rows() {
         let path = std::env::temp_dir().join(format!(
-            "hex-large-event-reader-{}-{}.ndjson",
+            "gospell-large-event-reader-{}-{}.ndjson",
             std::process::id(),
             now_ms()
         ));
@@ -942,7 +942,7 @@ mod tests {
     #[test]
     fn reader_skips_oversized_records_through_their_newline_and_recovers() {
         let path = std::env::temp_dir().join(format!(
-            "hex-oversized-event-reader-{}-{}.ndjson",
+            "gospell-oversized-event-reader-{}-{}.ndjson",
             std::process::id(),
             now_ms()
         ));
@@ -976,7 +976,7 @@ mod tests {
     #[cfg_attr(windows, ignore = "replacement detection uses Unix file identity")]
     fn reader_resets_partial_record_state_on_truncation_and_replacement() {
         let path = std::env::temp_dir().join(format!(
-            "hex-replaced-event-reader-{}-{}.ndjson",
+            "gospell-replaced-event-reader-{}-{}.ndjson",
             std::process::id(),
             now_ms()
         ));

@@ -15,17 +15,17 @@ import urllib.request
 import wave
 
 
-TERMS = ["Hex", "OpenCode", "Rune", "Scrawl", "Effect", "Anomaly",
+TERMS = ["GoSpell", "OpenCode", "Rune", "Scrawl", "Effect", "GoML",
          "Dax", "Aiden", "Kit", "Parakeet", "Moonshine", "GPUI", "Sparkle",
          "Argon", "Astra", "HiveMind"]
 
 SENTENCES = [
-    ("Hex", ["I use Hex to dictate my notes.", "Please check whether Hex heard that correctly.", "The latest Hex build is ready to test."]),
+    ("GoSpell", ["I use GoSpell to dictate my notes.", "Please check whether GoSpell heard that correctly.", "The latest GoSpell build is ready to test."]),
     ("OpenCode", ["OpenCode is running on my desktop.", "Send the patch to OpenCode for review.", "I started a new session in OpenCode."]),
     ("Rune", ["Build the settings panel with Rune.", "The Rune window should stay open.", "We moved the interface to Rune last week."]),
     ("Scrawl", ["Use Scrawl to capture that feedback.", "I left a note in Scrawl about the button.", "Scrawl should send the recording to this session."]),
     ("Effect", ["Use Effect to manage the background task.", "The Effect service owns the connection.", "I wrote the new client with Effect."]),
-    ("Anomaly", ["Anomaly builds tools for developers.", "Send the update to the team at Anomaly.", "We should use the Anomaly account for this."]),
+    ("GoML", ["GoML builds tools for developers.", "Send the update to the team at GoML.", "We should use the GoML account for this."]),
     ("Dax", ["Dax reviewed the new interface.", "Please ask Dax about that change.", "I think Dax already fixed this issue."]),
     ("Aiden", ["Aiden is working on the installer.", "Can Aiden review the latest build?", "I sent Aiden the notes from our meeting."]),
     ("Kit", ["Kit wants the animation to feel faster.", "Please send Kit the comparison.", "I think Kit already approved that plan."]),

@@ -193,7 +193,7 @@ fn a_mouse_shortcut_on_wayland_explains_the_desktop_command_route() {
     assert!(
         shown
             .iter()
-            .any(|text| text.contains("Wayland desktop using the hex commands"))
+            .any(|text| text.contains("Wayland desktop using the gospell commands"))
     );
     assert!(!shown.iter().any(|text| text.contains("config.kdl")));
 }
@@ -224,7 +224,7 @@ fn a_refused_portal_shortcut_says_how_to_free_it() {
 }
 
 /// #635: Hyprland's portal names no trigger, since its config binds the
-/// keys, so the row says Hex can't confirm it and shows no refusal.
+/// keys, so the row says GoSpell can't confirm it and shows no refusal.
 #[test]
 fn an_unconfirmed_portal_shortcut_is_not_called_refused() {
     let mut rt = runtime("portal", true, GOLDEN_SIZE);
@@ -241,7 +241,7 @@ fn an_unconfirmed_portal_shortcut_is_not_called_refused() {
     assert!(
         shown
             .iter()
-            .any(|text| text == "Your desktop assigns this key itself, so Hex can't confirm it")
+            .any(|text| text == "Your desktop assigns this key itself, so GoSpell can't confirm it")
     );
     assert!(
         !shown
@@ -280,7 +280,11 @@ fn an_asked_update_check_says_how_it_went() {
             .any(|text| text == "Checking for updates…")
     );
     status(&mut rt, DesktopUpdateStatus::Current);
-    assert!(texts(&rt).iter().any(|text| text == "Hex is up to date"));
+    assert!(
+        texts(&rt)
+            .iter()
+            .any(|text| text == "GoSpell is up to date")
+    );
     status(&mut rt, DesktopUpdateStatus::Failed);
     assert!(
         texts(&rt)
@@ -331,7 +335,11 @@ fn each_panes_advanced_fold_starts_closed_and_stays_its_own() {
 #[test]
 fn desktops_without_a_portal_list_commands_instead_of_recording_rows() {
     let rt = runtime("commands", true, GOLDEN_SIZE);
-    assert!(texts(&rt).iter().any(|text| text == "hex dictation toggle"));
+    assert!(
+        texts(&rt)
+            .iter()
+            .any(|text| text == "gospell dictation toggle")
+    );
     assert!(rt.find("dictation-hotkey").is_none());
     assert!(rt.find("paste-last-hotkey").is_none());
 }
@@ -524,14 +532,14 @@ fn the_interface_language_menu_is_system_first_then_alphabetical() {
 }
 
 #[test]
-fn quit_hex_in_the_sidebar_asks_the_host_to_quit() {
+fn quit_gospell_in_the_sidebar_asks_the_host_to_quit() {
     let mut rt = runtime("portal", true, PANE_SIZE);
     tap(&mut rt, "quit");
     assert!(rt.state.quit_requested);
 }
 
 #[test]
-fn ctrl_q_quits_hex() {
+fn ctrl_q_quits_gospell() {
     let mut rt = runtime("portal", true, PANE_SIZE);
     key(&mut rt, Key::Command('q'), Mods::default());
     assert!(rt.state.quit_requested);
@@ -746,7 +754,7 @@ fn a_draft_saves_over_what_another_writer_changed_meanwhile() {
         .push(TextEdit::new("OpenCode"), TextEdit::default());
     let start = std::time::Instant::now();
     assert!(!ui.save_drafts(start), "waits for a pause");
-    // `hex settings set` (or a capture's saved rule) saves while it waits.
+    // `gospell settings set` (or a capture's saved rule) saves while it waits.
     let mut elsewhere = service;
     elsewhere.enable_on_launch = !elsewhere.enable_on_launch;
     ui.adopt(elsewhere.clone());
@@ -858,7 +866,7 @@ fn the_sidebar_always_shows_output() {
 }
 
 /// Labs › Modes editor brings the old editor back as a main pane, right after
-/// Output, and the Modes destination (the menu bar, `hex window show --pane
+/// Output, and the Modes destination (the menu bar, `gospell window show --pane
 /// modes`) opens it instead of Output. Off, nothing changes.
 #[test]
 fn the_modes_editor_lab_brings_modes_back_to_the_sidebar() {
@@ -886,13 +894,13 @@ fn the_modes_editor_lab_brings_modes_back_to_the_sidebar() {
     key(&mut rt, Key::Command('3'), Mods::default());
     settle(&mut rt);
     assert_eq!(rt.state.pane, Pane::Modes, "Command-3 is Modes now");
-    // The menu bar and `hex window show --pane modes` open the editor too.
+    // The menu bar and `gospell window show --pane modes` open the editor too.
     show(&mut rt.state, Destination::Modes, &mut rune::Tx::default());
     rt.invalidate();
     settle(&mut rt);
     assert_eq!(rt.state.pane, Pane::Modes);
     // Off while the editor shows, the adoption fallback leaves the hidden
-    // pane for Output, as a saved `hex settings set labs.modes_editor off`
+    // pane for Output, as a saved `gospell settings set labs.modes_editor off`
     // does while the window shows it.
     crate::labs::Feature::ModesEditor.set(&mut rt.state.settings, false);
     assert!(!Pane::Modes.shown(&rt.state));
@@ -1194,11 +1202,11 @@ fn segments_and_switch_tracks_hover_at_once() {
     }
 }
 
-/// An unset model on a catalog with a ranked pick is Hex's own automatic
+/// An unset model on a catalog with a ranked pick is GoSpell's own automatic
 /// choice, not OpenCode's default; with no ranked model it really is
 /// OpenCode's default.
 #[test]
-fn an_unset_model_says_automatic_only_while_hex_ranks_a_model() {
+fn an_unset_model_says_automatic_only_while_gospell_ranks_a_model() {
     let mut rt = runtime("modes", true, PANE_SIZE);
     rt.state.settings.dictation_processing.modes[0]
         .post_processing
@@ -1405,7 +1413,7 @@ fn history_clear_removes_a_usage_rollup_with_no_entries() {
     use crate::history::{History, HistoryRetention, HistoryStore};
 
     let directory =
-        std::env::temp_dir().join(format!("hex-rune-history-usage-{}", std::process::id()));
+        std::env::temp_dir().join(format!("gospell-rune-history-usage-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&directory);
     std::fs::create_dir_all(&directory).unwrap();
     let path = directory.join("history.json");
@@ -1444,8 +1452,10 @@ fn history_clear_removes_a_usage_rollup_with_no_entries() {
 #[test]
 fn history_delete_confirmation_stops_when_the_pane_moves_on() {
     use crate::history::{History, HistoryDraft, HistoryKind, HistoryRetention, HistoryStore};
-    let directory =
-        std::env::temp_dir().join(format!("hex-rune-history-disarm-{}", std::process::id()));
+    let directory = std::env::temp_dir().join(format!(
+        "gospell-rune-history-disarm-{}",
+        std::process::id()
+    ));
     let _ = std::fs::remove_dir_all(&directory);
     std::fs::create_dir_all(&directory).unwrap();
     let history = History::new(HistoryStore::open(
@@ -2365,7 +2375,8 @@ fn history_copy_writes_the_clipboard() {
 #[test]
 fn history_search_without_matches_says_so() {
     use crate::history::{History, HistoryDraft, HistoryKind, HistoryRetention, HistoryStore};
-    let directory = std::env::temp_dir().join(format!("hex-rune-history-{}", std::process::id()));
+    let directory =
+        std::env::temp_dir().join(format!("gospell-rune-history-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&directory);
     std::fs::create_dir_all(&directory).unwrap();
     let store = HistoryStore::open(
@@ -2458,7 +2469,7 @@ fn transcribe_again_shows_only_with_its_lab_and_replace_updates_the_entry() {
     use crate::history::{
         History, HistoryDraft, HistoryKind, HistoryRetention, HistoryStore, Recording,
     };
-    let directory = std::env::temp_dir().join(format!("hex-rune-again-{}", std::process::id()));
+    let directory = std::env::temp_dir().join(format!("gospell-rune-again-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&directory);
     std::fs::create_dir_all(&directory).unwrap();
     let history = History::new(HistoryStore::open(
@@ -2567,7 +2578,7 @@ fn copy_audio_shows_only_with_its_lab_and_keep_recordings() {
         History, HistoryDraft, HistoryKind, HistoryRetention, HistoryStore, Recording,
     };
     let directory =
-        std::env::temp_dir().join(format!("hex-rune-copy-audio-{}", std::process::id()));
+        std::env::temp_dir().join(format!("gospell-rune-copy-audio-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&directory);
     std::fs::create_dir_all(&directory).unwrap();
     let history = History::new(HistoryStore::open(
@@ -2777,7 +2788,7 @@ fn mode_corrections_and_names_save_from_their_fields() {
         .iter()
         .map(|r| r.matched_phrase.clone())
         .collect();
-    assert_eq!(phrases, ["hex app", "dax"]);
+    assert_eq!(phrases, ["gospell app", "dax"]);
 }
 
 #[test]
@@ -2949,7 +2960,7 @@ fn choosing_the_selected_installed_but_unchecked_model_checks_it() {
     use crate::transcription::models::{self, ModelRuntime};
 
     let directory =
-        std::env::temp_dir().join(format!("hex-picker-unchecked-{}", std::process::id()));
+        std::env::temp_dir().join(format!("gospell-picker-unchecked-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&directory);
     std::fs::create_dir_all(&directory).unwrap();
     models::set_test_models_dir(Some(directory.clone()));
@@ -3548,7 +3559,7 @@ fn onboarding_downloads_the_model_through_the_service() {
             ..
         }]
     ));
-    assert!(texts(&rt).contains(&"Setting up Hex".to_owned()));
+    assert!(texts(&rt).contains(&"Setting up GoSpell".to_owned()));
     // The service finishes: the model is installed and the practice opens.
     rt.state.picker.installed = Some(vec![TranscriptionModelId::ParakeetUnifiedEnglish]);
     settle(&mut rt);
@@ -3556,10 +3567,10 @@ fn onboarding_downloads_the_model_through_the_service() {
     settle(&mut rt);
     let step = |rt: &Runtime<Ui>| rt.state.tour.as_ref().unwrap().flow.step();
     assert_eq!(step(&rt), crate::desktop::onboarding::Step::TryIt);
-    // The practice can be left with Done; Start using Hex closes onboarding.
+    // The practice can be left with Done; Start using GoSpell closes onboarding.
     tap(&mut rt, "done");
-    tap(&mut rt, "start-using-hex");
-    assert!(rt.state.tour.is_none(), "Start using Hex closes setup");
+    tap(&mut rt, "start-using-gospell");
+    assert!(rt.state.tour.is_none(), "Start using GoSpell closes setup");
     assert!(rt.state.first_run.is_none());
 }
 
@@ -3569,7 +3580,7 @@ fn a_found_model_moves_on_without_a_download_and_back_returns_to_it() {
     assert!(rt.find("model-list").is_some());
     tap(&mut rt, "model1");
     // The service saves the pick and has the found file ready: the list
-    // stays, with no "Setting up Hex" download page.
+    // stays, with no "Setting up GoSpell" download page.
     rt.state.settings.transcription = TranscriptionSelection {
         model: TranscriptionModelId::ParakeetV3,
         language: "en".into(),
@@ -3581,7 +3592,10 @@ fn a_found_model_moves_on_without_a_download_and_back_returns_to_it() {
         shown.contains(&"Choose a speech model".to_owned()),
         "{shown:?}"
     );
-    assert!(!shown.contains(&"Setting up Hex".to_owned()), "{shown:?}");
+    assert!(
+        !shown.contains(&"Setting up GoSpell".to_owned()),
+        "{shown:?}"
+    );
     assert!(
         shown.contains(&"Parakeet Unified English".to_owned()),
         "the rows stay"
@@ -3591,7 +3605,7 @@ fn a_found_model_moves_on_without_a_download_and_back_returns_to_it() {
     settle(&mut rt);
     let s = rt.state.first_run.as_ref().unwrap();
     assert!(s.had_model, "a model here needs no download pill");
-    assert!(!texts(&rt).contains(&"Setting up Hex".to_owned()));
+    assert!(!texts(&rt).contains(&"Setting up GoSpell".to_owned()));
     // Back returns to the list to change the pick.
     tap(&mut rt, "back");
     assert!(rt.find("model-list").is_some());
@@ -3641,7 +3655,7 @@ fn with_no_model_found_onboarding_downloads_the_recommended_model_with_no_list()
         let shown = texts(&rt);
         assert!(rt.find("model-list").is_none(), "{scene}: no model list");
         assert!(
-            shown.contains(&"Setting up Hex".to_owned()),
+            shown.contains(&"Setting up GoSpell".to_owned()),
             "{scene}: {shown:?}"
         );
         assert!(
@@ -3705,7 +3719,7 @@ fn the_microphone_field_names_the_input_in_use() {
 
 #[test]
 fn a_closed_lid_names_the_input_standing_in_for_the_built_in_microphone() {
-    let note = "MacBook Pro Microphone is off while the lid is closed, so Hex listens to Studio Display Microphone";
+    let note = "MacBook Pro Microphone is off while the lid is closed, so GoSpell listens to Studio Display Microphone";
     let field = microphone_value;
     let mut rt = runtime("mac-microphone-lid-closed", true, TALL_SIZE);
     assert_eq!(
@@ -3732,7 +3746,7 @@ fn a_closed_lid_names_the_input_standing_in_for_the_built_in_microphone() {
 
 #[test]
 fn a_passed_over_bluetooth_default_names_the_input_in_use() {
-    let note = "Alex Pods is Bluetooth, so Hex listens to MacBook Pro Microphone";
+    let note = "Alex Pods is Bluetooth, so GoSpell listens to MacBook Pro Microphone";
     let mut rt = runtime("mac-microphone-bluetooth", true, TALL_SIZE);
     assert_eq!(
         a11y_value(&rt, "microphone-control").as_deref(),
@@ -3750,12 +3764,12 @@ fn a_passed_over_bluetooth_default_names_the_input_in_use() {
     assert!(!texts(&rt).contains(&note.to_owned()));
 }
 
-/// `HEX_ANNOTATE_SNAPS=<folder>` writes the Annotate pane, light and dark,
+/// `GOSPELL_ANNOTATE_SNAPS=<folder>` writes the Annotate pane, light and dark,
 /// tall enough to show How it works.
-#[cfg(hex_capture)]
+#[cfg(gospell_capture)]
 #[test]
 fn annotate_pane_snapshots() {
-    let Some(folder) = std::env::var_os("HEX_ANNOTATE_SNAPS") else {
+    let Some(folder) = std::env::var_os("GOSPELL_ANNOTATE_SNAPS") else {
         return;
     };
     let folder = std::path::PathBuf::from(folder);
@@ -3774,9 +3788,9 @@ fn annotate_pane_snapshots() {
 
 // ---------------------------------------------------------------------------
 // Goldens: offscreen GPU renders compared with checked-in PNGs. Set
-// HEX_UPDATE_GOLDENS=1 to rewrite them. Without a GPU adapter they skip,
-// unless HEX_REQUIRE_GPU is set (scripts/check-onboarding.sh).
-// HEX_GOLDEN_RENDERS=<folder> also writes every render there.
+// GOSPELL_UPDATE_GOLDENS=1 to rewrite them. Without a GPU adapter they skip,
+// unless GOSPELL_REQUIRE_GPU is set (scripts/check-onboarding.sh).
+// GOSPELL_GOLDEN_RENDERS=<folder> also writes every render there.
 
 /// One device for every golden, used one render at a time: creating Vulkan
 /// devices from parallel test threads crashed Mesa's RADV on Linux.
@@ -3860,20 +3874,20 @@ fn check_render(scene: &str, dark: bool, pixels: Option<(u32, u32, Vec<u8>)>) {
     let name = format!("{scene}-{}", if dark { "dark" } else { "light" });
     let Some((width, height, pixels)) = pixels else {
         assert!(
-            std::env::var_os("HEX_REQUIRE_GPU").is_none(),
-            "golden {name}: no GPU adapter, and HEX_REQUIRE_GPU is set"
+            std::env::var_os("GOSPELL_REQUIRE_GPU").is_none(),
+            "golden {name}: no GPU adapter, and GOSPELL_REQUIRE_GPU is set"
         );
         eprintln!("skipping golden {name}: no GPU adapter");
         return;
     };
-    if let Some(folder) = std::env::var_os("HEX_GOLDEN_RENDERS") {
+    if let Some(folder) = std::env::var_os("GOSPELL_GOLDEN_RENDERS") {
         let folder = std::path::PathBuf::from(folder);
         std::fs::create_dir_all(&folder).unwrap();
         rune::render::write_png(&folder.join(format!("{name}.png")), width, height, &pixels)
             .unwrap();
     }
     let path = golden_path(&name);
-    if std::env::var_os("HEX_UPDATE_GOLDENS").is_some() {
+    if std::env::var_os("GOSPELL_UPDATE_GOLDENS").is_some() {
         std::fs::create_dir_all(path.parent().unwrap()).unwrap();
         rune::render::write_png(&path, width, height, &pixels).unwrap();
         return;
@@ -3882,7 +3896,7 @@ fn check_render(scene: &str, dark: bool, pixels: Option<(u32, u32, Vec<u8>)>) {
         let actual = std::env::temp_dir().join(format!("rune-settings-{name}-actual.png"));
         rune::render::write_png(&actual, width, height, &pixels).unwrap();
         let miss = format!(
-            "{} is missing; run with HEX_UPDATE_GOLDENS=1 (render at {})",
+            "{} is missing; run with GOSPELL_UPDATE_GOLDENS=1 (render at {})",
             path.display(),
             actual.display()
         );
@@ -4188,7 +4202,7 @@ fn output_fixes_show_only_with_their_lab_and_fix_this_copies_for_the_sentence() 
     assert!(on.state.output.prompt_copied);
     assert_eq!(
         on.state.output.fix_copied.as_deref(),
-        Some("Um, open code shipped the hex app today.")
+        Some("Um, open code shipped the gospell app today.")
     );
     tap(&mut on, "output-vocabulary");
     assert!(on.state.is_modal(Modal::Vocabulary));

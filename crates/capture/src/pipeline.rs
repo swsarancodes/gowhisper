@@ -201,7 +201,7 @@ pub struct SourceExtras {
     pub agent_context: Option<bool>,
     /// Why there is no picture of the screen (`ScreenRecording::no_screen`).
     pub no_screen: Option<String>,
-    /// Where the capture's audio stops on the bundle's clock (ms), when Hex had to stop
+    /// Where the capture's audio stops on the bundle's clock (ms), when GoSpell had to stop
     /// keeping it (a streamed capture's disk guard, or a failed write).
     pub audio_stopped_at_ms: Option<u64>,
     /// Decodes the chosen keyframes again at full quality, for sources that select on small
@@ -1225,7 +1225,7 @@ mod tests {
 
     #[test]
     fn a_streamed_audio_takes_its_final_name_only_when_its_build_settles_it() {
-        let dir = std::env::temp_dir().join(format!("hex-pipeline-publish-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("gospell-pipeline-publish-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let partial = dir.join(crate::recover::PARTIAL_AUDIO);

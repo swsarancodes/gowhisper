@@ -3,7 +3,7 @@
 //! Ported from the t422 prototype (look A), itself a port of the OpenCode iOS
 //! dot scope (`DotScopeSimulation.swift`).
 //!
-//! [`Tuning`] is what HUD Lab edits; it is saved as `dot-scope.json` in Hex's
+//! [`Tuning`] is what HUD Lab edits; it is saved as `dot-scope.json` in GoSpell's
 //! Application Support folder. [`Scope`] steps the simulation at a fixed
 //! 240 Hz, so any frame rate draws the same picture, and yields one
 //! brightness pair per dot for `rune_hud.wgsl` to draw.
@@ -14,6 +14,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::rune_hud::spring::MORPH;
 
+pub mod embers;
 mod scope;
 pub use scope::*;
 
@@ -82,6 +83,32 @@ pub struct Tuning {
     /// How far From the notch's island reaches past the notch on each
     /// side, pt. The braid fills the island.
     pub island_spread: f32,
+    /// What the HUD draws: GoML's Embers, or the classic dot field.
+    pub look: Look,
+}
+
+/// What the recording HUD draws on its plate.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum Look {
+    /// GoML's look: embers on a voice-driven helix that gather into the
+    /// G-arrow while GoSpell works, then collapse into the mark
+    /// ([`embers`]).
+    #[default]
+    Embers,
+    /// The classic Dot scope: a field of dots lit by braided traces.
+    Dots,
+}
+
+impl Look {
+    pub const ALL: [Self; 2] = [Self::Embers, Self::Dots];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Embers => "Embers",
+            Self::Dots => "Dot scope",
+        }
+    }
 }
 
 /// How Dot scope says "working" while a dictation transcribes and
@@ -168,6 +195,7 @@ impl Default for Tuning {
             placement: Placement::default(),
             pretend_notch: false,
             island_spread: 28.0,
+            look: Look::default(),
         }
     }
 }
@@ -604,6 +632,9 @@ mod tests {
         assert!(old.auto_level);
         assert_eq!(old.processing, Processing::Flow);
         assert_eq!(old.placement, Placement::Below);
+        assert_eq!(old.look, Look::Embers, "an old file takes GoML's look");
+        let classic: Tuning = serde_json::from_str(r#"{"look": "dots"}"#).unwrap();
+        assert_eq!(classic.look, Look::Dots);
         let notch: Tuning =
             serde_json::from_str(r#"{"placement": "notch", "processing": "pulse"}"#).unwrap();
         assert_eq!(

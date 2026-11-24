@@ -179,7 +179,7 @@ impl CaptureState {
         }
     }
 
-    /// Whether Toggle's cancel shortcut is Hex's now: only while a toggled
+    /// Whether Toggle's cancel shortcut is GoSpell's now: only while a toggled
     /// capture records, so the key stays with every app otherwise.
     pub(super) fn wants_cancel(&self) -> bool {
         self.toggle && matches!(self.phase, Capture::Held { .. } | Capture::Locked { .. })

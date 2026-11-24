@@ -46,7 +46,7 @@ impl Playback {
         let path = path.to_path_buf();
         let (sender, receiver) = channel();
         let started = thread::Builder::new()
-            .name("hex-history-playback".into())
+            .name("gospell-history-playback".into())
             .spawn(move || {
                 let result = play(&path, generation);
                 let _ = sender.send(result);
@@ -211,7 +211,7 @@ mod tests {
     #[test]
     fn a_kept_recording_decodes_into_its_own_clip() {
         let directory = std::env::temp_dir().join(format!(
-            "hex-playback-{}-{}",
+            "gospell-playback-{}-{}",
             std::process::id(),
             crate::history::now_ms()
         ));

@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- The emoji picker's section titles (AndroidX's own strings, overridden) in sentence case, as the
-         rest of Hex, here and in the keyboard's languages; the picker writes them in capitals. -->
+         rest of GoSpell, here and in the keyboard's languages; the picker writes them in capitals. -->
     <string name="emoji_category_recent" tools:override="true">Recently used</string>
     <string name="emoji_category_emotions" tools:override="true">Smileys and emotions</string>
     <string name="emoji_category_people" tools:override="true">People</string>

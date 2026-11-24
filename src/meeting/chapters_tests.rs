@@ -410,7 +410,7 @@ fn the_boundary_pass_fails_only_when_every_call_does() {
 #[test]
 fn a_stopped_boundary_pass_records_nothing_and_runs_again() {
     let directory = std::env::temp_dir().join(format!(
-        "hex-refine-stop-{}-{}",
+        "gospell-refine-stop-{}-{}",
         std::process::id(),
         crate::desktop::events::now_ms()
     ));
@@ -601,8 +601,8 @@ fn the_vocabulary_line_lists_trimmed_terms() {
     assert_eq!(vocabulary_line(&[]), "");
     assert_eq!(vocabulary_line(&[" ".into()]), "");
     assert_eq!(
-        vocabulary_line(&[" Rune ".into(), "Hex\n\tMicrophone".into()]),
-        "Names and terms that may appear: Rune, Hex Microphone\n\n"
+        vocabulary_line(&[" Rune ".into(), "GoSpell\n\tMicrophone".into()]),
+        "Names and terms that may appear: Rune, GoSpell Microphone\n\n"
     );
 }
 
@@ -742,7 +742,7 @@ fn finishing_hands_over_chapters_not_yet_taken_and_the_departure_stop_opened() {
 #[test]
 fn a_chapter_retitle_rewrites_an_unedited_notes_file_heading() {
     let folder = std::env::temp_dir().join(format!(
-        "hex-chapter-notes-file-{}-{}",
+        "gospell-chapter-notes-file-{}-{}",
         std::process::id(),
         crate::desktop::events::now_ms()
     ));

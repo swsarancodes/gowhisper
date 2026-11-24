@@ -5,7 +5,7 @@ recordings are not vendored here. Download a public dataset yourself and convert
 it with `convert.py`; the script only reads local files and makes no network
 requests.
 
-Both output shapes are described in `ios/HEXMobileTests/TypingReplayTests.swift`.
+Both output shapes are described in `ios/GoSpellMobileTests/TypingReplayTests.swift`.
 Swipes have one gesture per word, taps have every committed touch of the
 sentence in order. Coordinates are in the unit grid: x 0…1 spans the ten columns
 of the top letter row (q's left edge to p's right edge, so their centres are 0.05
@@ -31,12 +31,12 @@ python3 convert.py <dataset> <input…> -o recording.json [--limit N]
 `--limit` caps emitted sentences. Run the replay with:
 
 ```sh
-TEST_RUNNER_HEX_SWIPE_REPLAY=recording.json xcodebuild test \
-  -project HEXMobile.xcodeproj -scheme HEXMobile -destination "id=<SIM_UDID>" \
-  -only-testing:HEXMobileTests/TypingReplayTests
+TEST_RUNNER_GOSPELL_SWIPE_REPLAY=recording.json xcodebuild test \
+  -project GoSpellMobile.xcodeproj -scheme GoSpellMobile -destination "id=<SIM_UDID>" \
+  -only-testing:GoSpellMobileTests/TypingReplayTests
 ```
 
-Use `TEST_RUNNER_HEX_TAP_REPLAY` for a tap recording.
+Use `TEST_RUNNER_GOSPELL_TAP_REPLAY` for a tap recording.
 
 The report line’s fields are described in
 [`ios/docs/build-and-test.md`](../../docs/build-and-test.md#replaying-real-typing): swipes report `attempts` (the
@@ -223,5 +223,5 @@ stay as `prompt.split()`, including their punctuation.
   experimenting. `--set`, `--word-sets`, `--eyes-free` and `--small-keyboards`
   change which attempts are emitted.
 - TSI's `--prompt phrase` is the useful default; random prompts are not words.
-- Output can be large. The tests report per-source accuracy, and `HEX_REPLAY_LIMIT`
+- Output can be large. The tests report per-source accuracy, and `GOSPELL_REPLAY_LIMIT`
   caps sentences inside the test as well.

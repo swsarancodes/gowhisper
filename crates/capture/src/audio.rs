@@ -26,7 +26,7 @@ pub struct RecordedAudio {
     /// Where the samples live when they were streamed to disk: reading them
     /// back is only needed by a path that shifts or rewrites the audio.
     pub(crate) streamed: Option<std::path::PathBuf>,
-    /// Where the audio stops on the capture's clock (ms), when Hex had to stop
+    /// Where the audio stops on the capture's clock (ms), when GoSpell had to stop
     /// keeping it: a streamed capture's disk guard, or a failed write.
     pub(crate) audio_stopped_at_ms: Option<u64>,
     pub(crate) sample_count: usize,
@@ -93,7 +93,7 @@ impl RecordedAudio {
         }
     }
 
-    /// Records where the audio stops on the capture's clock, when Hex had to
+    /// Records where the audio stops on the capture's clock, when GoSpell had to
     /// stop keeping it: a streamed capture's disk guard, or a failed write.
     #[must_use]
     pub fn stopping_audio_at(mut self, ms: Option<u64>) -> Self {
@@ -961,7 +961,7 @@ mod tests {
 
     #[test]
     fn audio_streamed_to_disk_counts_its_samples_and_can_be_read_back() {
-        let dir = std::env::temp_dir().join(format!("hex-audio-streamed-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("gospell-audio-streamed-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join(crate::recover::PARTIAL_AUDIO);
@@ -1029,7 +1029,7 @@ mod tests {
     #[test]
     fn a_streamed_recording_whose_file_is_gone_has_no_samples() {
         let missing =
-            std::env::temp_dir().join(format!("hex-audio-gone-{}.wav", std::process::id()));
+            std::env::temp_dir().join(format!("gospell-audio-gone-{}.wav", std::process::id()));
         let _ = std::fs::remove_file(&missing);
         // A phone capture's narration can outlive its streamed file (or never
         // have one): that is no audio, not a failed capture.

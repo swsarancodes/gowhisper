@@ -187,10 +187,10 @@ impl Flow {
                 Phase::Selecting(mode)
             }
             // Closed before the router answered (dismissed, or the answer
-            // came after the hold): it stays closed, and `hex capture list`
-            // and `hex capture send` still offer the capture.
+            // came after the hold): it stays closed, and `gospell capture list`
+            // and `gospell capture send` still offer the capture.
             (Phase::Dismissed, Input::Routed(_) | Input::Delivered(_)) => Phase::Dismissed,
-            // A queued send went on a retry: Hex can't take it back.
+            // A queued send went on a retry: GoSpell can't take it back.
             (_, Input::Delivered(delivered)) => match delivered {
                 Delivered::Sent { to } => Phase::Sent(Sent {
                     undoable: false,

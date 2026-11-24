@@ -74,8 +74,8 @@ def score(lang, mapping, cases, limits, tmp, command):
     if len(rows) != 2000 or len(cases) != 2:
         raise ValueError(f'{lang}: missing held-out sentences or critical cases')
     refs = [text.lower().split() for _, _, text, _, _ in rows]
-    model = MODELS / (lang + '.hextm')
-    holds, *vocabulary = subprocess.check_output(command + ['local.hex.bench.GateLexicon', model, lang],
+    model = MODELS / (lang + '.gospelltm')
+    holds, *vocabulary = subprocess.check_output(command + ['local.gospell.bench.GateLexicon', model, lang],
                                                  encoding='utf-8').splitlines()
     actual = dict(pair.split(':') for pair in holds.split())
     # Most omissions tap the hold key once. Some have a conventional typed substitute (ß → ss).
@@ -111,7 +111,7 @@ def score(lang, mapping, cases, limits, tmp, command):
     inputs += [typed + ' ' for _, typed, _ in cases]
     path = tmp / 'input.tsv'
     path.write_text('\n'.join(inputs) + '\n', encoding='utf-8')
-    output = subprocess.check_output(command + ['local.hex.bench.Replay', model, path, lang, '--gate'],
+    output = subprocess.check_output(command + ['local.gospell.bench.Replay', model, path, lang, '--gate'],
                                      encoding='utf-8').splitlines()
     if len(output) != len(inputs):
         raise ValueError(f'{lang}: replay returned {len(output)} of {len(inputs)} sentences')
@@ -178,7 +178,7 @@ def score(lang, mapping, cases, limits, tmp, command):
 
 def main():
     maps, cases, limits = map(config, ['accent-keys.json', 'critical-cases.json', 'thresholds.json'])
-    languages = sorted(p.stem for p in MODELS.glob('*.hextm') if (HERE/'held-out'/(p.stem+'.tsv.gz')).is_file())
+    languages = sorted(p.stem for p in MODELS.glob('*.gospelltm') if (HERE/'held-out'/(p.stem+'.tsv.gz')).is_file())
     # A language may be configured before Android has its model (Polish: iOS's typing-gate.py).
     if not set(languages) <= set(maps) & set(cases):
         raise ValueError('Model/set coverage does not match the configured gate languages')

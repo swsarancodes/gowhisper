@@ -43,7 +43,7 @@ const PORTAL_CLIPBOARD_SETTLE: Duration = Duration::from_millis(150);
 /// the paster's lifetime instead, since it notifies on every session start
 /// (#2508).
 const PORTAL_IDLE: Duration = Duration::from_secs(15);
-/// How long an X11 paste waits for modifiers no Hex shortcut holds.
+/// How long an X11 paste waits for modifiers no GoSpell shortcut holds.
 const MODIFIER_WAIT_LIMIT: Duration = Duration::from_secs(2);
 
 pub(crate) struct LinuxPaster {
@@ -266,7 +266,7 @@ const WL_COPY: &str = "wl-copy";
 const WL_COPY_MISSING: &str =
     "wl-copy is not installed. Install the wl-clipboard package, then try again.";
 
-/// What Settings and `hex status` warn with while this Wayland session can't
+/// What Settings and `gospell status` warn with while this Wayland session can't
 /// copy or paste at all.
 pub(crate) fn missing_wayland_helper() -> Option<&'static str> {
     if !LinuxSession::detect().is_wayland() {
@@ -275,7 +275,7 @@ pub(crate) fn missing_wayland_helper() -> Option<&'static str> {
     missing_wl_copy(std::env::var_os("PATH").as_deref())
 }
 
-/// The notice Settings and `hex status` show while one runs.
+/// The notice Settings and `gospell status` show while one runs.
 pub(crate) fn listener_warning(running: bool) -> Option<String> {
     if !running {
         return None;
@@ -466,7 +466,7 @@ impl LinuxPaster {
 
     /// Starts a job that owns the clipboard until it restores: cancels any
     /// pending paste restore, adopts the clipboard that paste replaced when
-    /// there is one, or snapshots the clipboard now. `None` when Hex cannot
+    /// there is one, or snapshots the clipboard now. `None` when GoSpell cannot
     /// read it; the job still runs, and its result stays on the clipboard.
     pub(crate) fn begin_clipboard_job(&mut self) -> Result<Option<Snapshot>> {
         let selection = self.selection.current();
@@ -891,7 +891,7 @@ fn chord_keys(chord: Chord, with_shift: bool) -> Vec<String> {
     keys
 }
 
-/// Waits until the X server reports no held modifiers. While one of Hex's
+/// Waits until the X server reports no held modifiers. While one of GoSpell's
 /// shortcuts is down, a newer capture owns them, so its predecessor stays
 /// queued for as long as it is held. Otherwise the wait ends after `limit`
 /// and the paste goes ahead: XWayland's modifier state goes stale while a
@@ -914,7 +914,7 @@ fn wait_for_modifiers(
         if began.elapsed() >= limit && !shortcut_held() {
             tracing::warn!(
                 waited_ms = began.elapsed().as_millis() as u64,
-                "modifiers still read as held with no Hex shortcut down; pasting anyway"
+                "modifiers still read as held with no GoSpell shortcut down; pasting anyway"
             );
             return Ok(());
         }
@@ -1097,11 +1097,12 @@ mod tests {
 
     #[test]
     fn a_missing_wl_copy_names_the_package_to_install() {
-        let missing = missing_wl_copy(Some(OsStr::new("/hex-test-no-such-directory")));
+        let missing = missing_wl_copy(Some(OsStr::new("/gospell-test-no-such-directory")));
         assert_eq!(missing, Some(WL_COPY_MISSING));
 
         // A `wl-copy` on PATH that is executable is enough.
-        let directory = std::env::temp_dir().join(format!("hex-paste-path-{}", std::process::id()));
+        let directory =
+            std::env::temp_dir().join(format!("gospell-paste-path-{}", std::process::id()));
         std::fs::create_dir_all(&directory).unwrap();
         let helper = directory.join("wl-copy");
         std::fs::write(&helper, b"").unwrap();
@@ -1225,7 +1226,7 @@ mod tests {
     fn helper_can_read_a_large_transcript_without_argv_or_files() {
         let text = b"--help\nplain text\n".repeat(32_768);
         let mut command = shell("test \"$(wc -c)\" -eq \"$1\"");
-        command.args(["hex-paste-test", &text.len().to_string()]);
+        command.args(["gospell-paste-test", &text.len().to_string()]);
         assert!(run_helper(command, &text, &AtomicBool::new(false), HELPER_TIMEOUT).is_ok());
     }
 
@@ -1261,9 +1262,10 @@ mod tests {
 
     #[test]
     fn a_clipboard_daemon_inheriting_stderr_does_not_block_parent_completion() {
-        let path = std::env::temp_dir().join(format!("hex-paste-daemon-{}", std::process::id()));
+        let path =
+            std::env::temp_dir().join(format!("gospell-paste-daemon-{}", std::process::id()));
         let mut command = shell("cat >/dev/null; sleep 10 >&2 & echo $! >\"$1\"");
-        command.arg("hex-paste-test").arg(&path);
+        command.arg("gospell-paste-test").arg(&path);
         let result = run_helper(
             command,
             b"example",
@@ -1332,7 +1334,7 @@ mod tests {
     #[ignore = "run scripts/test-wayland-paste.sh with the compiled test executable"]
     fn native_wayland_clipboard_shortcut() {
         assert!(LinuxSession::detect().is_wayland());
-        let path = std::env::var_os("HEX_WAYLAND_PASTE_OUTPUT")
+        let path = std::env::var_os("GOSPELL_WAYLAND_PASTE_OUTPUT")
             .expect("the isolated Wayland test runner must supply its output file");
         let expected = "Example dictation: --flags, punctuation, \u{6f22}\u{5b57}.\nSecond line.";
         let wait_for = |what: &str, done: &mut dyn FnMut() -> bool| {

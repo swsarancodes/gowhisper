@@ -22,7 +22,7 @@ pub struct LocalTranscriber {
     selection: TranscriptionSelection,
     options: RunOptions,
     device_label: String,
-    /// Where it runs, for Settings and `hex status`.
+    /// Where it runs, for Settings and `gospell status`.
     backend: crate::transcription::SpeechBackend,
     max_audio_samples: Option<usize>,
     /// The finest timestamps the model gives, for a capture's or a
@@ -701,7 +701,7 @@ impl LocalTranscriber {
         &self.device_label
     }
 
-    /// Where this model runs, for `hex status` and Settings.
+    /// Where this model runs, for `gospell status` and Settings.
     pub(crate) fn backend(&self) -> &crate::transcription::SpeechBackend {
         &self.backend
     }
@@ -942,7 +942,7 @@ type Reloading = std::sync::mpsc::Receiver<std::result::Result<(), String>>;
 fn spawn_model_load(selection: TranscriptionSelection, cancel: Arc<AtomicBool>) -> Result<Loading> {
     let (sender, receiver) = std::sync::mpsc::channel();
     std::thread::Builder::new()
-        .name("hex-model-swap".into())
+        .name("gospell-model-swap".into())
         .spawn(move || {
             let _ = sender.send(
                 LocalTranscriber::load_cancellable(&selection, &cancel)
@@ -1455,7 +1455,7 @@ mod gpu_start_tests {
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
             .as_nanos();
-        std::env::temp_dir().join(format!("hex-gpu-start-{name}-{unique}.pending"))
+        std::env::temp_dir().join(format!("gospell-gpu-start-{name}-{unique}.pending"))
     }
 
     fn marker(text: &str) -> String {

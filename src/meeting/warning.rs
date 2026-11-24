@@ -835,7 +835,7 @@ mod tests {
     #[test]
     fn a_warning_is_written_to_the_manifest_as_soon_as_it_is_raised() {
         let directory = std::env::temp_dir().join(format!(
-            "hex-meeting-warning-{}-{}",
+            "gospell-meeting-warning-{}-{}",
             std::process::id(),
             super::super::now_ms()
         ));

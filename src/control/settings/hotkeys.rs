@@ -1,4 +1,4 @@
-//! Shortcut text for `hex settings`: reading and writing the modifier-plus-key
+//! Shortcut text for `gospell settings`: reading and writing the modifier-plus-key
 //! form, and why a bare special key still needs its Labs toggle.
 
 use crate::app_settings::{
@@ -26,7 +26,7 @@ pub(super) fn check_shortcut(
                 crate::control::ControlError::new(
                     "shortcut-in-use",
                     format!(
-                        "{} is already in use by another Hex shortcut",
+                        "{} is already in use by another GoSpell shortcut",
                         format_hotkey(binding)
                     ),
                 )
@@ -45,22 +45,25 @@ fn cli_refusal_message(refusal: ShortcutRefusal) -> String {
         }
         ShortcutRefusal::BareErase => "add a modifier".into(),
         ShortcutRefusal::NeedsMouseShortcutsLab => {
-            "mouse buttons need Labs › Mouse shortcuts: hex labs on mouse-shortcuts".into()
+            "mouse buttons need Labs › Mouse shortcuts: gospell labs on mouse-shortcuts".into()
         }
         ShortcutRefusal::NeedsSectionKeyLab => {
-            "section needs Labs › § key alone: hex labs on section-key".into()
+            "section needs Labs › § key alone: gospell labs on section-key".into()
         }
         ShortcutRefusal::NeedsMicrophoneKeyLab => {
-            "the mic key needs Labs › Microphone key alone: hex labs on microphone-key".into()
+            "the mic key needs Labs › Microphone key alone: gospell labs on microphone-key".into()
         }
         ShortcutRefusal::MicrophoneKeyOnScreenshot => {
-            "the mic key can't be the screenshot shortcut: macOS takes it before Hex sees it".into()
+            "the mic key can't be the screenshot shortcut: macOS takes it before GoSpell sees it"
+                .into()
         }
         ShortcutRefusal::NeedsNavigationKeyLab { key_name } => {
-            format!("{key_name} alone needs Labs › Special keys alone: hex labs on special-keys")
+            format!(
+                "{key_name} alone needs Labs › Special keys alone: gospell labs on special-keys"
+            )
         }
         ShortcutRefusal::NeedsSpecialKeysLab { key_name, .. } => {
-            format!("{key_name} needs Labs › Special keys alone: hex labs on special-keys")
+            format!("{key_name} needs Labs › Special keys alone: gospell labs on special-keys")
         }
         ShortcutRefusal::NeedsModifierForKey { key_name } => {
             format!("add a modifier, such as option+{key_name}")

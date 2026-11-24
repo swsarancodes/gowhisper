@@ -4,8 +4,8 @@
 # internal-only changes. The Release workflow runs it without secrets; its
 # dev-notes job checks the result (.github/release/publish-dev-notes.sh) and
 # publishes it to the one-commit `dev-notes` branch, which the site serves at
-# https://anoma.ly/hex/files/dev-notes.json and renders at
-# https://anoma.ly/hex/dev; the app's update item reads the same file.
+# https://gospell.goml.io/files/dev-notes.json and renders at
+# https://gospell.goml.io/dev; the app's update item reads the same file.
 #
 #   release-dev-notes.sh <version> <commit> <out>
 #
@@ -17,9 +17,9 @@ set -euo pipefail
 version=${1:?Usage: release-dev-notes.sh <version> <commit> <out>}
 commit=${2:?Usage: release-dev-notes.sh <version> <commit> <out>}
 out=${3:?Usage: release-dev-notes.sh <version> <commit> <out>}
-repository=https://github.com/anomalyco/hex
-notes_url=${HEX_DEV_NOTES_URL:-https://anoma.ly/hex/files/dev-notes.json}
-manifest_url=${HEX_DEV_MANIFEST_URL:-https://anoma.ly/release/hex/desktop/dev.json}
+repository=https://github.com/goml/gospell
+notes_url=${GOSPELL_DEV_NOTES_URL:-https://gospell.goml.io/files/dev-notes.json}
+manifest_url=${GOSPELL_DEV_MANIFEST_URL:-https://goml.io/release/gospell/desktop/dev.json}
 max_builds=40
 max_items=40
 max_bytes=200000
@@ -54,7 +54,7 @@ fi
 # iOS, CI) is not in a dev build.
 app_path='^(src/|crates/|native/|resources/|assets/|app/|packaging/|sdk/commands/|build\.rs$|Cargo\.toml$)'
 test_path='(^tests/|/tests/|_tests\.rs$|/goldens/)'
-# Titles of changes nobody using Hex notices.
+# Titles of changes nobody using GoSpell notices.
 internal='^(fix\(ci\)|(ci|chore|test|tests|refactor|docs|build|style)(\([^)]*\))?!?:|release prep|release:|fold |extract |update (feature )?docs|goldens|bump rune|roll in|add code-shape|merge )'
 
 : > "$work/items.jsonl"

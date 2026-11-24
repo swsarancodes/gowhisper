@@ -1,4 +1,4 @@
-//! The `hex settings` registry: one key per persisted setting, named by its
+//! The `gospell settings` registry: one key per persisted setting, named by its
 //! dotted path in `settings.json`, with the same rules and side effects the
 //! window applies when you change it there.
 
@@ -19,7 +19,7 @@ use hotkeys::check_shortcut;
 pub use hotkeys::{format_hotkey, parse_hotkey};
 use registry::{CAPTURE_KEYS, KEYS, Key, Kind, RETIRED, needs};
 
-/// One setting as `hex settings get` reports it.
+/// One setting as `gospell settings get` reports it.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct SettingValue {
     pub key: String,
@@ -30,7 +30,7 @@ pub struct SettingValue {
     pub choices: Vec<String>,
     pub writable: bool,
     pub about: String,
-    /// False where this OS's Hex lacks what the setting needs ([`needs`]):
+    /// False where this OS's GoSpell lacks what the setting needs ([`needs`]):
     /// it is kept, but does nothing here and `set` refuses it.
     #[serde(default = "available")]
     pub available: bool,
@@ -40,7 +40,7 @@ fn available() -> bool {
     true
 }
 
-/// Why `hex settings set` refuses `name` on this OS, if it does.
+/// Why `gospell settings set` refuses `name` on this OS, if it does.
 pub fn unavailable(name: &str) -> Option<ControlError> {
     unavailable_under(name, crate::policy::Policy::current())
 }
@@ -83,7 +83,7 @@ fn unavailable_under(name: &str, policy: crate::policy::Policy) -> Option<Contro
     Some(ControlError::new(
         "unsupported",
         format!(
-            "`{name}` does nothing on this OS: it needs {capability}, which Hex has only elsewhere"
+            "`{name}` does nothing on this OS: it needs {capability}, which GoSpell has only elsewhere"
         ),
     ))
 }
@@ -100,11 +100,11 @@ fn keys() -> impl Iterator<Item = &'static Key> {
     KEYS.iter().chain(CAPTURE_KEYS)
 }
 
-/// Settings `hex settings` never shows: Hex's own bookkeeping.
+/// Settings `gospell settings` never shows: GoSpell's own bookkeeping.
 #[cfg(test)]
 const INTERNAL: &[&str] = &["migrations", "mouse_shortcut_notice", "labs.groups"];
 
-/// Settings another `hex` command edits instead (`hex vocabulary`).
+/// Settings another `gospell` command edits instead (`gospell vocabulary`).
 #[cfg(test)]
 const OWN_COMMAND: &[&str] = &["vocabulary"];
 
@@ -156,7 +156,7 @@ fn recognition_hints(settings: &AppSettings) -> SettingValue {
         kind: Kind::Text.name().into(),
         choices: Vec::new(),
         writable: true,
-        about: "Deprecated: the vocabulary's terms; setting it adds names to the vocabulary                 (use `hex vocabulary`)"
+        about: "Deprecated: the vocabulary's terms; setting it adds names to the vocabulary                 (use `gospell vocabulary`)"
             .into(),
         available: true,
     }
@@ -189,13 +189,13 @@ fn unknown(name: &str) -> ControlError {
     if name == "labs.settings_search" {
         return ControlError::new(
             "unknown-setting",
-            "Settings search no longer needs a lab. Use Cmd+K (Ctrl+K off macOS) in the Hex window.",
+            "Settings search no longer needs a lab. Use Cmd+K (Ctrl+K off macOS) in the GoSpell window.",
         );
     }
     if let Some((_, replacement)) = RETIRED.iter().find(|(retired, _)| *retired == name) {
         return ControlError::new(
             "unknown-setting",
-            format!("`{name}` was replaced: use `hex settings set {replacement}`"),
+            format!("`{name}` was replaced: use `gospell settings set {replacement}`"),
         );
     }
     let near = keys()
@@ -209,7 +209,7 @@ fn unknown(name: &str) -> ControlError {
         .unwrap_or_default();
     ControlError::new(
         "unknown-setting",
-        format!("unknown setting `{name}`.{near} Run `hex settings list` for every key."),
+        format!("unknown setting `{name}`.{near} Run `gospell settings list` for every key."),
     )
 }
 
@@ -264,7 +264,7 @@ pub fn apply(
             settings: candidate,
             effects: Vec::new(),
             message: "Added the names to the vocabulary (transcription.recognition_hints is \
-                      deprecated; use `hex vocabulary`)"
+                      deprecated; use `gospell vocabulary`)"
                 .into(),
         });
     }
@@ -396,7 +396,7 @@ pub fn apply(
                 validate_mode_speech(name, mode)?;
             }
         }
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         "capture.enabled"
             if candidate.capture.enabled
                 && candidate.hotkey_in_use(HotkeySlot::Capture, &candidate.capture.hotkey) =>
@@ -418,7 +418,7 @@ pub fn apply(
                  shortcut first",
             ));
         }
-        #[cfg(hex_capture)]
+        #[cfg(gospell_capture)]
         "labs.screenshots" if candidate.labs.screenshots => {
             candidate.clear_record_shortcut_sharing_capture();
         }
@@ -442,10 +442,10 @@ pub fn apply(
 }
 
 /// Validates every `key: value` in `values` against `settings` and returns
-/// the settings to save, all or none (`hex settings apply`, the Home Manager
+/// the settings to save, all or none (`gospell settings apply`, the Home Manager
 /// module). Values are JSON: booleans, numbers, `null` for `none`, objects
 /// and arrays for json settings, text for the rest. `transcription.model`
-/// and `transcription.language` select a model, as `hex model use` would,
+/// and `transcription.language` select a model, as `gospell model use` would,
 /// without needing it installed. Keys that depend on each other (a
 /// double-tap-only start and its shortcut) apply in any order.
 pub fn apply_all(
@@ -771,9 +771,9 @@ mod tests {
         }
     }
 
-    /// Fails when a persisted setting has no `hex settings` key: add one to
-    /// `KEYS` (or to `INTERNAL` if it is Hex's own bookkeeping, or to
-    /// `OWN_COMMAND` if another `hex` command edits it).
+    /// Fails when a persisted setting has no `gospell settings` key: add one to
+    /// `KEYS` (or to `INTERNAL` if it is GoSpell's own bookkeeping, or to
+    /// `OWN_COMMAND` if another `gospell` command edits it).
     #[test]
     fn every_persisted_setting_has_a_cli_key() {
         // Lists left empty and unchosen options are left out of the file;
@@ -802,7 +802,7 @@ mod tests {
                 .any(|key| path == key || path.starts_with(&format!("{key}.")));
             assert!(
                 covered,
-                "settings.json has `{path}`, which `hex settings` can't name"
+                "settings.json has `{path}`, which `gospell settings` can't name"
             );
         }
         for key in keys() {
@@ -827,7 +827,7 @@ mod tests {
             let name = feature.settings_key();
             let key = keys().find(|key| key.key == name).unwrap_or_else(|| {
                 panic!(
-                    "Labs feature `{}` names no `hex settings` key `{name}`",
+                    "Labs feature `{}` names no `gospell settings` key `{name}`",
                     feature.name()
                 )
             });
@@ -1072,12 +1072,12 @@ mod tests {
         let change = apply(
             &change.settings,
             "labs.signature_text",
-            "  Dax, from Hex ",
+            "  Dax, from GoSpell ",
             &rules(),
         )
         .unwrap();
         assert_eq!(
-            change.settings.labs.signature_text, "Dax, from Hex",
+            change.settings.labs.signature_text, "Dax, from GoSpell",
             "a saved signature is trimmed"
         );
         let error = apply(
@@ -1090,7 +1090,7 @@ mod tests {
         assert_eq!(error.code, "invalid-value");
         assert!(error.message.contains("one line"), "{}", error.message);
         assert_eq!(
-            change.settings.labs.signature_text, "Dax, from Hex",
+            change.settings.labs.signature_text, "Dax, from GoSpell",
             "a refused draft leaves the saved signature"
         );
         let change = apply(&change.settings, "labs.signature_text", "", &rules()).unwrap();
@@ -1119,7 +1119,7 @@ mod tests {
         }
     }
 
-    #[cfg(hex_capture)]
+    #[cfg(gospell_capture)]
     #[test]
     fn capture_routing_is_set_as_one_object_without_a_jev_key() {
         let settings = AppSettings::default();
@@ -1516,7 +1516,7 @@ mod tests {
             format_hotkey(&change.settings.dictation_hotkey),
             "option+mic"
         );
-        // Screenshots never take it: their keys are read after Hex's session
+        // Screenshots never take it: their keys are read after GoSpell's session
         // tap has taken the press.
         let error = apply(&on, "screenshots.hotkey", "microphone", &rules()).unwrap_err();
         assert_eq!(error.code, "invalid-value");

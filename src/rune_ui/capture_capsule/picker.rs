@@ -6,7 +6,7 @@
 //! click records the display.
 //!
 //! It takes the pointer only while it shows and never takes focus: Escape
-//! and the capture shortcut reach the capsule through Hex's tap, and the
+//! and the capture shortcut reach the capsule through GoSpell's tap, and the
 //! shortcut records what the picker shows ([`PickerOverlay::aim`]).
 //!
 //! [`Scene::at`] decides what shows from the mode, the windows, the pointer
@@ -974,7 +974,7 @@ impl PickerOverlay {
             app,
             act,
             PickerRole {
-                name: "Hex capture picker",
+                name: "GoSpell capture picker",
                 screen_label: FULL_SCREEN,
                 exclude_from_capture: !crate::capture_host::own_windows_recorded(),
                 prewarm: true,
@@ -1362,7 +1362,7 @@ pub(crate) mod tests {
             Window {
                 id: 2,
                 frame: [420.0, 240.0, 460.0, 300.0],
-                label: "Zed — hex".into(),
+                label: "Zed — gospell".into(),
             },
         ]
     }
@@ -1380,7 +1380,10 @@ pub(crate) mod tests {
     #[test]
     fn a_window_is_labelled_by_its_app_and_title() {
         let f = [0.0, 0.0, 800.4, 600.0];
-        assert_eq!(window_label(Some("Zed"), Some("hex"), f), "Zed — hex");
+        assert_eq!(
+            window_label(Some("Zed"), Some("gospell"), f),
+            "Zed — gospell"
+        );
         assert_eq!(window_label(Some("Finder"), Some("Finder"), f), "Finder");
         assert_eq!(window_label(Some("Finder"), Some(""), f), "Finder");
         assert_eq!(window_label(None, Some("x"), f), "800 × 600");

@@ -1,4 +1,4 @@
-package local.hex.measure;
+package local.gospell.measure;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -14,7 +14,7 @@ import android.util.Log;
 import android.widget.EditText;
 import java.util.ArrayList;
 
-/** Disposable foreground probe, never packaged in Hex. Only the synthetic corpus is logged. */
+/** Disposable foreground probe, never packaged in GoSpell. Only the synthetic corpus is logged. */
 public class SystemProbe extends Activity {
     private SpeechRecognizer speech;
     private String active;
@@ -102,5 +102,5 @@ public class SystemProbe extends Activity {
         });
     }
     private static long now(){return SystemClock.elapsedRealtime();}
-    private static void log(String id,String s){Log.i("HexMeasure",id+"|"+s);}
+    private static void log(String id,String s){Log.i("GoSpellMeasure",id+"|"+s);}
 }

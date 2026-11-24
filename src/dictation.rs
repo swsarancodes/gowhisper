@@ -553,7 +553,7 @@ impl DictationClip {
 
     /// A cancel keeps neither warm pre-roll nor a live stream that may have
     /// heard beyond the physical key event. Never hand it to normal output.
-    #[cfg(all(target_os = "macos", hex_capture))]
+    #[cfg(all(target_os = "macos", gospell_capture))]
     fn into_cancel_samples(mut self) -> Vec<f32> {
         self.samples
             .truncate(self.samples.len().saturating_sub(self.tail_samples));
@@ -814,7 +814,7 @@ struct Recording {
     recorded_through: Option<CaptureInstant>,
     /// How much of the recording precedes the press.
     pre_press: Duration,
-    /// Clip samples through which Hex's output suppression has actually
+    /// Clip samples through which GoSpell's output suppression has actually
     /// reached the microphone, as the environment reported it. Zero when
     /// nothing was suppressed or the report has not arrived.
     output_suppression_through: usize,
@@ -850,10 +850,10 @@ struct Recording {
     suppression_reports: Option<mpsc::Receiver<CaptureInstant>>,
     #[cfg(target_os = "macos")]
     capture: Option<crate::audio::recording_environment::CaptureMarker>,
-    /// Filters Hex Microphone from the hold threshold until the recording
+    /// Filters GoSpell Microphone from the hold threshold until the recording
     /// ends (macOS follows its recording environment instead).
     #[cfg(target_os = "linux")]
-    voice_filter: Option<crate::audio::hex_microphone::Dictation>,
+    voice_filter: Option<crate::audio::gospell_microphone::Dictation>,
 }
 
 impl Recording {
@@ -973,7 +973,7 @@ impl Recording {
         self.environment.activate(&mut self.suppression_reports);
         #[cfg(target_os = "linux")]
         {
-            self.voice_filter = Some(crate::audio::hex_microphone::Dictation::begin());
+            self.voice_filter = Some(crate::audio::gospell_microphone::Dictation::begin());
         }
         true
     }
@@ -991,7 +991,7 @@ impl Recording {
         Some(self.head_ignored())
     }
 
-    /// Clip samples of Hex's own audio at the capture's head, which a stream
+    /// Clip samples of GoSpell's own audio at the capture's head, which a stream
     /// that hears it has not lost any speech over.
     fn head_ignored(&self) -> usize {
         opening_head::ignored_head(self.pre_press, self.output_suppression_through)
@@ -1201,7 +1201,7 @@ impl DictationCapture {
         #[cfg(target_os = "linux")]
         {
             recording.voice_filter =
-                intentional.then(crate::audio::hex_microphone::Dictation::begin);
+                intentional.then(crate::audio::gospell_microphone::Dictation::begin);
         }
         #[cfg(target_os = "macos")]
         {

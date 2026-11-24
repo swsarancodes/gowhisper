@@ -98,15 +98,15 @@ fn run(model: &mut Parakeet, mut samples: Vec<f32>) -> String {
 }
 
 #[test]
-#[ignore = "requires HEX_TAIL_MODEL (Unified English GGUF) and HEX_TAIL_WAVS (comma-separated)"]
+#[ignore = "requires GOSPELL_TAIL_MODEL (Unified English GGUF) and GOSPELL_TAIL_WAVS (comma-separated)"]
 fn release_boundary_harness() {
     let mut model = Parakeet::load_from(
-        &PathBuf::from(std::env::var("HEX_TAIL_MODEL").unwrap()),
+        &PathBuf::from(std::env::var("GOSPELL_TAIL_MODEL").unwrap()),
         false,
         Some(&TranscriptionSelection::default()),
     )
     .unwrap();
-    for path in std::env::var("HEX_TAIL_WAVS").unwrap().split(',') {
+    for path in std::env::var("GOSPELL_TAIL_WAVS").unwrap().split(',') {
         let (speech, rate) = read_wav(Path::new(path));
         let end = speech_end(&speech, rate);
         let lead = samples_for(LEAD, rate);

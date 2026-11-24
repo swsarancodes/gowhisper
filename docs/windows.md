@@ -12,10 +12,10 @@ deadline-bounded OpenCode processing policy as macOS, then run ordered built-in
 or user-defined TypeScript transformations.
 
 The default shortcut is the left **Alt** key alone, the key under your thumb
-where Option sits on a Mac ([#2278](https://github.com/anomalyco/hex/issues/2278)).
+where Option sits on a Mac ([#2278](https://github.com/goml/gospell/issues/2278)).
 In **Hold** mode, hold Alt while speaking and release it to transcribe and
 paste. In **Toggle** mode, press Alt to start and again to finish, or press
-the **Cancel** shortcut (Escape by default) to throw the recording away; Hex
+the **Cancel** shortcut (Escape by default) to throw the recording away; GoSpell
 takes that key only while a recording runs. Hold mode has no cancel shortcut
 (releasing the hold transcribes and pastes). Alt is the shortcut only while it is held
 alone: another key, or a modifier the shortcut doesn't include, joining it
@@ -24,13 +24,13 @@ the input language, or Ctrl on the way to Ctrl+Alt+V), which cancels the
 press before anything is transcribed, and AltGr keeps typing on the layouts
 that use it. With Labs › Hold through other keys, a hold that is already a
 second old keeps recording through those keys instead. Windows opens its
-menus on an Alt tap, so Hex swallows Alt's release when nothing joined it,
+menus on an Alt tap, so GoSpell swallows Alt's release when nothing joined it,
 the way macOS keeps Option from opening its menus. A hold another key or
-modifier joined leaves the release to the app, unless Hex swallowed a key of
+modifier joined leaves the release to the app, unless GoSpell swallowed a key of
 that chord too (Paste Last's V, say), which brings the mask back. Rebind it in
 Settings if you rely on a bare Alt elsewhere. To let another app use the same
 key, such as a Discord push-to-talk key, turn on **Share dictation shortcut
-with other apps** under Advanced: Hex still reacts to it but passes its
+with other apps** under Advanced: GoSpell still reacts to it but passes its
 key-down and key-up on, which can also trigger that binding in other apps. In Hold mode, tap the shortcut twice within
 300 ms to lock recording, then press it again to finish. Paste Last defaults to
 `Ctrl+Alt+V`. Settings changes apply live or through an automatic listener
@@ -41,77 +41,77 @@ app and **Disabled** when it does nothing.
 
 ## Install
 
-x86_64 PCs need a 2013 or newer processor with AVX2 (Intel Haswell / AMD Excavator or later); on an older processor Hex shows a message and quits instead of starting.
+x86_64 PCs need a 2013 or newer processor with AVX2 (Intel Haswell / AMD Excavator or later); on an older processor GoSpell shows a message and quits instead of starting.
 
 Download and run the installer for your PC:
 
-- x64: [`HexSetup.exe`](https://anoma.ly/hex/download/windows-x64-setup)
-- ARM64: [`HexSetup.exe`](https://anoma.ly/hex/download/windows-arm64-setup)
+- x64: [`GoSpellSetup.exe`](https://gospell.goml.io/download/windows-x64-setup)
+- ARM64: [`GoSpellSetup.exe`](https://gospell.goml.io/download/windows-arm64-setup)
 
-Until Hex's first stable release these are the newest dev build, which keeps
+Until GoSpell's first stable release these are the newest dev build, which keeps
 updating itself from the Dev channel; afterwards, the stable release.
 
-[anoma.ly/hex](https://anoma.ly/hex/) picks the right one. The
+[gospell.goml.io](https://gospell.goml.io/) picks the right one. The
 installer needs no administrator rights: it installs for the current user,
-adds Hex to the Start menu, to **Settings › Apps** for uninstalling, and
-`hex` to PATH for terminals, and opens Hex, whose first run downloads a speech
+adds GoSpell to the Start menu, to **Settings › Apps** for uninstalling, and
+`gospell` to PATH for terminals, and opens GoSpell, whose first run downloads a speech
 model. Releases built once
-Anomaly's Azure Artifact Signing is configured are Authenticode-signed
+GoML's Azure Artifact Signing is configured are Authenticode-signed
 ([windows-signing.md](windows-signing.md)). Until then, and while a new
 publisher builds SmartScreen reputation, SmartScreen may say it protected your
 PC; choose **More info**, then **Run anyway**.
 
 **x64** decodes on the GPU through Vulkan 1.2, which a current NVIDIA, AMD, or
 Intel graphics driver supplies (`vulkan-1.dll`). With a missing or older
-driver Hex still starts and decodes on the CPU, and Settings › Speech engine
+driver GoSpell still starts and decodes on the CPU, and Settings › Speech engine
 says so. **ARM64** decodes on the CPU. Both are
-self-contained: no Visual C++ Redistributable is required. Hex then keeps
+self-contained: no Visual C++ Redistributable is required. GoSpell then keeps
 itself current through the signed update feed. Uninstalling removes every
 installed version, the shortcut, and Launch at login, and keeps settings and
-history in `%APPDATA%\hex` and logs and models in `%LOCALAPPDATA%\hex`.
+history in `%APPDATA%\gospell` and logs and models in `%LOCALAPPDATA%\gospell`.
 
 The installer and the script below create the same managed layout, so either
 can replace the other. For a scripted install:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -Command "iwr https://anoma.ly/hex/files/install-windows.ps1 -OutFile install-windows.ps1; ./install-windows.ps1"
+powershell -ExecutionPolicy Bypass -Command "iwr https://gospell.goml.io/files/install-windows.ps1 -OutFile install-windows.ps1; ./install-windows.ps1"
 ```
 
 Uninstall a script install with `install-windows.ps1 -Uninstall`.
 
-The managed layout is `%APPDATA%\hex\versions\<version>\` holding `hex.exe`,
-the app, a GUI program so launching Hex opens no console window, and
-`hex.com`, its console entry point, which runs `hex.exe` with the same
-arguments, waits for it, and returns its exit code (`hex` and `hex app` only
+The managed layout is `%APPDATA%\gospell\versions\<version>\` holding `gospell.exe`,
+the app, a GUI program so launching GoSpell opens no console window, and
+`gospell.com`, its console entry point, which runs `gospell.exe` with the same
+arguments, waits for it, and returns its exit code (`gospell` and `gospell app` only
 start the app and return). Shortcuts, Launch at login,
-and the Start menu open `hex.exe`. `%APPDATA%\hex\bin\hex.com`, a copy that
+and the Start menu open `gospell.exe`. `%APPDATA%\gospell\bin\gospell.com`, a copy that
 runs the version `current-version` names, is on the user's PATH, and a
-terminal resolves `hex` to it before any `hex.exe` because PATHEXT lists
+terminal resolves `gospell` to it before any `gospell.exe` because PATHEXT lists
 `.COM` first. Terminals opened before the install need reopening to see PATH.
 
 ## Known Issues
 
-**Discord shows "Playing HEX: Shards of Fate"**
-([#445](https://github.com/anomalyco/hex/issues/445)). With game activity
-detection on, Discord Desktop matches the running `hex.exe` to the verified game
-*HEX: Shards of Fate*. It then shows that game on your profile for as long as
-Hex runs. The reporter's local test suggests Discord matches on the executable
-name. Hex keeps the name `hex.exe` because the installer, updater, Start Menu
+**Discord shows "Playing GOSPELL: Shards of Fate"**
+([#445](https://github.com/goml/gospell/issues/445)). With game activity
+detection on, Discord Desktop matches the running `gospell.exe` to the verified game
+*GOSPELL: Shards of Fate*. It then shows that game on your profile for as long as
+GoSpell runs. The reporter's local test suggests Discord matches on the executable
+name. GoSpell keeps the name `gospell.exe` because the installer, updater, Start Menu
 shortcut, and Launch at login all use the managed
-`%APPDATA%\hex\versions\<version>\hex.exe` path. The problem has been reported
+`%APPDATA%\gospell\versions\<version>\gospell.exe` path. The problem has been reported
 to Discord. Until Discord fixes its game list, open Discord's
 **Settings › Registered Games** (or **Activity Privacy**) and hide the detected
-entry, or turn off activity sharing there. Hex works the same either way.
+entry, or turn off activity sharing there. GoSpell works the same either way.
 
 ## Streaming Dictation
 
-With Parakeet Unified English on a GPU, Hex streams audio into the model while
+With Parakeet Unified English on a GPU, GoSpell streams audio into the model while
 the shortcut is held, so release only decodes the last one to two seconds. The
 same engine streams on macOS (Metal) and Linux (Vulkan). Each dictation logs
 `source=stream` or `source=fallback` in `logs\process.log`; a stream that fails,
 stalls past its deadline, or returns nothing falls back to transcribing the
 whole clip. CPU devices (including ARM64) always use the whole-clip path. Set
-`HEX_STREAMING=0` to force the whole-clip path. See
+`GOSPELL_STREAMING=0` to force the whole-clip path. See
 [dictation](features/dictation.md#streaming-finish).
 
 ## Requirements For Source Builds
@@ -135,7 +135,7 @@ AVX2) can still build from source. In PowerShell:
 
 ```powershell
 $env:TRANSCRIBE_CMAKE_ARGS = "-DGGML_NATIVE=OFF -DGGML_SSE42=ON -DGGML_AVX=ON -DGGML_F16C=ON -DGGML_AVX2=OFF -DGGML_BMI2=OFF -DGGML_FMA=OFF"
-$env:HEX_X86_BASELINE = "ivybridge"
+$env:GOSPELL_X86_BASELINE = "ivybridge"
 cargo build --release
 ```
 
@@ -164,7 +164,7 @@ cargo run -- devices
 cargo run -- model devices
 ```
 
-Install the selected model (with Hex stopped, `model install` downloads and
+Install the selected model (with GoSpell stopped, `model install` downloads and
 selects it in this process), load it, and transcribe a WAV file:
 
 ```powershell
@@ -189,7 +189,7 @@ cargo run -- app
 
 The Settings card reads **Enabled** when the shortcut works system-wide in every
 app and **Disabled** when it does nothing; its button and the tray's
-**Enable / Disable Hex** switch between them. Hex enables itself on launch by
+**Enable / Disable GoSpell** switch between them. GoSpell enables itself on launch by
 default (**Enable on launch**). The microphone records only while you dictate.
 Changing the
 transcription model, microphone, dictation shortcut, double-tap behavior, or
@@ -208,15 +208,15 @@ cargo run -- listen --model parakeet_v3 --language pl
 Press Enter once to start, then again to stop. Captures shorter than 300 ms are
 discarded. `--device` accepts a case-insensitive fragment from `devices`.
 
-Runtime data is stored under `%APPDATA%\hex`, except logs and speech models,
-which belong to this computer and live in `%LOCALAPPDATA%\hex`: on managed
+Runtime data is stored under `%APPDATA%\gospell`, except logs and speech models,
+which belong to this computer and live in `%LOCALAPPDATA%\gospell`: on managed
 networks Windows copies the Roaming folder to a server at every sign-in, which
-hundreds of megabytes of models would slow down. An older Hex's `logs` and
-`models` move there once (`app_paths::machine_local`); while a running Hex
+hundreds of megabytes of models would slow down. An older GoSpell's `logs` and
+`models` move there once (`app_paths::machine_local`); while a running GoSpell
 holds them, the Roaming copy stays in use. Observations are in
 `logs\live.ndjson`, and native/runtime diagnostics are in `logs\process.log`,
 including every panic with its thread and backtrace. A worker that stops
-unexpectedly leaves its cause there. `hex.exe` is a GUI program, so a launch
+unexpectedly leaves its cause there. `gospell.exe` is a GUI program, so a launch
 from Explorer, the Start menu, or login opens no console window. Run from a
 terminal, it prints startup errors there, then the app leaves the terminal and
 has no stdout or stderr.
@@ -226,24 +226,24 @@ by default.
 
 ## Control commands
 
-The `hex` control commands ([docs/cli.md](cli.md)) drive the running tray app
+The `gospell` control commands ([docs/cli.md](cli.md)) drive the running tray app
 as they do on macOS: `status`, `start`, `quit`, `restart`, `dictation
 start|stop|cancel|toggle` (with `stop --print`), `paste-last`, `settings`,
 `model`, `window`, `vocabulary`, `history clear`, `check-for-updates`,
 `launch-at-login` (the Run key), `onboarding reset`, `logs`, and `commands
 init|check`, `annotate`, `meetings record|stop|copy-last`, `history`, and
 `mcp`. They reach it through its local API (`local-api.json` in
-`%APPDATA%\hex` and the bearer-authenticated `POST /control`). Dictation commands go
+`%APPDATA%\gospell` and the bearer-authenticated `POST /control`). Dictation commands go
 to the listener's own loop as a shortcut press would, and `annotate`
 start, stop, cancel, and status wait for its capture host. `history`,
-`meetings`, and `mcp` work as on macOS. `hex restart`
-quits, waits for the drain, and starts `hex app --hidden` again.
+`meetings`, and `mcp` work as on macOS. `gospell restart`
+quits, waits for the drain, and starts `gospell app --hidden` again.
 
 ## Custom Transformations
 
 The Transformations card in Modes always offers the built-in transformations.
-Choose **Set up** there to create `~/.config/hex/hex.config.ts` and load any
-transformations registered by that config. Hex runs the config in its embedded
+Choose **Set up** there to create `~/.config/gospell/gospell.config.ts` and load any
+transformations registered by that config. GoSpell runs the config in its embedded
 JavaScript engine (QuickJS), so nothing else needs installing.
 
 Transformations run in the displayed order after mode corrections and the
@@ -256,11 +256,11 @@ the card.
 
 ## The App
 
-`hex app` (`--hidden` for a login launch) runs the tray app on Rune. Snapshot
-fixtures without starting anything: `hex app -- --snap out.png --scene modes`.
+`gospell app` (`--hidden` for a login launch) runs the tray app on Rune. Snapshot
+fixtures without starting anything: `gospell app -- --snap out.png --scene modes`.
 
 ```ts
-hex app
+gospell app
 ├── named event already held -> signal it (the running app shows its window) -> exit
 └── becomes the app                                   // windows::rune::open
     ├── the local API's POST /control -> control::host::answer
@@ -271,7 +271,7 @@ hex app
     └── tray Quit / Ctrl-C / restart into an update -> AppHandle::quit -> runtime stops the listener
 ```
 
-- Quit Hex in the window or the tray stops the listener and ends the app;
+- Quit GoSpell in the window or the tray stops the listener and ends the app;
   closing the window only hides it.
 - The window uses the shared Rune panes (General, Modes,
   History, the transcription picker, first-run setup) with Windows rows:
@@ -303,7 +303,7 @@ hex app
   winit repaints the frame from the OS theme on each one, and only reports
   `ThemeChanged` when the OS theme actually changed. The subclass removes
   itself when the window is destroyed.
-- Without a tray (creation failed) closing the window quits Hex.
+- Without a tray (creation failed) closing the window quits GoSpell.
   See the [single-process plan](plans/single-process.md#windows-under-rune).
 
 **This app has never run on Windows.** Earlier releases shipped a GPUI app
@@ -365,17 +365,17 @@ current-user startup registry, UI Automation, and Windows capture APIs.
 | Vocabulary as Whisper and Qwen3-ASR's context prompt | Implemented |
 | Release microphone while idle | Implemented; mutually exclusive with audio pre-roll, as documented in Settings |
 | While-dictating audio control (mute other apps or pause media) | Implemented via WASAPI session volumes and GSMTC |
-| Signed automatic self-update for managed installs | Implemented for x64 and ARM64; the same ed25519 key and `https://anoma.ly/hex/files` origin as Linux, one feed per architecture, activating into a user-local versions directory. Checks 10 s after launch and every 6 h (or Check for updates); a staged update shows Restart to update in the tray menu and the window's sidebar footer, and the tray tooltip says an update is available. Source builds keep the GitHub release link (Download update); CI test builds never check |
+| Signed automatic self-update for managed installs | Implemented for x64 and ARM64; the same ed25519 key and `https://gospell.goml.io/files` origin as Linux, one feed per architecture, activating into a user-local versions directory. Checks 10 s after launch and every 6 h (or Check for updates); a staged update shows Restart to update in the tray menu and the window's sidebar footer, and the tray tooltip says an update is available. Source builds keep the GitHub release link (Download update); CI test builds never check |
 | Web-domain mode rules and browser context via UI Automation | Implemented; the page URL comes from the browser's UIA document element, bounded so a hung provider degrades to application-only context. Meeting detection reads the microphone-holding browser's own windows the same way (titles first, then document addresses, one read in flight within a 2 s deadline, never searching a page's content), so a Meet or Teams page is named by its site |
 | Meeting call detection and call site names | Implemented on the shared detector: Windows audio sessions and executables map to the macOS keys, and a browser's call page is read from its windows through UI Automation, with whole-window titles reduced to the page's (Edge's profile and other-tab count removed); not observed on a real Windows call |
-| Managed installer with Start Menu integration and clean uninstall | Implemented as `.github/release/install-windows.ps1`; it creates the self-updating versions layout, and updates retarget the managed shortcut, Desktop shortcuts and taskbar pins pointed at an old `versions\<version>\hex.exe` (and an icon from that version), and the Launch-at-login entry |
+| Managed installer with Start Menu integration and clean uninstall | Implemented as `.github/release/install-windows.ps1`; it creates the self-updating versions layout, and updates retarget the managed shortcut, Desktop shortcuts and taskbar pins pointed at an old `versions\<version>\gospell.exe` (and an icon from that version), and the Launch-at-login entry |
 | First-run onboarding | Implemented; a fresh install picks a dictation language, downloads its recommended model with live progress, and starts listening only once setup is recorded — the shared first-run story, with a Microphone page only while the privacy switch is off and the practice game on the real shortcut |
 | Activity pane with the live session and recent dictations | Implemented in developer builds; the shared read-only pane (phases and timing; the event log keeps no dictated text) |
 | Developer Meetings and live drafts | Missing |
 | Local transcription API and public TypeScript SDK host lifecycle on Windows | Missing; see Local Transcription Service |
 | Streaming finish with whole-clip fallback | Implemented on GPU devices with Parakeet Unified English |
 
-Settings live in `%APPDATA%\hex\settings.json`, the same file macOS and
+Settings live in `%APPDATA%\gospell\settings.json`, the same file macOS and
 Linux use.
 
 The Windows window uses the shared design system
@@ -394,7 +394,7 @@ the default distribution's registration and a Linux workspace path for
 ahead of a Windows one; the Windows service is used when WSL answers nothing.
 Annotate's capture sends use the same service: the prompt's "Recorded at"
 line names the capture folder as a Linux `/mnt/…` path while the summary
-header keeps the Windows path. Off, Hex reads only the
+header keeps the Windows path. Off, GoSpell reads only the
 Windows registration and an OpenCode in WSL isn't found.
 Remaining panes should be added only with their complete Windows behavior;
 empty look-alike screens do not count as parity.
@@ -413,7 +413,7 @@ TypeScript transformation host already ship. Windows releases are built for
 x64 and ARM64 by
 [`release.yml`](../.github/workflows/release.yml) with
 [`scripts/build-windows.sh`](../scripts/build-windows.sh), Authenticode-signed,
-and published to the Anomaly release service with the other platforms
+and published to the GoML release service with the other platforms
 (`docs/releasing.md`); [`.github/release/install-windows.ps1`](../.github/release/install-windows.ps1)
 installs from its stable manifest. Users install
 with the command under [Install](#install).

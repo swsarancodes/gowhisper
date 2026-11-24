@@ -1,4 +1,4 @@
-//! The Voice Filter pane (macOS and Linux, in Labs, or while the Hex
+//! The Voice Filter pane (macOS and Linux, in Labs, or while the GoSpell
 //! Microphone driver is installed): the virtual microphone (macOS's driver,
 //! or Linux's PipeWire source), the filter mode and its key sliders, comfort
 //! noise, and "Try it": record five seconds or use the example clip, then
@@ -6,8 +6,8 @@
 //! Rune shapes. Voice Filter is a dev-build Lab: a stable build shows the
 //! pane only while the macOS driver is installed, with Uninstall alone.
 //! The driver, the live filter, and the demo audio stay with the
-//! host (`PlatformState::{hex_microphone, tuning, demo}`, `PlatformRequest::
-//! {SetTuning, HexMicrophoneDemo}`).
+//! host (`PlatformState::{gospell_microphone, tuning, demo}`, `PlatformRequest::
+//! {SetTuning, GoSpellMicrophoneDemo}`).
 
 use rune::{El, LineCap, Shape, canvas, col, row, text};
 
@@ -18,8 +18,8 @@ use super::controls::{
 };
 use super::lists::{Tone, slider, small_button, tone_tag};
 use super::platform::{DemoRequest, PlatformRequest};
-use crate::audio::hex_microphone::{
-    DemoPlaybackTrack, DemoSnapshot, DemoSourceKind, DriverActionState, HexMicrophoneStatus,
+use crate::audio::gospell_microphone::{
+    DemoPlaybackTrack, DemoSnapshot, DemoSourceKind, DriverActionState, GoSpellMicrophoneStatus,
     TunedFilterConfig,
 };
 use crate::audio::voice_filter::{DictationSpan, VoiceFilterMode};
@@ -153,9 +153,9 @@ pub(super) fn set_tuning(ui: &mut Ui, change: impl FnOnce(&mut TunedFilterConfig
     if save {
         let (mode, comfort, strength) = (cfg.mode, cfg.comfort_noise, cfg.strength);
         ui.update(|settings| {
-            settings.experimental.hex_microphone_mode = mode;
-            settings.experimental.hex_microphone_comfort_noise = comfort;
-            settings.experimental.hex_microphone_strength = strength;
+            settings.experimental.gospell_microphone_mode = mode;
+            settings.experimental.gospell_microphone_comfort_noise = comfort;
+            settings.experimental.gospell_microphone_strength = strength;
         });
     }
     ui.platform.tuning = cfg.clone();
@@ -163,12 +163,12 @@ pub(super) fn set_tuning(ui: &mut Ui, change: impl FnOnce(&mut TunedFilterConfig
 }
 
 fn ask_demo(ui: &mut Ui, request: DemoRequest) {
-    ui.ask(PlatformRequest::HexMicrophoneDemo(request));
+    ui.ask(PlatformRequest::GoSpellMicrophoneDemo(request));
 }
 
-/// Hex Microphone's state where Hex creates it rather than a driver
-/// (`Capabilities::hex_microphone` off): starting, available, or failed.
-fn source_state(status: &HexMicrophoneStatus) -> (&'static str, Tone) {
+/// GoSpell Microphone's state where GoSpell creates it rather than a driver
+/// (`Capabilities::gospell_microphone` off): starting, available, or failed.
+fn source_state(status: &GoSpellMicrophoneStatus) -> (&'static str, Tone) {
     match &status.action_state {
         DriverActionState::Failed(_) => (tr("Unavailable"), Tone::Danger),
         _ if status.driver_loaded => (tr("Available"), Tone::Success),
@@ -176,29 +176,31 @@ fn source_state(status: &HexMicrophoneStatus) -> (&'static str, Tone) {
     }
 }
 
-/// Hex Microphone as a virtual input Hex creates (Linux): what to do with
+/// GoSpell Microphone as a virtual input GoSpell creates (Linux): what to do with
 /// it, or why it could not start. The header shows its state.
 fn source_row(ui: &Ui, p: Paint) -> El {
-    let title = tr("Hex Microphone");
-    let Some(status) = &ui.platform.hex_microphone else {
+    let title = tr("GoSpell Microphone");
+    let Some(status) = &ui.platform.gospell_microphone else {
         return setting_row(
             p,
-            "hex-mic-source",
+            "gospell-mic-source",
             title,
             Some(tr("Checking…")),
             row().key("none"),
         );
     };
     let description = match &status.action_state {
-        DriverActionState::Failed(reason) => tr_fill("Could not start Hex Microphone: {}", reason),
-        _ if status.driver_loaded => {
-            tr("Select Hex Microphone as the input in your call app").to_string()
+        DriverActionState::Failed(reason) => {
+            tr_fill("Could not start GoSpell Microphone: {}", reason)
         }
-        _ => tr("Starting Hex Microphone…").to_string(),
+        _ if status.driver_loaded => {
+            tr("Select GoSpell Microphone as the input in your call app").to_string()
+        }
+        _ => tr("Starting GoSpell Microphone…").to_string(),
     };
     setting_row(
         p,
-        "hex-mic-source",
+        "gospell-mic-source",
         title,
         Some(&description),
         tone_tag(
@@ -235,7 +237,7 @@ fn tunable(ui: &Ui, p: Paint, which: Tunable, label: &str) -> El {
 /// found its driver installed); in a stable build, only while the driver is
 /// installed, so it can be uninstalled.
 pub(super) fn running(ui: &Ui) -> bool {
-    (crate::labs::Feature::VoiceFilter.shipped() && ui.settings.experimental.hex_microphone)
+    (crate::labs::Feature::VoiceFilter.shipped() && ui.settings.experimental.gospell_microphone)
         || driver_installed(ui)
 }
 
@@ -245,11 +247,11 @@ fn uninstall_only() -> bool {
     !crate::labs::Feature::VoiceFilter.shipped()
 }
 
-/// The Hex Microphone driver is installed: apps may use it, so the Voice
+/// The GoSpell Microphone driver is installed: apps may use it, so the Voice
 /// Filter stays on until it is uninstalled.
 pub(super) fn driver_installed(ui: &Ui) -> bool {
     ui.platform
-        .hex_microphone
+        .gospell_microphone
         .as_ref()
         .is_some_and(|status| status.driver_bundle_installed)
 }
@@ -257,9 +259,13 @@ pub(super) fn driver_installed(ui: &Ui) -> bool {
 pub(super) fn pane(ui: &Ui, p: Paint) -> El {
     let mut content = page("content");
     if uninstall_only() {
-        content = content.child(card(p, "fun-hex-microphone", vec![uninstall_row(ui, p)]));
+        content = content.child(card(
+            p,
+            "fun-gospell-microphone",
+            vec![uninstall_row(ui, p)],
+        ));
     } else {
-        let setup = if ui.platform.caps.hex_microphone {
+        let setup = if ui.platform.caps.gospell_microphone {
             super::platform_settings::driver_row(ui, p)
         } else {
             source_row(ui, p)
@@ -271,7 +277,7 @@ pub(super) fn pane(ui: &Ui, p: Paint) -> El {
                 tr("What callers hear"),
                 vec![effect_grid(ui, p), try_it(ui, p)],
             ))
-            .child(card(p, "fun-hex-microphone", vec![setup]));
+            .child(card(p, "fun-gospell-microphone", vec![setup]));
         if ui.platform.tuning.mode != VoiceFilterMode::Normal {
             content = content.child(super::general::disclosure_toggle(
                 ui,
@@ -457,10 +463,10 @@ fn tuning_card(ui: &Ui, p: Paint) -> El {
 
 /// A stable build's only Voice Filter row: Uninstall the driver it left.
 fn uninstall_row(ui: &Ui, p: Paint) -> El {
-    let status = ui.platform.hex_microphone.as_ref();
+    let status = ui.platform.gospell_microphone.as_ref();
     let uninstalling = ui
         .platform
-        .hex_microphone
+        .gospell_microphone
         .as_ref()
         .is_some_and(|status| matches!(status.action_state, DriverActionState::Uninstalling));
     let control = if uninstalling {
@@ -471,17 +477,17 @@ fn uninstall_row(ui: &Ui, p: Paint) -> El {
             "uninstall",
             tr("Uninstall"),
             ButtonKind::Secondary,
-            |ui: &mut Ui, _| ui.ask(PlatformRequest::UninstallHexMicrophone),
+            |ui: &mut Ui, _| ui.ask(PlatformRequest::UninstallGoSpellMicrophone),
         )
     };
     let hint = match status.map(|s| &s.action_state) {
         Some(DriverActionState::Failed(reason)) => format!("{} · {}", tr("Failed"), reason),
         Some(DriverActionState::Cancelled) => tr("Uninstall cancelled").into(),
-        _ => tr("Voice Filter isn't in this version of Hex. Uninstall its driver to remove Hex Microphone from your inputs.").into(),
+        _ => tr("Voice Filter isn't in this version of GoSpell. Uninstall its driver to remove GoSpell Microphone from your inputs.").into(),
     };
     setting_row(
         p,
-        "hex-mic-driver",
+        "gospell-mic-driver",
         tr("Virtual microphone driver"),
         Some(&hint),
         row().key("controls").gap(8.0).center_y().child(control),

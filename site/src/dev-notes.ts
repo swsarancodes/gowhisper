@@ -1,4 +1,4 @@
-// The dev channel's changelog at /hex/dev: what each dev build changed, from
+// The dev channel's changelog at /gospell/dev: what each dev build changed, from
 // dev-notes.json on the Release workflow's dev-notes branch (see
 // scripts/release-dev-notes.sh and .github/release/publish-dev-notes.sh). The
 // worker fetches and renders it per request, so a new dev build shows without
@@ -9,7 +9,7 @@ export type DevNotes = {
   builds: { version: string; commit: string; published_at: string; items: { title: string; url: string }[] }[]
 }
 
-const ITEM_URL = /^https:\/\/github\.com\/anomalyco\/hex\/(pull\/[0-9]+|commit\/[0-9a-f]{40})$/
+const ITEM_URL = /^https:\/\/github\.com\/goml\/gospell\/(pull\/[0-9]+|commit\/[0-9a-f]{40})$/
 
 function escape(text: string): string {
   return text.replace(/[&<>"']/g, (character) => `&#${character.charCodeAt(0)};`)
@@ -43,7 +43,7 @@ function date(iso: string): string {
   return parsed.toLocaleString("en-US", { timeZone: "America/New_York", dateStyle: "medium", timeStyle: "short" }) + " ET"
 }
 
-const REPOSITORY = "https://github.com/anomalyco/hex"
+const REPOSITORY = "https://github.com/goml/gospell"
 const COMMIT = /^[0-9a-f]{40}$/
 
 // ?since=<version> (the app's What's new) shows only the builds after the
@@ -61,7 +61,7 @@ function since(notes: DevNotes, version: string | null): { builds: DevNotes["bui
     : ""
   return {
     builds,
-    summary: `<p class="since">Changes since ${escape(version)}, the build you run.${compare} <a href="/hex/dev">Every dev build</a></p>`,
+    summary: `<p class="since">Changes since ${escape(version)}, the build you run.${compare} <a href="/gospell/dev">Every dev build</a></p>`,
   }
 }
 
@@ -82,9 +82,9 @@ export function renderDevNotes(notes: DevNotes, downloadPath: string, sinceVersi
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hex dev builds</title>
-<meta name="description" content="What changed in each dev build of Hex.">
-<link rel="icon" href="/hex/favicon.svg" type="image/svg+xml">
+<title>GoSpell dev builds</title>
+<meta name="description" content="What changed in each dev build of GoSpell.">
+<link rel="icon" href="/gospell/favicon.svg" type="image/svg+xml">
 <style>
 body { margin: 0; background: #070707; color: #e8e8e8; font: 15px/1.55 Inter, ui-sans-serif, system-ui, sans-serif; }
 main { max-width: 680px; margin: 0 auto; padding: 48px 20px 80px; }
@@ -103,8 +103,8 @@ h2 a { text-decoration: none; }
 </head>
 <body>
 <main>
-<h1>Hex dev builds</h1>
-<p class="intro">What changed in each dev build. Dev builds update often and can break; <a href="/hex/">stable</a> is the safe choice. <a href="${escape(downloadPath)}">Download the latest Mac dev build</a>, or switch Settings › Update channel to Dev.</p>
+<h1>GoSpell dev builds</h1>
+<p class="intro">What changed in each dev build. Dev builds update often and can break; <a href="/gospell/">stable</a> is the safe choice. <a href="${escape(downloadPath)}">Download the latest Mac dev build</a>, or switch Settings › Update channel to Dev.</p>
 ${shown.summary}
 ${builds || `<p class="quiet">No dev build notes yet.</p>`}
 </main>

@@ -165,22 +165,22 @@ mod tests {
                 vec![Dest::new("Board", "same page").session("ses_board")],
                 vec![
                     Dest::new("Home", "recent").session("ses_home"),
-                    Dest::new("Hex", "recent").session("ses_hex"),
+                    Dest::new("GoSpell", "recent").session("ses_gospell"),
                 ],
             )),
             0.0,
         );
         let shown = sessions(&flow);
-        assert_eq!(shown, ["ses_board", "ses_home", "ses_hex"]);
+        assert_eq!(shown, ["ses_board", "ses_home", "ses_gospell"]);
         flow.point(1, true);
         flow.input(Input::Shift(true), 0.2);
         flow.input(Input::Shift(false), 0.3);
         assert_eq!(sessions(&flow), shown, "pointing and Shift");
-        // Jev's pick replaces the answer: Hex on top, the recent ones
+        // Jev's pick replaces the answer: GoSpell on top, the recent ones
         // re-sorted by their latest activity, and one more session.
         flow.input(
             Input::Refined(guess_of(
-                vec![Dest::new("Hex", "mentioned").session("ses_hex")],
+                vec![Dest::new("GoSpell", "mentioned").session("ses_gospell")],
                 vec![
                     Dest::new("Rune", "recent").session("ses_rune"),
                     Dest::new("Board", "recent").session("ses_board"),
@@ -194,7 +194,7 @@ mod tests {
             [
                 ("ses_board".into(), "recent".into()),
                 ("ses_home".into(), "recent".into()),
-                ("ses_hex".into(), "mentioned".into()),
+                ("ses_gospell".into(), "mentioned".into()),
                 ("ses_rune".into(), "recent".into()),
             ],
             "rows keep their place and take their new reason; a new one comes last"

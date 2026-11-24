@@ -1,7 +1,7 @@
 //! A meeting track's recent loudness, and the gain a microphone chunk gets.
 //!
 //! When another call app holds the built-in microphone with voice processing,
-//! Hex's own microphone track can be recorded tens of dB quiet: live, but too
+//! GoSpell's own microphone track can be recorded tens of dB quiet: live, but too
 //! quiet for the speech detector and the models. The decision is the track's,
 //! not the chunk's. Within a minute of normal-level speech a microphone is
 //! transcribed exactly as captured, so a quiet word between louder ones, and

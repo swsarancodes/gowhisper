@@ -15,7 +15,7 @@ use crate::desktop::events::now_ms;
 use crate::durable::{lock_contended, sync_directory, sync_file};
 
 const SAMPLE_RATE: u32 = 16_000;
-/// Beside the manifest of a meeting Hex quit while recording or during its
+/// Beside the manifest of a meeting GoSpell quit while recording or during its
 /// final transcription: its audio is
 /// saved and its final transcript runs at the next launch.
 const FINAL_PENDING_FILE: &str = "final.pending";
@@ -122,7 +122,7 @@ pub struct MeetingStart {
 #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum TitleSource {
-    /// The app-and-time title Hex made up.
+    /// The app-and-time title GoSpell made up.
     #[default]
     Default,
     /// The detected call's own name, such as a browser tab's.
@@ -234,7 +234,7 @@ pub struct MeetingManifest {
     /// kept 24 hours by default. Older meetings stay until then.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub retention_applies: bool,
-    /// SHA-256 of the exported Markdown as Hex last wrote it. Expiry moves
+    /// SHA-256 of the exported Markdown as GoSpell last wrote it. Expiry moves
     /// that file to the Trash only while it still matches, so a copy the
     /// user edited stays.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -243,12 +243,12 @@ pub struct MeetingManifest {
     /// wrote one, tracked so renames, Trash, and retention follow it.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub notes_export_path: Option<PathBuf>,
-    /// SHA-256 of the notes file as Hex last wrote it. A later notes
+    /// SHA-256 of the notes file as GoSpell last wrote it. A later notes
     /// regeneration rewrites it only while it still matches, and expiry moves
     /// it only then, so a copy the user edited stays.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub notes_export_sha256: Option<String>,
-    /// The tracked notes file was deleted outside Hex. Hex forgets its path
+    /// The tracked notes file was deleted outside GoSpell. GoSpell forgets its path
     /// and never writes another notes file for this meeting.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub notes_export_removed: bool,
@@ -440,7 +440,7 @@ pub fn record(
     updates: Option<SyncSender<RecordingUpdate>>,
 ) -> Result<MeetingManifest> {
     if crate::desktop::process_exit::quitting() {
-        return Err(eyre!("Hex is quitting"));
+        return Err(eyre!("GoSpell is quitting"));
     }
     let (_, transcription_selection) = crate::app_settings::transcription_selection();
     let transcription_model = crate::transcription::models::validate(&transcription_selection)?;
@@ -462,7 +462,7 @@ pub fn record(
     if crate::desktop::process_exit::quitting() {
         drop(_active);
         recovery::discard_refused_start(&meeting_dir);
-        return Err(eyre!("Hex is quitting"));
+        return Err(eyre!("GoSpell is quitting"));
     }
     // Held until this recording returns: a quit or a restart to update can
     // see it and wait for the audio to be finalised.
@@ -616,7 +616,7 @@ pub fn record(
             write_manifest(&meeting_dir, &manifest)?;
             tracing::info!(
                 meeting = manifest.id,
-                "Hex quit while recording; the transcript finishes at the next launch"
+                "GoSpell quit while recording; the transcript finishes at the next launch"
             );
             return Ok(manifest);
         }
@@ -649,7 +649,7 @@ pub fn record(
                 tracing::info!(
                     meeting = manifest.id,
                     %error,
-                    "Hex quit during final transcription; the transcript finishes at the next launch"
+                    "GoSpell quit during final transcription; the transcript finishes at the next launch"
                 );
                 return Ok(manifest);
             }
@@ -976,7 +976,7 @@ fn transcribe(
     Ok(())
 }
 
-/// Meetings Hex left with `final.pending` (quit while recording or
+/// Meetings GoSpell left with `final.pending` (quit while recording or
 /// importing), oldest first.
 pub fn pending_final_transcripts() -> Vec<String> {
     let Ok(entries) = root().and_then(|root| Ok(fs::read_dir(root)?)) else {
@@ -1241,7 +1241,7 @@ fn rename_meeting_with(
     // The notes writer applies its own title and renames the file; leaving
     // the name alone here keeps it from racing that in-place rewrite. A
     // failed heading update keeps the old name too, as notes do. The notes
-    // file follows the title independently, since it is Hex's own copy.
+    // file follows the title independently, since it is GoSpell's own copy.
     if heading_updated && !notes_in_progress(&manifest.id) {
         export_name::rename_to_title(&mut manifest, &next, descriptive_filenames);
     }
