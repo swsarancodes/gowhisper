@@ -1,0 +1,167 @@
+name: Release to GitHub
+
+# Builds unsigned GoSpell installers for macOS, Windows and Linux from one
+# commit and publishes them as a GitHub release, under file names that never
+# change, so the website can link to
+#   https://github.com/<owner>/<repo>/releases/latest/download/<name>
+# and always get the newest build for the visitor's system.
+#
+# It reuses the unsigned build jobs the test builds use (build-desktop.yml,
+# windows-installers.yml). Nothing here signs, notarizes or needs a secret:
+# macOS asks to confirm once, Windows shows SmartScreen once
+# (docs/install-without-developer-id.md). The builds have updates off.
+#
+# Run it from Actions > Release to GitHub > Run workflow, with a tag such as
+# v3.4.0-goml.1.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to create, for example v3.4.0-goml.1
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-github
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    runs-on: ubuntu-24.04
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+      version: ${{ steps.resolve.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - id: resolve
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          case "$TAG" in v[0-9]*) ;; *) echo "::error::tag must look like v3.4.0-goml.1"; exit 1 ;; esac
+          {
+            echo "sha=$(git rev-parse HEAD)"
+            echo "version=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "gospell") | .version')"
+          } >> "$GITHUB_OUTPUT"
+
+  desktop:
+    needs: resolve
+    uses: ./.github/workflows/build-desktop.yml
+    with:
+      sha: ${{ needs.resolve.outputs.sha }}
+      version: ${{ needs.resolve.outputs.version }}
+      test-build: true
+      artifact-prefix: rel
+      retention-days: 3
+
+  installers:
+    needs: [resolve, desktop]
+    uses: ./.github/workflows/windows-installers.yml
+    with:
+      sha: ${{ needs.resolve.outputs.sha }}
+      version: ${{ needs.resolve.outputs.version }}
+      pattern: rel-windows-*
+      digests: rel-windows-x86_64=${{ needs.desktop.outputs.windows-x64-digest }} rel-windows-aarch64=${{ needs.desktop.outputs.windows-arm64-digest }}
+      artifact-name: rel-windows-installers
+      retention-days: 3
+
+  macos:
+    name: macOS arm64
+    needs: resolve
+    # A standard hosted Apple silicon runner, free on public repositories.
+    runs-on: macos-26
+    timeout-minutes: 90
+    env:
+      GOSPELL_VERSION: ${{ needs.resolve.outputs.version }}
+      GOSPELL_RELEASE_UNSIGNED: "1"
+      GOSPELL_LOCAL_BUILD: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+        with:
+          key: release-github
+          cache-on-failure: true
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+      - name: Install the Metal toolchain
+        run: xcrun --sdk macosx metal --version || xcodebuild -downloadComponent MetalToolchain
+      - name: Build GoSpell.app and the DMG
+        run: |
+          scripts/setup.sh
+          bundle=$(scripts/build-app.sh)
+          "$bundle/Contents/MacOS/gospell" --version
+          mkdir -p dist/staging
+          /usr/bin/ditto "$bundle" "dist/staging/$(basename "$bundle")"
+          ln -s /Applications dist/staging/Applications
+          # hdiutil on hosted runners sometimes fails with "Resource busy", so it gets a few tries.
+          for attempt in 1 2 3 4 5; do
+            hdiutil create -fs APFS -format ULFO -volname "GoSpell" -srcfolder dist/staging "dist/GoSpell-macos-arm64.dmg" && break
+            [ "$attempt" -lt 5 ] || exit 1
+            echo "hdiutil create failed (attempt $attempt); retrying" >&2
+            rm -f "dist/GoSpell-macos-arm64.dmg"
+            sleep 10
+          done
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: rel-macos-arm64
+          path: dist/GoSpell-macos-arm64.dmg
+          retention-days: 3
+          if-no-files-found: error
+
+  publish:
+    needs: [resolve, desktop, installers, macos]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          pattern: rel-*
+          path: in
+      - name: Give every file a name that never changes
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+        run: |
+          mkdir -p out
+          pick() { # pick <source glob> <final name>
+            local f; f=$(find in -type f -name "$1" | head -n 1)
+            [ -n "$f" ] || { echo "::error::no file matches $1"; exit 1; }
+            cp "$f" "out/$2"
+          }
+          pick "GoSpell-macos-arm64.dmg"                        GoSpell-macos-arm64.dmg
+          pick "gospell-setup-$VERSION-windows-x64.exe"         GoSpell-windows-x64-setup.exe
+          pick "gospell-setup-$VERSION-windows-arm64.exe"       GoSpell-windows-arm64-setup.exe
+          pick "gospell-$VERSION-linux-x64.deb"                 GoSpell-linux-x64.deb
+          pick "gospell-$VERSION-linux-x64.rpm"                 GoSpell-linux-x64.rpm
+          pick "gospell-$VERSION-linux-x64"                     GoSpell-linux-x64
+          pick "gospell-$VERSION-linux-arm64.deb"               GoSpell-linux-arm64.deb
+          pick "gospell-$VERSION-linux-arm64.rpm"               GoSpell-linux-arm64.rpm
+          pick "gospell-$VERSION-linux-arm64"                   GoSpell-linux-arm64
+          (cd out && sha256sum * > SHA256SUMS)
+          ls -la out
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          SHA: ${{ needs.resolve.outputs.sha }}
+          VERSION: ${{ needs.resolve.outputs.version }}
+        run: |
+          cat > notes.md <<EOF
+          Unsigned builds of GoSpell $VERSION for macOS (Apple silicon), Windows (x64, ARM64) and Linux (x64, ARM64). They have updates off.
+
+          - **macOS:** open the DMG, drag GoSpell to Applications, then run \`xattr -dr com.apple.quarantine /Applications/GoSpell.app\`.
+          - **Windows:** run the setup. At the SmartScreen warning choose More info, then Run anyway.
+          - **Linux:** \`sudo apt install ./GoSpell-linux-x64.deb\` (or the .rpm on Fedora), or run the bare executable.
+
+          Full steps: [docs/install-without-developer-id.md](https://github.com/$GITHUB_REPOSITORY/blob/main/docs/install-without-developer-id.md). Check files against SHA256SUMS.
+          EOF
+          gh release create "$TAG" out/* --repo "$GITHUB_REPOSITORY" --target "$SHA" --title "GoSpell $TAG" --notes-file notes.md --latest
