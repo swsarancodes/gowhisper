@@ -109,6 +109,12 @@ fn main() {
         );
         println!("cargo:rustc-link-arg=-Wl,-rpath,{swift_runtime}");
     }
+    // The Command Line Tools keep Swift's compatibility libraries outside the
+    // toolchain folder Xcode uses; the Swift bridges link against them.
+    let tools_swift = format!("{}/usr/lib/swift/macosx", developer_dir.trim());
+    if std::path::Path::new(&tools_swift).join("libswiftCompatibility56.a").exists() {
+        println!("cargo:rustc-link-search=native={tools_swift}");
+    }
 }
 
 /// The version GoSpell reports (`GOSPELL_BUILD_VERSION`): the crate version, which
@@ -399,12 +405,24 @@ fn compile_swift_bridge(
             .arg("-Xcc")
             .arg("-fblocks");
     }
-    let status = swift
-        .arg(&source)
-        .arg("-o")
-        .arg(&object)
+    swift.arg(&source).arg("-o").arg(&object);
+    let mut status = swift
         .status()
         .expect("xcrun swiftc is required to compile Swift bridges");
+    // FoundationModels' `@Generable` needs the macro plugin that ships with
+    // Xcode, not with the Command Line Tools alone. Without it, build the
+    // bridge without FoundationModels: GoSpell then reports Apple Intelligence
+    // as unavailable, and everything else is the same.
+    if !status.success() && name == "apple_intelligence" {
+        println!(
+            "cargo:warning=building without Apple Intelligence: FoundationModels' macros need Xcode"
+        );
+        status = swift
+            .arg("-D")
+            .arg("GOSPELL_NO_FOUNDATION_MODELS")
+            .status()
+            .expect("xcrun swiftc is required to compile Swift bridges");
+    }
     assert!(status.success(), "{module} compilation failed");
     println!("cargo:rustc-link-arg={}", object.display());
 }

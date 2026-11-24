@@ -1,5 +1,5 @@
 import Foundation
-#if canImport(FoundationModels)
+#if canImport(FoundationModels) && !GOSPELL_NO_FOUNDATION_MODELS
 import FoundationModels
 #endif
 
@@ -39,7 +39,7 @@ private let contextWindowMarker = "context-window:"
 /// A refused or guardrail-blocked transcript, which retrying won't change.
 private let refusalMarker = "refused:"
 
-#if canImport(FoundationModels)
+#if canImport(FoundationModels) && !GOSPELL_NO_FOUNDATION_MODELS
 @available(macOS 26.0, *)
 @Generable
 private struct GeneratedNotes {
@@ -208,7 +208,7 @@ private func writeError(
 /// 3 model not ready, 4 unsupported macOS, 5 unknown reason.
 @_cdecl("gospell_apple_intelligence_availability")
 public func gospellAppleIntelligenceAvailability() -> Int32 {
-    #if canImport(FoundationModels)
+    #if canImport(FoundationModels) && !GOSPELL_NO_FOUNDATION_MODELS
     guard #available(macOS 26.0, *) else { return 4 }
     switch SystemLanguageModel.default.availability {
     case .available:
@@ -229,7 +229,7 @@ public func gospellAppleIntelligenceAvailability() -> Int32 {
 
 @_cdecl("gospell_apple_intelligence_context_size")
 public func gospellAppleIntelligenceContextSize() -> Int {
-    #if canImport(FoundationModels)
+    #if canImport(FoundationModels) && !GOSPELL_NO_FOUNDATION_MODELS
     // `contextSize` arrived with the macOS 26.4 SDK (Swift 6.3). An older
     // Xcode then builds without it and reports no context size, and the Rust
     // excerpt budget falls back to the on-device model's documented
@@ -254,7 +254,7 @@ public func gospellAppleIntelligenceNotes(
     _ timeoutMs: UInt64,
     _ errorOutput: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
 ) -> UnsafeMutablePointer<CChar>? {
-    #if canImport(FoundationModels)
+    #if canImport(FoundationModels) && !GOSPELL_NO_FOUNDATION_MODELS
     guard #available(macOS 26.0, *), let instructions, let prompt else {
         writeError(BridgeError("Apple Intelligence requires macOS 26."), to: errorOutput)
         return nil
@@ -322,7 +322,7 @@ public func gospellAppleIntelligenceChapter(
     _ timeoutMs: UInt64,
     _ errorOutput: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
 ) -> UnsafeMutablePointer<CChar>? {
-    #if canImport(FoundationModels)
+    #if canImport(FoundationModels) && !GOSPELL_NO_FOUNDATION_MODELS
     guard #available(macOS 26.0, *) else {
         writeError(BridgeError("Apple Intelligence requires macOS 26."), to: errorOutput)
         return nil
@@ -353,7 +353,7 @@ public func gospellAppleIntelligenceChapterLines(
     _ timeoutMs: UInt64,
     _ errorOutput: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
 ) -> UnsafeMutablePointer<CChar>? {
-    #if canImport(FoundationModels)
+    #if canImport(FoundationModels) && !GOSPELL_NO_FOUNDATION_MODELS
     guard #available(macOS 26.0, *) else {
         writeError(BridgeError("Apple Intelligence requires macOS 26."), to: errorOutput)
         return nil
@@ -381,7 +381,7 @@ public func gospellAppleIntelligenceText(
     _ timeoutMs: UInt64,
     _ errorOutput: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
 ) -> UnsafeMutablePointer<CChar>? {
-    #if canImport(FoundationModels)
+    #if canImport(FoundationModels) && !GOSPELL_NO_FOUNDATION_MODELS
     guard #available(macOS 26.0, *) else {
         writeError(BridgeError("Apple Intelligence requires macOS 26."), to: errorOutput)
         return nil

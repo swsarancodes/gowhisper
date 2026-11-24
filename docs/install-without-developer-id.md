@@ -9,8 +9,11 @@ changes: dictation, the HUD and every feature work the same.
 
 ### Build it on your Mac
 
-You need Xcode (free from the App Store; the Command Line Tools alone lack the
-Swift macros GoSpell's Apple Intelligence bridge uses), cmake, and Rust.
+You need the Command Line Tools, cmake, and Rust:
+
+```bash
+xcode-select --install
+```
 
 ```bash
 brew install cmake
@@ -20,9 +23,10 @@ brew install cmake
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-```bash
-sudo xcode-select -s /Applications/Xcode.app
-```
+Xcode (free from the App Store) is optional. Without it, GoSpell builds without
+Apple Intelligence (its Swift macros ship with Xcode only) and uses the
+prebuilt `app/AppIcon.icns` instead of compiling `app/AppIcon.icon`; everything
+else is the same.
 
 Then, from the repository:
 

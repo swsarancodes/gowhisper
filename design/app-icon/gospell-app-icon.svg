@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="100 100 824 824">
+<!-- GoSpell app icon, "Speak Bubble": a speech bubble holding a live waveform
+     and a text caret on GoML orange. The body is the rounded square at
+     100..924; the viewBox picks the framing. -->
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF9A2E"/><stop offset="1" stop-color="#FF5A00"/></linearGradient>
+  <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <linearGradient id="wave" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF9A2E"/><stop offset="1" stop-color="#F25500"/></linearGradient>
+</defs>
+<path d="M285 100h454c102 0 185 83 185 185v454c0 102-83 185-185 185H285c-102 0-185-83-185-185V285c0-102 83-185 185-185z" fill="url(#bg)"/>
+<path d="M285 100h454c102 0 185 83 185 185v170H100V285c0-102 83-185 185-185z" fill="url(#shine)"/>
+<path d="M370 262h284c92 0 166 74 166 166v84c0 92-74 166-166 166H452l-122 96c-14 11-34 0-30-17l22-92c-66-22-118-86-118-153v-84c0-92 74-166 166-166z" fill="#fff"/>
+<g fill="url(#wave)"><rect x="338" y="436" width="46" height="62" rx="23"/><rect x="414" y="394" width="46" height="146" rx="23"/><rect x="490" y="344" width="46" height="246" rx="23"/><rect x="566" y="394" width="46" height="146" rx="23"/><rect x="642" y="426" width="46" height="82" rx="23"/></g>
+<rect x="716" y="442" width="14" height="50" rx="7" fill="#F25500" fill-opacity=".55"/>
+</svg>
