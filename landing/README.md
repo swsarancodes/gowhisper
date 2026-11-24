@@ -1,32 +1,31 @@
-# React + TypeScript + Vite
+# GoSpell landing page
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+The website for GoSpell. Vite, React, TypeScript, Geist, Framer Motion, GSAP, and dithered WebGPU scenes (WGSL, with a WebGL 2 fallback).
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev     # http://localhost:5173
+npm run build   # type-checks, then writes dist/
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Downloads
+
+The download buttons read the visitor's system and link to the newest file on the repo's latest GitHub release:
+
+```
+https://github.com/swsarancodes/gowhisper/releases/latest/download/<name>
+```
+
+The names never change (`src/lib/download.ts`), and the release workflow publishes them:
+
+| System | File |
+| --- | --- |
+| macOS, Apple silicon | `GoSpell-macos-arm64.dmg` |
+| Windows x64 / ARM64 | `GoSpell-windows-x64-setup.exe`, `GoSpell-windows-arm64-setup.exe` |
+| Linux x64 / ARM64 | `GoSpell-linux-<arch>.deb`, `.rpm`, and the bare `GoSpell-linux-<arch>` executable |
+
+To cut a release, open Actions, choose **Release to GitHub**, and run it with a tag such as `v3.4.0-goml.2`. The builds are unsigned, so macOS and Windows ask to confirm once (see `docs/install-without-developer-id.md`).
+
+## Hosting
+
+Vercel builds this folder (root directory `landing`) on every push to `main`.
